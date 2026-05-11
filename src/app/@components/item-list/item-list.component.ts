@@ -4,10 +4,19 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { HttpClientService } from '../../@services/http-client.service';
 import Swal from 'sweetalert2';
-
+import { MatFormFieldModule } from '@angular/material/form-field'; // 必須匯入
+import { MatInputModule } from '@angular/material/input'; // 必須匯入
+import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-item-list',
-  imports: [MatPaginator],
+  imports: [
+    MatPaginator,
+    CommonModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatFormFieldModule,
+    MatInputModule,
+  ],
   templateUrl: './item-list.component.html',
   styleUrl: './item-list.component.scss',
 })
@@ -19,8 +28,9 @@ export class ItemListComponent {
     'price',
     'expireDate',
   ];
-  itemList!: Item[];
-  dataSource = new MatTableDataSource<Item>(this.itemList);
+
+  // 初始化 dataSource
+  dataSource = new MatTableDataSource<Item>([]);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -50,5 +60,15 @@ export class ItemListComponent {
           });
         },
       });
+  }
+
+  // 實作搜尋功能
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 }
