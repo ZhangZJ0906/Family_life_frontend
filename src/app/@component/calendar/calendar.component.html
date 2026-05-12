@@ -1,0 +1,18 @@
+<div class="calendar-page">
+  <div class="calendar-card">
+
+    <div class="calendar-header">
+      <div class="calendar-title">
+        <h2>家庭行事曆</h2>
+        <p>管理家庭活動、提醒與重要日期</p>
+      </div>
+
+      <button type="button" class="add-btn" (click)="openCreateDialog()">
+        ＋ 新增活動
+      </button>
+    </div>
+
+    <full-calendar [options]="calendarOptions"></full-calendar>
+
+  </div>
+</div>

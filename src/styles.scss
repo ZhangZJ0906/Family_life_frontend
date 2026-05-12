@@ -2,3 +2,29 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+.swal-form {
+  width: 100%;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  align-items: center;
+  column-gap: 18px;
+  margin-bottom: 18px;
+}
+
+.form-row label {
+  width: 120px;
+  text-align: right;
+  font-size: 18px;
+  font-weight: 600;
+  color: #4a4a4a;
+  white-space: nowrap;
+}
+
+.form-row .swal2-input {
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+}
