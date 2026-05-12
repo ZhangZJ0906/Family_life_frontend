@@ -1,5 +1,8 @@
-import { Item } from './../../common/interfaceList';
-import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { Item, LocationAndCategory } from './../../common/interfaceList';
+import { MatIconModule } from '@angular/material/icon';
+import { MatChipListbox, MatChipOption } from '@angular/material/chips';
+import { MatDialog } from '@angular/material/dialog';
+import { Component, inject, ViewChild } from '@angular/core';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { HttpClientService } from '../../@services/http-client.service';
@@ -7,28 +10,40 @@ import Swal from 'sweetalert2';
 import { MatFormFieldModule } from '@angular/material/form-field'; // 必須匯入
 import { MatInputModule } from '@angular/material/input'; // 必須匯入
 import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { ItemListAddDialogComponent } from '../item-list-add-dialog/item-list-add-dialog.component';
+import { ItemListEditDialogComponent } from '../item-list-edit-dialog/item-list-edit-dialog.component';
 @Component({
   selector: 'app-item-list',
   imports: [
+    MatButtonModule,
+    MatIconModule,
     MatPaginator,
     CommonModule,
     MatTableModule,
     MatPaginatorModule,
     MatFormFieldModule,
     MatInputModule,
+    MatChipListbox,
+    MatChipOption,
   ],
   templateUrl: './item-list.component.html',
   styleUrl: './item-list.component.scss',
 })
 export class ItemListComponent {
+  readonly dialog = inject(MatDialog);
+  location: LocationAndCategory[] = [];
   displayedColumns: string[] = [
     'id',
     'name',
     'quantity',
     'price',
     'expireDate',
+    'notify',
   ];
-
+  selectedCategory = '全部';
+  categories: LocationAndCategory[] = [];
+  itemList: Item[] = [];
   // 初始化 dataSource
   dataSource = new MatTableDataSource<Item>([]);
 
@@ -42,15 +57,74 @@ export class ItemListComponent {
     this.basicUrl = this.http.basicUrl;
     this.getItemByGroupId();
   }
-
+  /*TODO 缺少 拿user 資料跟拿user 群組資料 分類資料 通知功能 */
+  /*新增物品 */
+  openAddDialog() {
+    const dialogRef = this.dialog.open(ItemListAddDialogComponent, {
+      width: '540px',
+      height: '540px',
+      data: {
+        title: '新增物品',
+      },
+    });
+  }
+  /*修改物品 */
+  openEditDialog(row: Item) {
+    // console.log(row)
+    const dialogRef = this.dialog.open(ItemListEditDialogComponent, {
+      width: '540px',
+      height: '540px',
+      data: {
+        title: '修改物品資料',
+        item: row,
+        locationMap: this.location,
+        categoriesMap: this.categories,
+      },
+    });
+    /*TODO 更新還沒做 */
+    // dialogRef.afterClosed().subscribe((result) => {
+    //   if (result) {
+    //     this.updateItem(result); // 呼叫更新 API
+    //   }
+    // });
+  }
+  /*分類 */
+  filterByCategory(catId: number) {
+    if (catId === 0) {
+      this.dataSource.data = this.itemList;
+    } else {
+      this.dataSource.data = this.itemList.filter(
+        (item) => item.categoryId === catId,
+      );
+    }
+  }
+  /*取得DB 物品清單資料 */
   getItemByGroupId() {
-    const group = 2;
+    const group = 1;
+    if (group <= 0) {
+      Swal.fire({
+        title: 'fail',
+        text: '群組ID參數錯誤',
+        icon: 'error',
+      });
+      return;
+    }
     this.http
       .getApi(this.basicUrl + `item/getItems?groupId=${group}`)
       .subscribe({
         next: (res: any) => {
-          const arr = res.items;
-          console.log(arr);
+          this.itemList = res.items;
+          this.dataSource.data = res.items;
+          this.location = res.locationMap;
+          this.categories = Object.entries(res.categoriesMap).map(
+            ([id, name]) => ({
+              id: Number(id), 
+              name: name as string,
+            }),
+          );
+          
+          this.categories.unshift({ id: 0, name: '全部' });
+          // console.log(this.dataSource.data);
         },
         error: (err: any) => {
           Swal.fire({

@@ -1,0 +1,50 @@
+.search-field {
+  width: 300px;
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    background-color: white;
+  }
+}
+
+.element-row:hover {
+  background-color: #f8f9fa; // Bootstrap light gray
+  cursor: pointer;
+}
+
+// 狀態小圓點
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  &.online { background-color: #198754; } // Bootstrap green
+  &.offline { background-color: #6c757d; } // Bootstrap gray
+}
+
+.table-responsive {
+  border-radius: 8px;
+}
+
+.fab-bottom-right {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1000;
+}
+
+
+.fab-delete-bottom-right {
+  position: fixed;
+  bottom: 90px;
+  right: 30px;
+  z-index: 1000;
+}
+
+.custom-delete-btn {
+  background-color: #dc3545; // 使用 Bootstrap 的紅色 (danger)
+  color: white; // 確保垃圾桶圖示是白色的
+
+  // 處理滑鼠懸停時的顏色變化
+  &:hover {
+    background-color: #c82333; // 懸停時變深一點的紅色
+  }
+}
