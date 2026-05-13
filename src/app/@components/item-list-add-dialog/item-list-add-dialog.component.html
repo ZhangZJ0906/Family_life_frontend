@@ -71,18 +71,18 @@
       <div class="col-6">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>購買日期</mat-label>
-          <input matInput [matDatepicker]="picker" required [(ngModel)]="item.purchaseDate" [min]="minDate">
-          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
+          <input matInput [matDatepicker]="purchasePicker" required [(ngModel)]="item.purchaseDate" [max]="today">
+          <mat-datepicker-toggle matIconSuffix [for]="purchasePicker"></mat-datepicker-toggle>
+          <mat-datepicker #purchasePicker></mat-datepicker>
 
         </mat-form-field>
       </div>
       <div class="col-6">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>到期日期</mat-label>
-          <input matInput [matDatepicker]="picker" required [(ngModel)]="item.expireDate" [min]="minDate">
-          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
+          <input matInput [matDatepicker]="expirePicker" required [(ngModel)]="item.expireDate" [min]="minDate">
+          <mat-datepicker-toggle matIconSuffix [for]="expirePicker"></mat-datepicker-toggle>
+          <mat-datepicker #expirePicker></mat-datepicker>
           <mat-hint>過期前系統會自動發送通知</mat-hint>
         </mat-form-field>
       </div>
