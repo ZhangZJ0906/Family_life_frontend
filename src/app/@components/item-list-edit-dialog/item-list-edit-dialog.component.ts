@@ -33,8 +33,13 @@ export class ItemListEditDialogComponent implements OnInit {
   // 綁定表單的資料結構
   item: any = {};
   items: Item[] = [];
-  groups: LocationAndCategory[] = [];
+  groups: LocationAndCategory[] = [
+    { id: 1, name: 'test' },
+    { id: 2, name: 'test2' },
+    { id: 3, name: 'test3' },
+  ];
   categories: LocationAndCategory[] = [];
+  location: LocationAndCategory[] = [];
 
   constructor(
     public dialogRef: MatDialogRef<ItemListEditDialogComponent>,
@@ -45,13 +50,11 @@ export class ItemListEditDialogComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.data && this.data.item && this.data.locationMap) {
+      console.log(this.data.item);
       this.item = { ...this.data.item };
-      this.groups = Object.entries(this.data.locationMap).map(([id, name]) => ({
-        id: Number(id), // 注意：Map 的 key 在轉成 Object 後會變字串，要轉回數字
-        name: name as string,
-      }));
-this.categories = this.data.categoriesMap;
-console.log(this.categories)
+      // this.groups =this.item.groupId;
+      this.location = this.data.locationMap;
+      this.categories = this.data.categoriesMap;
       
 
       if (this.item.expireDate && this.item.expireDate.includes('T')) {

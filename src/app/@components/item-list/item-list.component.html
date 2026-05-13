@@ -14,13 +14,21 @@
       </div>
       <div class="d-flex flex-wrap gap-2 mb-3">
         <mat-chip-listbox aria-label="分類篩選">
-          @for (cat of categories; track cat) {
+          @for (cat of categories; track $index) {
           <mat-chip-option [selected]="selectedCategory === cat.name" (click)="filterByCategory(cat.id)" color="accent">
             {{ cat.name }}
           </mat-chip-option>
           }
         </mat-chip-listbox>
       </div>
+      <mat-form-field appearance="outline">
+        <mat-label>切換群組</mat-label>
+        <mat-select [(value)]="currentGroupId" (selectionChange)="getItemByGroupId($event.value)">
+          @for (group of userGroups; track $index) {
+          <mat-option [value]="group.id">{{ group.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
       <button mat-fab color="warn" class="fab-delete-bottom-right custom-delete-btn" (click)="openAddDialog()">
 
         <mat-icon>delete</mat-icon>
@@ -52,8 +60,37 @@
                 </td>
               </ng-container>
 
+              <ng-container matColumnDef="totalPrice">
+                <th mat-header-cell *matHeaderCellDef>總價格</th>
+                <td mat-cell *matCellDef="let element" class="text-danger">
+                  <!-- 
+                  CurrencyPipe 的參數設定，用來將數字格式化為貨幣格式。
+                  這段語法的完整結構是 value | currency : currencyCode : display : digitsInfo
+
+                  1. "TWD" (currencyCode)
+                  代表意義：ISO 4217 貨幣代碼。
+
+                  作用：指定使用 新台幣 格式。
+
+                  2. "symbol" (display)
+                  代表意義：貨幣符號的顯示方式。
+
+                  作用：顯示貨幣符號（例如 $），而不是顯示字串 "TWD"。
+
+                  3. "1.0-0" (digitsInfo)
+                  這是最關鍵的數字格式控制，格式為 {minIntegerDigits}.{minFractionDigits}-{maxFractionDigits}：
+
+                  1 (minIntegerDigits)：小數點前最少顯示 1 位數（例如 0 會顯示為 0 而不是空值）。
+
+                  .0 (minFractionDigits)：小數點後最少顯示 0 位數（不強迫顯示小數點後的零）。
+
+                  -0 (maxFractionDigits)：小數點後最多顯示 0 位數（直接四捨五入到整數，不顯示任何小數）。 -->
+
+                  {{ element.price*element.quantity | currency: "TWD" : "symbol" : "1.0-0" }}
+                </td>
+              </ng-container>
               <ng-container matColumnDef="price">
-                <th mat-header-cell *matHeaderCellDef>價格</th>
+                <th mat-header-cell *matHeaderCellDef>單價</th>
                 <td mat-cell *matCellDef="let element" class="text-danger">
                   {{ element.price | currency: "TWD" : "symbol" : "1.0-0" }}
                 </td>

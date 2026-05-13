@@ -1,6 +1,7 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { TextFieldModule } from '@angular/cdk/text-field'; // ✨ 匯入這個
 import {
   MAT_DIALOG_DATA,
   MatDialog,
@@ -14,11 +15,15 @@ import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-
+import { LocationAndCategory } from '../../common/interfaceList';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { provideNativeDateAdapter } from '@angular/material/core';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 @Component({
   selector: 'app-item-list-add-dialog',
   imports: [
     CommonModule,
+    TextFieldModule,
     MatFormFieldModule,
     MatSelectModule,
     MatInputModule,
@@ -28,36 +33,57 @@ import { MatSelectModule } from '@angular/material/select';
     MatDialogContent,
     MatDialogActions,
     MatDialogClose,
+    MatDatepickerModule,
+    MatSlideToggleModule,
   ],
+  providers: [provideNativeDateAdapter()],
   templateUrl: './item-list-add-dialog.component.html',
   styleUrl: './item-list-add-dialog.component.scss',
 })
-export class ItemListAddDialogComponent {
+export class ItemListAddDialogComponent implements OnInit {
   // 初始化對應資料庫欄位的物件
-  groupId: number[] = [1,2,3,4,5,6];
+  groupId: number[] = [1, 2, 3, 4, 5, 6];
+  location: LocationAndCategory[] = [];
+  categories: LocationAndCategory[] = [];
+  minDate: string = ''; // 日期限制
   item = {
+    created_by_id: 1, //創造這筆的人
+    groupId: this.groupId, // 放在哪個群組
+    locationId: 1, // 放在哪裡
+    categoryId: 1, // 哪一個分類
     name: '',
     quantity: 1,
     unit: '',
-    categoryId: 1,
     price: 0,
-    expireDate: '',
-    groupId: this.groupId, // 這裡記得根據你的需求改
-    createdById: 1, // 這裡記得根據你的需求改
+    purchaseDate:'',// 購買日
+    expireDate: '', // 有效日期
     notify: true,
-    note: '',
+    saveQuantity:0,
+    note: '', // 備註
   };
 
   constructor(
     public dialogRef: MatDialogRef<ItemListAddDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-  ) {
-    // 如果有傳入初始資料（例如編輯模式），就覆蓋進去
-    if (data.item) {
-      this.item = { ...data.item };
+  ) {}
+  ngOnInit(): void {
+    const today = new Date();
+    this.minDate = today.toISOString().split('T')[0];
+    if (this.data && this.data.location) {
+      this.location =  [...this.data.location ];
+      console.log(this.location)
+    }
+    if (this.data && this.data.categories) {
+      this.categories = [ ...this.data.categories ];
+      this.categories.shift();
+      
     }
   }
+  addItemInfo() {
+    //這邊會比編輯多一個created_by_id
+    console.log(this.item);
 
+  }
   onNoClick(): void {
     this.dialogRef.close();
   }

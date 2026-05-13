@@ -4,10 +4,17 @@
 </h2>
 
 <mat-dialog-content>
-  <div class="container-fluid pt-3">
+  <div class="container-fluid pt-2">
     <div class="row g-3">
 
       <div class="col-12">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>物品名稱</mat-label>
+          <input matInput [(ngModel)]="item.name" required placeholder="例如：全脂牛奶">
+        </mat-form-field>
+      </div>
+
+      <div class="col-6">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>所屬群組</mat-label>
           <mat-select [(ngModel)]="item.groupId">
@@ -15,50 +22,10 @@
             <mat-option [value]="g.id">{{ g.name }}</mat-option>
             }
           </mat-select>
-          <mat-hint>選擇該物品存放的群組</mat-hint>
-        </mat-form-field>
-      </div>
-      <!-- 開關 -->
-      <div class="d-flex align-items-center justify-content-between mb-3 px-1">
-        <div class="d-flex align-items-center gap-2">
-          <mat-slide-toggle [(ngModel)]="item.notify" name="notify" color="primary">
-            <span class="small fw-medium text-secondary">開啟到期提醒</span>
-          </mat-slide-toggle>
-        </div>
-        @if(item.notify) {
-        <span class="badge rounded-pill border border-danger text-danger bg-light"
-          style="font-size: 10px; letter-spacing: 0.5px;">
-          啟用
-        </span>
-        }
-      </div>
-      <div class="col-12">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>物品名稱</mat-label>
-          <input matInput [(ngModel)]="item.name" required>
         </mat-form-field>
       </div>
 
       <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>目前數量</mat-label>
-          <input matInput type="number" [(ngModel)]="item.quantity" min="0">
-        </mat-form-field>
-      </div>
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>單位</mat-label>
-          <input matInput [(ngModel)]="item.unit" placeholder="例如：包">
-        </mat-form-field>
-      </div>
-      <div class="col-12">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>總價</mat-label>
-          <input matInput type="number" [(ngModel)]="item.price" min="0">
-        </mat-form-field>
-      </div>
-
-      <div class="col-12">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>分類</mat-label>
           <mat-select [(ngModel)]="item.categoryId">
@@ -69,26 +36,70 @@
         </mat-form-field>
       </div>
 
+      <div class="col-4">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>目前數量</mat-label>
+          <input matInput type="number" [(ngModel)]="item.quantity" min="0">
+        </mat-form-field>
+      </div>
+      <div class="col-4">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>單位</mat-label>
+          <input matInput [(ngModel)]="item.unit" placeholder="例如：包">
+        </mat-form-field>
+      </div>
+      <div class="col-4">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>單價</mat-label>
+          <input matInput type="number" [(ngModel)]="item.price" min="0">
+          <span matPrefix>$&nbsp;</span>
+        </mat-form-field>
+      </div>
+
       <div class="col-12">
+        <mat-form-field appearance="outline" class="w-100" color="accent">
+          <mat-label class="text-danger">總價 (自動計算)</mat-label>
+          <input matInput type="number" [value]="item.quantity * item.price" disabled class="text-danger">
+          <span matPrefix>$&nbsp;</span>
+          <mat-hint align="end">原始價格：{{item.price}} × {{item.quantity}}</mat-hint>
+        </mat-form-field>
+      </div>
+
+      <div class="col-6">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>到期日期</mat-label>
           <input matInput type="date" [(ngModel)]="item.expireDate">
         </mat-form-field>
       </div>
 
-      <div class="col-12">
+      <div class="col-6">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>存放位置</mat-label>
           <mat-select [(ngModel)]="item.locationId">
-            @for (loc of groups; track loc.id) {
+            @for (loc of location; track loc.id) {
             <mat-option [value]="loc.id">{{ loc.name }}</mat-option>
             }
           </mat-select>
-
-          @if (item.locationId && data.locationMap) {
-          <mat-hint>目前設定的位置：{{ data.locationMap[item.locationId] }}</mat-hint>
-          }
         </mat-form-field>
+      </div>
+
+      <div class="col-12 mt-2">
+        <div class="d-flex align-items-center justify-content-between p-3 rounded-3 bg-light border">
+          <div class="d-flex align-items-center gap-2">
+            <mat-icon [class.text-primary]="item.notify" class="text-secondary">
+              {{ item.notify ? 'notifications_active' : 'notifications_off' }}
+            </mat-icon>
+            <div>
+              <div class="fw-bold mb-0" [class.text-primary]="item.notify" style="font-size: 14px;">
+                開啟到期提醒
+              </div>
+              <div class="text-muted" style="font-size: 11px;">
+                {{ item.notify ? '已啟用：系統將發送通知' : '已關閉提醒功能' }}
+              </div>
+            </div>
+          </div>
+          <mat-slide-toggle [(ngModel)]="item.notify" color="primary"></mat-slide-toggle>
+        </div>
       </div>
 
     </div>
@@ -97,7 +108,7 @@
 
 <mat-dialog-actions align="end" class="p-3 border-top">
   <button mat-button (click)="onCancel()">捨棄變更</button>
-  <button mat-flat-button color="accent" [mat-dialog-close]="item" [disabled]="!item.name" class="px-4">
+  <button mat-flat-button color="primary" [mat-dialog-close]="item" [disabled]="!item.name" class="px-4">
     確認修改
   </button>
 </mat-dialog-actions>

@@ -13,6 +13,7 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { ItemListAddDialogComponent } from '../item-list-add-dialog/item-list-add-dialog.component';
 import { ItemListEditDialogComponent } from '../item-list-edit-dialog/item-list-edit-dialog.component';
+import { MatSelect, MatOption } from '@angular/material/select';
 @Component({
   selector: 'app-item-list',
   imports: [
@@ -26,6 +27,8 @@ import { ItemListEditDialogComponent } from '../item-list-edit-dialog/item-list-
     MatInputModule,
     MatChipListbox,
     MatChipOption,
+    MatSelect,
+    MatOption,
   ],
   templateUrl: './item-list.component.html',
   styleUrl: './item-list.component.scss',
@@ -33,11 +36,16 @@ import { ItemListEditDialogComponent } from '../item-list-edit-dialog/item-list-
 export class ItemListComponent {
   readonly dialog = inject(MatDialog);
   location: LocationAndCategory[] = [];
+  /*群組陣列 */
+  userGroups: any[] = [1, 2];
+  // 現在的群組
+  currentGroupId: number = 0;
   displayedColumns: string[] = [
     'id',
     'name',
     'quantity',
-    'price',
+    'totalPrice',
+    'price', // 單價
     'expireDate',
     'notify',
   ];
@@ -55,7 +63,8 @@ export class ItemListComponent {
   basicUrl!: string;
   constructor(private http: HttpClientService) {
     this.basicUrl = this.http.basicUrl;
-    this.getItemByGroupId();
+
+    this.getItemByGroupId(this.userGroups[0]);
   }
   /*TODO 缺少 拿user 資料跟拿user 群組資料 分類資料 通知功能 */
   /*新增物品 */
@@ -65,6 +74,8 @@ export class ItemListComponent {
       height: '540px',
       data: {
         title: '新增物品',
+        location: this.location,
+        categories: this.categories,
       },
     });
   }
@@ -99,9 +110,9 @@ export class ItemListComponent {
     }
   }
   /*取得DB 物品清單資料 */
-  getItemByGroupId() {
-    const group = 1;
-    if (group <= 0) {
+  getItemByGroupId(groupId: number) {
+    this.currentGroupId = groupId;
+    if (this.currentGroupId <= 0) {
       Swal.fire({
         title: 'fail',
         text: '群組ID參數錯誤',
@@ -110,19 +121,23 @@ export class ItemListComponent {
       return;
     }
     this.http
-      .getApi(this.basicUrl + `item/getItems?groupId=${group}`)
+      .getApi(this.basicUrl + `item/getItems?groupId=${this.currentGroupId}`)
       .subscribe({
         next: (res: any) => {
           this.itemList = res.items;
           this.dataSource.data = res.items;
-          this.location = res.locationMap;
+
+          this.location = Object.entries(res.locationMap).map(([id, name]) => ({
+            id: Number(id),
+            name: name as string,
+          }));
           this.categories = Object.entries(res.categoriesMap).map(
             ([id, name]) => ({
-              id: Number(id), 
+              id: Number(id),
               name: name as string,
             }),
           );
-          
+
           this.categories.unshift({ id: 0, name: '全部' });
           // console.log(this.dataSource.data);
         },
