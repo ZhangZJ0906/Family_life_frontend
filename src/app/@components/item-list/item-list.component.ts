@@ -2,6 +2,9 @@ import { Item, LocationAndCategory } from './../../common/interfaceList';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipListbox, MatChipOption } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+
+import { SelectionModel } from '@angular/cdk/collections';
 import { Component, inject, ViewChild } from '@angular/core';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -17,6 +20,7 @@ import { MatSelect, MatOption } from '@angular/material/select';
 @Component({
   selector: 'app-item-list',
   imports: [
+    MatCheckboxModule,
     MatButtonModule,
     MatIconModule,
     MatPaginator,
@@ -36,12 +40,22 @@ import { MatSelect, MatOption } from '@angular/material/select';
 export class ItemListComponent {
   readonly dialog = inject(MatDialog);
   location: LocationAndCategory[] = [];
+  selection = new SelectionModel<any>(true, []);
   /*群組陣列 */
-  userGroups: any[] = [1, 2];
+  userGroups: any[] = [
+    {
+      id: 1,
+      name: '陳家大宅',
+    },
+    {
+      id: 2,
+      name: '林老師',
+    },
+  ];
   // 現在的群組
   currentGroupId: number = 0;
   displayedColumns: string[] = [
-    'id',
+    'select',
     'name',
     'quantity',
     'totalPrice',
@@ -64,7 +78,7 @@ export class ItemListComponent {
   constructor(private http: HttpClientService) {
     this.basicUrl = this.http.basicUrl;
 
-    this.getItemByGroupId(this.userGroups[0]);
+    this.getItemByGroupId(this.userGroups[0].id);
   }
   /*TODO 缺少 拿user 資料跟拿user 群組資料 分類資料 通知功能 */
   /*新增物品 */
@@ -79,7 +93,7 @@ export class ItemListComponent {
       },
     });
   }
-  /*修改物品 */
+  /*修改物品 dialog */
   openEditDialog(row: Item) {
     // console.log(row)
     const dialogRef = this.dialog.open(ItemListEditDialogComponent, {
@@ -92,12 +106,11 @@ export class ItemListComponent {
         categoriesMap: this.categories,
       },
     });
-    /*TODO 更新還沒做 */
-    // dialogRef.afterClosed().subscribe((result) => {
-    //   if (result) {
-    //     this.updateItem(result); // 呼叫更新 API
-    //   }
-    // });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.updateItem(result); // 呼叫更新 API
+      }
+    });
   }
   /*分類 */
   filterByCategory(catId: number) {
@@ -159,5 +172,110 @@ export class ItemListComponent {
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();
     }
+  }
+  /*更新 */
+  updateItem(data: any) {
+    if (!data) {
+      Swal.fire({
+        title: '沒有更新資料',
+        text: '資料沒傳進來',
+        icon: 'error',
+      });
+      return;
+    }
+    this.http.postApi(this.basicUrl + 'item/update', data).subscribe({
+      next: (res: any) => {
+        if (res.code != 200) {
+          Swal.fire({
+            title: '更新錯誤',
+            text: res.message || 'server error ',
+            icon: 'error',
+          });
+        }
+        Swal.fire({
+          title: '更新成功',
+          icon: 'success',
+        });
+        this.getItemByGroupId(this.currentGroupId);
+      },
+      error: (err: any) => {
+        Swal.fire({
+          title: '更新錯誤',
+          text: err.message || 'server error ',
+          icon: 'error',
+        });
+      },
+    });
+  }
+  //判斷有效日期是否小於今天
+  isExpired(expiredDate: string): boolean {
+    if (!expiredDate) return false;
+
+    // 將「今天」設定為今天凌晨 00:00:00，避免因為小時/分鐘導致當天算過期
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // 將傳入的日期字串轉為 Date 物件
+    const targetDate = new Date(expiredDate);
+    // 如果目標日期小於今天，就是過期了
+    return targetDate.getTime() < today.getTime();
+  }
+  // 刪除資料
+  // 檢查是否全選
+  isAllSelected() {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.dataSource.data.length;
+    return numSelected === numRows;
+  }
+
+  // 全選或取消全選
+  masterToggle() {
+    this.isAllSelected()
+      ? this.selection.clear()
+      : this.dataSource.data.forEach((row) => this.selection.select(row));
+  }
+
+  // 刪除按鈕邏輯
+  deleteSelectedItems() {
+    const selectedIds = this.selection.selected.map((item) => item.id);
+
+    Swal.fire({
+      title: '確定要刪除嗎？',
+      text: `您選中了 ${selectedIds.length} 筆物品，刪除後將無法還原！`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: '是的，刪除它們！',
+      cancelButtonText: '取消',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.http
+          .postApi(this.basicUrl + 'item/delete', selectedIds)
+          .subscribe({
+            next: (res: any) => {
+              if (res.code != 200) {
+                Swal.fire({
+                  title: '刪除錯誤',
+                  text: res.message || 'server error ',
+                  icon: 'error',
+                });
+              }
+              Swal.fire({
+                title: '刪除成功',
+                icon: 'success',
+              });
+              window.location.reload();
+            },
+            error: (err: any) => {
+              Swal.fire({
+                title: '刪除錯誤',
+                text: err.message || 'server error ',
+                icon: 'error',
+              });
+            },
+          });
+      }
+    });
   }
 }

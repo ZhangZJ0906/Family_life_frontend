@@ -108,7 +108,8 @@
 
 <mat-dialog-actions align="end" class="p-3 border-top">
   <button mat-button (click)="onCancel()">捨棄變更</button>
-  <button mat-flat-button color="primary" [mat-dialog-close]="item" [disabled]="!item.name" class="px-4">
+  <button mat-flat-button color="primary" [mat-dialog-close]="item" [disabled]="!item.name" (click)="onOkClose()"
+    class="px-4">
     確認修改
   </button>
 </mat-dialog-actions>

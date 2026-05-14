@@ -32,7 +32,7 @@ import { Item, LocationAndCategory } from '../../common/interfaceList';
 export class ItemListEditDialogComponent implements OnInit {
   // 綁定表單的資料結構
   item: any = {};
-  items: Item[] = [];
+
   groups: LocationAndCategory[] = [
     { id: 1, name: 'test' },
     { id: 2, name: 'test2' },
@@ -44,9 +44,7 @@ export class ItemListEditDialogComponent implements OnInit {
   constructor(
     public dialogRef: MatDialogRef<ItemListEditDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-  ) {
-    // console.log(this.items);
-  }
+  ) {}
 
   ngOnInit(): void {
     if (this.data && this.data.item && this.data.locationMap) {
@@ -55,14 +53,30 @@ export class ItemListEditDialogComponent implements OnInit {
       // this.groups =this.item.groupId;
       this.location = this.data.locationMap;
       this.categories = this.data.categoriesMap;
-      
-
       if (this.item.expireDate && this.item.expireDate.includes('T')) {
         this.item.expireDate = this.item.expireDate.split('T')[0];
       }
     }
   }
-
+  // 日期格式化小工具
+  private formatDate(date: any): string {
+    if (!date) return '';
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+  onOkClose(): void {
+    // 在傳回外部前，建議先處理日期格式 (確保是 YYYY-MM-DD)
+    const payload = {
+      ...this.item,
+      // 如果你有使用 MatDatepicker，它傳回的是 Date 物件，需轉為字串
+      purchaseDate: this.formatDate(this.item.purchaseDate),
+      expireDate: this.formatDate(this.item.expireDate),
+    };
+    this.dialogRef.close(payload);
+  }
   onCancel(): void {
     this.dialogRef.close();
   }
