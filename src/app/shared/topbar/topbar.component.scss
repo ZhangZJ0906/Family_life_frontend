@@ -1,0 +1,77 @@
+/* 頂部導覽列 */
+.topbar {
+  height: 72px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 0 22px;
+  display: grid;
+  grid-template-columns: 220px 1fr auto;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+/* 系統名稱 */
+.logo {
+  font-size: 22px;
+  font-weight: 800;
+  color: #222;
+  white-space: nowrap;
+}
+
+/* 導覽按鈕區 */
+.top-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 導覽按鈕 */
+.top-nav button {
+  border: none;
+  background: transparent;
+  color: #333;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+/* 導覽按鈕 hover */
+.top-nav button:hover {
+  background: #f3f6fb;
+  color: #2f80ed;
+}
+
+/* 右上角通知與頭像 */
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* 通知按鈕 */
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: #f3f4f6;
+  cursor: pointer;
+}
+
+/* 使用者頭像 */
+.user-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #2f80ed;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}

@@ -5,11 +5,13 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
 import { CalendarApiService } from '../../calendar-api.service';
 import Swal from 'sweetalert2';
+import { TopbarComponent } from '../../shared/topbar/topbar.component';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [FullCalendarModule],
+  imports: [FullCalendarModule,TopbarComponent,RouterLink],
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss'
 })

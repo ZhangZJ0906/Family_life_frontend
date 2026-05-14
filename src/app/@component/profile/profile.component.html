@@ -1,0 +1,107 @@
+<div class="profile-page">
+<app-topbar></app-topbar>
+
+  <section class="profile-grid">
+
+    <!-- 左上：頭像 -->
+    <div class="profile-card user-card">
+      <div class="avatar-large">J</div>
+      <h3>Jack</h3>
+      <p>jack&#64;example.com</p>
+      <button class="edit-avatar-btn">更換頭像</button>
+    </div>
+
+    <!-- 中上：基本資料 -->
+    <div class="profile-card info-card">
+      <h3>基本資料</h3>
+
+      <div class="form-row">
+        <label>使用者名稱</label>
+        <p class="profile-text">Jack</p>
+      </div>
+
+      <div class="form-row">
+        <label>Email</label>
+        <p class="profile-text">jack&#64;example.com</p>
+      </div>
+
+      <div class="form-actions">
+        <button class="save-btn">修改</button>
+      </div>
+    </div>
+
+    <!-- 右側：群組，往下跨兩列 -->
+    <div class="profile-card group-card">
+       <div class="group-header">
+          <h3>群組</h3>
+          <button class="back-btn" routerLink="/home-page">返回首頁</button>
+  </div>
+
+
+      <div class="group-list">
+        <details class="group-accordion" open>
+          <summary>我的家庭</summary>
+          <div class="group-detail">
+            <p>邀請碼</p>
+            <h4>ABC123</h4>
+          </div>
+        </details>
+
+        <details class="group-accordion">
+          <summary>外婆家</summary>
+          <div class="group-detail">
+            <p>邀請碼</p>
+            <h4>FAMILY02</h4>
+          </div>
+        </details>
+
+        <details class="group-accordion">
+          <summary>台北租屋處</summary>
+          <div class="group-detail">
+            <p>邀請碼</p>
+            <h4>HOME5566</h4>
+          </div>
+        </details>
+
+        <details class="group-accordion">
+          <summary>阿姨家</summary>
+          <div class="group-detail">
+            <p>邀請碼</p>
+            <h4>GROUP888</h4>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 左下：通知設定，橫跨頭像 + 基本資料 -->
+    <div class="profile-card notify-card">
+      <h3>通知設定</h3>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <h4>到期提醒</h4>
+          <p>食材、藥品、保固、訂閱即將到期時通知</p>
+        </div>
+
+        <label class="switch">
+          <input type="checkbox" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <h4>Email 通知</h4>
+          <p>透過 Email 接收重要提醒</p>
+        </div>
+
+        <label class="switch">
+          <input type="checkbox" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+  </section>
+
+</div>

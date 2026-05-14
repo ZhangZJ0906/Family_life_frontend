@@ -1,17 +1,37 @@
 <div class="calendar-page">
+
+  <!-- 共用導覽列 -->
+  <app-topbar></app-topbar>
+
+  <!-- 行事曆白色卡片 -->
   <div class="calendar-card">
 
+    <!-- 上方標題列 -->
     <div class="calendar-header">
+
+      <!-- 左邊：標題與說明 -->
       <div class="calendar-title">
         <h2>家庭行事曆</h2>
         <p>管理家庭活動、提醒與重要日期</p>
       </div>
 
-      <button type="button" class="add-btn" (click)="openCreateDialog()">
-        ＋ 新增活動
-      </button>
+      <!-- 右邊：新增活動與返回首頁 -->
+      <div class="calendar-actions">
+
+        <!-- 新增活動按鈕 -->
+        <button type="button" class="add-btn" (click)="openCreateDialog()">
+          ＋ 新增活動
+        </button>
+
+        <!-- 返回首頁按鈕 -->
+        <button type="button" class="back-home-btn" routerLink="/home-page">
+          返回首頁
+        </button>
+
+      </div>
     </div>
 
+    <!-- FullCalendar 行事曆 -->
     <full-calendar [options]="calendarOptions"></full-calendar>
 
   </div>
