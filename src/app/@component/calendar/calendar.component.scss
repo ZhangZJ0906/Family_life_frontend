@@ -184,3 +184,48 @@
   box-sizing: border-box;
 }
 
+
+
+
+
+/* 跨天活動：讓內容水平排列，圓點與文字同一行 */
+:host ::ng-deep .fc-daygrid-block-event .fc-event-main {
+  display: flex;
+  align-items: center;
+}
+
+/* 跨天活動：自製圓點，大小位置接近單天活動 */
+:host ::ng-deep .fc-daygrid-block-event .fc-event-main::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  background: #5b8def;
+  border-radius: 50%;
+  margin-left: 4px;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+/* 跨天活動整體文字顏色 */
+:host ::ng-deep .fc-daygrid-block-event,
+:host ::ng-deep .fc-daygrid-block-event .fc-event-main,
+:host ::ng-deep .fc-daygrid-block-event .fc-event-main-frame {
+  color: #1f4f9a !important;
+}
+
+/* 跨天活動時間文字，例如：上午9時 */
+:host ::ng-deep .fc-daygrid-block-event .fc-event-time {
+  color: #1f4f9a !important;
+  font-weight: 700 !important;
+}
+
+/* 跨天活動標題文字，例如：1111、33333 */
+:host ::ng-deep .fc-daygrid-block-event .fc-event-title {
+  color: #1f4f9a !important;
+  font-weight: 700 !important;
+}
+
+/* 一般活動圓點顏色 */
+:host ::ng-deep .fc-daygrid-event-dot {
+  border-color: #5b8def !important;
+}
