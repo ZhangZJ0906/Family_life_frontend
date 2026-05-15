@@ -113,6 +113,10 @@ export class CalendarComponent implements OnInit {
   createCalendarEvent(dateStr?: string): void {
     Swal.fire({
       title: '新增行事曆事件',
+        didOpen: () => {
+    (document.getElementById('createEventTime') as HTMLInputElement).value = '';
+    (document.getElementById('createEndTime') as HTMLInputElement).value = '';
+  },
     html: `
   <div class="swal-form">
 
@@ -133,7 +137,7 @@ export class CalendarComponent implements OnInit {
 
     <div class="form-row">
       <label>開始時間</label>
-      <input id="createEventTime" type="time" class="swal2-input" value="09:00">
+      <input id="createEventTime" type="time" class="swal2-input" value="" autocomplete="off">
     </div>
 
     <div class="form-row">
@@ -143,7 +147,7 @@ export class CalendarComponent implements OnInit {
 
     <div class="form-row">
       <label>結束時間</label>
-      <input id="createEndTime" type="time" class="swal2-input" value="10:00">
+      <input id="createEndTime" type="time" class="swal2-input" value="" autocomplete="off">
     </div>
 
     <div class="form-row">
@@ -183,6 +187,16 @@ if (!title) {
     Swal.showValidationMessage('活動日期不可為空');
     return;
   }
+
+  if (!eventTime) {
+  Swal.showValidationMessage('開始時間不可為空');
+  return;
+}
+
+if (endDate && !endTime) {
+  Swal.showValidationMessage('結束時間不可為空');
+  return;
+}
 
   if (endDate && startDateTime > endDateTime) {
   Swal.showValidationMessage('開始時間不可大於結束時間');
@@ -237,9 +251,9 @@ openUpdateDialog(info: EventClickArg): void {
 
 
   const oldDate = info.event.startStr.substring(0, 10);
-  const oldTime = info.event.startStr.substring(11, 16) || '09:00';
+  const oldTime = info.event.startStr.substring(11, 16) ;
   const oldEndDate = info.event.endStr ? info.event.endStr.substring(0, 10) : '';
-  const oldEndTime = info.event.endStr ? info.event.endStr.substring(11, 16) : '10:00';
+  const oldEndTime = info.event.endStr ? info.event.endStr.substring(11, 16) : '';
   Swal.fire({
     title: '修改行事曆事件',
  html: `

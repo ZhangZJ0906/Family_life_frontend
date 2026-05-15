@@ -10,6 +10,7 @@
   align-items: center;
   gap: 20px;
   margin-bottom: 24px;
+  overflow: hidden; /* 避免圖片超出導覽列 */
 }
 
 /* 系統名稱 */
@@ -75,3 +76,22 @@
   justify-content: center;
   font-weight: 700;
 }
+
+/* 左側 Logo 區 */
+.logo-area {
+  height: 72px;              /* 跟 topbar 一樣高 */
+  display: flex;
+  align-items: center;      /* 垂直置中 */
+  justify-content: flex-start;
+  cursor: pointer;
+}
+
+/* Logo 圖片 */
+.logo-img {
+  width: 200px;             /* 控制圖片寬度 */
+  height: 120px;             /* 不要超過 topbar 高度 */
+  object-fit: contain;      /* 等比例縮放，不變形 */
+  display: block;
+}
+
+
