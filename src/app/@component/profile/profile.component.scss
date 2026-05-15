@@ -110,19 +110,32 @@
   grid-row: 2;
 }
 
-/* 大頭像圓形 */
+/* 大頭像外框 */
 .avatar-large {
   width: 96px;
   height: 96px;
   border-radius: 50%;
   background: #2f80ed;
-  color: #ffffff;
+  color: white;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   font-size: 42px;
   font-weight: 800;
   margin: 0 auto 16px;
+
+  overflow: hidden; /* 重要：圖片超出圓形範圍時裁切 */
+}
+
+/* 頭像圖片 */
+.avatar-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 讓圖片填滿圓形，不變形 */
+  border-radius: 50%;
+  display: block;
 }
 
 .user-card h3 {
@@ -394,4 +407,11 @@
     grid-row: auto;
     height: auto;
   }
+
+.avatar-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
 }

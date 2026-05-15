@@ -18,7 +18,18 @@
 
   <div class="top-actions">
     <button class="icon-btn">🔔</button>
-    <div class="user-avatar">J</div>
+    <!-- 右上角使用者頭像 -->
+  <div class="user-avatar">
+
+    <!-- 有頭像圖片時顯示圖片 -->
+    <img *ngIf="avatarUrl; else defaultAvatar" [src]="avatarUrl" alt="使用者頭像">
+
+    <!-- 沒有頭像圖片時顯示 J -->
+    <ng-template #defaultAvatar>
+      J
+    </ng-template>
+
+  </div>
   </div>
 
 </header>
