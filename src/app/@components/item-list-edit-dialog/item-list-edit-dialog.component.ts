@@ -50,6 +50,7 @@ export class ItemListEditDialogComponent implements OnInit {
     if (this.data && this.data.item && this.data.locationMap) {
       console.log(this.data.item);
       this.item = { ...this.data.item };
+      console.log(this.item);
       // this.groups =this.item.groupId;
       this.location = this.data.locationMap;
       this.categories = this.data.categoriesMap;
@@ -58,10 +59,20 @@ export class ItemListEditDialogComponent implements OnInit {
       }
     }
   }
+  // 在你的 Component 內，或是物件 model 內
+  get totalPrice(): number {
+    return (this.item.unitPrice || 0) * (this.item.quantity || 0);
+  }
+
   // 日期格式化小工具
   private formatDate(date: any): string {
     if (!date) return '';
+    // ✅ 補上時區防呆：如果本來就是 YYYY-MM-DD 的 10 碼字串，直接返回
+    if (typeof date === 'string' && date.length === 10 && date.includes('-')) {
+      return date;
+    }
     const d = new Date(date);
+    if (isNaN(d.getTime())) return '';
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
@@ -74,6 +85,8 @@ export class ItemListEditDialogComponent implements OnInit {
       // 如果你有使用 MatDatepicker，它傳回的是 Date 物件，需轉為字串
       purchaseDate: this.formatDate(this.item.purchaseDate),
       expireDate: this.formatDate(this.item.expireDate),
+
+      price: this.totalPrice,
     };
     this.dialogRef.close(payload);
   }

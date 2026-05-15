@@ -76,13 +76,13 @@
                 </td>
               </ng-container>
 
-              <ng-container matColumnDef="price">
+              <ng-container matColumnDef="unitPrice">
                 <th mat-header-cell *matHeaderCellDef>單價</th>
                 <td mat-cell *matCellDef="let element">
-                  {{ element.price | currency: "TWD" : "symbol" : "1.0-0" }}
+                  {{ element.unitPrice | currency: "TWD" : "symbol" : "1.0-0" }}
                 </td>
               </ng-container>
-              <ng-container matColumnDef="totalPrice">
+              <ng-container matColumnDef="price">
               
                 <th mat-header-cell *matHeaderCellDef>總價格</th>
               
@@ -134,7 +134,7 @@
               
               
               
-                  {{ element.price*element.quantity | currency: "TWD" : "symbol" : "1.0-0" }}
+                  {{ element.price | currency: "TWD" : "symbol" : "1.0-0" }}
               
                 </td>
               

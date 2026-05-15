@@ -15,7 +15,7 @@
           <mat-label>所屬群組</mat-label>
           <mat-select required [(ngModel)]="item.groupId">
             @for (g of groupId; track $index) {
-            <mat-option [value]="g">{{g}}</mat-option>
+            <mat-option [value]="g">群組 {{g}}</mat-option>
             }
           </mat-select>
         </mat-form-field>
@@ -47,23 +47,32 @@
       <div class="col-4">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>單價</mat-label>
-          <input matInput type="number" required [(ngModel)]="item.price" min="0">
+          <input matInput type="number" required [(ngModel)]="item.unitPrice" min="0">
           <span matPrefix>$&nbsp;</span>
         </mat-form-field>
       </div>
+
+      <div class="col-12">
+        <mat-form-field appearance="outline" class="w-100" color="accent">
+          <mat-label class="text-primary">總價 (自動計算)</mat-label>
+          <input matInput type="number" [ngModel]="totalPrice" readonly name="totalPrice" class="text-primary fw-bold">
+          <span matPrefix>$&nbsp;</span>
+          <mat-hint align="end">計算公式：{{item.unitPrice || 0}} × {{item.quantity || 0}}</mat-hint>
+        </mat-form-field>
+      </div>
+
       <div class="col-6">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>安全庫存量</mat-label>
           <input matInput type="number" required [(ngModel)]="item.saveQuantity" min="0">
-          <span matPrefix>$&nbsp;</span>
         </mat-form-field>
       </div>
       <div class="col-6">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>存放地點</mat-label>
           <mat-select required [(ngModel)]="item.locationId">
-            @for(cat of location; track $index){
-            <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
+            @for(loc of location; track $index){
+            <mat-option [value]="loc.id">{{ loc.name }}</mat-option>
             }
           </mat-select>
         </mat-form-field>
@@ -74,7 +83,6 @@
           <input matInput [matDatepicker]="purchasePicker" required [(ngModel)]="item.purchaseDate" [max]="today">
           <mat-datepicker-toggle matIconSuffix [for]="purchasePicker"></mat-datepicker-toggle>
           <mat-datepicker #purchasePicker></mat-datepicker>
-
         </mat-form-field>
       </div>
       <div class="col-6">
@@ -101,13 +109,12 @@
         </div>
       </div>
 
-
       <div class="col-12">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>備註事項</mat-label>
           <textarea cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5"
             matInput rows="3" [(ngModel)]="item.note" placeholder="可以記錄購買地點、口感或保存提醒...">
-    </textarea>
+          </textarea>
         </mat-form-field>
       </div>
     </div>
@@ -116,8 +123,7 @@
 
 <mat-dialog-actions align="end" class="p-3">
   <button mat-button (click)="onNoClick()">取消</button>
-  <button mat-raised-button color="primary" [mat-dialog-close]="item" [disabled]="!item.name || !item.expireDate"
-    (click)="addItemInfo()">
+  <button mat-raised-button color="primary" [disabled]="!item.name || !item.expireDate" (click)="addItemInfo()">
     確認新增
   </button>
 </mat-dialog-actions>

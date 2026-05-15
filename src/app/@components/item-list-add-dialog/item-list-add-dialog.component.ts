@@ -48,7 +48,7 @@ export class ItemListAddDialogComponent implements OnInit {
   location: LocationAndCategory[] = [];
   categories: LocationAndCategory[] = [];
   minDate: string = ''; // 日期限制
-  today=new Date();
+  today = new Date();
   item = {
     created_by_id: 1, //創造這筆的人
     groupId: this.groupId, // 放在哪個群組
@@ -57,6 +57,7 @@ export class ItemListAddDialogComponent implements OnInit {
     name: '',
     quantity: 1,
     unit: '',
+    unitPrice: 0,
     price: 0,
     purchaseDate: '', // 購買日
     expireDate: '', // 有效日期
@@ -73,24 +74,26 @@ export class ItemListAddDialogComponent implements OnInit {
     this.basicUrl = this.http.basicUrl;
   }
   ngOnInit(): void {
-
     this.minDate = this.today.toISOString().split('T')[0];
     if (this.data && this.data.location) {
       this.location = [...this.data.location];
-
     }
     if (this.data && this.data.categories) {
       this.categories = [...this.data.categories];
       this.categories.shift();
     }
   }
+  get totalPrice(): number {
+    return (this.item.unitPrice || 0) * (this.item.quantity || 0);
+  }
   addItemInfo() {
     const payload = {
       ...this.item,
+      price: this.totalPrice,
       userId: this.item.created_by_id, // 轉成後端要的 userId
       groupId: this.item.groupId || 0, // 如果是個人則給 0
       purchaseDate: this.formatDate(this.item.purchaseDate),
-    expireDate: this.formatDate(this.item.expireDate)
+      expireDate: this.formatDate(this.item.expireDate),
     };
 
     // 2. 必填欄位檢查 (前端第一道防線)
@@ -115,7 +118,7 @@ export class ItemListAddDialogComponent implements OnInit {
       return;
     }
 
-    this.http.postApi(this.basicUrl + 'item/add', this.item).subscribe({
+    this.http.postApi(this.basicUrl + 'item/add', payload).subscribe({
       next: (res: any) => {
         if (res.code != 200) {
           Swal.fire({
@@ -130,7 +133,7 @@ export class ItemListAddDialogComponent implements OnInit {
           text: res.message,
           icon: 'success',
         });
-        this.onNoClick();
+        this.dialogRef.close(true); // 傳回 true 告知列表重新刷新
       },
       error: (err: any) => {
         Swal.fire({
@@ -142,10 +145,10 @@ export class ItemListAddDialogComponent implements OnInit {
     });
   }
   private formatDate(date: any): string {
-  if (!date) return '';
-  const d = new Date(date);
-  return d.toISOString().split('T')[0];
-}
+    if (!date) return '';
+    const d = new Date(date);
+    return d.toISOString().split('T')[0];
+  }
   private showError(msg: string) {
     Swal.fire({
       title: '資訊不完整',

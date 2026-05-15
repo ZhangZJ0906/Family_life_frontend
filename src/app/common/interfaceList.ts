@@ -11,7 +11,8 @@ export interface Item {
   purchaseDate: string; // YYYY-MM-DD
   expireDate: string; // YYYY-MM-DD
   safeQuantity: number;
-  price: number;
+  unit_price: number; //單價
+  price: number; // 總價
   notify: boolean;
   note: string;
   createdAt: string; // ISO 8601 格式
@@ -22,6 +23,20 @@ export interface Item {
 export interface LocationAndCategory {
   id: number;
   name: string;
-  // icon:string,
+  icon?:string,
 }
+/*============================================ */
+/*記帳 2026-05-15 by zj */
+export interface ExpenseRecord {
+  id: number | null;
+  group_id: number;
+  user_id: number;
+  category_id: number;
+  related_item_id: number | null;
+  price: number | null;
+  expense_date: string;
+  note: string;
+  created_at?: string;
+}
+
 /*============================================ */

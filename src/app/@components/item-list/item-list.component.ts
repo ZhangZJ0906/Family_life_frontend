@@ -58,7 +58,7 @@ export class ItemListComponent {
     'select',
     'name',
     'quantity',
-    'totalPrice',
+    'unitPrice',
     'price', // 單價
     'expireDate',
     'notify',
@@ -91,6 +91,11 @@ export class ItemListComponent {
         location: this.location,
         categories: this.categories,
       },
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.getItemByGroupId(this.currentGroupId);
+      }
     });
   }
   /*修改物品 dialog */
