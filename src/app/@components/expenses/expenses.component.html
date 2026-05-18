@@ -29,7 +29,7 @@
       <div class="card summary-card bg-primary text-white">
         <div class="card-body">
           <div class="label">本月支出</div>
-          <div class="value">${{ monthlyExpense() }}</div>
+          <!-- <div class="value">${{ monthlyExpense() }}</div> -->
         </div>
       </div>
     </div>
@@ -38,7 +38,7 @@
       <div class="card summary-card bg-success text-white">
         <div class="card-body">
           <div class="label">平均每日</div>
-          <div class="value">${{ avgDaily() }}</div>
+          <!-- <div class="value">${{ avgDaily() }}</div> -->
         </div>
       </div>
     </div>
@@ -67,7 +67,9 @@
         <!-- 篩選 -->
         <mat-form-field appearance="outline" class="filter-field">
           <mat-label>分類</mat-label>
-          <mat-select (selectionChange)="filterCategory($event.value)">
+          <mat-select>
+          <!-- <mat-select (selectionChange)="filterCategory($event.value)"> -->
+
             <mat-option value="">全部</mat-option>
             @for (cat of categoryMap; track cat.id) {
               <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
