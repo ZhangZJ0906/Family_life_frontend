@@ -31,10 +31,10 @@ export interface ExpenseRecord {
   id: number | null;
   group_id: number;
   user_id: number;
-  category_id: number;
+  categoryId: number;
   related_item_id: number | null;
   price: number | null;
-  expense_date: string;
+  expenseDate: string;
   note: string;
   created_at?: string;
 }

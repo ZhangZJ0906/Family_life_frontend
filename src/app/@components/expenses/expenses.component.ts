@@ -35,7 +35,6 @@ import { ExpensesEditComponent } from '../expenses-edit/expenses-edit.component'
 })
 export class ExpensesComponent {
   basicUrl!: string;
-  // 模擬分類字典 (實務上會從 category 資料表查出)
   categoryMap: LocationAndCategory[] = [];
   dataSource = new MatTableDataSource<ExpenseRecord>([]);
   expense: ExpenseRecord[] = [];
@@ -54,9 +53,33 @@ export class ExpensesComponent {
     private dialog: MatDialog,
   ) {
     this.basicUrl = this.http.basicUrl;
+
+    // 自訂篩選邏輯：同時處理「分類」+「搜尋」
+    this.dataSource.filterPredicate = (data: ExpenseRecord, filter: string) => {
+      const f = JSON.parse(filter);
+
+      // 條件 A：分類 (null = 全部)
+      const matchCategory =
+        f.category == null || data.categoryId === f.category;
+
+      // 條件 B：關鍵字搜尋 (備註 / 分類名 / 金額 / 日期)
+      const keyword = f.search;
+      const matchSearch =
+        !keyword ||
+        (data.note ?? '').toLowerCase().includes(keyword) ||
+        this.getCategoryName(data.categoryId).toLowerCase().includes(keyword) ||
+        (data.price?.toString() ?? '').includes(keyword) ||
+        (data.expenseDate ?? '').toLowerCase().includes(keyword);
+
+      return matchCategory && matchSearch; // 兩個條件都要符合
+    };
     this.getCatgories();
     this.getExpense(null, 1);
   }
+  filterValues = {
+    search: '',
+    category: null as number | null,
+  };
   // 模擬登入使用者與群組環境
   currentGroupId = 1;
   currentUserId = 1;
@@ -69,15 +92,31 @@ export class ExpensesComponent {
     this.dialog.open(ExpensesAddComponent, {
       width: '540px',
       height: '540px',
-      data: null,
+      data: {
+        categoryMap: this.categoryMap,
+      },
     });
   }
 
   openEditDialog(record: any) {
-    this.dialog.open(ExpensesEditComponent, {
+    let relatedItem = null;
+    if (record.relatedItemId != null) {
+      relatedItem = this.itemMap[record.relatedItemId];
+    }
+    const dialogRef = this.dialog.open(ExpensesEditComponent, {
       width: '540px',
       height: '540px',
-      data: record,
+      data: {
+        record: JSON.parse(JSON.stringify(record)),
+        categoryMap: this.categoryMap,
+        relatedItem: relatedItem,
+      },
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      // 如果 result 是 true，代表彈窗內更新成功了，主頁面只需要重新載入列表
+      if (result === true) {
+        this.getExpense(null, this.currentUserId);
+      }
     });
   }
   deleteById(e: object) {}
@@ -107,15 +146,6 @@ export class ExpensesComponent {
       },
     });
   }
-  // filterByCategory(catId: number) {
-  //   if (catId === 0) {
-  //     this.dataSource.data = this.itemList;
-  //   } else {
-  //     this.dataSource.data = this.itemList.filter(
-  //       (item) => item.categoryId === catId,
-  //     );
-  //   }
-  // }
 
   getExpense(groupId: number | null, userId: number) {
     if (!userId || userId <= 0) {
@@ -132,7 +162,7 @@ export class ExpensesComponent {
     if (groupId != null) {
       url += `&groupId=${groupId}`;
     }
-console.log(url)
+
     this.http.getApi(url).subscribe({
       next: (res: any) => {
         if (res.code !== 200) {
@@ -143,12 +173,11 @@ console.log(url)
           });
           return;
         }
-console.log(res)
+
         // 2. 完美接收後端一次打包回傳的資料
-        this.expense = res.list || []; // 後端回傳的記帳清單 List<Expense>
+        this.expense = res.list ? [...res.list] : [];
         this.itemMap = res.itemMap || {}; // 後端回傳的物品對照表 Map<Long, Items>
 
-        console.log(this.expense)
         // 更新表格或畫面資料來源
         this.dataSource.data = this.expense;
       },
@@ -161,13 +190,19 @@ console.log(res)
       },
     });
   }
-  // 實作搜尋功能
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
 
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
-    }
+  getCategoryName(categoryId: number): string {
+    return this.categoryMap.find((c) => c.id === categoryId)?.name || '未分類';
+  }
+
+  filterByCategory(categoryId: number | null) {
+    this.filterValues.category = categoryId;
+    this.dataSource.filter = JSON.stringify(this.filterValues);
+  }
+  //文字搜尋
+  applyFilter(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.filterValues.search = value.trim().toLowerCase();
+    this.dataSource.filter = JSON.stringify(this.filterValues);
   }
 }
