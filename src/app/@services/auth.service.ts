@@ -24,7 +24,7 @@ const STORAGE_KEY = 'family-life-current-user';
 export class AuthService {
 
   private readonly currentUserSignal = signal<User | null>(this.readStoredUser());
-  private readonly userUrl = 'http://localhost:8080/user';
+  private readonly userUrl = 'http://localhost:8080/users';
 
 
   readonly currentUser = this.currentUserSignal.asReadonly();
