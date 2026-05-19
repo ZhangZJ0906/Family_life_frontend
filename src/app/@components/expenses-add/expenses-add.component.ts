@@ -113,7 +113,7 @@ export class ExpensesAddComponent {
    * 呼叫後端 API 動態載入物品清單
    */
   loadItemList(groupId: number | null, userId: number) {
-    let url = `${this.basicUrl}item/getInfo?userId=${userId}`;
+    let url = `${this.basicUrl}item/getItems?userId=${userId}`;
     if (groupId !== null) {
       url += `&groupId=${groupId}`;
     }
@@ -138,7 +138,7 @@ export class ExpensesAddComponent {
 
     // 建立要送去後端的 payload
     const payload = {
-      user_id: this.currentUserId,
+      userId: this.currentUserId,
       group_id:
         formValues.selectedEnvId === 0 ? null : formValues.selectedEnvId, // 0 轉成 null 送給後端，代表這是私人帳
       categoryId: formValues.categoryId,
@@ -147,8 +147,9 @@ export class ExpensesAddComponent {
       note: formValues.note,
       expenseDate: this.formatToBackendDate(formValues.expenseDate), // 格式化為 YYYY-MM-DD
     };
+    console.log(payload)
 
-    this.http.postApi(this.basicUrl + 'expense/saveInfo', payload).subscribe({
+    this.http.postApi(this.basicUrl + 'expense/addInfo', payload).subscribe({
       next: (res: any) => {
         if (res.code != 200) {
           Swal.fire({

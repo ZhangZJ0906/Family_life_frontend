@@ -14,11 +14,13 @@ import { HttpClientService } from '../../@services/http-client.service';
 import Swal from 'sweetalert2';
 import { ExpensesAddComponent } from '../expenses-add/expenses-add.component';
 import { ExpensesEditComponent } from '../expenses-edit/expenses-edit.component';
-
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 @Component({
   selector: 'app-expense-tracker',
   standalone: true,
   imports: [
+    MatCheckboxModule,
     MatDialogModule,
     CommonModule,
     FormsModule,
@@ -34,13 +36,16 @@ import { ExpensesEditComponent } from '../expenses-edit/expenses-edit.component'
   styleUrl: './expenses.component.scss',
 })
 export class ExpensesComponent {
-  basicUrl!: string;
-  categoryMap: LocationAndCategory[] = [];
-  dataSource = new MatTableDataSource<ExpenseRecord>([]);
-  expense: ExpenseRecord[] = [];
-  itemMap: { [key: number]: any } = {};
+  basicUrl!: string; // APIＵＲＬ
+  userGroups: any[] = [1, 2]; // 儲存使用者擁有的群組清單
+  categoryMap: LocationAndCategory[] = []; // 分類
+  dataSource = new MatTableDataSource<ExpenseRecord>([]); // table  資料
+  selection = new SelectionModel<ExpenseRecord>(true, []); // 刪除  checkbox 勾選到的資料
+  expense: ExpenseRecord[] = []; // 記帳資料
+  itemMap: { [key: number]: any } = {}; // 群組物品東西
   // Angular Material Table 要顯示的欄位
   displayedColumns: string[] = [
+    'select',
     'expense_date',
     'category_id',
     'note',
@@ -73,9 +78,10 @@ export class ExpensesComponent {
 
       return matchCategory && matchSearch; // 兩個條件都要符合
     };
-    this.getCatgories();
-    this.getExpense(null, 1);
+    this.getCatgories(); // 獲取 分類
+    this.getExpense(null, 1); // 獲取記帳紀錄
   }
+  // 塞選或是 文字搜尋用
   filterValues = {
     search: '',
     category: null as number | null,
@@ -89,12 +95,18 @@ export class ExpensesComponent {
     this.dataSource.data.reduce((sum, r) => sum + (r.price || 0), 0),
   );
   openCreateDialog() {
-    this.dialog.open(ExpensesAddComponent, {
+    const dialogRef = this.dialog.open(ExpensesAddComponent, {
       width: '540px',
       height: '540px',
       data: {
         categoryMap: this.categoryMap,
       },
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      // 如果 result 是 true，代表彈窗內更新成功了，主頁面只需要重新載入列表
+      if (result === true) {
+        this.getExpense(null, this.currentUserId);
+      }
     });
   }
 
@@ -119,7 +131,66 @@ export class ExpensesComponent {
       }
     });
   }
-  deleteById(e: object) {}
+  //刪除
+
+  // 刪除資料
+  // 檢查是否全選
+  isAllSelected() {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.dataSource.data.length;
+    return numSelected === numRows;
+  }
+
+  // 全選或取消全選
+  masterToggle() {
+    this.isAllSelected()
+      ? this.selection.clear()
+      : this.dataSource.data.forEach((row) => this.selection.select(row));
+  }
+
+  // 刪除按鈕邏輯
+  deleteById() {
+    const selectedIds = this.selection.selected.map((item) => item.id);
+
+    Swal.fire({
+      title: '確定要刪除嗎？',
+      text: `您選中了 ${selectedIds.length} 筆物品，刪除後將無法還原！`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: '是的，刪除它們！',
+      cancelButtonText: '取消',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.http
+          .postApi(this.basicUrl + 'expense/deleteInfo', selectedIds)
+          .subscribe({
+            next: (res: any) => {
+              if (res.code != 200) {
+                Swal.fire({
+                  title: '刪除錯誤',
+                  text: res.message || 'server error ',
+                  icon: 'error',
+                });
+              }
+              Swal.fire({
+                title: '刪除成功',
+                icon: 'success',
+              });
+              window.location.reload();
+            },
+            error: (err: any) => {
+              Swal.fire({
+                title: '刪除錯誤',
+                text: err.message || 'server error ',
+                icon: 'error',
+              });
+            },
+          });
+      }
+    });
+  }
   //拉取 分類
   getCatgories() {
     this.http.getApi(this.basicUrl + 'categories/get').subscribe({
