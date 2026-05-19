@@ -17,6 +17,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { ItemListAddDialogComponent } from '../item-list-add-dialog/item-list-add-dialog.component';
 import { ItemListEditDialogComponent } from '../item-list-edit-dialog/item-list-edit-dialog.component';
 import { MatSelect, MatOption } from '@angular/material/select';
+import { TopbarComponent } from '../../shared/topbar/topbar.component';
 @Component({
   selector: 'app-item-list',
   imports: [
@@ -33,6 +34,7 @@ import { MatSelect, MatOption } from '@angular/material/select';
     MatChipOption,
     MatSelect,
     MatOption,
+    TopbarComponent,
   ],
   templateUrl: './item-list.component.html',
   styleUrl: './item-list.component.scss',
@@ -54,7 +56,7 @@ export class ItemListComponent {
   ];
   // 現在的群組
   currentGroupId: number = 0;
-  displayedColumns: string[] = [
+  itemDisplayedColumns: string[] = [
     'select',
     'name',
     'quantity',
@@ -68,6 +70,27 @@ export class ItemListComponent {
   itemList: Item[] = [];
   // 初始化 dataSource
   dataSource = new MatTableDataSource<Item>([]);
+
+  // 訂閱表格欄位：只列重要欄位
+subscriptionDisplayedColumns: string[] = [
+  'select',
+  'name',
+  'price',
+  'billingCycle',
+  'trialEndDate',
+  'nextBillingDate',
+  'status',
+  'notify',
+];
+
+// 目前實際顯示的欄位
+displayedColumns: string[] = this.itemDisplayedColumns;
+
+// 判斷目前是不是訂閱模式
+isSubscriptionMode = false;
+
+// 訂閱資料
+subscriptionList: any[] = [];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -119,14 +142,68 @@ export class ItemListComponent {
   }
   /*分類 */
   filterByCategory(catId: number) {
-    if (catId === 0) {
-      this.dataSource.data = this.itemList;
-    } else {
-      this.dataSource.data = this.itemList.filter(
-        (item) => item.categoryId === catId,
-      );
-    }
+    // 找到目前點擊的分類
+  const category = this.categories.find(cat => cat.id === catId);
+  this.selectedCategory = category?.name || '全部';
+
+  // 如果點擊「訂閱」，改查訂閱後端
+  if (this.selectedCategory === '訂閱') {
+    this.getSubscriptionByGroupId(this.currentGroupId);
+    return;
   }
+
+  // 其他分類維持原本物品清單
+  this.isSubscriptionMode = false;
+  this.displayedColumns = this.itemDisplayedColumns;
+
+  if (catId === 0) {
+    this.dataSource.data = this.itemList;
+  } else {
+    this.dataSource.data = this.itemList.filter(
+      item => item.categoryId === catId
+    );
+  }
+  }
+
+  // 查詢某群組的訂閱資料
+getSubscriptionByGroupId(groupId: number): void {
+  if (!groupId || groupId <= 0) {
+    Swal.fire({
+      title: '錯誤',
+      text: '群組 ID 不可為空',
+      icon: 'error',
+    });
+    return;
+  }
+
+  this.isSubscriptionMode = true;
+  this.displayedColumns = this.subscriptionDisplayedColumns;
+
+  this.http
+    .getApi(this.basicUrl + `subscription/getByGroup?groupId=${groupId}`)
+    .subscribe({
+      next: (res: any) => {
+        if (res.code !== 200) {
+          Swal.fire({
+            title: '查詢失敗',
+            text: res.message || '訂閱資料查詢失敗',
+            icon: 'error',
+          });
+          return;
+        }
+
+        this.subscriptionList = res.data || [];
+        this.dataSource.data = this.subscriptionList;
+      },
+      error: (err: any) => {
+        Swal.fire({
+          title: '錯誤',
+          text: err.message || 'Server error',
+          icon: 'error',
+        });
+      },
+    });
+}
   /*取得DB 物品清單資料 */
   getItemByGroupId(groupId: number) {
     this.currentGroupId = groupId;
