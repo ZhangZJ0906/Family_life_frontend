@@ -1,0 +1,148 @@
+<div class="dialog-container">
+
+  <div class="header-bar">
+
+  <h2 class="title">我的通知</h2>
+
+  <div class="top-actions">
+
+    <button class="action-btn" (click)="markAllAsRead()">
+      全部已讀
+    </button>
+
+    <button class="action-btn danger" (click)="deleteRead()">
+      刪除已讀
+    </button>
+
+  </div>
+
+</div>
+
+  <!-- 🔥 分類 Tabs -->
+  <div class="tabs">
+    <button [class.active]="filterType === 'all'" (click)="filterType = 'all'">
+      全部
+
+      <span class="tab-badge" *ngIf="unreadMap.all > 0">
+        {{ unreadMap.all }}
+      </span>
+    </button>
+
+    <button [class.active]="filterType === 'invite'" (click)="filterType = 'invite'">
+      邀請通知
+
+      <span class="tab-badge" *ngIf="unreadMap.invite > 0">
+        {{ unreadMap.invite }}
+      </span>
+    </button>
+
+    <button [class.active]="filterType === 'group'" (click)="filterType = 'group'">
+      群組通知
+
+      <span class="tab-badge" *ngIf="unreadMap.group > 0">
+        {{ unreadMap.group }}
+      </span>
+    </button>
+
+    <button [class.active]="filterType === 'update'" (click)="filterType = 'update'">
+      更新通知
+
+      <span class="tab-badge" *ngIf="unreadMap.update > 0">
+        {{ unreadMap.update }}
+      </span>
+    </button>
+  </div>
+
+  <div
+    class="notify-item"
+    *ngFor="let n of filteredNotifies()"
+    [class.unread]="!n.isRead"
+    (click)="markAsRead(n)"
+  >
+
+    <!-- 未讀紅點 -->
+    <div
+      class="unread-dot"
+      *ngIf="!n.isRead"
+    ></div>
+
+    <!-- 頭像 -->
+    <div class="avatar">
+      <img *ngIf="n.avatar" [src]="n.avatar" />
+      <div *ngIf="!n.avatar" class="default-avatar"></div>
+    </div>
+
+    <!-- 內容 -->
+    <div class="content-area">
+
+      <div class="top-row">
+        <span class="user-name">
+          {{ n.name ?? 'User_name' }}
+        </span>
+
+        <span class="time" *ngIf="n.sendDate">
+          {{ n.sendDate | date:'yyyy-MM-dd HH:mm' }}
+        </span>
+      </div>
+
+      <div class="message">
+        {{ n.content }}
+      </div>
+
+    </div>
+
+    <!-- 操作 -->
+    <div
+      class="action-group"
+      (click)="$event.stopPropagation()"
+    >
+
+      <!-- invite -->
+      <ng-container *ngIf="n.type === 'invite'">
+
+        <ng-container *ngIf="!n.status">
+
+          <button
+            class="accept-btn"
+            (click)="acceptInvite(n)"
+          >
+            接受
+          </button>
+
+          <button
+            class="reject-btn"
+            (click)="rejectInvite(n)"
+          >
+            拒絕
+          </button>
+
+        </ng-container>
+
+        <div
+          *ngIf="n.status === 'accepted'"
+          class="status-pill accepted"
+        >
+          已加入該群組
+        </div>
+
+        <div
+          *ngIf="n.status === 'rejected'"
+          class="status-pill rejected"
+        >
+          已拒絕加入該群組
+        </div>
+
+      </ng-container>
+
+      <button
+        mat-icon-button
+        class="delete-btn"
+        (click)="deleteNotify(n)"
+      >
+        <mat-icon>delete</mat-icon>
+      </button>
+
+    </div>
+
+  </div>
+</div>

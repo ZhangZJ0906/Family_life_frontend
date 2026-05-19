@@ -1,0 +1,152 @@
+<div class="dialog-container">
+
+  <!-- Header -->
+  <div class="dialog-header">
+
+    <div>
+      <h2>{{ data.group.groupName }}</h2>
+
+      <div class="group-info-row">
+
+        <p class="group-id">
+          群組ID：{{ data.group.groupId }}
+        </p>
+
+        <div class="invite-code-box">
+
+          <span>
+            邀請碼：{{ data.group.inviteCode }}
+          </span>
+
+          <button
+            class="copy-btn"
+            (click)="copyInviteCode()"
+          >
+            複製
+          </button>
+
+        </div>
+
+      </div>
+    </div>
+
+    <button
+      class="close-btn"
+      (click)="closeDialog()"
+    >
+      ✕
+    </button>
+
+  </div>
+
+  <!-- Member List -->
+  <div class="member-list">
+
+    <div
+      class="member-card"
+      *ngFor="let member of members"
+    >
+
+      <div class="member-left">
+
+        <div class="avatar">
+          <!-- {{ member.name[0] }} -->
+        </div>
+
+        <div>
+
+          <div class="member-name">
+            {{ member.user_name }}
+          </div>
+
+          <div class="member-role">
+            UID: {{ member.user_id }}
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="member-actions">
+
+        <button *ngIf="member.publicInventory == 0"
+                disabled
+                class="check-btn">
+          個人清單
+        </button>
+
+        <button *ngIf="member.publicInventory == 1"
+                class="check-btn">
+          清單
+        </button>
+
+        <button
+          *ngIf="member.user_id != data.userId"
+          class="remove-btn"
+          (click)="removeMember(member)"
+        >
+          踢出群組
+        </button>
+
+        <button
+          *ngIf="member.user_id == data.userId"
+          class="remove-btn"
+          (click)="removeMember(member)"
+        >
+          退出群組
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div>
+    <h3>已邀請</h3>
+  </div>
+
+  <div class="member-list">
+
+    <div
+      class="member-card"
+      *ngFor="let member of invited_members"
+    >
+
+      <div class="member-left">
+
+        <div class="avatar">
+          <!-- {{ member.name[0] }} -->
+        </div>
+
+        <div>
+
+          <div class="member-name">
+            {{ member.user_name }}
+          </div>
+
+          <div class="member-role">
+            UID: {{ member.user_id }}
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="member-actions">
+
+      </div>
+
+    </div>
+
+  </div>
+  <!-- Footer -->
+  <div class="dialog-footer">
+
+    <button class="invite-btn" (click)="openInviteDialog()">
+      邀請成員
+    </button>
+
+  </div>
+
+</div>

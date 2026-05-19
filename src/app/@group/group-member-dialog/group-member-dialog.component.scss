@@ -1,0 +1,160 @@
+.dialog-container {
+  padding: 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.group-info-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+
+  margin-top: 8px;
+}
+
+.group-id {
+  color: #777;
+  font-size: 14px;
+  margin: 0;
+}
+
+.invite-code-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  background: #f5f5f5;
+  padding: 6px 12px;
+  border-radius: 8px;
+
+  font-size: 14px;
+}
+
+.copy-btn {
+  border: none;
+  background: #1976d2;
+  color: white;
+
+  padding: 4px 10px;
+  border-radius: 6px;
+
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.copy-btn:hover {
+  background: #1565c0;
+}
+
+.close-btn {
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.member-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.member-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 12px;
+
+  border-radius: 12px;
+
+  background: #f5f5f5;
+}
+
+.member-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+
+  border-radius: 50%;
+
+  background: #1976d2;
+  color: white;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.member-name {
+  font-weight: 600;
+}
+
+.member-role {
+  font-size: 13px;
+  color: #777;
+}
+
+.member-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.remove-btn,
+.check-btn {
+  border: none;
+
+  background: #ef5350;
+  color: white;
+
+  padding: 8px 14px;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+}
+
+.remove-btn,
+.check-btn:hover {
+  background: #d32f2f;
+}
+
+.dialog-footer {
+  margin-top: 24px;
+
+  display: flex;
+  justify-content: flex-end;
+}
+
+.invite-btn {
+  border: none;
+
+  background: #1976d2;
+  color: white;
+
+  padding: 10px 18px;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+}
+
+.invite-btn:hover {
+  background: #1565c0;
+}
