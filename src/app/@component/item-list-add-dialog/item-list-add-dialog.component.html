@@ -118,6 +118,13 @@
           </textarea>
         </mat-form-field>
       </div>
+
+      <mat-dialog-actions align="end" class="p-3">
+        <button mat-button (click)="onNoClick()">取消</button>
+        <button mat-raised-button color="primary" [disabled]="!item.name || !item.expireDate" (click)="addItemInfo()">
+          確認新增
+        </button>
+      </mat-dialog-actions>
       }
 
       @if (isSubscriptionCategory()) {
@@ -160,15 +167,11 @@
     </mat-form-field>
   </div>
 
-  <div class="col-12">
-    <mat-form-field appearance="outline" class="w-100">
-      <mat-label>下次扣款日</mat-label>
-      <input matInput [matDatepicker]="nextBillingPicker" required [(ngModel)]="item.nextBillingDate">
-      <mat-datepicker-toggle matIconSuffix [for]="nextBillingPicker"></mat-datepicker-toggle>
-      <mat-datepicker #nextBillingPicker></mat-datepicker>
-      <mat-hint>下次扣款前系統會發送提醒</mat-hint>
-    </mat-form-field>
+ <div class="col-12">
+  <div class="subscription-hint">
+    下次扣款日將由後端依照「試用結束日 + 扣款週期」自動計算
   </div>
+</div>
 
   <div class="col-12 mt-2">
   <div class="d-flex align-items-center justify-content-between p-3 rounded-3 bg-light border">
@@ -197,7 +200,20 @@
       placeholder="可以記錄帳號、方案、付款方式或其他提醒...">
     </textarea>
   </mat-form-field>
+
+  <mat-dialog-actions align="end" class="p-3">
+        <button mat-button (click)="onNoClick()">取消</button>
+       <button
+        mat-raised-button
+        color="primary"
+        [disabled]="isSubmitDisabled()"
+        (click)="addItemInfo()">
+        確認新增
+      </button>
+      </mat-dialog-actions>
 </div>
+
+
 
 }
 
@@ -207,9 +223,4 @@
   </div>
 </mat-dialog-content>
 
-<mat-dialog-actions align="end" class="p-3">
-  <button mat-button (click)="onNoClick()">取消</button>
-  <button mat-raised-button color="primary" [disabled]="!item.name || !item.expireDate" (click)="addItemInfo()">
-    確認新增
-  </button>
-</mat-dialog-actions>
+

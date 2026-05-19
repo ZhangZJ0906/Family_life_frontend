@@ -106,40 +106,86 @@ subscriptionList: any[] = [];
   /*TODO 缺少 拿user 資料跟拿user 群組資料 分類資料 通知功能 */
   /*新增物品 */
   openAddDialog() {
-    const dialogRef = this.dialog.open(ItemListAddDialogComponent, {
-      width: '540px',
-      height: '540px',
-      data: {
-        title: '新增物品',
-        location: this.location,
-        categories: this.categories,
-      },
-    });
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
+     const dialogRef = this.dialog.open(ItemListAddDialogComponent, {
+    width: '540px',
+    height: '540px',
+    data: {
+      title: '新增物品',
+      location: this.location,
+      categories: this.categories,
+      currentGroupId: this.currentGroupId,
+      isSubscriptionMode: this.isSubscriptionMode,
+    },
+  });
+
+  dialogRef.afterClosed().subscribe((result) => {
+    if (result) {
+      if (this.isSubscriptionMode) {
+        this.getSubscriptionByGroupId(this.currentGroupId);
+      } else {
         this.getItemByGroupId(this.currentGroupId);
       }
-    });
+    }
+  });
   }
   /*修改物品 dialog */
   openEditDialog(row: Item) {
     // console.log(row)
-    const dialogRef = this.dialog.open(ItemListEditDialogComponent, {
-      width: '540px',
-      height: '540px',
-      data: {
-        title: '修改物品資料',
-        item: row,
-        locationMap: this.location,
-        categoriesMap: this.categories,
-      },
-    });
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.updateItem(result); // 呼叫更新 API
-      }
-    });
+    const dialogRef = this.dialog.open(
+  ItemListEditDialogComponent,
+  {
+    width: '540px',
+    height: '540px',
+    data: {
+      item: row,
+      locationMap: this.location,
+      categoriesMap: this.categories,
+      isSubscriptionMode: this.isSubscriptionMode,
+    },
   }
+);
+
+  dialogRef.afterClosed().subscribe((result) => {
+    if (result) {
+      if (this.isSubscriptionMode) {
+        this.updateSubscription(result);
+      } else {
+        this.updateItem(result);
+      }
+    }
+  });
+  }
+
+updateSubscription(data: any) {
+  this.http.postApi(this.basicUrl + 'subscription/update', data).subscribe({
+    next: (res: any) => {
+      if (res.code != 200) {
+        Swal.fire({
+          title: '更新錯誤',
+          text: res.message || 'server error',
+          icon: 'error',
+        });
+        return;
+      }
+
+      Swal.fire({
+        title: '更新成功',
+        icon: 'success',
+      });
+
+      this.getSubscriptionByGroupId(this.currentGroupId);
+    },
+    error: (err: any) => {
+      Swal.fire({
+        title: '更新錯誤',
+        text: err.message || 'server error',
+        icon: 'error',
+      });
+    },
+  });
+}
+
+
   /*分類 */
   filterByCategory(catId: number) {
     // 找到目前點擊的分類
@@ -319,45 +365,112 @@ getSubscriptionByGroupId(groupId: number): void {
 
   // 刪除按鈕邏輯
   deleteSelectedItems() {
-    const selectedIds = this.selection.selected.map((item) => item.id);
+  const selectedIds = this.selection.selected.map((item) => item.id);
 
-    Swal.fire({
-      title: '確定要刪除嗎？',
-      text: `您選中了 ${selectedIds.length} 筆物品，刪除後將無法還原！`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: '是的，刪除它們！',
-      cancelButtonText: '取消',
-    }).then((result) => {
-      if (result.isConfirmed) {
+  Swal.fire({
+    title: '確定要刪除嗎？',
+    text: `您選中了 ${selectedIds.length} 筆資料，刪除後將無法還原！`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: '是的，刪除它們！',
+    cancelButtonText: '取消',
+  }).then((result) => {
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    // =========================
+    // 訂閱模式刪除
+    // =========================
+    if (this.isSubscriptionMode) {
+
+      // 多筆刪除
+      selectedIds.forEach((id) => {
+
         this.http
-          .postApi(this.basicUrl + 'item/delete', selectedIds)
+          .deleteApi(this.basicUrl + `subscription/delete?id=${id}`)
           .subscribe({
             next: (res: any) => {
-              if (res.code != 200) {
+
+              if (res.code !== 200) {
                 Swal.fire({
-                  title: '刪除錯誤',
-                  text: res.message || 'server error ',
+                  title: '刪除失敗',
+                  text: res.message || 'Server error',
                   icon: 'error',
                 });
+                return;
               }
-              Swal.fire({
-                title: '刪除成功',
-                icon: 'success',
-              });
-              window.location.reload();
+
+              // 最後一筆刪除成功後刷新
+              if (id === selectedIds[selectedIds.length - 1]) {
+
+                Swal.fire({
+                  title: '刪除成功',
+                  icon: 'success',
+                });
+
+                this.selection.clear();
+
+                // 重新查詢訂閱列表
+                this.getSubscriptionByGroupId(this.currentGroupId);
+              }
             },
+
             error: (err: any) => {
               Swal.fire({
                 title: '刪除錯誤',
-                text: err.message || 'server error ',
+                text: err.message || 'Server error',
                 icon: 'error',
               });
             },
           });
-      }
-    });
-  }
-}
+
+      });
+
+      return;
+    }
+
+    // =========================
+    // 一般物品刪除
+    // =========================
+    this.http
+      .postApi(this.basicUrl + 'item/delete', selectedIds)
+      .subscribe({
+
+        next: (res: any) => {
+
+          if (res.code != 200) {
+            Swal.fire({
+              title: '刪除錯誤',
+              text: res.message || 'Server error',
+              icon: 'error',
+            });
+            return;
+          }
+
+          Swal.fire({
+            title: '刪除成功',
+            icon: 'success',
+          });
+
+          this.selection.clear();
+
+          // 重新查詢物品列表
+          this.getItemByGroupId(this.currentGroupId);
+        },
+
+        error: (err: any) => {
+          Swal.fire({
+            title: '刪除錯誤',
+            text: err.message || 'Server error',
+            icon: 'error',
+          });
+        },
+
+      });
+
+  });
+}}

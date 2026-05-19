@@ -55,7 +55,11 @@ export class ItemListAddDialogComponent implements OnInit {
   subscriptionCategoryId = 4; // 依照你的資料庫分類 id 調整，訂閱如果不是 4 就改成正確 id
 
 isSubscriptionCategory(): boolean {
-  return Number(this.item.categoryId) === this.subscriptionCategoryId;
+  const selectedCategory = this.categories.find(
+    cat => Number(cat.id) === Number(this.item.categoryId)
+  );
+
+  return selectedCategory?.name === '訂閱';
 }
   item = {
   created_by_id: 1,
@@ -89,14 +93,27 @@ isSubscriptionCategory(): boolean {
     this.basicUrl = this.http.basicUrl;
   }
   ngOnInit(): void {
-    this.minDate = this.today.toISOString().split('T')[0];
-    if (this.data && this.data.location) {
-      this.location = [...this.data.location];
+     this.minDate = this.today.toISOString().split('T')[0];
+
+  if (this.data && this.data.location) {
+    this.location = [...this.data.location];
+  }
+
+  if (this.data && this.data.categories) {
+    this.categories = [...this.data.categories];
+    this.categories.shift();
+  }
+
+  if (this.data?.currentGroupId) {
+    this.item.groupId = this.data.currentGroupId;
+  }
+
+  if (this.data?.isSubscriptionMode) {
+    const subscriptionCategory = this.categories.find(cat => cat.name === '訂閱');
+    if (subscriptionCategory) {
+      this.item.categoryId = subscriptionCategory.id;
     }
-    if (this.data && this.data.categories) {
-      this.categories = [...this.data.categories];
-      this.categories.shift();
-    }
+  }
   }
   get totalPrice(): number {
     return (this.item.unitPrice || 0) * (this.item.quantity || 0);
@@ -179,7 +196,6 @@ isSubscriptionCategory(): boolean {
     billingCycle: this.item.billingCycle,
     purchaseDate: this.formatDate(this.item.purchaseDate),
     trialEndDate: this.formatDate(this.item.trialEndDate),
-    nextBillingDate: this.formatDate(this.item.nextBillingDate),
     notify: this.item.notify,
     note: this.item.note,
   };
@@ -201,11 +217,6 @@ isSubscriptionCategory(): boolean {
 
   if (!payload.billingCycle) {
     this.showError('請選擇扣款週期');
-    return;
-  }
-
-  if (!payload.nextBillingDate) {
-    this.showError('請選擇下次扣款日');
     return;
   }
 
@@ -253,4 +264,16 @@ isSubscriptionCategory(): boolean {
   onNoClick(): void {
     this.dialogRef.close();
   }
+
+  isSubmitDisabled(): boolean {
+  if (!this.item.name?.trim()) {
+    return true;
+  }
+
+  if (this.isSubscriptionCategory()) {
+    return !this.item.billingCycle || !this.item.trialEndDate;
+  }
+
+  return !this.item.expireDate;
+}
 }
