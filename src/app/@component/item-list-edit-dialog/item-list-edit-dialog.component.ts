@@ -61,16 +61,24 @@ isSubscriptionCategory(): boolean {
   ngOnInit(): void {
   if (this.data && this.data.item) {
     this.isSubscriptionMode = this.data?.isSubscriptionMode || false;
+
     this.item = { ...this.data.item };
 
     this.location = this.data.locationMap || [];
     this.categories = this.data.categoriesMap || [];
 
+    if (this.isSubscriptionMode) {
+      const subscriptionCategory = this.categories.find(cat => cat.name === '訂閱');
+
+      if (subscriptionCategory) {
+        this.item.categoryId = subscriptionCategory.id;
+      }
+    }
+
     this.item.expireDate = this.formatDate(this.item.expireDate);
     this.item.purchaseDate = this.formatDate(this.item.purchaseDate);
     this.item.trialEndDate = this.formatDate(this.item.trialEndDate);
     this.item.nextBillingDate = this.formatDate(this.item.nextBillingDate);
-
   }
 }
   // 在你的 Component 內，或是物件 model 內
