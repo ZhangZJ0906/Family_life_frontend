@@ -36,7 +36,9 @@ export class ShoppingListService {
 
   /** 取得購物項目 */
   getItems(listId: number): Observable<PurchaseItemVo[]> {
-    return this.http.get<PurchaseItemVo[]>(`${this.shoppingUrl}/items/${listId}`);
+    return this.http.get<PurchaseItemVo[]>(
+      'http://localhost:8080/shopping_lists/items',
+      { params: { listId: listId } });
   }
 
   /** 新增購物項目 */

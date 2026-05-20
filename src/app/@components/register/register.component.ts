@@ -34,13 +34,15 @@ export class RegisterComponent {
     }
 
     this.authService.register({
-      name: this.name,
+      userName: this.name,
       email: this.email,
       pwd: this.password,
       avatar: this.avatar ?? '',
-      is_notify: this.is_notify ?? true
+      notify: this.is_notify ?? true
     }).subscribe({
       next: (res) => {
+        console.log('register response:', res);
+
         if (res.code === 200) {
           alert('註冊成功');
           this.router.navigate(['/login']);

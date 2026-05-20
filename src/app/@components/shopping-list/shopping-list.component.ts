@@ -9,11 +9,10 @@ import {
 } from '../../@models/shopping_list.model';
 
 import { AuthService } from '../../@services/auth.service';
-import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-shopping-list',
-  imports: [RouterLink, CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './shopping-list.component.html',
   styleUrl: './shopping-list.component.scss'
 })
