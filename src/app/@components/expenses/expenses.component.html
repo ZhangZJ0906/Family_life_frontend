@@ -64,6 +64,15 @@
           刪除已選 {{ selection.selected.length }} 筆
         </button>
         }
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>記帳環境</mat-label>
+          <mat-select [value]="currentGroupId" (selectionChange)="onGroupChange($event.value)">
+            <mat-option [value]="null">👤 個人私帳</mat-option>
+            @for (g of userGroups; track g.groupId) {
+            <mat-option [value]="g.id">👥 {{ g.groupName }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
         <!-- 篩選 -->
         <mat-form-field appearance="outline" class="filter-field">
           <mat-label>分類</mat-label>

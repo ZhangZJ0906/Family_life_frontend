@@ -9,7 +9,11 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
-import { ExpenseRecord, LocationAndCategory } from '../../common/interfaceList';
+import {
+  ExpenseRecord,
+  GroupList,
+  LocationAndCategory,
+} from '../../common/interfaceList';
 import { HttpClientService } from '../../@services/http-client.service';
 import Swal from 'sweetalert2';
 import { ExpensesAddComponent } from '../expenses-add/expenses-add.component';
@@ -37,12 +41,13 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 })
 export class ExpensesComponent {
   basicUrl!: string; // APIＵＲＬ
-  userGroups: any[] = [1, 2]; // 儲存使用者擁有的群組清單
+  userGroups: any[] = []; // 儲存使用者擁有的群組清單
   categoryMap: LocationAndCategory[] = []; // 分類
   dataSource = new MatTableDataSource<ExpenseRecord>([]); // table  資料
   selection = new SelectionModel<ExpenseRecord>(true, []); // 刪除  checkbox 勾選到的資料
   expense: ExpenseRecord[] = []; // 記帳資料
-  itemMap: { [key: number]: any } = {}; // 群組物品東西
+  itemMap: { [key: number]: any } = {}; // 群組物品東西'
+
   // Angular Material Table 要顯示的欄位
   displayedColumns: string[] = [
     'select',
@@ -80,6 +85,7 @@ export class ExpensesComponent {
     };
     this.getCatgories(); // 獲取 分類
     this.getExpense(this.currentGroupId, this.currentUserId); // 獲取記帳紀錄
+    this.getUserGroupData(); // 拉取user group
   }
   // 塞選或是 文字搜尋用
   filterValues = {
@@ -87,7 +93,7 @@ export class ExpensesComponent {
     category: null as number | null,
   };
   // 模擬登入使用者與群組環境
-  currentGroupId = null;
+  currentGroupId: number | null = null;
   currentUserId = 2;
 
   // 計算總支出
@@ -131,7 +137,6 @@ export class ExpensesComponent {
       }
     });
   }
-  //刪除
 
   // 刪除資料
   // 檢查是否全選
@@ -218,6 +223,45 @@ export class ExpensesComponent {
     });
   }
 
+  //拉取群組
+  getUserGroupData() {
+    this.http
+      .getApi(
+        this.basicUrl +
+          `family_life/get_group_list?user_id=${this.currentUserId}`,
+      )
+      .subscribe({
+        next: (res: any) => {
+          if (res.code != 200) {
+            Swal.fire({
+              title: '拉取群組錯誤',
+              text: res.message || 'server error ',
+              icon: 'error',
+            });
+          }
+          this.userGroups = res.groupList.map(
+            ({ groupId, groupName }: any) => ({
+              groupId,
+              groupName,
+            }),
+          );
+        },
+        error: (err) => {
+          Swal.fire({
+            title: '拉取群組錯誤',
+            text: err.message || 'server error ',
+            icon: 'error',
+          });
+        },
+      });
+  }
+
+  onGroupChange(groupId: number | null) {
+    this.currentGroupId = groupId;
+    this.selection.clear(); // 清掉勾選
+    this.getExpense(groupId, this.currentUserId);
+  }
+  //拉取記帳紀錄
   getExpense(groupId: number | null, userId: number) {
     if (!userId || userId <= 0) {
       Swal.fire({

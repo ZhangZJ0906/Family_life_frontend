@@ -55,7 +55,8 @@ export class ItemListComponent {
     },
   ];
   // 現在的群組
-  currentGroupId: number = 0;
+  currentGroupId: any = 1;
+  currentUserId: any;
   itemDisplayedColumns: string[] = [
     'select',
     'name',
@@ -72,25 +73,25 @@ export class ItemListComponent {
   dataSource = new MatTableDataSource<Item>([]);
 
   // 訂閱表格欄位：只列重要欄位
-subscriptionDisplayedColumns: string[] = [
-  'select',
-  'name',
-  'price',
-  'billingCycle',
-  'trialEndDate',
-  'nextBillingDate',
-  'status',
-  'notify',
-];
+  subscriptionDisplayedColumns: string[] = [
+    'select',
+    'name',
+    'price',
+    'billingCycle',
+    'trialEndDate',
+    'nextBillingDate',
+    'status',
+    'notify',
+  ];
 
-// 目前實際顯示的欄位
-displayedColumns: string[] = this.itemDisplayedColumns;
+  // 目前實際顯示的欄位
+  displayedColumns: string[] = this.itemDisplayedColumns;
 
-// 判斷目前是不是訂閱模式
-isSubscriptionMode = false;
+  // 判斷目前是不是訂閱模式
+  isSubscriptionMode = false;
 
-// 訂閱資料
-subscriptionList: any[] = [];
+  // 訂閱資料
+  subscriptionList: any[] = [];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -106,181 +107,136 @@ subscriptionList: any[] = [];
   /*TODO 缺少 拿user 資料跟拿user 群組資料 分類資料 通知功能 */
   /*新增物品 */
   openAddDialog() {
-     const dialogRef = this.dialog.open(ItemListAddDialogComponent, {
-    width: '540px',
-    height: '540px',
-    data: {
-      title: '新增物品',
-      location: this.location,
-      categories: this.categories,
-      currentGroupId: this.currentGroupId,
-      isSubscriptionMode: this.isSubscriptionMode,
-    },
-  });
+    const dialogRef = this.dialog.open(ItemListAddDialogComponent, {
+      width: '540px',
+      height: '540px',
+      data: {
+        title: '新增物品',
+        location: this.location,
+        categories: this.categories,
+        currentGroupId: this.currentGroupId,
+        isSubscriptionMode: this.isSubscriptionMode,
+      },
+    });
 
-  dialogRef.afterClosed().subscribe((result) => {
-    if (result) {
-      if (this.isSubscriptionMode) {
-        this.getSubscriptionByGroupId(this.currentGroupId);
-      } else {
-        this.getItemByGroupId(this.currentGroupId);
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        if (this.isSubscriptionMode) {
+          this.getSubscriptionByGroupId(this.currentGroupId);
+        } else {
+          this.getItemByGroupId(this.currentGroupId);
+        }
       }
-    }
-  });
+    });
   }
   /*修改物品 dialog */
   openEditDialog(row: Item) {
     // console.log(row)
-    const dialogRef = this.dialog.open(
-  ItemListEditDialogComponent,
-  {
-    width: '540px',
-    height: '540px',
-    data: {
-      item: row,
-      locationMap: this.location,
-      categoriesMap: this.categories,
-      isSubscriptionMode: this.isSubscriptionMode,
-    },
-  }
-);
-
-  dialogRef.afterClosed().subscribe((result) => {
-    if (result) {
-      if (this.isSubscriptionMode) {
-        this.updateSubscription(result);
-      } else {
-        this.updateItem(result);
-      }
-    }
-  });
-  }
-
-updateSubscription(data: any) {
-  this.http.postApi(this.basicUrl + 'subscription/update', data).subscribe({
-    next: (res: any) => {
-      if (res.code != 200) {
-        Swal.fire({
-          title: '更新錯誤',
-          text: res.message || 'server error',
-          icon: 'error',
-        });
-        return;
-      }
-
-      Swal.fire({
-        title: '更新成功',
-        icon: 'success',
-      });
-
-      this.getSubscriptionByGroupId(this.currentGroupId);
-    },
-    error: (err: any) => {
-      Swal.fire({
-        title: '更新錯誤',
-        text: err.message || 'server error',
-        icon: 'error',
-      });
-    },
-  });
-}
-
-
-  /*分類 */
-  filterByCategory(catId: number) {
-    // 找到目前點擊的分類
-  const category = this.categories.find(cat => cat.id === catId);
-  this.selectedCategory = category?.name || '全部';
-
-  // 如果點擊「訂閱」，改查訂閱後端
-  if (this.selectedCategory === '訂閱') {
-    this.getSubscriptionByGroupId(this.currentGroupId);
-    return;
-  }
-
-  // 其他分類維持原本物品清單
-  this.isSubscriptionMode = false;
-  this.displayedColumns = this.itemDisplayedColumns;
-
-  if (catId === 0) {
-    this.dataSource.data = this.itemList;
-  } else {
-    this.dataSource.data = this.itemList.filter(
-      item => item.categoryId === catId
-    );
-  }
-  }
-
-  // 查詢某群組的訂閱資料
-getSubscriptionByGroupId(groupId: number): void {
-  if (!groupId || groupId <= 0) {
-    Swal.fire({
-      title: '錯誤',
-      text: '群組 ID 不可為空',
-      icon: 'error',
+    const dialogRef = this.dialog.open(ItemListEditDialogComponent, {
+      width: '540px',
+      height: '540px',
+      data: {
+        item: row,
+        locationMap: this.location,
+        categoriesMap: this.categories,
+        isSubscriptionMode: this.isSubscriptionMode,
+      },
     });
-    return;
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        if (this.isSubscriptionMode) {
+          this.updateSubscription(result);
+        } else {
+          this.updateItem(result);
+        }
+      }
+    });
   }
 
-  this.isSubscriptionMode = true;
-  this.displayedColumns = this.subscriptionDisplayedColumns;
-
-  this.http
-    .getApi(this.basicUrl + `subscription/getByGroup?groupId=${groupId}`)
-    .subscribe({
+  updateSubscription(data: any) {
+    this.http.postApi(this.basicUrl + 'subscription/update', data).subscribe({
       next: (res: any) => {
-        if (res.code !== 200) {
+        if (res.code != 200) {
           Swal.fire({
-            title: '查詢失敗',
-            text: res.message || '訂閱資料查詢失敗',
+            title: '更新錯誤',
+            text: res.message || 'server error',
             icon: 'error',
           });
           return;
         }
 
-        this.subscriptionList = res.data || [];
-        this.dataSource.data = this.subscriptionList;
+        Swal.fire({
+          title: '更新成功',
+          icon: 'success',
+        });
+
+        this.getSubscriptionByGroupId(this.currentGroupId);
       },
       error: (err: any) => {
         Swal.fire({
-          title: '錯誤',
-          text: err.message || 'Server error',
+          title: '更新錯誤',
+          text: err.message || 'server error',
           icon: 'error',
         });
       },
     });
-}
-  /*取得DB 物品清單資料 */
-  getItemByGroupId(groupId: number) {
-    this.currentGroupId = groupId;
-    if (this.currentGroupId <= 0) {
+  }
+
+  /*分類 */
+  filterByCategory(catId: number) {
+    // 找到目前點擊的分類
+    const category = this.categories.find((cat) => cat.id === catId);
+    this.selectedCategory = category?.name || '全部';
+
+    // 如果點擊「訂閱」，改查訂閱後端
+    if (this.selectedCategory === '訂閱') {
+      this.getSubscriptionByGroupId(this.currentGroupId);
+      return;
+    }
+
+    // 其他分類維持原本物品清單
+    this.isSubscriptionMode = false;
+    this.displayedColumns = this.itemDisplayedColumns;
+
+    if (catId === 0) {
+      this.dataSource.data = this.itemList;
+    } else {
+      this.dataSource.data = this.itemList.filter(
+        (item) => item.categoryId === catId,
+      );
+    }
+  }
+
+  // 查詢某群組的訂閱資料
+  getSubscriptionByGroupId(groupId: number): void {
+    if (!groupId || groupId <= 0) {
       Swal.fire({
-        title: 'fail',
-        text: '群組ID參數錯誤',
+        title: '錯誤',
+        text: '群組 ID 不可為空',
         icon: 'error',
       });
       return;
     }
+
+    this.isSubscriptionMode = true;
+    this.displayedColumns = this.subscriptionDisplayedColumns;
+
     this.http
-      .getApi(this.basicUrl + `item/getItems?groupId=${this.currentGroupId}`)
+      .getApi(this.basicUrl + `subscription/getByGroup?groupId=${groupId}`)
       .subscribe({
         next: (res: any) => {
-          this.itemList = res.items;
-          this.dataSource.data = res.items;
+          if (res.code !== 200) {
+            Swal.fire({
+              title: '查詢失敗',
+              text: res.message || '訂閱資料查詢失敗',
+              icon: 'error',
+            });
+            return;
+          }
 
-          this.location = Object.entries(res.locationMap).map(([id, name]) => ({
-            id: Number(id),
-            name: name as string,
-          }));
-          this.categories = Object.entries(res.categoriesMap).map(
-            ([id, name]) => ({
-              id: Number(id),
-              name: name as string,
-            }),
-          );
-
-          this.categories.unshift({ id: 0, name: '全部' });
-          // console.log(this.dataSource.data);
+          this.subscriptionList = res.data || [];
+          this.dataSource.data = this.subscriptionList;
         },
         error: (err: any) => {
           Swal.fire({
@@ -290,6 +246,51 @@ getSubscriptionByGroupId(groupId: number): void {
           });
         },
       });
+  }
+  /*取得DB 物品清單資料 */
+  getItemByGroupId(groupId: number) {
+    this.currentGroupId = groupId;
+    this.currentUserId = 1;
+    if (this.currentGroupId <= 0) {
+      Swal.fire({
+        title: 'fail',
+        text: '群組ID參數錯誤',
+        icon: 'error',
+      });
+      return;
+    }
+    let url = `${this.basicUrl}item/getItems?userId=${this.currentUserId}`;
+    if (groupId != null) {
+      url += `&groupId=${groupId}`;
+    }
+    this.http.getApi(url).subscribe({
+      next: (res: any) => {
+        // console.log(res)
+        this.itemList = res.items;
+        this.dataSource.data = res.items;
+
+        this.location = Object.entries(res.locationMap).map(([id, name]) => ({
+          id: Number(id),
+          name: name as string,
+        }));
+        this.categories = Object.entries(res.categoriesMap).map(
+          ([id, name]) => ({
+            id: Number(id),
+            name: name as string,
+          }),
+        );
+
+        this.categories.unshift({ id: 0, name: '全部' });
+        // console.log(this.dataSource.data);
+      },
+      error: (err: any) => {
+        Swal.fire({
+          title: '錯誤',
+          text: err.message || 'Server error',
+          icon: 'error',
+        });
+      },
+    });
   }
 
   // 實作搜尋功能
@@ -365,83 +366,73 @@ getSubscriptionByGroupId(groupId: number): void {
 
   // 刪除按鈕邏輯
   deleteSelectedItems() {
-  const selectedIds = this.selection.selected.map((item) => item.id);
+    const selectedIds = this.selection.selected.map((item) => item.id);
 
-  Swal.fire({
-    title: '確定要刪除嗎？',
-    text: `您選中了 ${selectedIds.length} 筆資料，刪除後將無法還原！`,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#d33',
-    cancelButtonColor: '#3085d6',
-    confirmButtonText: '是的，刪除它們！',
-    cancelButtonText: '取消',
-  }).then((result) => {
+    Swal.fire({
+      title: '確定要刪除嗎？',
+      text: `您選中了 ${selectedIds.length} 筆資料，刪除後將無法還原！`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: '是的，刪除它們！',
+      cancelButtonText: '取消',
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        return;
+      }
 
-    if (!result.isConfirmed) {
-      return;
-    }
+      // =========================
+      // 訂閱模式刪除
+      // =========================
+      if (this.isSubscriptionMode) {
+        // 多筆刪除
+        selectedIds.forEach((id) => {
+          this.http
+            .deleteApi(this.basicUrl + `subscription/delete?id=${id}`)
+            .subscribe({
+              next: (res: any) => {
+                if (res.code !== 200) {
+                  Swal.fire({
+                    title: '刪除失敗',
+                    text: res.message || 'Server error',
+                    icon: 'error',
+                  });
+                  return;
+                }
 
-    // =========================
-    // 訂閱模式刪除
-    // =========================
-    if (this.isSubscriptionMode) {
+                // 最後一筆刪除成功後刷新
+                if (id === selectedIds[selectedIds.length - 1]) {
+                  Swal.fire({
+                    title: '刪除成功',
+                    icon: 'success',
+                  });
 
-      // 多筆刪除
-      selectedIds.forEach((id) => {
+                  this.selection.clear();
 
-        this.http
-          .deleteApi(this.basicUrl + `subscription/delete?id=${id}`)
-          .subscribe({
-            next: (res: any) => {
+                  // 重新查詢訂閱列表
+                  this.getSubscriptionByGroupId(this.currentGroupId);
+                }
+              },
 
-              if (res.code !== 200) {
+              error: (err: any) => {
                 Swal.fire({
-                  title: '刪除失敗',
-                  text: res.message || 'Server error',
+                  title: '刪除錯誤',
+                  text: err.message || 'Server error',
                   icon: 'error',
                 });
-                return;
-              }
+              },
+            });
+        });
 
-              // 最後一筆刪除成功後刷新
-              if (id === selectedIds[selectedIds.length - 1]) {
+        return;
+      }
 
-                Swal.fire({
-                  title: '刪除成功',
-                  icon: 'success',
-                });
-
-                this.selection.clear();
-
-                // 重新查詢訂閱列表
-                this.getSubscriptionByGroupId(this.currentGroupId);
-              }
-            },
-
-            error: (err: any) => {
-              Swal.fire({
-                title: '刪除錯誤',
-                text: err.message || 'Server error',
-                icon: 'error',
-              });
-            },
-          });
-
-      });
-
-      return;
-    }
-
-    // =========================
-    // 一般物品刪除
-    // =========================
-    this.http
-      .postApi(this.basicUrl + 'item/delete', selectedIds)
-      .subscribe({
-
+      // =========================
+      // 一般物品刪除
+      // =========================
+      this.http.postApi(this.basicUrl + 'item/delete', selectedIds).subscribe({
         next: (res: any) => {
-
           if (res.code != 200) {
             Swal.fire({
               title: '刪除錯誤',
@@ -469,8 +460,7 @@ getSubscriptionByGroupId(groupId: number): void {
             icon: 'error',
           });
         },
-
       });
-
-  });
-}}
+    });
+  }
+}
