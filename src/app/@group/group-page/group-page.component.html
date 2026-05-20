@@ -1,0 +1,159 @@
+<div class="layout">
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-actions">
+
+      <button class="icon-btn" (click)="joinGroupDialog()">
+        <mat-icon>group_add</mat-icon>
+      </button>
+
+      <button class="icon-btn" (click)="openCreateDialog()">
+        <span>＋</span>
+      </button>
+
+      <button
+      class="icon-btn"
+      (click)="openNotifyDialog()"
+      [matBadge]="unreadCount"
+      matBadgeColor="warn"
+      matBadgeSize="large"
+      [matBadgeHidden]="unreadCount === 0">
+        🔔
+      </button>
+
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+
+    <div class="menu-item">
+      <div class="icon">🏠</div>
+      <span>首頁</span>
+    </div>
+
+    <div class="menu-item">
+      <div class="icon">📅</div>
+      <span>日曆</span>
+    </div>
+
+    <div class="menu-item active">
+      <div class="icon">👥</div>
+      <span>群組</span>
+    </div>
+
+    <div class="menu-item">
+      <div class="icon">👤</div>
+      <span>個人資料</span>
+    </div>
+
+  </aside>
+
+  <!-- Main -->
+  <main class="content">
+
+    <!-- Search -->
+    <div class="search-box">
+
+      <input
+        type="text"
+        placeholder="搜尋"
+        [(ngModel)]="keyword"
+      />
+
+      <button (click)="searchGroups()">
+        🔍
+      </button>
+
+    </div>
+
+    <!-- Group List -->
+    <div class="group-list">
+
+      <div
+        class="group-card"
+        *ngFor="let group of pagedGroups"
+      >
+
+        <!-- 左邊 -->
+        <div class="group-left">
+
+        <img class="avatar" [src]="group.avatar || 'assets/default-avatar.png'"/>
+
+          <div class="group-info">
+
+            <div class="group-name">
+              {{ truncateName(group.groupName) }}
+            </div>
+
+            <div class="group-id">
+              GID: {{ group.groupId }}
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- 右邊 -->
+        <div class="group-actions">
+
+          <button class="chat-btn">
+            群組清單
+          </button>
+
+          <button
+            class="member-btn"
+            (click)="openMemberDialog(group, user_id)"
+          >
+            成員
+          </button>
+
+          <button class="update-btn" (click)="openUpdateDialog(group, user_id)">
+            修改
+          </button>
+
+          <button
+            class="delete-btn"
+            (click)="deleteGroup(group.groupId)"
+          >
+            解散
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+
+      <!-- 上一頁 -->
+      <button
+        class="page-btn"
+        (click)="prevPage()"
+        [disabled]="currentPage === 1"
+      >
+        ‹
+      </button>
+
+      <!-- 頁數 -->
+      <span>
+        page {{ currentPage }} / {{ totalPages }}
+      </span>
+
+      <!-- 下一頁 -->
+      <button
+        class="page-btn"
+        (click)="nextPage()"
+        [disabled]="currentPage === totalPages"
+      >
+        ›
+      </button>
+
+    </div>
+
+  </main>
+
+</div>

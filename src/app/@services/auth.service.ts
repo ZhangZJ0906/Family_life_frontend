@@ -1,0 +1,80 @@
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { computed, Injectable, signal } from '@angular/core';
+import { Observable } from 'rxjs';
+import { User } from '../@models/user.model';
+import { Router } from '@angular/router';
+
+// 模擬用戶資料，實際應從後端獲取
+const DEMO_USERS: User[] = [
+  {
+    user_id: 1,
+    name: 'Family Admin',
+    email: '123@example.com',
+    password: '123',
+    avatar: '',
+    is_notify: true,
+    created_at: '2026-05-11T00:00:00.000Z',
+    updated_at: '2026-05-11T00:00:00.000Z'
+  }
+];
+
+const STORAGE_KEY = 'family-life-current-user';
+
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+
+  private readonly currentUserSignal = signal<User | null>(this.readStoredUser());
+  private readonly userUrl = 'http://localhost:8080/users';
+
+
+  readonly currentUser = this.currentUserSignal.asReadonly();
+  readonly isLoggedIn = computed(() => this.currentUserSignal() !== null);
+
+  constructor(private readonly router: Router,
+              private readonly http: HttpClient
+             ) {}
+
+
+  login(email: string, password: string) {
+    const user = DEMO_USERS.find(
+      (candidate) =>
+        candidate.email.toLowerCase() === email.trim().toLowerCase() &&
+        candidate.password === password
+    );
+
+    if (!user) {
+      return false;
+    }
+    console.log('AuthService.login: found user' , { user })
+    this.currentUserSignal.set(user);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+    return true;
+  }
+
+  logout(): void {
+    this.currentUserSignal.set(null);
+    localStorage.removeItem(STORAGE_KEY);
+    this.router.navigate(['/login']);
+  }
+
+  register(userData: { name: string; email: string; password: string;
+           avatar: string; is_notify: boolean }): Observable<any> {
+    return this.http.post(`${this.userUrl}/register`, userData);
+  }
+
+  private readStoredUser(): User | null {
+    const rawUser = localStorage.getItem(STORAGE_KEY);
+
+    if (!rawUser) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(rawUser) as User;
+    } catch {
+      localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+  }
+
+}

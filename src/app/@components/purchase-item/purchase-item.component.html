@@ -1,0 +1,25 @@
+<!-- <main class="page">
+  <a class="back-link" routerLink="/shopping-list">返回購物清單</a>
+
+  <section class="page-heading">
+    <p class="eyebrow">Items</p>
+    <h1>購物項目</h1>
+  </section>
+
+  <section class="items-panel" aria-label="購物項目列表">
+    @for (item of purchaseItems; track item.id) {
+      <button
+        type="button"
+        class="item-row"
+        [class.is-bought]="item.isBought"
+        (click)="toggleItem(item)"
+      >
+        <span class="check">{{ item.isBought ? '✓' : '' }}</span>
+        <span class="name">{{ item.name }}</span>
+        <span class="quantity">x {{ item.quantity }}</span>
+      </button>
+    } @empty {
+      <p class="empty">這份清單目前沒有項目</p>
+    }
+  </section>
+</main> -->
