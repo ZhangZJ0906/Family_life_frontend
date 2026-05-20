@@ -1,0 +1,23 @@
+<div class="invite-dialog">
+
+  <h2>邀請成員</h2>
+
+  <input
+    type="text"
+    [(ngModel)]="userId"
+    placeholder="輸入使用者ID"
+  />
+
+  <div class="actions">
+
+    <button (click)="inviteMember()">
+      邀請
+    </button>
+
+    <button (click)="closeDialog()">
+      取消
+    </button>
+
+  </div>
+
+</div>
