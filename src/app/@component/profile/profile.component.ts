@@ -3,6 +3,10 @@ import { TopbarComponent } from '../../shared/topbar/topbar.component';
 import { RouterLink } from '@angular/router';
 import Swal, { SweetAlertResult } from 'sweetalert2';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+
+import { AuthService } from '../../@services/auth.service';
+
 
 @Component({
   selector: 'app-profile',
@@ -24,6 +28,56 @@ export class ProfileComponent {
 
   // 頭像圖片，空值代表用文字頭像
   avatarUrl = '';
+
+  groups: any[] = [];
+
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
+
+  user_id = 0;
+
+  ngOnInit(): void {
+    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
+    //Add 'implements OnInit' to the class.
+    this.getGroup();
+    console.log(this.authService);
+  }
+
+  getGroup() {
+
+    this.user_id = this.authService.currentUser()?.user_id ?? 0;
+
+    console.log("userId: " + this.user_id);
+
+    this.http.get<any>(
+      `http://localhost:8080/family_life/get_group_list?user_id=${this.user_id}`
+    ).subscribe({
+
+      next: (res) => {
+        // console.log(res);
+
+        this.groups = res.groupList;
+
+        console.log(res.groupList);
+      },
+
+      error: (err) => {
+        console.log(err);
+      }
+
+    });
+
+  }
+
+  truncateName(name: string): string {
+    if (!name) return '';
+
+    return name.length > 20
+      ? name.substring(0, 20) + '....'
+      : name;
+  }
 
   // 開啟修改資料彈窗
   openEditDialog(): void {

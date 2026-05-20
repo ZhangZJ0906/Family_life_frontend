@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
 // 模擬用戶資料，實際應從後端獲取
 const DEMO_USERS: User[] = [
   {
-    user_id: 1,
+    user_id: 2,
     name: 'Family Admin',
     email: '123@example.com',
     password: '123',

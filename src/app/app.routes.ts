@@ -17,6 +17,7 @@ export const routes: Routes = [
   {
     path: 'itemList',
     component: ItemListComponent,
+    title: '我的物品清單'
   },
   {
     path: 'expenses',
@@ -24,10 +25,12 @@ export const routes: Routes = [
   },
   {
     path: 'group',
-    component: GroupPageComponent,},
-
+    component: GroupPageComponent,
+    title: '我的群組'
+  },
  {
     path: 'login',
+    title: '登入',
     loadComponent: () =>
       import('./@components/login/login.component').then((m) => m.LoginComponent)
   },
@@ -50,8 +53,8 @@ export const routes: Routes = [
 
 
   {path: 'calendar',component: CalendarComponent},
-  {path: 'home-page',component: HomePageComponent},
-  {path: 'profile', component: ProfileComponent},
+  {path: 'home-page',component: HomePageComponent, title: '首頁'},
+  {path: 'profile', component: ProfileComponent, title: '個人資料'},
   {path: 'topbar', component: TopbarComponent},
   {path: 'itemList', component: ItemListComponent},
   {path: 'expenses', component: ExpensesComponent},

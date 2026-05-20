@@ -277,6 +277,7 @@
   flex: 1;
   overflow-y: auto;
   padding-right: 6px;
+  height: 60px;
 }
 
 .group-list::-webkit-scrollbar {
@@ -290,6 +291,12 @@
 .group-list::-webkit-scrollbar-thumb {
   background: #d6dbe4;
   border-radius: 999px;
+}
+
+.group-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
 }
 
 /* 群組手風琴 */

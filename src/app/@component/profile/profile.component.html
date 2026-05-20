@@ -42,45 +42,22 @@
     </div>
 
     <!-- 右側：群組，往下跨兩列 -->
-    <div class="profile-card group-card">
+    <div class="profile-card group-card" >
        <div class="group-header">
           <h3>群組</h3>
-          <button class="back-btn" routerLink="/home-page">返回首頁</button>
-  </div>
-
+      </div>
 
       <div class="group-list">
-        <details class="group-accordion" open>
-          <summary>我的家庭</summary>
+        <details class="group-accordion" *ngFor="let group of groups" open>
+          <summary>
+            <img class="group-avatar" [src]="group.avatar || 'assets/default-avatar.png'">
+            &nbsp;{{ truncateName(group.groupName) }}
+          </summary>
           <div class="group-detail">
-            <p>邀請碼</p>
-            <h4>ABC123</h4>
+            <p>邀請碼 : {{ group.inviteCode }}</p>
           </div>
         </details>
 
-        <details class="group-accordion">
-          <summary>外婆家</summary>
-          <div class="group-detail">
-            <p>邀請碼</p>
-            <h4>FAMILY02</h4>
-          </div>
-        </details>
-
-        <details class="group-accordion">
-          <summary>台北租屋處</summary>
-          <div class="group-detail">
-            <p>邀請碼</p>
-            <h4>HOME5566</h4>
-          </div>
-        </details>
-
-        <details class="group-accordion">
-          <summary>阿姨家</summary>
-          <div class="group-detail">
-            <p>邀請碼</p>
-            <h4>GROUP888</h4>
-          </div>
-        </details>
       </div>
     </div>
 
