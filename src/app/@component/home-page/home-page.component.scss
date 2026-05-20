@@ -1,0 +1,268 @@
+/* 整個首頁背景 */
+.home-page {
+  min-height: 100vh;
+  padding: 28px;
+  background: #f6f7f9;
+  color: #222;
+  box-sizing: border-box;
+}
+
+
+
+/* 歡迎卡片：包含早安 Jack 和橫向金額 */
+.welcome-card {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 28px 32px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 24px;
+  box-sizing: border-box;
+}
+
+/* 歡迎文字區 */
+.welcome-text {
+  margin-bottom: 24px;
+}
+
+/* 歡迎標題 */
+.welcome-text h1 {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 800;
+}
+
+/* 歡迎說明文字 */
+.welcome-text p {
+  margin: 10px 0 0;
+  color: #7a7a7a;
+  font-size: 16px;
+}
+
+/* 金額摘要橫向排列 */
+.money-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+/* 單一金額卡 */
+.money-item {
+  background: #f8fafc;
+  border-radius: 20px;
+  padding: 22px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+/* 金額圖示 */
+.money-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+/* 金額標籤 */
+.money-item p {
+  margin: 0 0 8px;
+  color: #777;
+  font-weight: 700;
+  font-size: 17px;
+}
+
+/* 金額數字 */
+.money-item h2 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 800;
+}
+
+/* 紅色圖示背景 */
+.red-icon {
+  background: #fff1f1;
+  color: #d85c5c;
+}
+
+/* 綠色圖示背景 */
+.green-icon {
+  background: #effaf3;
+  color: #3fa765;
+}
+
+/* 紅色金額 */
+.money-red {
+  color: #d85c5c;
+}
+
+/* 綠色金額 */
+.money-green {
+  color: #3fa765;
+}
+
+/* 第二區：左右各半 */
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* 左邊統計數量：上下兩列，每列兩張 */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+/* 統計卡片 */
+.summary-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 22px;
+  border: 1px solid #e5e7eb;
+  min-height: 130px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 統計文字區 */
+.summary-text {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 統計標籤 */
+.card-label {
+  color: #7a7a7a;
+  font-size: 14px;
+}
+
+/* 統計數字 */
+.summary-card h2 {
+  margin: 12px 0 6px;
+  font-size: 36px;
+}
+
+/* 統計說明 */
+.summary-card p {
+  margin: 0;
+  color: #888;
+}
+
+/* 統計圖示 */
+.summary-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+/* 食材圖示底色 */
+.food-icon {
+  background: #effaf3;
+}
+
+/* 藥品圖示底色 */
+.medicine-icon {
+  background: #eef4ff;
+}
+
+/* 保固圖示底色 */
+.warranty-icon {
+  background: #fff7e8;
+}
+
+/* 訂閱圖示底色 */
+.sub-icon {
+  background: #fff1f1;
+}
+
+/* 右邊今日優先處理卡片 */
+.priority-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 22px;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* 今日優先處理標題 */
+.priority-card h3 {
+  margin: 0 0 18px;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+/* 優先處理項目 */
+.task {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+/* 優先處理標題 */
+.task h4 {
+  margin: 0;
+  font-size: 16px;
+}
+
+/* 優先處理說明 */
+.task p {
+  margin: 6px 0 0;
+  color: #777;
+}
+
+/* 優先程度 */
+.task span {
+  font-weight: 700;
+}
+
+/* 高優先 */
+.danger {
+  background: #fff1f1;
+  color: #eb5757;
+}
+
+/* 中優先 */
+.warning {
+  background: #fff7e8;
+  color: #f2994a;
+}
+
+/* 低優先 */
+.normal {
+  background: #eef4ff;
+  color: #2f80ed;
+}
+
+/* 窄螢幕時改成單欄 */
+@media (max-width: 1100px) {
+  .topbar {
+    grid-template-columns: 1fr;
+    height: auto;
+    padding: 18px;
+  }
+
+  .top-nav {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .money-row,
+  .bottom-grid,
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}

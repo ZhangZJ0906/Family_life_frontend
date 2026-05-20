@@ -1,0 +1,113 @@
+<div class="home-page">
+
+  <app-topbar></app-topbar>
+
+  <!-- 第一區：歡迎卡片，內含橫向金額摘要 -->
+  <section class="welcome-card">
+    <div class="welcome-text">
+      <h1>早安，Jack</h1>
+      <p>今天有 3 件生活事項需要優先處理</p>
+    </div>
+
+    <!-- 金額摘要：橫向顯示在早安 Jack 區塊中 -->
+    <div class="money-row">
+      <div class="money-item">
+        <div class="money-icon red-icon">↘</div>
+        <div>
+          <p>總額</p>
+          <h2 class="money-red">-NT$5,655</h2>
+        </div>
+      </div>
+
+      <div class="money-item">
+        <div class="money-icon green-icon">↗</div>
+        <div>
+          <p>收入</p>
+          <h2 class="money-green">NT$0</h2>
+        </div>
+      </div>
+
+      <div class="money-item">
+        <div class="money-icon red-icon">💳</div>
+        <div>
+          <p>支出</p>
+          <h2 class="money-red">NT$5,655</h2>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 第二區：左邊統計數量，右邊今日優先處理，各占一半 -->
+  <section class="bottom-grid">
+
+    <!-- 左邊：數量統計區 -->
+    <section class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-text">
+          <span class="card-label">即將到期食材</span>
+          <h2>5</h2>
+          <p>7 天內到期</p>
+        </div>
+        <div class="summary-icon food-icon">🥬</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-text">
+          <span class="card-label">藥品提醒</span>
+          <h2>2</h2>
+          <p>需要補充</p>
+        </div>
+        <div class="summary-icon medicine-icon">💊</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-text">
+          <span class="card-label">保固到期</span>
+          <h2>1</h2>
+          <p>本月到期</p>
+        </div>
+        <div class="summary-icon warranty-icon">🧾</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-text">
+          <span class="card-label">訂閱續扣</span>
+          <h2>3</h2>
+          <p>近期扣款</p>
+        </div>
+        <div class="summary-icon sub-icon">💳</div>
+      </div>
+    </section>
+
+    <!-- 右邊：今日優先處理 -->
+    <section class="priority-card">
+      <h3>今日優先處理</h3>
+
+      <div class="task danger">
+        <div>
+          <h4>牛奶即將到期</h4>
+          <p>剩餘 2 天｜冰箱</p>
+        </div>
+        <span>高</span>
+      </div>
+
+      <div class="task warning">
+        <div>
+          <h4>感冒藥庫存不足</h4>
+          <p>剩餘 1 盒｜藥品櫃</p>
+        </div>
+        <span>中</span>
+      </div>
+
+      <div class="task normal">
+        <div>
+          <h4>Netflix 即將續扣</h4>
+          <p>明天扣款｜NT$390</p>
+        </div>
+        <span>低</span>
+      </div>
+    </section>
+
+  </section>
+
+</div>
