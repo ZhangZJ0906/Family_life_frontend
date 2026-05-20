@@ -1,0 +1,395 @@
+.search-field {
+  width: 300px;
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    background-color: white;
+  }
+}
+
+.element-row:hover {
+  background-color: #f8f9fa; // Bootstrap light gray
+  cursor: pointer;
+}
+
+// 狀態小圓點
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  &.online {
+    background-color: #198754;
+  } // Bootstrap green
+  &.offline {
+    background-color: #6c757d;
+  } // Bootstrap gray
+}
+
+.table-responsive {
+  border-radius: 8px;
+}
+
+.fab-bottom-right {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1000;
+}
+
+.fab-delete-bottom-right {
+  position: fixed;
+  bottom: 90px;
+  right: 30px;
+  z-index: 1000;
+}
+
+.custom-delete-btn {
+  background-color: #dc3545; // 使用 Bootstrap 的紅色 (danger)
+  color: white; // 確保垃圾桶圖示是白色的
+
+  // 處理滑鼠懸停時的顏色變化
+  &:hover {
+    background-color: #c82333; // 懸停時變深一點的紅色
+  }
+}
+
+/* 讓表格列在選取時變色 */
+.selected-row {
+  background-color: rgba(63, 81, 181, 0.05) !important;
+}
+
+/* 右下角按鈕容器 */
+.fab-container {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* 刪除按鈕上的數字標籤 */
+.fab-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #333;
+  color: white;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+}
+
+/* 搜尋框寬度微調 */
+.search-field {
+  width: 250px;
+}
+
+/* 群組選擇器寬度 */
+.group-select {
+  width: 180px;
+}
+/* 整個物品清單頁面，讓導覽列也吃到左右外距 */
+.item-page {
+  min-height: 100vh;
+  padding: 28px;
+  background: #f6f7f9;
+  box-sizing: border-box;
+}
+
+
+/* 第二個區塊：標題、篩選、搜尋放同一張卡 */
+.item-header-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 22px;
+  padding: 28px;
+  min-height: 120px;
+  margin-bottom: 20px;
+
+  display: grid;
+  grid-template-columns: 360px 1fr 300px;
+  align-items: center;
+  gap: 28px;
+}
+
+/* 左側標題 */
+.item-title {
+  flex-shrink: 0;
+}
+
+/* 中間篩選區：固定在整張卡片正中間 */
+.header-filter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  white-space: nowrap;
+}
+
+/* 分類按鈕不換行 */
+.header-filter mat-chip-listbox {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+
+/* 右側搜尋框 */
+.search-field {
+  width: 300px;
+  margin-left: auto;
+}
+
+/* 群組選擇器 */
+.group-select {
+  width: 180px;
+}
+
+/* 標題列 */
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 標題左側 icon */
+.title-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #eef4ff;
+  color: #2f80ed;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 24px;
+}
+
+/* 分類 chip 裡的小圖示 */
+.chip-icon {
+  margin-right: 6px;
+  font-size: 15px;
+}
+
+/* 搜尋 icon 顏色 */
+.search-field {
+  width: 300px;
+  justify-self: end;
+}
+
+
+/* Angular Material 欄位白底 */
+.search-field ::ng-deep .mat-mdc-text-field-wrapper,
+.group-select ::ng-deep .mat-mdc-text-field-wrapper {
+  background-color: #ffffff;
+  border-radius: 12px;
+}
+
+/* 表格白色卡片 */
+.table-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+}
+
+/* 表格可水平滾動 */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* 表格本體 */
+table {
+  width: 100%;
+  background: #ffffff;
+}
+
+/* 表頭 */
+th.mat-mdc-header-cell {
+  background: #f8fafc;
+  color: #222;
+  font-size: 15px;
+  font-weight: 800;
+  padding: 18px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* 表格內容 */
+td.mat-mdc-cell {
+  padding: 18px 16px;
+  color: #222;
+  font-size: 15px;
+  border-bottom: 1px solid #edf0f3;
+}
+
+/* 滑鼠移到列上 */
+.element-row:hover {
+  background-color: #f8fafc;
+  cursor: pointer;
+}
+
+/* 選取列 */
+.selected-row {
+  background-color: #eef4ff !important;
+}
+
+/* 數量標籤 */
+.quantity-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: #2f80ed;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* 價格文字 */
+.price-text {
+  color: #d85c5c !important;
+  font-weight: 700;
+}
+
+/* 已過期日期 */
+.expired-text {
+  color: #d85c5c;
+  font-weight: 800;
+}
+
+/* 扣款週期標籤，樣式跟目前數量類似 */
+.cycle-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: #2f80ed;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* 狀態標籤共用 */
+.status-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+/* 正常 */
+.status-normal {
+  background: #eef8f0;
+  color: #3d9b5f;
+}
+
+/* 試用中 */
+.status-trial {
+  background: #eef4ff;
+  color: #2f80ed;
+}
+
+/* 試用即將結束 / 即將扣款 */
+.status-warning {
+  background: #fff7e8;
+  color: #e69a2a;
+}
+
+/* 已逾期扣款 */
+.status-danger {
+  background: #fdeeee;
+  color: #d85c5c;
+}
+
+/* 狀態下方提醒文字 */
+.remind-text {
+  margin: 4px 0 0;
+  color: #666;
+  font-size: 13px;
+}
+
+/* 提醒 icon，跟一般物品表格一致 */
+.notify-icon {
+  color: #111;
+  font-size: 24px;
+}
+
+/* 沒有資料區 */
+.no-data {
+  text-align: center;
+  padding: 56px 0 !important;
+  color: #777;
+}
+
+/* 沒資料 icon */
+.no-data mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: #777;
+}
+
+/* 分頁器 */
+mat-paginator {
+  border-top: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+/* 右下角按鈕容器 */
+.fab-container {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  z-index: 1000;
+}
+
+/* 刪除數量標籤 */
+.fab-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #222;
+  color: white;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 小螢幕排版 */
+@media (max-width: 900px) {
+  .item-header-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  .search-field {
+    width: 100%;
+  }
+
+  .filter-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .group-select {
+    width: 100%;
+  }
+}

@@ -1,0 +1,115 @@
+<div class="container mt-4">
+  <h2 class="mb-4 text-center text-secondary fw-bold">家庭記帳系統 - 費用管理</h2>
+
+  <div class="row g-3 mb-4核心">
+    <div class="col-md-4 mx-auto">
+      <div class="card bg-danger text-white p-3 shadow-sm text-center">
+        <div class="small text-uppercase">目前總支出金額</div>
+        <div class="fs-2 fw-bold">${{ totalExpense() }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-md-5">
+      <mat-card class="p-4 shadow-sm">
+        <mat-card-header class="mb-3">
+          <mat-card-title class="fw-bold text-primary">新增支出項目</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>費用分類</mat-label>
+              <mat-select [value]="formCategoryId()" (selectionChange)="formCategoryId.set($event.value)">
+                @for (cat of categoryMap; track cat.id) {
+                <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>支出金額 (Price)</mat-label>
+              <input matInput type="number" placeholder="請輸入金額" [ngModel]="formPrice()"
+                (ngModelChange)="formPrice.set($event)">
+              <span matTextPrefix>$&nbsp;</span>
+            </mat-form-field>
+          </div>
+
+          <div class="mb-4">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>備註說明 (Note)</mat-label>
+              <textarea matInput placeholder="寫點什麼詳細紀錄吧..." rows="2" [ngModel]="formNote()"
+                (ngModelChange)="formNote.set($event)"></textarea>
+            </mat-form-field>
+          </div>
+
+          <button mat-raised-button color="accent" class="w-100 py-2 fw-bold" (click)="addRecord()">
+            記一筆
+          </button>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="col-md-7">
+      <mat-card class="p-4 shadow-sm">
+        <mat-card-header class="mb-3">
+          <mat-card-title class="fw-bold">核心支出明細</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          @if (records().length === 0) {
+          <p class="text-muted text-center py-4">無任何消費紀錄。</p>
+          } @else {
+          <div class="table-responsive">
+            <table mat-table [dataSource]="records()" class="w-100">
+
+              <ng-container matColumnDef="expense_date">
+                <th mat-header-cell *matHeaderCellDef> 消費日期 </th>
+                <td mat-cell *matCellDef="let element"> {{element.expense_date}} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="category_id">
+                <th mat-header-cell *matHeaderCellDef> 分類 </th>
+                <td mat-cell *matCellDef="let element">
+                  <span class="badge bg-secondary">
+                    {{ categoryMap[element.category_id] || '未分類' }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="note">
+                <th mat-header-cell *matHeaderCellDef> 備註 </th>
+                <td mat-cell *matCellDef="let element" class="text-truncate" style="max-width: 150px;">
+                  {{element.note || '--'}}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="price">
+                <th mat-header-cell *matHeaderCellDef> 金額 </th>
+                <td mat-cell *matCellDef="let element" class="text-danger fw-bold">
+                  ${{element.price}}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef> 操作 </th>
+                <td mat-cell *matCellDef="let element">
+                  <button mat-icon-button color="warn" (click)="deleteRecord(element.id)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>
