@@ -1,0 +1,231 @@
+/* 整個行事曆頁面背景 */
+.calendar-page {
+  min-height: 100vh;
+  padding: 32px;
+  background: #f5f6f8;
+  box-sizing: border-box;
+}
+
+/* 行事曆主要白色卡片 */
+.calendar-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* 上方標題列：左邊標題，右邊按鈕 */
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+/* 標題文字 */
+.calendar-title h2 {
+  margin: 0;
+  font-size: 28px;
+  color: #222;
+}
+
+/* 標題下方說明文字 */
+.calendar-title p {
+  margin: 6px 0 0;
+  color: #777;
+  font-size: 14px;
+}
+
+/* 右上角按鈕群組 */
+.calendar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 新增活動按鈕 */
+.add-btn {
+  padding: 11px 22px;
+  border: none;
+  border-radius: 10px;
+  background: #222;
+  color: #fff;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* 新增活動 hover 效果 */
+.add-btn:hover {
+  background: #444;
+}
+
+/* 返回首頁按鈕 */
+.back-home-btn {
+  padding: 11px 22px;
+  border: 1px solid #dcdfe5;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #333;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* 返回首頁 hover 效果 */
+.back-home-btn:hover {
+  background: #f1f3f5;
+  color: #2f80ed;
+}
+
+/* FullCalendar 外層 */
+:host ::ng-deep .fc {
+  background: #fff;
+  color: #222;
+}
+
+/* 上方工具列 */
+:host ::ng-deep .fc-toolbar-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #111;
+}
+
+:host ::ng-deep .fc-button {
+  background: #ffffff !important;
+  border: 1px solid #dcdfe5 !important;
+  color: #333 !important;
+  border-radius: 8px !important;
+  padding: 8px 14px !important;
+  box-shadow: none !important;
+}
+
+:host ::ng-deep .fc-button:hover {
+  background: #f1f3f5 !important;
+}
+
+:host ::ng-deep .fc-button-active {
+  background: #222 !important;
+  color: #fff !important;
+}
+
+/* 星期列 */
+:host ::ng-deep .fc-col-header-cell {
+  background: #fafafa;
+  padding: 10px 0;
+}
+
+:host ::ng-deep .fc-col-header-cell-cushion {
+  color: #333;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* 日期格線 */
+:host ::ng-deep .fc-theme-standard td,
+:host ::ng-deep .fc-theme-standard th {
+  border: 1px solid #edf0f3;
+}
+
+:host ::ng-deep .fc-daygrid-day {
+  background: #fff;
+}
+
+:host ::ng-deep .fc-day-today {
+  background: #f4f8ff !important;
+}
+
+:host ::ng-deep .fc-daygrid-day-number {
+  color: #333;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* 活動樣式 */
+:host ::ng-deep .fc-event {
+  background: #eef4ff !important;
+  border: 1px solid #cfe0ff !important;
+  color: #1f4f9a !important;
+  border-radius: 8px;
+  padding: 3px 6px;
+  font-weight: 600;
+}
+
+:host ::ng-deep .fc-event:hover {
+  background: #dceaff !important;
+}
+
+/* SweetAlert 表單 */
+.swal-form {
+  width: 100%;
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  align-items: center;
+  column-gap: 18px;
+  margin-bottom: 18px;
+}
+
+.form-row label {
+  text-align: right;
+  font-size: 17px;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+}
+
+.form-row .swal2-input {
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+
+
+
+
+/* 跨天活動：讓內容水平排列，圓點與文字同一行 */
+:host ::ng-deep .fc-daygrid-block-event .fc-event-main {
+  display: flex;
+  align-items: center;
+}
+
+/* 跨天活動：自製圓點，大小位置接近單天活動 */
+:host ::ng-deep .fc-daygrid-block-event .fc-event-main::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  background: #5b8def;
+  border-radius: 50%;
+  margin-left: 4px;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+/* 跨天活動整體文字顏色 */
+:host ::ng-deep .fc-daygrid-block-event,
+:host ::ng-deep .fc-daygrid-block-event .fc-event-main,
+:host ::ng-deep .fc-daygrid-block-event .fc-event-main-frame {
+  color: #1f4f9a !important;
+}
+
+/* 跨天活動時間文字，例如：上午9時 */
+:host ::ng-deep .fc-daygrid-block-event .fc-event-time {
+  color: #1f4f9a !important;
+  font-weight: 700 !important;
+}
+
+/* 跨天活動標題文字，例如：1111、33333 */
+:host ::ng-deep .fc-daygrid-block-event .fc-event-title {
+  color: #1f4f9a !important;
+  font-weight: 700 !important;
+}
+
+/* 一般活動圓點顏色 */
+:host ::ng-deep .fc-daygrid-event-dot {
+  border-color: #5b8def !important;
+}
