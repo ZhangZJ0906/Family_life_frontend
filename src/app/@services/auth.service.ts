@@ -57,7 +57,7 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
-  register(userData: { name: string; email: string; password: string;
+  register(userData: { name: string; email: string; pwd: string;
            avatar: string; is_notify: boolean }): Observable<any> {
     return this.http.post(`${this.userUrl}/register`, userData);
   }
