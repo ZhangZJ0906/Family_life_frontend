@@ -79,7 +79,7 @@ export class ExpensesComponent {
       return matchCategory && matchSearch; // 兩個條件都要符合
     };
     this.getCatgories(); // 獲取 分類
-    this.getExpense(null, 1); // 獲取記帳紀錄
+    this.getExpense(this.currentGroupId, this.currentUserId); // 獲取記帳紀錄
   }
   // 塞選或是 文字搜尋用
   filterValues = {
@@ -87,8 +87,8 @@ export class ExpensesComponent {
     category: null as number | null,
   };
   // 模擬登入使用者與群組環境
-  currentGroupId = 1;
-  currentUserId = 1;
+  currentGroupId = null;
+  currentUserId = 2;
 
   // 計算總支出
   totalExpense = computed(() =>
