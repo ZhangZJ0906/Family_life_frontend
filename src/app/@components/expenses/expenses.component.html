@@ -69,7 +69,7 @@
           <mat-select [value]="currentGroupId" (selectionChange)="onGroupChange($event.value)">
             <mat-option [value]="null">👤 個人私帳</mat-option>
             @for (g of userGroups; track g.groupId) {
-            <mat-option [value]="g.id">👥 {{ g.groupName }}</mat-option>
+            <mat-option [value]="g.groupId">👥 {{ g.groupName }}</mat-option>
             }
           </mat-select>
         </mat-form-field>

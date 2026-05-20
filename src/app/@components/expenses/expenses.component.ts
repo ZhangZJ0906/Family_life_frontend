@@ -94,7 +94,7 @@ export class ExpensesComponent {
   };
   // 模擬登入使用者與群組環境
   currentGroupId: number | null = null;
-  currentUserId = 2;
+  currentUserId = 3;
 
   // 計算總支出
   totalExpense = computed(() =>
@@ -245,6 +245,7 @@ export class ExpensesComponent {
               groupName,
             }),
           );
+          console.log(this.userGroups)
         },
         error: (err) => {
           Swal.fire({
@@ -257,6 +258,7 @@ export class ExpensesComponent {
   }
 
   onGroupChange(groupId: number | null) {
+    console.log(groupId)
     this.currentGroupId = groupId;
     this.selection.clear(); // 清掉勾選
     this.getExpense(groupId, this.currentUserId);
