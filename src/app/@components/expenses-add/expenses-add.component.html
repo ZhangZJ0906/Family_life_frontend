@@ -11,9 +11,9 @@
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>選擇記帳環境</mat-label>
           <mat-select formControlName="selectedEnvId" (selectionChange)="onEnvChange($event.value)" required>
-            <mat-option [value]="0">👤 個人私帳 (不公開至群組)</mat-option>
-            @for (g of userGroups; track g.id) {
-            <mat-option [value]="g.id">👥 {{ g.name }}</mat-option>
+            
+            @for (g of userGroups; track g.groupId) {
+            <mat-option [value]="g.groupId">👥 {{ g.groupName }}</mat-option>
             }
           </mat-select>
           @if (expenseForm.get('selectedEnvId')?.hasError('required')) {

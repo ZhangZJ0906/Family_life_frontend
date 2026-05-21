@@ -111,6 +111,8 @@ export class ExpensesComponent {
       height: '540px',
       data: {
         categoryMap: this.categoryMap,
+        groupList:this.userGroups,
+        relatedItem:this.relatedItem
       },
     });
     dialogRef.afterClosed().subscribe((result) => {
@@ -266,11 +268,9 @@ export class ExpensesComponent {
   // 切換群組
   onGroupChange(groupId: number | null) {
     this.currentGroupId = groupId;
-
     if (this.currentGroupId == 0) {
       this.getExpense(null, this.currentUserId);
       this.selection.clear(); // 清掉勾選
-
       return;
     }
     this.selection.clear(); // 清掉勾選
@@ -286,7 +286,6 @@ export class ExpensesComponent {
       });
       return;
     }
-
     // 動態組合 URL 參數，避免寫兩段一模一樣的 subscribe 邏輯
     let url = `${this.basicUrl}expense/getInfo?userId=${userId}`;
     if (groupId != null) {
@@ -338,6 +337,7 @@ export class ExpensesComponent {
             });
           }
           console.log(res);
+          this.relatedItem=res.items;
         },
         error: (err) => {
           Swal.fire({

@@ -33,6 +33,7 @@ export interface ExpenseRecord {
   user_id: number;
   categoryId: number;
   related_item_id: number | null;
+  related_item_name?:string;
   price: number | null;
   expenseDate: string;
   note: string;
@@ -55,5 +56,5 @@ export interface GroupList {
 export interface DropDownGroupList {
   groupId: number;
   groupName: string;
-} 
+}
 /*============================================ */

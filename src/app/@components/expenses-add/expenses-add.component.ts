@@ -9,10 +9,17 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
-import { LocationAndCategory } from '../../common/interfaceList';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogRef,
+  MatDialogModule,
+} from '@angular/material/dialog';
+import {
+  DropDownGroupList,
+  LocationAndCategory,
+} from '../../common/interfaceList';
 import Swal from 'sweetalert2';
-import { MatDatepickerModule } from "@angular/material/datepicker";
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
 @Component({
   selector: 'app-expenses-add',
@@ -33,7 +40,7 @@ export class ExpensesAddComponent {
   expenseForm!: FormGroup;
 
   categoryMap: LocationAndCategory[] = []; // 分類對照
-  userGroups: any[] = [1, 2]; // 儲存使用者擁有的群組清單
+  userGroups: DropDownGroupList[] = []; // 儲存使用者擁有的群組清單
   itemList: any[] = []; // 動態變更的物品清單
 
   currentUserId = 1; // 目前登入的使用者 ID
@@ -45,17 +52,20 @@ export class ExpensesAddComponent {
     @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
     this.basicUrl = this.http.basicUrl;
+    console.log(this.data);
+
   }
 
   ngOnInit(): void {
     // 從主畫面接收傳遞過來的初始共用資料
     if (this.data) {
       this.categoryMap = this.data.categoryMap || [];
-      this.userGroups = this.data.userGroups || []; // 💡 記得主畫面要把使用者持有的群組陣列傳進來
+      this.userGroups = this.data.groupList || [];
     }
 
     this.initForm();
     this.watchFormChanges(); // 啟動欄位連動監聽器
+    console.log(this.userGroups);
   }
 
   /**
@@ -147,7 +157,7 @@ export class ExpensesAddComponent {
       note: formValues.note,
       expenseDate: this.formatToBackendDate(formValues.expenseDate), // 格式化為 YYYY-MM-DD
     };
-    console.log(payload)
+    console.log(payload);
 
     this.http.postApi(this.basicUrl + 'expense/addInfo', payload).subscribe({
       next: (res: any) => {
