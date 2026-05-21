@@ -43,8 +43,8 @@
       <mat-label>切換群組</mat-label>
       <mat-select [(value)]="currentGroupId" (selectionChange)="getItemByGroupId($event.value)">
         @for (group of userGroups; track $index) {
-          <mat-option [value]="group.id">
-            🏠 {{ group.name }}
+          <mat-option [value]="group.groupId">
+            🏠 {{ group.groupName }}
           </mat-option>
         }
       </mat-select>

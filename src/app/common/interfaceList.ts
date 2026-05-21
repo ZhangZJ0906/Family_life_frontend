@@ -40,7 +40,7 @@ export interface ExpenseRecord {
 }
 
 /*============================================ */
-
+/*群組 2026-05-20 by zj */
 export interface GroupList {
   groupId: number;
   groupName: string;
@@ -50,3 +50,10 @@ export interface GroupList {
   creater: string;
   avatar?: string;
 }
+
+/* 下拉選單群組 2026-05-21 by zj*/
+export interface DropDownGroupList {
+  groupId: number;
+  groupName: string;
+} 
+/*============================================ */

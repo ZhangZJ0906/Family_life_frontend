@@ -10,8 +10,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import {
+  DropDownGroupList,
   ExpenseRecord,
   GroupList,
+  Item,
   LocationAndCategory,
 } from '../../common/interfaceList';
 import { HttpClientService } from '../../@services/http-client.service';
@@ -41,12 +43,13 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 })
 export class ExpensesComponent {
   basicUrl!: string; // APIＵＲＬ
-  userGroups: any[] = []; // 儲存使用者擁有的群組清單
+  userGroups: DropDownGroupList[] = []; // 儲存使用者擁有的群組清單
   categoryMap: LocationAndCategory[] = []; // 分類
   dataSource = new MatTableDataSource<ExpenseRecord>([]); // table  資料
   selection = new SelectionModel<ExpenseRecord>(true, []); // 刪除  checkbox 勾選到的資料
   expense: ExpenseRecord[] = []; // 記帳資料
   itemMap: { [key: number]: any } = {}; // 群組物品東西'
+  relatedItem: Item[] = [];
 
   // Angular Material Table 要顯示的欄位
   displayedColumns: string[] = [
@@ -86,6 +89,7 @@ export class ExpensesComponent {
     this.getCatgories(); // 獲取 分類
     this.getExpense(this.currentGroupId, this.currentUserId); // 獲取記帳紀錄
     this.getUserGroupData(); // 拉取user group
+    this.getItem(this.currentGroupId);
   }
   // 塞選或是 文字搜尋用
   filterValues = {
@@ -94,12 +98,13 @@ export class ExpensesComponent {
   };
   // 模擬登入使用者與群組環境
   currentGroupId: number | null = null;
-  currentUserId = 3;
+  currentUserId = 1;
 
   // 計算總支出
   totalExpense = computed(() =>
     this.dataSource.data.reduce((sum, r) => sum + (r.price || 0), 0),
   );
+  // 開啟新增dialog
   openCreateDialog() {
     const dialogRef = this.dialog.open(ExpensesAddComponent, {
       width: '540px',
@@ -109,13 +114,12 @@ export class ExpensesComponent {
       },
     });
     dialogRef.afterClosed().subscribe((result) => {
-      // 如果 result 是 true，代表彈窗內更新成功了，主頁面只需要重新載入列表
       if (result === true) {
         this.getExpense(null, this.currentUserId);
       }
     });
   }
-
+  // 開啟更新dialog
   openEditDialog(record: any) {
     let relatedItem = null;
     if (record.relatedItemId != null) {
@@ -131,7 +135,6 @@ export class ExpensesComponent {
       },
     });
     dialogRef.afterClosed().subscribe((result) => {
-      // 如果 result 是 true，代表彈窗內更新成功了，主頁面只需要重新載入列表
       if (result === true) {
         this.getExpense(null, this.currentUserId);
       }
@@ -222,13 +225,12 @@ export class ExpensesComponent {
       },
     });
   }
-
   //拉取群組
   getUserGroupData() {
     this.http
       .getApi(
         this.basicUrl +
-          `family_life/get_group_list?user_id=${this.currentUserId}`,
+          `family_life/getGroupList?user_Id=${this.currentUserId}`,
       )
       .subscribe({
         next: (res: any) => {
@@ -239,13 +241,18 @@ export class ExpensesComponent {
               icon: 'error',
             });
           }
-          this.userGroups = res.groupList.map(
-            ({ groupId, groupName }: any) => ({
-              groupId,
-              groupName,
+
+          this.userGroups = Object.entries(res.groupIdList).map(
+            ([id, name]) => ({
+              groupId: Number(id),
+              groupName: name as string,
             }),
           );
-          console.log(this.userGroups)
+          this.userGroups.unshift({
+            groupId: 0,
+            groupName: '私人記帳',
+          });
+          this.currentGroupId = 0;
         },
         error: (err) => {
           Swal.fire({
@@ -256,10 +263,16 @@ export class ExpensesComponent {
         },
       });
   }
-
+  // 切換群組
   onGroupChange(groupId: number | null) {
-    console.log(groupId)
     this.currentGroupId = groupId;
+
+    if (this.currentGroupId == 0) {
+      this.getExpense(null, this.currentUserId);
+      this.selection.clear(); // 清掉勾選
+
+      return;
+    }
     this.selection.clear(); // 清掉勾選
     this.getExpense(groupId, this.currentUserId);
   }
@@ -307,11 +320,39 @@ export class ExpensesComponent {
       },
     });
   }
-
+  //拉取可能關聯物品
+  getItem(groupId: number | null) {
+      let url = `${this.basicUrl}item/getItems?userId=${this.currentUserId}`; // 👈 補 userId
+      if (groupId != null && groupId > 0) {
+        url += `&groupId=${groupId}`; // 👈 null 就不帶 groupId
+      }
+    this.http
+      .getApi(url)
+      .subscribe({
+        next: (res: any) => {
+          if (res.code != 200) {
+            Swal.fire({
+              title: '拉取群組物品錯誤',
+              text: res.message || 'server error ',
+              icon: 'error',
+            });
+          }
+          console.log(res);
+        },
+        error: (err) => {
+          Swal.fire({
+            title: '拉取群組物品錯誤',
+            text: err.message || 'server error ',
+            icon: 'error',
+          });
+        },
+      });
+  }
+  // 前端 分類名字統整
   getCategoryName(categoryId: number): string {
     return this.categoryMap.find((c) => c.id === categoryId)?.name || '未分類';
   }
-
+  // 下拉選單 塞選
   filterByCategory(categoryId: number | null) {
     this.filterValues.category = categoryId;
     this.dataSource.filter = JSON.stringify(this.filterValues);

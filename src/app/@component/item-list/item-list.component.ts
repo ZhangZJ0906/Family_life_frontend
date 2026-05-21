@@ -1,4 +1,8 @@
-import { Item, LocationAndCategory } from './../../common/interfaceList';
+import {
+  DropDownGroupList,
+  Item,
+  LocationAndCategory,
+} from './../../common/interfaceList';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipListbox, MatChipOption } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
@@ -44,18 +48,9 @@ export class ItemListComponent {
   location: LocationAndCategory[] = [];
   selection = new SelectionModel<any>(true, []);
   /*群組陣列 */
-  userGroups: any[] = [
-    {
-      id: 1,
-      name: '陳家大宅',
-    },
-    {
-      id: 2,
-      name: '林老師',
-    },
-  ];
+  userGroups: DropDownGroupList[] = [];
   // 現在的群組
-  currentGroupId: any = 1;
+  currentGroupId!: number | null;
   currentUserId: any;
   itemDisplayedColumns: string[] = [
     'select',
@@ -101,10 +96,10 @@ export class ItemListComponent {
   basicUrl!: string;
   constructor(private http: HttpClientService) {
     this.basicUrl = this.http.basicUrl;
-
-    this.getItemByGroupId(this.userGroups[0].id);
+    this.currentUserId = 1;
+    this.getUserGroupData();
   }
-  /*TODO 缺少 拿user 資料跟拿user 群組資料 分類資料 通知功能 */
+  /*TODO 缺少 拿user 資料跟  通知功能 */
   /*新增物品 */
   openAddDialog() {
     const dialogRef = this.dialog.open(ItemListAddDialogComponent, {
@@ -183,7 +178,46 @@ export class ItemListComponent {
     });
   }
 
-  /*分類 */
+  getUserGroupData() {
+    this.http
+      .getApi(
+        this.basicUrl +
+          `family_life/getGroupList?user_Id=${this.currentUserId}`,
+      )
+      .subscribe({
+        next: (res: any) => {
+          if (res.code != 200) {
+            Swal.fire({
+              title: '拉取群組錯誤',
+              text: res.message || 'server error ',
+              icon: 'error',
+            });
+          }
+
+          this.userGroups = Object.entries(res.groupIdList).map(
+            ([id, name]) => ({
+              groupId: Number(id),
+              groupName: name as string,
+            }),
+          );
+          this.userGroups.unshift({
+            groupId: 0,
+            groupName: '私人物品',
+          });
+          this.currentGroupId = null;
+          this.getItemByGroupId(this.currentGroupId);
+        },
+        error: (err) => {
+          Swal.fire({
+            title: '拉取群組錯誤',
+            text: err.message || 'server error ',
+            icon: 'error',
+          });
+        },
+      });
+  }
+
+  /*分類 塞選 */
   filterByCategory(catId: number) {
     // 找到目前點擊的分類
     const category = this.categories.find((cat) => cat.id === catId);
@@ -209,7 +243,7 @@ export class ItemListComponent {
   }
 
   // 查詢某群組的訂閱資料
-  getSubscriptionByGroupId(groupId: number): void {
+  getSubscriptionByGroupId(groupId: number | null): void {
     if (!groupId || groupId <= 0) {
       Swal.fire({
         title: '錯誤',
@@ -248,24 +282,26 @@ export class ItemListComponent {
       });
   }
   /*取得DB 物品清單資料 */
-  getItemByGroupId(groupId: number) {
+  getItemByGroupId(groupId: number | null) {
     this.currentGroupId = groupId;
-    this.currentUserId = 1;
-    if (this.currentGroupId <= 0) {
-      Swal.fire({
-        title: 'fail',
-        text: '群組ID參數錯誤',
-        icon: 'error',
-      });
-      return;
+    if (this.currentGroupId == 0) {
+      this.currentGroupId = null;
     }
     let url = `${this.basicUrl}item/getItems?userId=${this.currentUserId}`;
-    if (groupId != null) {
+    if (this.currentGroupId != null) {
       url += `&groupId=${groupId}`;
     }
     this.http.getApi(url).subscribe({
       next: (res: any) => {
-        // console.log(res)
+        if (res.code != 200) {
+          Swal.fire({
+            title: 'fail',
+            text: res.message,
+            icon: 'error',
+          });
+          return;
+        }
+
         this.itemList = res.items;
         this.dataSource.data = res.items;
 
@@ -281,7 +317,6 @@ export class ItemListComponent {
         );
 
         this.categories.unshift({ id: 0, name: '全部' });
-        // console.log(this.dataSource.data);
       },
       error: (err: any) => {
         Swal.fire({
