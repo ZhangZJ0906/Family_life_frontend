@@ -23,7 +23,7 @@ export interface Item {
 export interface LocationAndCategory {
   id: number;
   name: string;
-  icon?:string,
+  icon?: string;
 }
 /*============================================ */
 /*記帳 2026-05-15 by zj */
@@ -31,12 +31,22 @@ export interface ExpenseRecord {
   id: number | null;
   group_id: number;
   user_id: number;
-  category_id: number;
+  categoryId: number;
   related_item_id: number | null;
   price: number | null;
-  expense_date: string;
+  expenseDate: string;
   note: string;
   created_at?: string;
 }
 
 /*============================================ */
+
+export interface GroupList {
+  groupId: number;
+  groupName: string;
+  inviteCode: string;
+  createdBy: number;
+  createdAt: string;
+  creater: string;
+  avatar?: string;
+}

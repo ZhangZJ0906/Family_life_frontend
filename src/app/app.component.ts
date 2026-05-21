@@ -1,12 +1,14 @@
 import { Component, inject } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AuthService } from './@services/auth.service';
+import { Title } from '@angular/platform-browser';
+import { filter, map } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   imports: [RouterLink, RouterOutlet],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
 })
 export class AppComponent {
   private readonly authService = inject(AuthService);
@@ -16,5 +18,29 @@ export class AppComponent {
 
   logout(): void {
     this.authService.logout();
+  }
+
+  pageTitle = '';
+
+  constructor(
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private titleService: Title, // 👈 注入
+  ) {}
+
+  ngOnInit() {
+    this.router.events
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        map(() => {
+          let route = this.activatedRoute;
+          while (route.firstChild) route = route.firstChild;
+          return route.snapshot.data['title'] || '家庭生活管家';
+        }),
+      )
+      .subscribe((title) => {
+        this.pageTitle = title;
+        this.titleService.setTitle(title); // 👈 這行就會改瀏覽器分頁標題
+      });
   }
 }
