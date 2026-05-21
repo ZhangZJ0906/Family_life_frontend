@@ -1,112 +1,172 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 
-import { ShoppingListService } from '../../@services/shopping-list.service';
-import {
-  PurchaseItemVo,
-  AddPurchaseItemReq
-} from '../../@models/shopping_list.model';
-
+import { CreateListReq, ShoppingList } from '../../@models/shopping_list.model';
 import { AuthService } from '../../@services/auth.service';
+import { ShoppingListService } from '../../@services/shopping-list.service';
+
+interface GroupOption {
+  id: number | null;
+  name: string;
+}
 
 @Component({
   selector: 'app-shopping-list',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './shopping-list.component.html',
   styleUrl: './shopping-list.component.scss'
 })
 export class ShoppingListComponent implements OnInit {
+  userId = 1;
+  lists: ShoppingList[] = [];
 
-  listId = 1; // 👉 之後改成 route param 或 group id
-  userId = 1; // 👉 改成 authService.currentUser().user_id
+  // GROUP_FEATURE: 目前後端還沒有 groups API，所以先只提供「無」。
+  // 之後新增群組功能時，在這裡改成從後端載入使用者可選的 groups。
+  groupOptions: GroupOption[] = [{ id: null, name: '無' }];
 
-  items: PurchaseItemVo[] = [];
-
-  newItem = {
-    item: '',
-    quantity: 1,
-    categoryId: 1,
-    userId: 1
-  };
+  isLoading = false;
+  isCreating = false;
+  isDialogOpen = false;
+  errorMessage = '';
+  formError = '';
+  newTitle = '';
+  selectedGroupId: number | null = null;
 
   constructor(
-    private shoppingService: ShoppingListService,
-    private authService: AuthService
+    private readonly authService: AuthService,
+    private readonly router: Router,
+    private readonly shoppingService: ShoppingListService
   ) {}
 
   ngOnInit(): void {
     this.userId = this.authService.currentUser()?.user_id ?? 1;
-    this.loadItems();
+    this.loadLists();
   }
 
-  // ======================
-  // 取得項目（後端）
-  // ======================
-  loadItems(): void {
-    this.shoppingService.getItems(this.listId).subscribe({
+  openCreateDialog(): void {
+    this.newTitle = '';
+    this.selectedGroupId = null;
+    this.formError = '';
+    this.isDialogOpen = true;
+  }
+
+  closeCreateDialog(): void {
+    if (this.isCreating) {
+      return;
+    }
+
+    this.isDialogOpen = false;
+  }
+
+  loadLists(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.shoppingService.getLists(this.userId).subscribe({
       next: (res) => {
-        this.items = res;
+        this.lists = res ?? [];
+        this.isLoading = false;
       },
-      error: (err) => console.error(err)
+      error: (err) => {
+        console.error(err);
+        this.errorMessage = '購物清單載入失敗，請稍後再試';
+        this.isLoading = false;
+      }
     });
   }
 
-  // ======================
-  // 新增 item
-  // ======================
-  addItem(): void {
+  createList(): void {
+    const title = this.newTitle.trim();
+    this.formError = '';
 
-    const req: AddPurchaseItemReq = {
-      listId: this.listId,
-      createrId: this.userId,
-      purchaseItemVoList: [
-        {
-          item: this.newItem.item,
-          quantity: this.newItem.quantity,
-          categoryId: this.newItem.categoryId,
-          userId: this.userId,
-          listId: this.listId,
-          id: 0, // 後端會自動生成 id
-          check: false // 預設為未勾選
-        }
-      ]
+    if (!title) {
+      this.formError = '請輸入清單名稱';
+      return;
+    }
+
+    const req: CreateListReq = {
+      shoppingList: {
+        id: 0,
+        // GROUP_FEATURE: 「無」會送 null；選到群組時才送真實 group_id。
+        group_id: this.selectedGroupId,
+        title,
+        createrId: this.userId
+      },
+      purchaseItemVoList: []
     };
 
-    this.shoppingService.addItems(req).subscribe({
-      next: () => {
-        this.newItem.item = '';
-        this.newItem.quantity = 1;
-        this.loadItems();
+    this.isCreating = true;
+    this.shoppingService.create(req).subscribe({
+      next: (res) => {
+        if (res.code !== 200) {
+          this.formError = res.message ?? '建立清單失敗';
+          this.isCreating = false;
+          return;
+        }
+
+        this.navigateToNewestList();
       },
-      error: (err) => console.error(err)
+      error: (err) => {
+        console.error(err);
+        this.formError = err.error?.message ?? '建立清單失敗';
+        this.isCreating = false;
+      }
     });
   }
 
-  // ======================
-  // 刪除 item
-  // ======================
-  deleteItem(itemId: number): void {
-    this.shoppingService.deleteItem(this.listId, itemId).subscribe({
-      next: () => this.loadItems(),
-      error: (err) => console.error(err)
+  deleteList(list: ShoppingList): void {
+    const confirmed = confirm(`確定刪除「${list.title}」？`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.shoppingService.deleteList(list.id).subscribe({
+      next: (res) => {
+        if (res.code !== 200) {
+          this.errorMessage = res.message ?? '刪除清單失敗';
+          return;
+        }
+
+        this.loadLists();
+      },
+      error: (err) => {
+        console.error(err);
+        this.errorMessage = err.error?.message ?? '刪除清單失敗';
+      }
     });
   }
 
-  // ======================
-  // 勾選
-  // ======================
-  toggleCheck(item: PurchaseItemVo): void {
-    this.shoppingService.updateCheck(
-      this.listId,
-      item.id,
-      !item.check,
-      this.userId
-    ).subscribe({
-      next: () => {
-        item.check = !item.check;
+  getGroupName(groupId: number | null): string {
+    return this.groupOptions.find((group) => group.id === groupId)?.name ?? '無';
+  }
+
+  private navigateToNewestList(): void {
+    this.shoppingService.getLists(this.userId).subscribe({
+      next: (lists) => {
+        const newestList = [...(lists ?? [])].sort((a, b) => b.id - a.id)[0];
+        this.isCreating = false;
+        this.isDialogOpen = false;
+
+        if (!newestList) {
+          this.loadLists();
+          return;
+        }
+
+        this.router.navigate(['/purchase-item', newestList.id]);
       },
-      error: (err) => console.error(err)
+      error: (err) => {
+        console.error(err);
+        this.isCreating = false;
+        this.isDialogOpen = false;
+        this.loadLists();
+      }
     });
+  }
+
+  trackByListId(_index: number, list: ShoppingList): number {
+    return list.id;
   }
 }

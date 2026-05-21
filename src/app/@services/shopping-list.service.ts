@@ -6,69 +6,69 @@ import {
   AddPurchaseItemReq,
   BasicRes,
   CreateListReq,
-  PurchaseItemVo
+  PurchaseItemVo,
+  ShoppingList
 } from '../@models/shopping_list.model';
-
 
 @Injectable({
   providedIn: 'root'
 })
 export class ShoppingListService {
+  private readonly http = inject(HttpClient);
+  private readonly shoppingUrl = 'http://localhost:8080/shopping_lists';
 
-  private http = inject(HttpClient);
+  // 取得目前使用者建立的 shopping lists，用在左側「我的清單」。
+  getLists(createrId: number): Observable<ShoppingList[]> {
+    return this.http.get<ShoppingList[]>(this.shoppingUrl, {
+      params: { createrId }
+    });
+  }
 
-  private shoppingUrl = 'http://localhost:8080/shopping_lists';
-
-  /** 新增購物清單 */
   create(req: CreateListReq): Observable<BasicRes> {
     return this.http.post<BasicRes>(`${this.shoppingUrl}/create`, req);
   }
 
-  /** 刪除購物清單 */
+  // 後端目前 delete/check 都是 POST + RequestParam，不是 REST DELETE/PUT。
   deleteList(listId: number): Observable<BasicRes> {
-    return this.http.delete<BasicRes>(`${this.shoppingUrl}/delete/${listId}`);
+    return this.http.post<BasicRes>(
+      `${this.shoppingUrl}/delete`,
+      null,
+      { params: { listId } }
+    );
   }
 
-  /** 修改購物清單 */
   updateList(req: CreateListReq): Observable<BasicRes> {
-    return this.http.put<BasicRes>(`${this.shoppingUrl}/update`, req);
+    return this.http.post<BasicRes>(`${this.shoppingUrl}/update`, req);
   }
 
-  /** 取得購物項目 */
   getItems(listId: number): Observable<PurchaseItemVo[]> {
-    return this.http.get<PurchaseItemVo[]>(
-      'http://localhost:8080/shopping_lists/items',
-      { params: { listId: listId } });
+    return this.http.get<PurchaseItemVo[]>(`${this.shoppingUrl}/items`, {
+      params: { listId }
+    });
   }
 
-  /** 新增購物項目 */
   addItems(req: AddPurchaseItemReq): Observable<BasicRes> {
     return this.http.post<BasicRes>(`${this.shoppingUrl}/items/add`, req);
   }
 
-  /** 刪除購物項目 */
   deleteItem(listId: number, itemId: number): Observable<BasicRes> {
-    return this.http.delete<BasicRes>(
-      `${this.shoppingUrl}/items/${listId}/${itemId}`
+    return this.http.post<BasicRes>(
+      `${this.shoppingUrl}/items/delete`,
+      null,
+      { params: { listId, itemId } }
     );
   }
 
-  /** 勾選 / 取消勾選 */
   updateCheck(
     listId: number,
     itemId: number,
     check: boolean,
     checkMan: number
   ): Observable<BasicRes> {
-
-    return this.http.put<BasicRes>(
-      `${this.shoppingUrl}/check`,
-      {
-        listId,
-        itemId,
-        check,
-        checkMan
-      }
+    return this.http.post<BasicRes>(
+      `${this.shoppingUrl}/items/check`,
+      null,
+      { params: { listId, itemId, check, checkMan } }
     );
   }
 }

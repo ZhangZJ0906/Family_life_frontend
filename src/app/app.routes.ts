@@ -14,6 +14,13 @@ export const routes: Routes = [
       )
   },
   {
+    path: 'purchase-item/:listId',
+    loadComponent: () =>
+      import('./@components/purchase-item/purchase-item.component').then(
+        (m) => m.PurchaseItemComponent
+      )
+  },
+  {
     path: 'register',
     loadComponent: () =>
       import('./@components/register/register.component').then(

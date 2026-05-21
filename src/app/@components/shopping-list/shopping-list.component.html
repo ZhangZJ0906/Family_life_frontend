@@ -1,39 +1,91 @@
-<h2>購物清單</h2>
+<main class="shopping-page">
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">Shopping Lists</p>
+      <h1>購物清單</h1>
+      <p class="subtitle">建立清單後，進入清單內新增與管理購物項目。</p>
+    </div>
 
-<!-- 新增 -->
-<div>
-  <input
-    type="text"
-    [(ngModel)]="newItem.item"
-    placeholder="品項"
-  />
+    <div class="actions">
+      <button class="ghost-button" type="button" (click)="loadLists()" [disabled]="isLoading">
+        重新整理
+      </button>
+      <button class="primary-button" type="button" (click)="openCreateDialog()">
+        建立清單
+      </button>
+    </div>
+  </section>
 
-  <input
-    type="number"
-    [(ngModel)]="newItem.quantity"
-    placeholder="數量"
-  />
+  <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
 
-  <button (click)="addItem()">
-    新增
-  </button>
-</div>
+  <section class="lists-panel" aria-label="我的購物清單">
+    <div class="panel-header">
+      <h2>我的清單</h2>
+      <span>{{ lists.length }} 份</span>
+    </div>
 
-<hr />
+    <div class="state-box" *ngIf="isLoading">清單載入中...</div>
 
-<!-- 清單 -->
-<div *ngFor="let item of items">
+    <div class="state-box" *ngIf="!isLoading && lists.length === 0">
+      目前沒有購物清單，先建立一份新的清單。
+    </div>
 
-  <input
-    type="checkbox"
-    [checked]="item.check"
-    (change)="toggleCheck(item)"
-  />
+    <div class="list-grid" *ngIf="!isLoading && lists.length > 0">
+      <article class="list-card" *ngFor="let list of lists; trackBy: trackByListId">
+        <a class="list-link" [routerLink]="['/purchase-item', list.id]">
+          <strong>{{ list.title }}</strong>
+          <small *ngIf="list.group_id !== null">群組：{{ getGroupName(list.group_id) }}</small>
+        </a>
 
-  {{ item.item }} x {{ item.quantity }}
+        <button class="text-button" type="button" (click)="deleteList(list)">
+          刪除
+        </button>
+      </article>
+    </div>
+  </section>
+</main>
 
-  <button (click)="deleteItem(item.id)">
-    刪除
-  </button>
+<div class="dialog-backdrop" *ngIf="isDialogOpen" (click)="closeCreateDialog()">
+  <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="create-list-title" (click)="$event.stopPropagation()">
+    <div class="dialog-header">
+      <h2 id="create-list-title">建立購物清單</h2>
+      <button class="icon-button" type="button" aria-label="關閉" (click)="closeCreateDialog()">×</button>
+    </div>
 
+    <form class="dialog-form" (ngSubmit)="createList()">
+      <label class="field">
+        <span>清單名稱</span>
+        <input
+          type="text"
+          name="title"
+          [(ngModel)]="newTitle"
+          placeholder="例如：本週補貨"
+          autocomplete="off"
+          autofocus
+        />
+      </label>
+
+      <label class="field">
+        <span>群組</span>
+        <select name="groupId" [(ngModel)]="selectedGroupId">
+          <option *ngFor="let group of groupOptions" [ngValue]="group.id">
+            {{ group.name }}
+          </option>
+        </select>
+      </label>
+
+      <!-- GROUP_FEATURE: 群組功能加入後，把 groupOptions 改成後端 groups API 的結果即可。 -->
+      <p class="form-hint">沒有群組時選「無」，系統會以 null 建立清單。</p>
+      <p class="form-error" *ngIf="formError">{{ formError }}</p>
+
+      <div class="dialog-actions">
+        <button class="ghost-button" type="button" (click)="closeCreateDialog()" [disabled]="isCreating">
+          取消
+        </button>
+        <button class="primary-button" type="submit" [disabled]="isCreating">
+          {{ isCreating ? '建立中' : '建立並新增項目' }}
+        </button>
+      </div>
+    </form>
+  </section>
 </div>

@@ -6,6 +6,7 @@
       <a routerLink="/shopping-list">購物清單</a>
     </nav>
 
+    <!-- 顯示使用者資訊和登出按鈕 -->
     <div class="user-area">
       @if (currentUser(); as user) {
         @if (user.avatar) {
