@@ -46,12 +46,15 @@ export class ItemListEditDialogComponent implements OnInit {
   location: LocationAndCategory[] = [];
 
 isSubscriptionMode = false;
+isWarrantyMode = false;
 
 isSubscriptionCategory(): boolean {
   return this.isSubscriptionMode;
 }
 
-
+isWarrantyCategory(): boolean {
+  return this.isWarrantyMode;
+}
 
   constructor(
     public dialogRef: MatDialogRef<ItemListEditDialogComponent>,
@@ -61,7 +64,7 @@ isSubscriptionCategory(): boolean {
   ngOnInit(): void {
   if (this.data && this.data.item) {
     this.isSubscriptionMode = this.data?.isSubscriptionMode || false;
-
+    this.isWarrantyMode = this.data?.isWarrantyMode || false;
     this.item = { ...this.data.item };
 
     this.location = this.data.locationMap || [];
@@ -74,11 +77,21 @@ isSubscriptionCategory(): boolean {
         this.item.categoryId = subscriptionCategory.id;
       }
     }
+     if (this.isWarrantyMode) {
+      const warrantyCategory = this.categories.find(cat => cat.name === '保固');
+      if (warrantyCategory) {
+        this.item.categoryId = warrantyCategory.id;
+      }
+
+      // 保固資料後端欄位是 productName，Dialog 共用 item.name
+      this.item.name = this.item.productName;
+    }
 
     this.item.expireDate = this.formatDate(this.item.expireDate);
     this.item.purchaseDate = this.formatDate(this.item.purchaseDate);
     this.item.trialEndDate = this.formatDate(this.item.trialEndDate);
     this.item.nextBillingDate = this.formatDate(this.item.nextBillingDate);
+    this.item.warrantyEndDate = this.formatDate(this.item.warrantyEndDate);
   }
 }
   // 在你的 Component 內，或是物件 model 內
@@ -122,9 +135,24 @@ onOkClose(): void {
       name: this.item.name,
       price: this.item.price || this.item.unitPrice,
       billingCycle: this.item.billingCycle,
-      expireDate: this.formatDate(this.item.expireDate),
       purchaseDate: this.formatDate(this.item.purchaseDate),
       trialEndDate: this.formatDate(this.item.trialEndDate),
+      notify: this.item.notify,
+      note: this.item.note,
+    };
+  } else if (this.isWarrantyCategory()) {
+    payload = {
+      id: this.item.id,
+      groupId: this.item.groupId,
+      userId: this.item.userId || 1,
+      productName: this.item.name,
+      brand: this.item.brand,
+      model: this.item.model,
+      serialNumber: this.item.serialNumber,
+      purchaseDate: this.formatDate(this.item.purchaseDate),
+      warrantyEndDate: this.formatDate(this.item.warrantyEndDate),
+      storeName: this.item.storeName,
+      price: this.item.price || 0,
       notify: this.item.notify,
       note: this.item.note,
     };
@@ -134,6 +162,7 @@ onOkClose(): void {
       purchaseDate: this.formatDate(this.item.purchaseDate),
       expireDate: this.formatDate(this.item.expireDate),
       price: this.totalPrice,
+      safeQuantity: this.item.safeQuantity ?? 0,
     };
   }
 

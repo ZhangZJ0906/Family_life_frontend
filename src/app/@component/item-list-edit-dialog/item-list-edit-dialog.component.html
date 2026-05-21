@@ -36,7 +36,7 @@
         </mat-form-field>
       </div>
 
-      @if (!isSubscriptionCategory()) {
+      @if (!isSubscriptionCategory() && !isWarrantyCategory()) {
 
   <div class="col-4">
     <mat-form-field appearance="outline" class="w-100">
@@ -59,6 +59,21 @@
       <span matPrefix>$&nbsp;</span>
     </mat-form-field>
   </div>
+
+  <div class="col-12">
+  <mat-form-field appearance="outline" class="w-100">
+    <mat-label>安全庫存量</mat-label>
+    <input
+      matInput
+      type="number"
+      [(ngModel)]="item.safeQuantity"
+      min="0"
+      placeholder="例如：1">
+    <mat-hint>
+      當目前數量小於或等於安全庫存量時，狀態會顯示「庫存不足」
+    </mat-hint>
+  </mat-form-field>
+</div>
 
   <div class="col-12">
     <mat-form-field appearance="outline" class="w-100" color="accent">
@@ -150,6 +165,63 @@
       下次扣款日將由後端依照「試用結束日 + 扣款週期」自動重新計算。
       目前下次扣款日：{{ item.nextBillingDate || '尚未計算' }}
     </div>
+  </div>
+}
+
+@if (isWarrantyCategory()) {
+
+  <div class="col-6">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>品牌</mat-label>
+      <input matInput [(ngModel)]="item.brand" placeholder="例如：Apple">
+    </mat-form-field>
+  </div>
+
+  <div class="col-6">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>型號</mat-label>
+      <input matInput [(ngModel)]="item.model" placeholder="例如：M2">
+    </mat-form-field>
+  </div>
+
+  <div class="col-12">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>序號</mat-label>
+      <input matInput [(ngModel)]="item.serialNumber" placeholder="例如：ABC123456">
+    </mat-form-field>
+  </div>
+
+  <div class="col-6">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>購買日期</mat-label>
+      <input matInput [matDatepicker]="warrantyPurchasePicker" [(ngModel)]="item.purchaseDate">
+      <mat-datepicker-toggle matIconSuffix [for]="warrantyPurchasePicker"></mat-datepicker-toggle>
+      <mat-datepicker #warrantyPurchasePicker></mat-datepicker>
+    </mat-form-field>
+  </div>
+
+  <div class="col-6">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>保固到期日</mat-label>
+      <input matInput [matDatepicker]="warrantyEndPicker" [(ngModel)]="item.warrantyEndDate">
+      <mat-datepicker-toggle matIconSuffix [for]="warrantyEndPicker"></mat-datepicker-toggle>
+      <mat-datepicker #warrantyEndPicker></mat-datepicker>
+    </mat-form-field>
+  </div>
+
+  <div class="col-6">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>購買店家</mat-label>
+      <input matInput [(ngModel)]="item.storeName" placeholder="例如：Apple Store">
+    </mat-form-field>
+  </div>
+
+  <div class="col-6">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>購買金額</mat-label>
+      <input matInput type="number" [(ngModel)]="item.price" min="0">
+      <span matPrefix>$&nbsp;</span>
+    </mat-form-field>
   </div>
 }
   <div class="col-12 mt-2">

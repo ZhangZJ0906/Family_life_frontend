@@ -61,6 +61,14 @@ isSubscriptionCategory(): boolean {
 
   return selectedCategory?.name === '訂閱';
 }
+
+isWarrantyCategory(): boolean {
+  const selectedCategory = this.categories.find(
+    cat => Number(cat.id) === Number(this.item.categoryId)
+  );
+
+  return selectedCategory?.name === '保固';
+}
   item = {
   created_by_id: 1,
   groupId: 1,
@@ -75,13 +83,20 @@ isSubscriptionCategory(): boolean {
   purchaseDate: '',
   expireDate: '',
   notify: true,
-  saveQuantity: 0,
+  safeQuantity: 0,
   note: '',
 
   // 訂閱用欄位
   billingCycle: '每月',
   trialEndDate: '',
   nextBillingDate: '',
+
+  // 保固用欄位
+  brand: '',
+  model: '',
+  serialNumber: '',
+  warrantyEndDate: '',
+  storeName: '',
   };
 
   basicUrl!: string;
@@ -114,16 +129,31 @@ isSubscriptionCategory(): boolean {
       this.item.categoryId = subscriptionCategory.id;
     }
   }
+
+  if (this.data?.isWarrantyMode) {
+  const warrantyCategory = this.categories.find(cat => cat.name === '保固');
+  if (warrantyCategory) {
+    this.item.categoryId = warrantyCategory.id;
+  }
+}
   }
   get totalPrice(): number {
     return (this.item.unitPrice || 0) * (this.item.quantity || 0);
   }
   addItemInfo() {
+    // 如果是訂閱類別，走訂閱的新增流程
     if (this.isSubscriptionCategory()) {
     this.addSubscriptionInfo();
     return;
   }
 
+    // 如果是保固類別，走保固的新增流程
+    if (this.isWarrantyCategory()) {
+    this.addWarrantyInfo();
+    return;
+  }
+
+  // 一般物品的新增流程
   const payload = {
     ...this.item,
     price: this.totalPrice,
@@ -187,6 +217,7 @@ isSubscriptionCategory(): boolean {
   });
   }
 
+  // 訂閱的新增流程
   addSubscriptionInfo(): void {
   const payload = {
     groupId: this.item.groupId,
@@ -248,6 +279,72 @@ isSubscriptionCategory(): boolean {
     },
   });
 }
+
+addWarrantyInfo(): void {
+  const payload = {
+    groupId: this.item.groupId,
+    userId: this.item.created_by_id,
+    productName: this.item.name,
+    brand: this.item.brand,
+    model: this.item.model,
+    serialNumber: this.item.serialNumber,
+    purchaseDate: this.formatDate(this.item.purchaseDate),
+    warrantyEndDate: this.formatDate(this.item.warrantyEndDate),
+    storeName: this.item.storeName,
+    price: this.item.unitPrice,
+    notify: this.item.notify,
+    note: this.item.note,
+  };
+
+  if (!payload.productName?.trim()) {
+    this.showError('請輸入產品名稱');
+    return;
+  }
+
+  if (!payload.groupId) {
+    this.showError('請選擇所屬群組');
+    return;
+  }
+
+  if (!payload.purchaseDate) {
+    this.showError('請選擇購買日期');
+    return;
+  }
+
+  if (!payload.warrantyEndDate) {
+    this.showError('請選擇保固到期日');
+    return;
+  }
+
+  this.http.postApi(this.basicUrl + 'warranty/add', payload).subscribe({
+    next: (res: any) => {
+      if (res.code != 200) {
+        Swal.fire({
+          title: '錯誤',
+          text: res.message || 'Server error',
+          icon: 'error',
+        });
+        return;
+      }
+
+      Swal.fire({
+        title: '成功',
+        text: res.message,
+        icon: 'success',
+      });
+
+      this.dialogRef.close(true);
+    },
+    error: (err: any) => {
+      Swal.fire({
+        title: '錯誤',
+        text: err.message || 'Server error',
+        icon: 'error',
+      });
+    },
+  });
+}
+
   private formatDate(date: any): string {
     if (!date) return '';
     const d = new Date(date);

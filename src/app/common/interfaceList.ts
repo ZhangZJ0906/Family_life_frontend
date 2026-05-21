@@ -36,6 +36,7 @@ export interface ExpenseRecord {
   price: number | null;
   expense_date: string;
   note: string;
+  status?: string;
   created_at?: string;
 }
 
