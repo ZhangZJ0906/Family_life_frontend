@@ -308,14 +308,61 @@
   margin-bottom: 14px;
 }
 
+/* summary 左右排列 */
+/* summary 左右排列 */
 .group-accordion summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
   cursor: pointer;
-  font-weight: 800;
-  font-size: 18px;
-  color: #222;
   list-style: none;
   position: relative;
+
   padding-left: 28px;
+}
+
+/* 左側 */
+.group-summary-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 群組名稱 */
+.group-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #222;
+}
+
+/* 右側設定 */
+.group-share-setting {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* 文字和 slider 距離 */
+}
+
+/* 顯示個人清單文字 */
+.group-share-text {
+  font-size: 14px;
+  font-weight: 400;
+  color: #777;
+}
+
+/* 顯示個人清單文字 */
+.group-share-text {
+  font-size: 14px;
+  font-weight: 400;   /* 字體變細 */
+  color: #777;
+  margin-left: 6px;
+}
+
+/* switch 對齊 */
+.group-accordion .switch {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
 }
 
 .group-accordion summary::-webkit-details-marker {
@@ -350,6 +397,36 @@
 .group-detail h4 {
   margin: 0;
   font-size: 20px;
+}
+
+.invite-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.invite-row p {
+  margin: 0;
+  color: #777;
+}
+
+/* 複製按鈕 */
+.copy-btn {
+  border: none;
+  background: #2f80ed;
+  color: white;
+  border-radius: 10px;
+  padding: 6px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+  flex-shrink: 0;
+}
+
+.copy-btn:hover {
+  background: #1f6fd6;
 }
 
 /* 群組卡片 */
