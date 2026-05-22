@@ -8,7 +8,7 @@ import { AuthService } from '../../@services/auth.service';
   selector: 'app-login',
   imports: [FormsModule, RouterLink],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  styleUrl: './login.component.scss',
 })
 export class LoginComponent {
   email = '';
@@ -17,7 +17,7 @@ export class LoginComponent {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly router: Router
+    private readonly router: Router,
   ) {}
 
   signIn(): void {
@@ -27,31 +27,25 @@ export class LoginComponent {
           this.errorMessage = 'Email 或密碼不正確';
           return;
         }
-
-        this.authService.setCurrentUser(this.buildLoginUser(res));
+        const payload = {
+          user_id: res.userId,
+          name: res.name,
+          email: res.email,
+          password: '',
+          avatar: res.avatar ?? '',
+          notifyByEndDate: res.notifyByEndDate ?? true,
+          notifyByEmail: res.notifyByEmail ?? true,
+          // created_at: res.created_at ??  '',
+          // updated_at: res.updated_at ?? '',
+        };
+        this.authService.setCurrentUser(payload);
         localStorage.setItem('isLogin', 'true');
-        this.router.navigate(['/shopping-list']);// 👉 登入成功後導向的頁面，可以自己改路徑。
+        this.router.navigate(['/shopping-list']); // 👉 登入成功後導向的頁面，可以自己改路徑。
       },
       error: (err) => {
         console.error(err);
         this.errorMessage = 'Email 或密碼不正確';
-      }
+      },
     });
-  }
-
-  //** 後端回傳的 user 物件結構不太一致，這裡做一次轉換 */
-  private buildLoginUser(res: any): User {
-    const user = res.user ?? res.data ?? {};
-
-    return {
-      user_id: user.user_id ?? user.userId ?? 0,
-      name: user.name ?? user.userName ?? this.email,
-      email: user.email ?? this.email,
-      password: '',
-      avatar: user.avatar ?? '',
-      notify: user.notify ?? user.is_notify ?? true,
-      created_at: user.created_at ?? '',
-      updated_at: user.updated_at ?? ''
-    };
   }
 }

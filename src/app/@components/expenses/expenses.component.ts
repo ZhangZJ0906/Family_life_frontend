@@ -41,6 +41,7 @@ import Swal from 'sweetalert2';
   styleUrl: './expenses.component.scss',
 })
 export class ExpensesComponent {
+  user: any;
   basicUrl!: string;
   userGroups: DropDownGroupList[] = [];
   categoryMap: LocationAndCategory[] = [];
@@ -85,7 +86,10 @@ export class ExpensesComponent {
     private dialog: MatDialog,
   ) {
     this.basicUrl = this.http.basicUrl;
-
+    const raw = localStorage.getItem('family-life-current-user');
+    this.user = JSON.parse(raw!);
+    this.currentUserId = this.user.user_id;
+    
     this.dataSource.filterPredicate = (data: ExpenseRecord, filter: string) => {
       const f = JSON.parse(filter);
 
