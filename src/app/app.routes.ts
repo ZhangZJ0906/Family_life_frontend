@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { GroupPageComponent } from './@group/group-page/group-page.component';
 
 export const routes: Routes = [
+<<<<<<< HEAD
   {path:'group',component:GroupPageComponent}
 =======
 import { CalendarComponent } from './@component/calendar/calendar.component';
@@ -24,4 +25,30 @@ export const routes: Routes = [
 
 
 >>>>>>> origin/feature-calendar
+=======
+ {
+    path: 'login',
+    loadComponent: () =>
+      import('./@components/login/login.component').then((m) => m.LoginComponent)
+  },
+  {
+    path: 'shopping-list',
+    loadComponent: () =>
+      import('./@components/shopping-list/shopping-list.component').then(
+        (m) => m.ShoppingListComponent
+      )
+  },
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./@components/register/register.component').then(
+        (m) => m.RegisterComponent
+      )
+  },
+  {
+    path: '',
+    pathMatch: 'full',
+    redirectTo: 'login'
+  }
+>>>>>>> 2dcfdd2922ed702026575f2e79bf3d3a598e4c93
 ];

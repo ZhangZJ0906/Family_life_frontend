@@ -1,0 +1,39 @@
+<h2>購物清單</h2>
+
+<!-- 新增 -->
+<div>
+  <input
+    type="text"
+    [(ngModel)]="newItem.item"
+    placeholder="品項"
+  />
+
+  <input
+    type="number"
+    [(ngModel)]="newItem.quantity"
+    placeholder="數量"
+  />
+
+  <button (click)="addItem()">
+    新增
+  </button>
+</div>
+
+<hr />
+
+<!-- 清單 -->
+<div *ngFor="let item of items">
+
+  <input
+    type="checkbox"
+    [checked]="item.check"
+    (change)="toggleCheck(item)"
+  />
+
+  {{ item.item }} x {{ item.quantity }}
+
+  <button (click)="deleteItem(item.id)">
+    刪除
+  </button>
+
+</div>

@@ -1,4 +1,26 @@
+<<<<<<< HEAD
 
 
+=======
+<header class="app-header">
+  <a class="brand" routerLink="/shopping-list">Family Life</a>
+
+  @if (isLoggedIn()) {
+    <nav aria-label="主要功能">
+      <a routerLink="/shopping-list">購物清單</a>
+    </nav>
+
+    <div class="user-area">
+      @if (currentUser(); as user) {
+        @if (user.avatar) {
+          <img [src]="user.avatar" [alt]="user.name" />
+        }
+        <span>{{ user.name }}</span>
+      }
+      <button type="button" (click)="logout()">登出</button>
+    </div>
+  }
+</header>
+>>>>>>> 2dcfdd2922ed702026575f2e79bf3d3a598e4c93
 
 <router-outlet />
