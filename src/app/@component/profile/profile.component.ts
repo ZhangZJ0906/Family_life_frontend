@@ -70,7 +70,10 @@ export class ProfileComponent {
 
         this.userName = res.name;
         this.email = res.email;
-        console.log(res.name + this.user_id)
+        this.endDateNotify = res.notifyByEndDate;
+        this.emailNotify = res.notifyByEmail;
+        this.avatarUrl = res.avatar;
+        // console.log(res.email)
       },
 
       error: (err) => {
@@ -264,11 +267,12 @@ openAvatarDialog(): void {
         userName: this.userName,
         email: this.email,
         avatar: this.avatarUrl,
-        isNotifyByEndDate: this.endDateNotify,
-        isNotifyByEmail: this.emailNotify
+        notifyByEndDate: this.endDateNotify ?? false,
+        notifyByEmail: this.emailNotify ?? false
       }
 
-      console.log()
+      // console.log(userInfo);
+      // console.log(JSON.stringify(userInfo));
 
     this.http.post('http://localhost:8080/users/update_info', {
       userInfo: userInfo,
@@ -276,7 +280,8 @@ openAvatarDialog(): void {
     }).subscribe({
 
       next: (res: any) => {
-        Swal.fire('成功', '', 'success');
+        Swal.fire('已儲存', '', 'success');
+        this.getSelfInfo();
       },
 
       error: (err) => {

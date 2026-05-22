@@ -37,7 +37,7 @@
       </div>
 
       <div class="form-actions">
-        <button type="button" class="save-btn" (click)="openEditDialog()">修改</button>
+        <button type="button" class="revise-btn" (click)="openEditDialog()">修改</button>
       </div>
     </div>
 
@@ -45,8 +45,6 @@
     <div class="profile-card group-card" >
       <div class="group-header">
           <h3>群組狀態</h3>
-
-          <button class="save-btn" (click)="saveAll()">儲存</button>
       </div>
 
 
@@ -126,5 +124,11 @@
     </div>
 
   </section>
+
+  <div class="save-wrapper">
+    <button class="save-btn" (click)="saveAll()">
+      儲存資料
+    </button>
+  </div>
 
 </div>

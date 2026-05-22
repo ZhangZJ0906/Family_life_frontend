@@ -25,7 +25,7 @@ import {
 export class GroupMemberDialogComponent {
 
   user_id!: string;
-
+  avatar = " ";
   constructor(
     private dialogRef: MatDialogRef<GroupMemberDialogComponent>,
 

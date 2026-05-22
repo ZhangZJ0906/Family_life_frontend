@@ -96,8 +96,21 @@ export class TopbarComponent implements OnInit, OnDestroy {
   }
 
   // 讀取 localStorage 裡的頭像
-  loadAvatar = (): void => {
-    this.avatarUrl = localStorage.getItem('avatarUrl') || '';
+  loadAvatar(){
+    this.http.get<any>(
+      `http://localhost:8080/users/get_user_info?userId=${this.user_id}`
+    ).subscribe({
+
+      next: (res) => {
+        this.avatarUrl = res.avatar;
+        // console.log(res.email)
+      },
+
+      error: (err) => {
+        console.log(err);
+      }
+
+    });
   };
 
 }

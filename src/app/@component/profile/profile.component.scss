@@ -197,7 +197,25 @@
   text-align: right;
 }
 
+.revise-btn{
+  border: none;
+  background: #2f80ed;
+  color: #ffffff;
+  border-radius: 12px;
+  padding: 8px 20px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.save-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+  margin-bottom: 40px;
+}
+
 .save-btn {
+  min-width: 180px;
   border: none;
   background: #2f80ed;
   color: #ffffff;
