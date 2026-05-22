@@ -29,18 +29,19 @@ export interface LocationAndCategory {
 /*記帳 2026-05-15 by zj */
 export interface ExpenseRecord {
   id: number | null;
-  group_id: number;
-  user_id: number;
+  groupId: number;
+  userId: number;
   categoryId: number;
-  related_item_id: number | null;
+  relatedItemId: number | null;
+  relatedItemName: string;
   price: number | null;
   expenseDate: string;
   note: string;
-  created_at?: string;
+  createdAt?: string;
 }
 
 /*============================================ */
-
+/*群組 2026-05-20 by zj */
 export interface GroupList {
   groupId: number;
   groupName: string;
@@ -50,3 +51,10 @@ export interface GroupList {
   creater: string;
   avatar?: string;
 }
+
+/* 下拉選單群組 2026-05-21 by zj*/
+export interface DropDownGroupList {
+  groupId: number;
+  groupName: string;
+}
+/*============================================ */

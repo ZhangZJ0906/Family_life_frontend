@@ -9,10 +9,17 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
-import { LocationAndCategory } from '../../common/interfaceList';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogRef,
+  MatDialogModule,
+} from '@angular/material/dialog';
+import {
+  DropDownGroupList,
+  LocationAndCategory,
+} from '../../common/interfaceList';
 import Swal from 'sweetalert2';
-import { MatDatepickerModule } from "@angular/material/datepicker";
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
 @Component({
   selector: 'app-expenses-add',
@@ -31,9 +38,10 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 export class ExpensesAddComponent {
   basicUrl!: string;
   expenseForm!: FormGroup;
+  currentGroupId!: number | null;
 
   categoryMap: LocationAndCategory[] = []; // 分類對照
-  userGroups: any[] = [1, 2]; // 儲存使用者擁有的群組清單
+  userGroups: DropDownGroupList[] = []; // 儲存使用者擁有的群組清單
   itemList: any[] = []; // 動態變更的物品清單
 
   currentUserId = 1; // 目前登入的使用者 ID
@@ -51,11 +59,15 @@ export class ExpensesAddComponent {
     // 從主畫面接收傳遞過來的初始共用資料
     if (this.data) {
       this.categoryMap = this.data.categoryMap || [];
-      this.userGroups = this.data.userGroups || []; // 💡 記得主畫面要把使用者持有的群組陣列傳進來
+      this.userGroups = this.data.groupList || [];
+      this.currentGroupId = this.data.currentGroupId;
     }
 
     this.initForm();
     this.watchFormChanges(); // 啟動欄位連動監聽器
+    const groupId = this.currentGroupId ?? 0;
+    this.expenseForm.get('selectedEnvId')?.setValue(groupId);
+    this.onEnvChange(groupId); // 觸發拉物品清單
   }
 
   /**
@@ -63,33 +75,39 @@ export class ExpensesAddComponent {
    */
   initForm() {
     this.expenseForm = this.fb.group({
-      selectedEnvId: [null, Validators.required], // 記帳環境控制項 (0:個人, >0:群組ID)
+      // selectedEnvId: [null, Validators.required], // 記帳環境控制項 (0:個人, >0:群組ID)
+      selectedEnvId: [null], // 記帳環境控制項 (0:個人, >0:群組ID)
       expenseDate: ['', Validators.required],
       price: [null, [Validators.required, Validators.min(0)]],
       categoryId: [null, Validators.required],
       related_item_id: [null],
-      note: [''],
+      related_item_name: ['', Validators.required], // ✅ 新增，作為消費名稱 snapshot
+      note: [''], // ✅ 還原成純備註
     });
   }
-
+  get currentGroupName(): string {
+    return (
+      this.userGroups.find((g) => g.groupId === this.data.currentGroupId)
+        ?.groupName ?? '私人記帳'
+    );
+  }
   /**
    * 監聽表單欄位聯動
    */
   watchFormChanges() {
-    // 監聽 1：當「相關物品」切換時，自動帶入名稱並鎖定 note
     this.expenseForm
       .get('related_item_id')
       ?.valueChanges.subscribe((itemId) => {
-        const noteControl = this.expenseForm.get('note');
+        const nameControl = this.expenseForm.get('related_item_name');
         if (itemId) {
           const selectedItem = this.itemList.find((item) => item.id === itemId);
           if (selectedItem) {
-            noteControl?.setValue(selectedItem.name);
-            noteControl?.disable(); // 帶入物品名稱，鎖定不讓使用者改
+            nameControl?.setValue(selectedItem.name); // ✅ snapshot
+            nameControl?.disable(); // 鎖定
           }
         } else {
-          noteControl?.enable(); // 無關聯物品，解除鎖定自由輸入
-          noteControl?.setValue('');
+          nameControl?.enable();
+          nameControl?.setValue('');
         }
       });
   }
@@ -100,19 +118,21 @@ export class ExpensesAddComponent {
   onEnvChange(envId: number) {
     // 先把舊的物品與備註清空，避免錯亂
     this.expenseForm.get('related_item_id')?.setValue(null);
+    this.expenseForm.get('related_item_name')?.setValue('');
+    this.expenseForm.get('related_item_name')?.enable();
     this.expenseForm.get('note')?.setValue('');
     this.expenseForm.get('note')?.enable();
     this.itemList = [];
 
     // 去後端重拉清單 (如果是 0 代表個人私帳，傳 null 給後端)
     const groupIdParam = envId === 0 ? null : envId;
-    this.loadItemList(groupIdParam, this.currentUserId);
+    this.getItemList(groupIdParam, this.currentUserId);
   }
 
   /**
    * 呼叫後端 API 動態載入物品清單
    */
-  loadItemList(groupId: number | null, userId: number) {
+  getItemList(groupId: number | null, userId: number) {
     let url = `${this.basicUrl}item/getItems?userId=${userId}`;
     if (groupId !== null) {
       url += `&groupId=${groupId}`;
@@ -137,17 +157,19 @@ export class ExpensesAddComponent {
     const formValues = this.expenseForm.getRawValue();
 
     // 建立要送去後端的 payload
+    // group_id: formValues.selectedEnvId === 0 ? null : formValues.selectedEnvId,
+    // 要變回 任意選群組就把group_id 改成上面這樣
     const payload = {
       userId: this.currentUserId,
-      group_id:
-        formValues.selectedEnvId === 0 ? null : formValues.selectedEnvId, // 0 轉成 null 送給後端，代表這是私人帳
+      groupId: this.currentGroupId === 0 ? null : this.currentGroupId,
       categoryId: formValues.categoryId,
-      related_item_id: formValues.related_item_id,
+      relatedItemId: formValues.related_item_id,
+      relatedItemName: formValues.related_item_name,
       price: formValues.price,
       note: formValues.note,
-      expenseDate: this.formatToBackendDate(formValues.expenseDate), // 格式化為 YYYY-MM-DD
+      expenseDate: this.formatToBackendDate(formValues.expenseDate),
     };
-    console.log(payload)
+    console.log(payload);
 
     this.http.postApi(this.basicUrl + 'expense/addInfo', payload).subscribe({
       next: (res: any) => {
