@@ -29,15 +29,15 @@ export interface LocationAndCategory {
 /*記帳 2026-05-15 by zj */
 export interface ExpenseRecord {
   id: number | null;
-  group_id: number;
-  user_id: number;
+  groupId: number;
+  userId: number;
   categoryId: number;
-  related_item_id: number | null;
-  related_item_name?:string;
+  relatedItemId: number | null;
+  relatedItemName: string;
   price: number | null;
   expenseDate: string;
   note: string;
-  created_at?: string;
+  createdAt?: string;
 }
 
 /*============================================ */

@@ -1,4 +1,4 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -9,19 +9,18 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import {
   DropDownGroupList,
   ExpenseRecord,
-  GroupList,
-  Item,
   LocationAndCategory,
 } from '../../common/interfaceList';
 import { HttpClientService } from '../../@services/http-client.service';
-import Swal from 'sweetalert2';
 import { ExpensesAddComponent } from '../expenses-add/expenses-add.component';
 import { ExpensesEditComponent } from '../expenses-edit/expenses-edit.component';
-import { SelectionModel } from '@angular/cdk/collections';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import Swal from 'sweetalert2';
+
 @Component({
   selector: 'app-expense-tracker',
   standalone: true,
@@ -42,24 +41,44 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
   styleUrl: './expenses.component.scss',
 })
 export class ExpensesComponent {
-  basicUrl!: string; // APIＵＲＬ
-  userGroups: DropDownGroupList[] = []; // 儲存使用者擁有的群組清單
-  categoryMap: LocationAndCategory[] = []; // 分類
-  dataSource = new MatTableDataSource<ExpenseRecord>([]); // table  資料
-  selection = new SelectionModel<ExpenseRecord>(true, []); // 刪除  checkbox 勾選到的資料
-  expense: ExpenseRecord[] = []; // 記帳資料
-  itemMap: { [key: number]: any } = {}; // 群組物品東西'
-  relatedItem: Item[] = [];
+  basicUrl!: string;
+  userGroups: DropDownGroupList[] = [];
+  categoryMap: LocationAndCategory[] = [];
+  dataSource = new MatTableDataSource<ExpenseRecord>([]);
+  selection = new SelectionModel<ExpenseRecord>(true, []);
+  expense: ExpenseRecord[] = [];
+  itemMap: { [key: number]: any } = {};
+  currentGroupId: number | null = null;
+  currentUserId = 1;
+  // 月份切換
+  selectedYear = signal(new Date().getFullYear());
+  selectedMonth = signal(new Date().getMonth() + 1);
 
-  // Angular Material Table 要顯示的欄位
   displayedColumns: string[] = [
     'select',
     'expense_date',
+    'related_item_name',
     'category_id',
     'note',
     'price',
     'actions',
   ];
+  filteredExpense = signal<ExpenseRecord[]>([]);
+  filterValues = {
+    search: '',
+    category: null as number | null,
+    year: new Date().getFullYear(),
+    month: new Date().getMonth() + 1,
+  };
+
+  // 本月支出（直接計算過濾後的資料，保證看得到什麼就加總什麼）
+  totalExpense = computed(() => {
+    const data = this.filteredExpense();
+    const total = data.reduce((sum, r) => {
+      return sum + (r.price || 0);
+    }, 0);
+    return total;
+  });
 
   constructor(
     private http: HttpClientService,
@@ -67,167 +86,169 @@ export class ExpensesComponent {
   ) {
     this.basicUrl = this.http.basicUrl;
 
-    // 自訂篩選邏輯：同時處理「分類」+「搜尋」
     this.dataSource.filterPredicate = (data: ExpenseRecord, filter: string) => {
       const f = JSON.parse(filter);
 
-      // 條件 A：分類 (null = 全部)
       const matchCategory =
         f.category == null || data.categoryId === f.category;
 
-      // 條件 B：關鍵字搜尋 (備註 / 分類名 / 金額 / 日期)
       const keyword = f.search;
       const matchSearch =
         !keyword ||
         (data.note ?? '').toLowerCase().includes(keyword) ||
+        (data.relatedItemName ?? '').toLowerCase().includes(keyword) ||
         this.getCategoryName(data.categoryId).toLowerCase().includes(keyword) ||
         (data.price?.toString() ?? '').includes(keyword) ||
         (data.expenseDate ?? '').toLowerCase().includes(keyword);
 
-      return matchCategory && matchSearch; // 兩個條件都要符合
-    };
-    this.getCatgories(); // 獲取 分類
-    this.getExpense(this.currentGroupId, this.currentUserId); // 獲取記帳紀錄
-    this.getUserGroupData(); // 拉取user group
-    this.getItem(this.currentGroupId);
-  }
-  // 塞選或是 文字搜尋用
-  filterValues = {
-    search: '',
-    category: null as number | null,
-  };
-  // 模擬登入使用者與群組環境
-  currentGroupId: number | null = null;
-  currentUserId = 1;
+      const matchMonth = (() => {
+        if (!data.expenseDate) return false;
+        const [y, m] = data.expenseDate.split('-').map(Number);
+        return y === f.year && m === f.month;
+      })();
 
-  // 計算總支出
-  totalExpense = computed(() =>
-    this.dataSource.data.reduce((sum, r) => sum + (r.price || 0), 0),
-  );
-  // 開啟新增dialog
+      return matchCategory && matchSearch && matchMonth;
+    };
+
+    this.getCatgories();
+    this.getExpense(this.currentGroupId, this.currentUserId);
+    this.getUserGroupData();
+  }
+
+  // ─── 月份切換 ───────────────────────────────────────
+  prevMonth() {
+    let y = this.selectedYear();
+    let m = this.selectedMonth();
+    m === 1 ? (y--, (m = 12)) : m--;
+    this.selectedYear.set(y);
+    this.selectedMonth.set(m);
+    this.applyMonthFilter(y, m);
+  }
+
+  nextMonth() {
+    if (this.isCurrentMonth()) return;
+    let y = this.selectedYear();
+    let m = this.selectedMonth();
+    m === 12 ? (y++, (m = 1)) : m++;
+    this.selectedYear.set(y);
+    this.selectedMonth.set(m);
+    this.applyMonthFilter(y, m);
+  }
+
+  isCurrentMonth(): boolean {
+    const now = new Date();
+    return (
+      this.selectedYear() === now.getFullYear() &&
+      this.selectedMonth() === now.getMonth() + 1
+    );
+  }
+
+  private applyMonthFilter(year: number, month: number) {
+    this.filterValues.year = year;
+    this.filterValues.month = month;
+    this.dataSource.filter = JSON.stringify(this.filterValues);
+    this.filteredExpense.set(this.dataSource.filteredData);
+  }
+
+  // ─── Dialog ─────────────────────────────────────────
   openCreateDialog() {
     const dialogRef = this.dialog.open(ExpensesAddComponent, {
       width: '540px',
       height: '540px',
       data: {
         categoryMap: this.categoryMap,
-        groupList:this.userGroups,
-        relatedItem:this.relatedItem
+        groupList: this.userGroups,
+        currentGroupId: this.currentGroupId,
       },
     });
     dialogRef.afterClosed().subscribe((result) => {
-      if (result === true) {
-        this.getExpense(null, this.currentUserId);
-      }
+      if (result === true)
+        this.getExpense(this.currentGroupId, this.currentUserId);
     });
   }
-  // 開啟更新dialog
+
   openEditDialog(record: any) {
-    let relatedItem = null;
-    if (record.relatedItemId != null) {
-      relatedItem = this.itemMap[record.relatedItemId];
-    }
+    const relatedItem =
+      record.relatedItemId != null ? this.itemMap[record.relatedItemId] : null;
     const dialogRef = this.dialog.open(ExpensesEditComponent, {
       width: '540px',
       height: '540px',
       data: {
         record: JSON.parse(JSON.stringify(record)),
         categoryMap: this.categoryMap,
-        relatedItem: relatedItem,
+        relatedItem,
       },
     });
     dialogRef.afterClosed().subscribe((result) => {
-      if (result === true) {
-        this.getExpense(null, this.currentUserId);
-      }
+      if (result === true)
+        this.getExpense(this.currentGroupId, this.currentUserId);
     });
   }
 
-  // 刪除資料
-  // 檢查是否全選
+  // ─── 刪除 ────────────────────────────────────────────
   isAllSelected() {
-    const numSelected = this.selection.selected.length;
-    const numRows = this.dataSource.data.length;
-    return numSelected === numRows;
+    return this.selection.selected.length === this.dataSource.data.length;
   }
 
-  // 全選或取消全選
   masterToggle() {
     this.isAllSelected()
       ? this.selection.clear()
       : this.dataSource.data.forEach((row) => this.selection.select(row));
   }
 
-  // 刪除按鈕邏輯
   deleteById() {
     const selectedIds = this.selection.selected.map((item) => item.id);
-
     Swal.fire({
       title: '確定要刪除嗎？',
-      text: `您選中了 ${selectedIds.length} 筆物品，刪除後將無法還原！`,
+      text: `您選中了 ${selectedIds.length} 筆，刪除後將無法還原！`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#3085d6',
-      confirmButtonText: '是的，刪除它們！',
+      confirmButtonText: '是的，刪除！',
       cancelButtonText: '取消',
     }).then((result) => {
-      if (result.isConfirmed) {
-        this.http
-          .postApi(this.basicUrl + 'expense/deleteInfo', selectedIds)
-          .subscribe({
-            next: (res: any) => {
-              if (res.code != 200) {
-                Swal.fire({
-                  title: '刪除錯誤',
-                  text: res.message || 'server error ',
-                  icon: 'error',
-                });
-              }
-              Swal.fire({
-                title: '刪除成功',
-                icon: 'success',
-              });
-              window.location.reload();
-            },
-            error: (err: any) => {
+      if (!result.isConfirmed) return;
+      this.http
+        .postApi(this.basicUrl + 'expense/deleteInfo', selectedIds)
+        .subscribe({
+          next: (res: any) => {
+            if (res.code != 200) {
               Swal.fire({
                 title: '刪除錯誤',
-                text: err.message || 'server error ',
+                text: res.message || 'server error',
                 icon: 'error',
               });
-            },
-          });
-      }
+              return;
+            }
+            Swal.fire({
+              title: '刪除成功',
+              icon: 'success',
+              timer: 1500,
+              showConfirmButton: false,
+            });
+            this.selection.clear();
+            this.getExpense(this.currentGroupId, this.currentUserId);
+          },
+          error: (err) =>
+            Swal.fire({ title: '刪除錯誤', text: err.message, icon: 'error' }),
+        });
     });
   }
-  //拉取 分類
+
+  // ─── API ─────────────────────────────────────────────
   getCatgories() {
     this.http.getApi(this.basicUrl + 'categories/get').subscribe({
       next: (res: any) => {
-        if (res.code != 200) {
-          Swal.fire({
-            title: '拉取分類錯誤',
-            text: res.message || 'server error ',
-            icon: 'error',
-          });
-        }
-
+        if (res.code != 200) return;
         this.categoryMap = Object.keys(res.categoiesMap).map((key) => ({
           id: Number(key),
           name: res.categoiesMap[key],
         }));
       },
-      error: (err) => {
-        Swal.fire({
-          title: '拉取分類錯誤',
-          text: err.message || 'server error ',
-          icon: 'error',
-        });
-      },
     });
   }
-  //拉取群組
+
   getUserGroupData() {
     this.http
       .getApi(
@@ -236,131 +257,61 @@ export class ExpensesComponent {
       )
       .subscribe({
         next: (res: any) => {
-          if (res.code != 200) {
-            Swal.fire({
-              title: '拉取群組錯誤',
-              text: res.message || 'server error ',
-              icon: 'error',
-            });
-          }
-
+          if (res.code != 200) return;
           this.userGroups = Object.entries(res.groupIdList).map(
             ([id, name]) => ({
               groupId: Number(id),
               groupName: name as string,
             }),
           );
-          this.userGroups.unshift({
-            groupId: 0,
-            groupName: '私人記帳',
-          });
+          this.userGroups.unshift({ groupId: 0, groupName: '私人記帳' });
           this.currentGroupId = 0;
         },
-        error: (err) => {
-          Swal.fire({
-            title: '拉取群組錯誤',
-            text: err.message || 'server error ',
-            icon: 'error',
-          });
-        },
       });
   }
-  // 切換群組
+
   onGroupChange(groupId: number | null) {
     this.currentGroupId = groupId;
-    if (this.currentGroupId == 0) {
-      this.getExpense(null, this.currentUserId);
-      this.selection.clear(); // 清掉勾選
-      return;
-    }
-    this.selection.clear(); // 清掉勾選
-    this.getExpense(groupId, this.currentUserId);
+    this.selection.clear();
+    const id = groupId === 0 ? null : groupId;
+    this.getExpense(id, this.currentUserId);
   }
-  //拉取記帳紀錄
+
   getExpense(groupId: number | null, userId: number) {
-    if (!userId || userId <= 0) {
-      Swal.fire({
-        title: '錯誤',
-        text: '不合法的使用者 ID',
-        icon: 'error',
-      });
-      return;
-    }
-    // 動態組合 URL 參數，避免寫兩段一模一樣的 subscribe 邏輯
     let url = `${this.basicUrl}expense/getInfo?userId=${userId}`;
-    if (groupId != null) {
-      url += `&groupId=${groupId}`;
-    }
+    if (groupId != null) url += `&groupId=${groupId}`;
 
     this.http.getApi(url).subscribe({
       next: (res: any) => {
-        if (res.code !== 200) {
-          Swal.fire({
-            title: '拉取資料錯誤',
-            text: res.message || 'Server error',
-            icon: 'error',
-          });
-          return;
-        }
-
-        // 2. 完美接收後端一次打包回傳的資料
+        if (res.code !== 200) return;
         this.expense = res.list ? [...res.list] : [];
-        this.itemMap = res.itemMap || {}; // 後端回傳的物品對照表 Map<Long, Items>
-
-        // 更新表格或畫面資料來源
+        this.itemMap = res.itemMap || {};
         this.dataSource.data = this.expense;
+        // 資料進來後觸發月份 filter
+        this.dataSource.filter = JSON.stringify(this.filterValues);
+        this.filteredExpense.set(this.dataSource.filteredData);
       },
-      error: (err) => {
-        Swal.fire({
-          title: '錯誤',
-          text: err.message || 'Server error',
-          icon: 'error',
-        });
-      },
+      error: (err) =>
+        Swal.fire({ title: '錯誤', text: err.message, icon: 'error' }),
     });
   }
-  //拉取可能關聯物品
-  getItem(groupId: number | null) {
-      let url = `${this.basicUrl}item/getItems?userId=${this.currentUserId}`; // 👈 補 userId
-      if (groupId != null && groupId > 0) {
-        url += `&groupId=${groupId}`; // 👈 null 就不帶 groupId
-      }
-    this.http
-      .getApi(url)
-      .subscribe({
-        next: (res: any) => {
-          if (res.code != 200) {
-            Swal.fire({
-              title: '拉取群組物品錯誤',
-              text: res.message || 'server error ',
-              icon: 'error',
-            });
-          }
-          console.log(res);
-          this.relatedItem=res.items;
-        },
-        error: (err) => {
-          Swal.fire({
-            title: '拉取群組物品錯誤',
-            text: err.message || 'server error ',
-            icon: 'error',
-          });
-        },
-      });
-  }
-  // 前端 分類名字統整
+
+  // ─── 篩選 ─────────────────────────────────────────────
   getCategoryName(categoryId: number): string {
     return this.categoryMap.find((c) => c.id === categoryId)?.name || '未分類';
   }
-  // 下拉選單 塞選
+
   filterByCategory(categoryId: number | null) {
     this.filterValues.category = categoryId;
     this.dataSource.filter = JSON.stringify(this.filterValues);
+    this.filteredExpense.set(this.dataSource.filteredData);
   }
-  //文字搜尋
+
   applyFilter(event: Event) {
-    const value = (event.target as HTMLInputElement).value;
-    this.filterValues.search = value.trim().toLowerCase();
+    this.filterValues.search = (event.target as HTMLInputElement).value
+      .trim()
+      .toLowerCase();
     this.dataSource.filter = JSON.stringify(this.filterValues);
+    this.filteredExpense.set(this.dataSource.filteredData);
   }
 }

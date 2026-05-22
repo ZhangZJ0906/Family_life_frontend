@@ -6,12 +6,12 @@
 <mat-dialog-content class="px-3 py-2" style="overflow: hidden;">
   <form [formGroup]="expenseForm" class="container-fluid p-0">
 
-    <div class="row g-3 mb-3">
+    <!-- <div class="row g-3 mb-3">
       <div class="col-12">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>選擇記帳環境</mat-label>
           <mat-select formControlName="selectedEnvId" (selectionChange)="onEnvChange($event.value)" required>
-            
+
             @for (g of userGroups; track g.groupId) {
             <mat-option [value]="g.groupId">👥 {{ g.groupName }}</mat-option>
             }
@@ -21,15 +21,47 @@
           }
         </mat-form-field>
       </div>
+    </div> -->
+<div class="row g-3 mb-3">
+  <div class="col-12">
+    <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 border bg-light">
+      <mat-icon class="text-primary" style="font-size: 20px; width: 20px; height: 20px;">
+        groups
+      </mat-icon>
+      <div class="lh-1">
+        <div class="text-muted" style="font-size: 0.72rem;">記帳環境</div>
+        <div class="fw-bold text-dark" style="font-size: 0.95rem;">{{ currentGroupName }}</div>
+      </div>
+      <mat-icon class="ms-auto text-success" style="font-size: 18px; width: 18px; height: 18px;">
+        lock
+      </mat-icon>
     </div>
+  </div>
+</div>
+    
+
+      <div class="row g-3 mb-2">
+        <div class="col-12">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>消費名稱</mat-label>
+            <input matInput formControlName="related_item_name"
+              [placeholder]="expenseForm.get('related_item_id')?.value ? '已自動帶入物品名稱' : '例如：午餐排骨飯...'" />
+            @if (expenseForm.get('related_item_id')?.value) {
+            <mat-hint class="text-primary fw-medium">
+              💡 已與物品連動，如需修改請先取消關聯物品。
+            </mat-hint>
+            }
+          </mat-form-field>
+        </div>
+      </div>
 
     <div class="row g-3 mb-3">
       <div class="col-12 col-md-6">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>消費日期</mat-label>
-          <input matInput  [matDatepicker]="picker" formControlName="expenseDate" required>
-            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
+          <input matInput [matDatepicker]="picker" formControlName="expenseDate" required>
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
           @if (expenseForm.get('expenseDate')?.hasError('required')) {
           <mat-error>請選擇日期</mat-error>
           }
@@ -67,7 +99,7 @@
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>關聯物品 (選填)</mat-label>
           <mat-select formControlName="related_item_id"
-            [placeholder]="expenseForm.get('selectedEnvId')?.value !== null ? '請選擇物品' : '請先選擇記帳環境'">
+            placeholder="請選擇物品">
             <mat-option [value]="null">無關聯物品 (自由輸入名稱)</mat-option>
             @for (item of itemList; track item.id) {
             <mat-option [value]="item.id">{{ item.name }}</mat-option>
@@ -77,17 +109,13 @@
       </div>
     </div>
 
-    <div class="row g-3 mb-2">
+ 
+
+    <div class="row g-3 mb-5">
       <div class="col-12">
         <mat-form-field appearance="outline" class="w-100">
-          <mat-label>消費名稱 / 備註说明</mat-label>
-          <textarea matInput formControlName="note" rows="2"
-            [placeholder]="expenseForm.get('related_item_id')?.value ? '已自動帶入物品名稱，不可修改' : '例如：午餐排骨飯...'"></textarea>
-          @if (expenseForm.get('related_item_id')?.value) {
-          <mat-hint class="text-primary fw-medium">
-            💡 已與物品連動，如需自行修改請先將關聯物品取消。
-          </mat-hint>
-          }
+          <mat-label>備註 (選填)</mat-label>
+          <textarea matInput formControlName="note" rows="2" placeholder="額外備註說明..."></textarea>
         </mat-form-field>
       </div>
     </div>
