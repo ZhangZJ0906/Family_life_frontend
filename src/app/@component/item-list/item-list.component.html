@@ -233,6 +233,22 @@
           </td>
         </ng-container>
 
+        <!-- 藥品：藥品類型 -->
+      <ng-container matColumnDef="medicineType">
+        <th mat-header-cell *matHeaderCellDef>藥品類型</th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.medicineType || '無' }}
+        </td>
+      </ng-container>
+
+      <!-- 藥品：用法 -->
+      <ng-container matColumnDef="usageMethod">
+        <th mat-header-cell *matHeaderCellDef>用法</th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.usageMethod || '無' }}
+        </td>
+      </ng-container>
+
         <!-- 一般物品 / 訂閱共用：狀態 -->
         <ng-container matColumnDef="status">
   <th mat-header-cell *matHeaderCellDef>狀態</th>
@@ -252,21 +268,24 @@
 
     <!-- 訂閱資料：用後端回傳的 remindMessage -->
     @if (isSubscriptionMode && element.remindMessage) {
-      <p class="remind-text">
-        {{ element.remindMessage }}
-      </p>
-    }
+  <p class="remind-text">
+    {{ element.remindMessage }}
+  </p>
+}
 
-    <!-- 一般物品：用 expireDate 自動算剩餘天數 -->
-    @if (isWarrantyMode) {
-    <p class="remind-text">
-      {{ getItemRemainText(element.warrantyEndDate) }}
-    </p>
-  } @else if (!isSubscriptionMode) {
-    <p class="remind-text">
-      {{ getItemRemainText(element.expireDate) }}
-    </p>
-  }
+@if (isWarrantyMode) {
+  <p class="remind-text">
+    {{ getItemRemainText(element.warrantyEndDate) }}
+  </p>
+} @else if (isMedicineMode) {
+  <p class="remind-text">
+    {{ getItemRemainText(element.expireDate) }}
+  </p>
+} @else if (!isSubscriptionMode) {
+  <p class="remind-text">
+    {{ getItemRemainText(element.expireDate) }}
+  </p>
+}
   </td>
 </ng-container>
         <!-- 表頭 -->

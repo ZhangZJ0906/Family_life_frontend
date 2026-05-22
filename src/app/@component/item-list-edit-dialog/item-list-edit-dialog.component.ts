@@ -47,6 +47,7 @@ export class ItemListEditDialogComponent implements OnInit {
 
 isSubscriptionMode = false;
 isWarrantyMode = false;
+isMedicineMode = false;
 
 isSubscriptionCategory(): boolean {
   return this.isSubscriptionMode;
@@ -54,6 +55,10 @@ isSubscriptionCategory(): boolean {
 
 isWarrantyCategory(): boolean {
   return this.isWarrantyMode;
+}
+
+isMedicineCategory(): boolean {
+  return this.isMedicineMode;
 }
 
   constructor(
@@ -65,6 +70,7 @@ isWarrantyCategory(): boolean {
   if (this.data && this.data.item) {
     this.isSubscriptionMode = this.data?.isSubscriptionMode || false;
     this.isWarrantyMode = this.data?.isWarrantyMode || false;
+    this.isMedicineMode = this.data?.isMedicineMode || false;
     this.item = { ...this.data.item };
 
     this.location = this.data.locationMap || [];
@@ -93,6 +99,17 @@ isWarrantyCategory(): boolean {
     this.item.nextBillingDate = this.formatDate(this.item.nextBillingDate);
     this.item.warrantyEndDate = this.formatDate(this.item.warrantyEndDate);
   }
+
+  if (this.isMedicineMode) {
+  const medicineCategory = this.categories.find(cat => cat.name === '藥品');
+  if (medicineCategory) {
+    this.item.categoryId = medicineCategory.id;
+  }
+
+  this.item.purchaseDate = this.formatDate(this.item.purchaseDate);
+
+  this.item.expireDate = this.formatDate(this.item.expireDate);
+}
 }
   // 在你的 Component 內，或是物件 model 內
   get totalPrice(): number {
@@ -156,7 +173,28 @@ onOkClose(): void {
       notify: this.item.notify,
       note: this.item.note,
     };
-  } else {
+  } else if (this.isMedicineCategory()) {
+  payload = {
+    id: this.item.id,
+    groupId: this.item.groupId,
+    userId: this.item.userId || 1,
+    name: this.item.name,
+    medicineType: this.item.medicineType,
+    quantity: this.item.quantity,
+    unit: this.item.unit,
+    safeQuantity: this.item.safeQuantity ?? 0,
+    purchaseDate: this.formatDate(this.item.purchaseDate),
+    expireDate: this.formatDate(this.item.expireDate),
+    dosage: this.item.dosage,
+    usageMethod: this.item.usageMethod,
+    unitPrice: this.item.unitPrice,
+    location: this.item.location,
+    source: this.item.source,
+    notify: this.item.notify,
+    note: this.item.note,
+  };
+}
+  else {
     payload = {
       ...this.item,
       purchaseDate: this.formatDate(this.item.purchaseDate),

@@ -36,7 +36,7 @@
         </mat-form-field>
       </div>
 
-      @if (!isSubscriptionCategory() && !isWarrantyCategory()) {
+      @if (!isSubscriptionCategory() && !isWarrantyCategory() && !isMedicineCategory()) {
 
   <div class="col-4">
     <mat-form-field appearance="outline" class="w-100">
@@ -221,6 +221,104 @@
       <mat-label>購買金額</mat-label>
       <input matInput type="number" [(ngModel)]="item.price" min="0">
       <span matPrefix>$&nbsp;</span>
+    </mat-form-field>
+  </div>
+}
+
+@if (isMedicineCategory()) {
+  <div class="col-6">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>藥品類型</mat-label>
+      <mat-select [(ngModel)]="item.medicineType">
+        <mat-option value="錠劑">錠劑</mat-option>
+        <mat-option value="膠囊">膠囊</mat-option>
+        <mat-option value="藥水">藥水</mat-option>
+        <mat-option value="藥膏">藥膏</mat-option>
+        <mat-option value="眼藥水">眼藥水</mat-option>
+        <mat-option value="其他">其他</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="col-3">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>目前數量</mat-label>
+      <input matInput type="number" [(ngModel)]="item.quantity" min="0">
+    </mat-form-field>
+  </div>
+
+  <div class="col-6">
+  <mat-form-field appearance="outline" class="w-100">
+    <mat-label>單價</mat-label>
+    <input matInput type="number" [(ngModel)]="item.unitPrice" min="0">
+    <span matPrefix>$&nbsp;</span>
+  </mat-form-field>
+</div>
+
+
+  <div class="col-3">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>單位</mat-label>
+      <input matInput [(ngModel)]="item.unit" placeholder="顆/瓶/盒">
+    </mat-form-field>
+  </div>
+
+  <div class="col-6">
+  <mat-form-field appearance="outline" class="w-100">
+    <mat-label>總價（自動計算）</mat-label>
+    <input matInput type="number" [ngModel]="totalPrice" readonly>
+    <span matPrefix>$&nbsp;</span>
+    <mat-hint>{{ item.quantity || 0 }} × {{ item.unitPrice || 0 }}</mat-hint>
+  </mat-form-field>
+</div>
+
+  <div class="col-6">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>安全庫存量</mat-label>
+      <input matInput type="number" [(ngModel)]="item.safeQuantity" min="0">
+    </mat-form-field>
+  </div>
+
+  <div class="col-6">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>藥品來源</mat-label>
+      <input matInput [(ngModel)]="item.source" placeholder="藥局/診所/醫院">
+    </mat-form-field>
+  </div>
+
+  <div class="col-6">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>購買日期</mat-label>
+      <input matInput [matDatepicker]="medicinePurchasePicker" [(ngModel)]="item.purchaseDate">
+      <mat-datepicker-toggle matIconSuffix [for]="medicinePurchasePicker"></mat-datepicker-toggle>
+      <mat-datepicker #medicinePurchasePicker></mat-datepicker>
+    </mat-form-field>
+  </div>
+
+
+
+  <div class="col-12">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>到期日期</mat-label>
+      <input matInput [matDatepicker]="medicineExpirePicker" [(ngModel)]="item.expireDate">
+      <mat-datepicker-toggle matIconSuffix [for]="medicineExpirePicker"></mat-datepicker-toggle>
+      <mat-datepicker #medicineExpirePicker></mat-datepicker>
+    </mat-form-field>
+  </div>
+
+  <div class="col-6">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>劑量</mat-label>
+      <input matInput [(ngModel)]="item.dosage" placeholder="一次 1 顆">
+    </mat-form-field>
+  </div>
+
+
+
+  <div class="col-12">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>用法</mat-label>
+      <input matInput [(ngModel)]="item.usageMethod" placeholder="飯後服用">
     </mat-form-field>
   </div>
 }

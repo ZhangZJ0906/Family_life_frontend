@@ -69,6 +69,14 @@ isWarrantyCategory(): boolean {
 
   return selectedCategory?.name === '保固';
 }
+
+isMedicineCategory(): boolean {
+  const selectedCategory = this.categories.find(
+    cat => Number(cat.id) === Number(this.item.categoryId)
+  );
+
+  return selectedCategory?.name === '藥品';
+}
   item = {
   created_by_id: 1,
   groupId: 1,
@@ -97,6 +105,12 @@ isWarrantyCategory(): boolean {
   serialNumber: '',
   warrantyEndDate: '',
   storeName: '',
+
+  // 藥品用欄位
+  medicineType: '',
+  dosage: '',
+  usageMethod: '',
+  source: '',
   };
 
   basicUrl!: string;
@@ -108,7 +122,7 @@ isWarrantyCategory(): boolean {
     this.basicUrl = this.http.basicUrl;
   }
   ngOnInit(): void {
-     this.minDate = this.today.toISOString().split('T')[0];
+    this.minDate = this.today.toISOString().split('T')[0];
 
   if (this.data && this.data.location) {
     this.location = [...this.data.location];
@@ -131,12 +145,23 @@ isWarrantyCategory(): boolean {
   }
 
   if (this.data?.isWarrantyMode) {
-  const warrantyCategory = this.categories.find(cat => cat.name === '保固');
-  if (warrantyCategory) {
-    this.item.categoryId = warrantyCategory.id;
+    const warrantyCategory = this.categories.find(cat => cat.name === '保固');
+    if (warrantyCategory) {
+      this.item.categoryId = warrantyCategory.id;
+    }
+  }
+
+  // 藥品要獨立判斷，不能放在訂閱裡面
+  if (this.data?.isMedicineMode) {
+    const medicineCategory = this.categories.find(cat => cat.name === '藥品');
+    if (medicineCategory) {
+      this.item.categoryId = medicineCategory.id;
+    }
   }
 }
-  }
+
+
+
   get totalPrice(): number {
     return (this.item.unitPrice || 0) * (this.item.quantity || 0);
   }
@@ -152,6 +177,12 @@ isWarrantyCategory(): boolean {
     this.addWarrantyInfo();
     return;
   }
+
+  // 如果是藥品類別，走藥品的新增流程
+  if (this.isMedicineCategory()) {
+  this.addMedicineInfo();
+  return;
+}
 
   // 一般物品的新增流程
   const payload = {
@@ -341,6 +372,57 @@ addWarrantyInfo(): void {
         text: err.message || 'Server error',
         icon: 'error',
       });
+    },
+  });
+}
+
+addMedicineInfo(): void {
+ const payload = {
+    groupId: this.item.groupId,
+    userId: this.item.created_by_id,
+    name: this.item.name,
+    medicineType: this.item.medicineType,
+    quantity: this.item.quantity,
+    unit: this.item.unit,
+    unitPrice: this.item.unitPrice,
+    safeQuantity: this.item.safeQuantity,
+    purchaseDate: this.formatDate(this.item.purchaseDate),
+    expireDate: this.formatDate(this.item.expireDate),
+    dosage: this.item.dosage,
+    usageMethod: this.item.usageMethod,
+    location: this.item.locationId?.toString(),
+    source: this.item.source,
+    notify: this.item.notify,
+    note: this.item.note,
+  };
+
+  if (!payload.name?.trim()) {
+    this.showError('請輸入藥品名稱');
+    return;
+  }
+
+  if (!payload.unit?.trim()) {
+    this.showError('請輸入單位');
+    return;
+  }
+
+  if (!payload.expireDate) {
+    this.showError('請選擇藥品到期日');
+    return;
+  }
+
+  this.http.postApi(this.basicUrl + 'medicine/add', payload).subscribe({
+    next: (res: any) => {
+      if (res.code != 200) {
+        Swal.fire('錯誤', res.message || 'Server error', 'error');
+        return;
+      }
+
+      Swal.fire('成功', res.message, 'success');
+      this.dialogRef.close(true);
+    },
+    error: (err: any) => {
+      Swal.fire('錯誤', err.message || 'Server error', 'error');
     },
   });
 }

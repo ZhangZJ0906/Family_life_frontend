@@ -116,6 +116,22 @@ warrantyDisplayedColumns: string[] = [
   'notify',
 ];
 
+// 藥品資料
+medicineList: any[] = [];
+isMedicineMode = false;
+
+// 藥品表格重要欄位
+medicineDisplayedColumns: string[] = [
+  'select',
+  'name',
+  'medicineType',
+  'quantity',
+  'expireDate',
+  'usageMethod',
+  'status',
+  'notify',
+];
+
   // 目前實際顯示的表格欄位
   displayedColumns: string[] = this.itemDisplayedColumns;
 
@@ -147,6 +163,7 @@ warrantyDisplayedColumns: string[] = [
         currentGroupId: this.currentGroupId,
         isSubscriptionMode: this.isSubscriptionMode,
         isWarrantyMode: this.isWarrantyMode,
+        isMedicineMode: this.isMedicineMode,
       },
     });
 
@@ -158,7 +175,10 @@ warrantyDisplayedColumns: string[] = [
           // 保固模式新增後，重新查保固
         } else if (this.isWarrantyMode) {
           this.getWarrantyByGroupId(this.currentGroupId);
-        } else {
+          // 藥品模式新增後，重新查藥品
+        } else if (this.isMedicineMode) {
+          this.getMedicineByGroupId(this.currentGroupId);
+    }else {
           // 一般物品新增後，重新查物品
           this.getItemByGroupId(this.currentGroupId);
         }
@@ -177,6 +197,7 @@ warrantyDisplayedColumns: string[] = [
         categoriesMap: this.categories,
         isSubscriptionMode: this.isSubscriptionMode,
         isWarrantyMode: this.isWarrantyMode,
+        isMedicineMode: this.isMedicineMode,
       },
     });
 
@@ -186,7 +207,11 @@ warrantyDisplayedColumns: string[] = [
           this.updateSubscription(result);
         } else if (this.isWarrantyMode) {
           this.updateWarranty(result);
-        } else {
+        }
+        else if (this.isMedicineMode) {
+        this.updateMedicine(result);
+      }
+        else {
           this.updateItem(result);
         }
       }
@@ -254,17 +279,58 @@ warrantyDisplayedColumns: string[] = [
   });
 }
 
+//修改藥品
+updateMedicine(data: any): void {
+  this.http.postApi(this.basicUrl + 'medicine/update', data).subscribe({
+    next: (res: any) => {
+      if (res.code !== 200) {
+        Swal.fire({
+          title: '更新錯誤',
+          text: res.message || 'Server error',
+          icon: 'error',
+        });
+        return;
+      }
+
+      Swal.fire({
+        title: '更新成功',
+        icon: 'success',
+      });
+
+      this.getMedicineByGroupId(this.currentGroupId);
+    },
+    error: (err: any) => {
+      Swal.fire({
+        title: '更新錯誤',
+        text: err.message || 'Server error',
+        icon: 'error',
+      });
+    },
+  });
+}
+
   // 點擊分類
   filterByCategory(catId: number) {
-    const category = this.categories.find((cat) => cat.id === catId);
-    this.selectedCategory = category?.name || '全部';
+     const category = this.categories.find((cat) => cat.id === catId);
+  this.selectedCategory = category?.name || '全部';
 
-    this.selection.clear();
+  this.selection.clear();
 
-     if (this.selectedCategory === '訂閱') {
+  // 訂閱
+  if (this.selectedCategory === '訂閱') {
     this.isSubscriptionMode = true;
     this.isWarrantyMode = false;
+    this.isMedicineMode = false;
     this.getSubscriptionByGroupId(this.currentGroupId);
+    return;
+  }
+
+  // 藥品
+  if (this.selectedCategory === '藥品') {
+    this.isSubscriptionMode = false;
+    this.isWarrantyMode = false;
+    this.isMedicineMode = true;
+    this.getMedicineByGroupId(this.currentGroupId);
     return;
   }
 
@@ -272,22 +338,24 @@ warrantyDisplayedColumns: string[] = [
   if (this.selectedCategory === '保固') {
     this.isSubscriptionMode = false;
     this.isWarrantyMode = true;
+    this.isMedicineMode = false;
     this.getWarrantyByGroupId(this.currentGroupId);
     return;
-    }
+  }
 
-    // 其他分類維持一般物品表格
-    this.isSubscriptionMode = false;
-    this.isWarrantyMode = false;
-    this.displayedColumns = this.itemDisplayedColumns;
+  // 其他分類：食品、日用品、清潔用品、全部
+  this.isSubscriptionMode = false;
+  this.isWarrantyMode = false;
+  this.isMedicineMode = false;
+  this.displayedColumns = this.itemDisplayedColumns;
 
-    if (catId === 0) {
-      this.dataSource.data = this.itemList;
-    } else {
-      this.dataSource.data = this.itemList.filter(
-        (item: any) => item.categoryId === catId
-      );
-    }
+  if (catId === 0) {
+    this.dataSource.data = this.itemList;
+  } else {
+    this.dataSource.data = this.itemList.filter(
+      (item: any) => item.categoryId === catId
+    );
+  }
 
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();
@@ -351,6 +419,7 @@ warrantyDisplayedColumns: string[] = [
 
   this.isWarrantyMode = true;
   this.isSubscriptionMode = false;
+  this.isMedicineMode = false;
   this.displayedColumns = this.warrantyDisplayedColumns;
 
   this.http
@@ -380,6 +449,49 @@ warrantyDisplayedColumns: string[] = [
     });
 }
 
+// 查詢藥品資料
+getMedicineByGroupId(groupId: number): void {
+  if (!groupId || groupId <= 0) {
+    Swal.fire({
+      title: '錯誤',
+      text: '群組 ID 不可為空',
+      icon: 'error',
+    });
+    return;
+  }
+
+  this.isMedicineMode = true;
+  this.isSubscriptionMode = false;
+  this.isWarrantyMode = false;
+  this.displayedColumns = this.medicineDisplayedColumns;
+
+  this.http
+    .getApi(this.basicUrl + `medicine/getByGroup?groupId=${groupId}`)
+    .subscribe({
+      next: (res: any) => {
+        if (res.code !== 200) {
+          Swal.fire({
+            title: '查詢失敗',
+            text: res.message || '藥品資料查詢失敗',
+            icon: 'error',
+          });
+          return;
+        }
+
+        this.medicineList = res.data || [];
+        this.dataSource.data = this.medicineList;
+        this.dataSource.paginator?.firstPage();
+      },
+      error: (err: any) => {
+        Swal.fire({
+          title: '錯誤',
+          text: err.message || 'Server error',
+          icon: 'error',
+        });
+      },
+    });
+}
+
   // 查詢一般物品資料
   getItemByGroupId(groupId: number) {
     this.currentGroupId = groupId;
@@ -393,6 +505,13 @@ warrantyDisplayedColumns: string[] = [
     // 切換群組時，如果目前在保固模式，就查保固
     if (this.isWarrantyMode) {
     this.getWarrantyByGroupId(groupId);
+    return;
+
+  }
+
+    // 切換群組時，如果目前在藥品模式，就查藥品
+    if (this.isMedicineMode) {
+    this.getMedicineByGroupId(groupId);
     return;
   }
 
@@ -619,6 +738,46 @@ warrantyDisplayedColumns: string[] = [
         return;
       }
 
+      // 藥品模式刪除
+if (this.isMedicineMode) {
+  selectedIds.forEach((id) => {
+    this.http
+      .deleteApi(this.basicUrl + `medicine/delete?id=${id}`)
+      .subscribe({
+        next: (res: any) => {
+          if (res.code !== 200) {
+            Swal.fire({
+              title: '刪除失敗',
+              text: res.message || 'Server error',
+              icon: 'error',
+            });
+            return;
+          }
+
+          // 最後一筆完成後重新查詢
+          if (id === selectedIds[selectedIds.length - 1]) {
+            Swal.fire({
+              title: '刪除成功',
+              icon: 'success',
+            });
+
+            this.selection.clear();
+            this.getMedicineByGroupId(this.currentGroupId);
+          }
+        },
+        error: (err: any) => {
+          Swal.fire({
+            title: '刪除錯誤',
+            text: err.message || 'Server error',
+            icon: 'error',
+          });
+        },
+      });
+  });
+
+  return;
+}
+
       // 一般物品刪除
       this.http.postApi(this.basicUrl + 'item/delete', selectedIds).subscribe({
         next: (res: any) => {
@@ -648,6 +807,8 @@ warrantyDisplayedColumns: string[] = [
         },
       });
     });
+
+
   }
 
   // 計算一般物品距離到期剩餘幾天
