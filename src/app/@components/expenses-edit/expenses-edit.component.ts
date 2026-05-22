@@ -48,7 +48,9 @@ export class ExpensesEditComponent {
     this.item = this.data.relatedItem;
     this.record = this.data.record;
     this.basicUrl = this.http.basicUrl;
+    console.log(this.record)
   }
+
   private formatToBackendDate(dateInput: any): string {
     if (!dateInput) return '';
 
