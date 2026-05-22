@@ -28,9 +28,11 @@ export class LoginComponent {
           return;
         }
 
+        console.log("id0001: " + res.userId)
+
         this.authService.setCurrentUser(this.buildLoginUser(res));
         localStorage.setItem('isLogin', 'true');
-        this.router.navigate(['/shopping-list']);// 👉 登入成功後導向的頁面，可以自己改路徑。
+        this.router.navigate(['/home-page']);// 👉 登入成功後導向的頁面，可以自己改路徑。
       },
       error: (err) => {
         console.error(err);
@@ -41,7 +43,7 @@ export class LoginComponent {
 
   //** 後端回傳的 user 物件結構不太一致，這裡做一次轉換 */
   private buildLoginUser(res: any): User {
-    const user = res.user ?? res.data ?? {};
+    const user = res?? {};
 
     return {
       user_id: user.user_id ?? user.userId ?? 0,
@@ -49,7 +51,8 @@ export class LoginComponent {
       email: user.email ?? this.email,
       password: '',
       avatar: user.avatar ?? '',
-      notify: user.notify ?? user.is_notify ?? true,
+      is_notify_by_enddate: user.is_notify_by_enddate?? true,
+      is_notify_by_email: user.is_notify_by_email?? true,
       created_at: user.created_at ?? '',
       updated_at: user.updated_at ?? ''
     };

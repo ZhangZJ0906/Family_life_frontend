@@ -4,7 +4,8 @@ export interface User {
   email: string;
   password: string;
   avatar: string;
-  notify: boolean;
+  is_notify_by_enddate: boolean;
+  is_notify_by_email: boolean;
   created_at: string;
   updated_at: string;
 }

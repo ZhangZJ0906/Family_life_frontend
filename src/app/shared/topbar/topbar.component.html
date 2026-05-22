@@ -30,17 +30,22 @@
       🔔
     </button>
     <!-- 右上角使用者頭像 -->
-  <div class="user-avatar">
+    <div class="user-avatar">
 
-    <!-- 有頭像圖片時顯示圖片 -->
-    <img *ngIf="avatarUrl; else defaultAvatar" [src]="avatarUrl" alt="使用者頭像">
+      <!-- 有頭像圖片時顯示圖片 -->
+      <img *ngIf="avatarUrl; else defaultAvatar" [src]="avatarUrl" alt="使用者頭像">
 
-    <!-- 沒有頭像圖片時顯示 J -->
-    <ng-template #defaultAvatar>
-      J
-    </ng-template>
+      <!-- 沒有頭像圖片時顯示 J -->
+      <ng-template #defaultAvatar>
+        J
+      </ng-template>
 
-  </div>
+    </div>
+
+    <!-- 🔥 新增 logout button -->
+    <button class="logout-btn" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+    </button>
   </div>
 
 </header>

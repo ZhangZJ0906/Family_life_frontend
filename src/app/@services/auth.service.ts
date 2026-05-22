@@ -4,23 +4,6 @@ import { Observable } from 'rxjs';
 import { User } from '../@models/user.model';
 import { Router } from '@angular/router';
 
-<<<<<<< HEAD
-// 模擬用戶資料，實際應從後端獲取
-const DEMO_USERS: User[] = [
-  {
-    user_id: 2,
-    name: 'Family Admin',
-    email: '123@example.com',
-    password: '123',
-    avatar: '',
-    is_notify: true,
-    created_at: '2026-05-11T00:00:00.000Z',
-    updated_at: '2026-05-11T00:00:00.000Z'
-  }
-];
-=======
-
->>>>>>> origin/LII
 
 const STORAGE_KEY = 'family-life-current-user';
 

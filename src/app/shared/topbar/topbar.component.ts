@@ -6,6 +6,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import Swal from 'sweetalert2';
+import { MatIconModule } from '@angular/material/icon';
 
 import { NotifyDialogComponent } from '../../@group/notify-dialog/notify-dialog.component';
 import { AuthService } from '../../@services/auth.service';
@@ -20,7 +21,8 @@ import { AuthService } from '../../@services/auth.service';
     CommonModule,
     MatDialogModule,
     MatBadgeModule,
-    FormsModule
+    FormsModule,
+    MatIconModule
   ],
   templateUrl: './topbar.component.html',
   styleUrl: './topbar.component.scss'
@@ -37,6 +39,10 @@ export class TopbarComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private authService: AuthService
   ) {}
+
+  logout(): void {
+    this.authService.logout();
+  }
 
   ngOnInit(): void {
 

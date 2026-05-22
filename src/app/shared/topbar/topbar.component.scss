@@ -109,4 +109,25 @@
   display: block;
 }
 
+.logout-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: #f3f4f6;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logout-btn mat-icon {
+  color: #e74c3c;
+  font-size: 24px;
+}
+
+.logout-btn:hover mat-icon {
+  color: #c0392b;
+}
 

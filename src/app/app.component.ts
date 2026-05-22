@@ -16,10 +16,6 @@ export class AppComponent {
   readonly currentUser = this.authService.currentUser;
   readonly isLoggedIn = this.authService.isLoggedIn;
 
-  logout(): void {
-    this.authService.logout();
-  }
-
   pageTitle = '';
 
   constructor(
