@@ -1,20 +1,18 @@
-import { AuthService } from './../../@services/auth.service';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-
+import { Router, RouterLink } from '@angular/router';
+import { User } from '../../@models/user.model';
+import { AuthService } from '../../@services/auth.service';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
 export class LoginComponent {
-
-  email = '123@example.com';
-  password = '123';
+  email = '';
+  password = '';
   errorMessage = '';
 
   constructor(
@@ -22,18 +20,38 @@ export class LoginComponent {
     private readonly router: Router
   ) {}
 
+  signIn(): void {
+    this.authService.login(this.email, this.password).subscribe({
+      next: (res) => {
+        if (res.code !== 200) {
+          this.errorMessage = 'Email 或密碼不正確';
+          return;
+        }
 
-  signIn() {
-    const success = this.authService.login(this.email, this.password);
-
-    if (!success) {
-      this.errorMessage = 'Email 或密碼不正確';
-      return;
-    }
-
-    this.errorMessage = '';
-    this.router.navigate(['/shopping-list']);
+        this.authService.setCurrentUser(this.buildLoginUser(res));
+        localStorage.setItem('isLogin', 'true');
+        this.router.navigate(['/shopping-list']);// 👉 登入成功後導向的頁面，可以自己改路徑。
+      },
+      error: (err) => {
+        console.error(err);
+        this.errorMessage = 'Email 或密碼不正確';
+      }
+    });
   }
 
+  //** 後端回傳的 user 物件結構不太一致，這裡做一次轉換 */
+  private buildLoginUser(res: any): User {
+    const user = res.user ?? res.data ?? {};
 
+    return {
+      user_id: user.user_id ?? user.userId ?? 0,
+      name: user.name ?? user.userName ?? this.email,
+      email: user.email ?? this.email,
+      password: '',
+      avatar: user.avatar ?? '',
+      notify: user.notify ?? user.is_notify ?? true,
+      created_at: user.created_at ?? '',
+      updated_at: user.updated_at ?? ''
+    };
+  }
 }

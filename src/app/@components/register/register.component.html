@@ -1,1 +1,32 @@
-<p>register works!</p>
+<section>
+  <h1>註冊</h1>
+
+  <form (ngSubmit)="register()">
+    <label>
+      姓名
+      <input type="text" name="name" [(ngModel)]="name" required />
+    </label>
+
+    <label>
+      Email
+      <input type="email" name="email" [(ngModel)]="email" required />
+    </label>
+
+    <label>
+      密碼
+      <input type="password" name="password" [(ngModel)]="password" required />
+    </label>
+
+    <label>
+      頭像網址
+      <input type="text" name="avatar" [(ngModel)]="avatar" />
+    </label>
+
+    <label>
+      <input type="checkbox" name="is_notify" [(ngModel)]="is_notify" />
+      開啟通知
+    </label>
+
+    <button type="submit">註冊</button>
+  </form>
+</section>

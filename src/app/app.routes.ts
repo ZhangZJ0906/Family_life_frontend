@@ -41,6 +41,20 @@ export const routes: Routes = [
     data: { title: '購物清單' },
   },
   {
+    path: 'purchase-item/:listId',
+    loadComponent: () =>
+      import('./@components/purchase-item/purchase-item.component').then(
+        (m) => m.PurchaseItemComponent
+      )
+  },
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./@components/register/register.component').then(
+        (m) => m.RegisterComponent
+      )
+  },
+  {
     path: '',
     pathMatch: 'full',
     redirectTo: 'login',
