@@ -47,8 +47,8 @@ export class AuthService {
 
   setCurrentUser(user: User): void {
     this.currentUserSignal.set(user);
+    console.log(user)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-    localStorage.setItem('loginUser', JSON.stringify(user));
   }
 
   private readStoredUser(): User | null {

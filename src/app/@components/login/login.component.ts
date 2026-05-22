@@ -8,7 +8,7 @@ import { AuthService } from '../../@services/auth.service';
   selector: 'app-login',
   imports: [FormsModule, RouterLink],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  styleUrl: './login.component.scss',
 })
 export class LoginComponent {
   email = '';
@@ -17,7 +17,7 @@ export class LoginComponent {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly router: Router
+    private readonly router: Router,
   ) {}
 
   signIn(): void {
@@ -27,19 +27,37 @@ export class LoginComponent {
           this.errorMessage = 'Email 或密碼不正確';
           return;
         }
+<<<<<<< HEAD
 
         // console.log("id0001: " + res.userId)
 
         this.authService.setCurrentUser(this.buildLoginUser(res));
         localStorage.setItem('isLogin', 'true');
         this.router.navigate(['/home-page']);// 👉 登入成功後導向的頁面，可以自己改路徑。
+=======
+        const payload = {
+          user_id: res.userId,
+          name: res.name,
+          email: res.email,
+          password: '',
+          avatar: res.avatar ?? '',
+          notifyByEndDate: res.notifyByEndDate ?? true,
+          notifyByEmail: res.notifyByEmail ?? true,
+          // created_at: res.created_at ??  '',
+          // updated_at: res.updated_at ?? '',
+        };
+        this.authService.setCurrentUser(payload);
+        localStorage.setItem('isLogin', 'true');
+        this.router.navigate(['/shopping-list']); // 👉 登入成功後導向的頁面，可以自己改路徑。
+>>>>>>> origin/ZJ
       },
       error: (err) => {
         console.error(err);
         this.errorMessage = 'Email 或密碼不正確';
-      }
+      },
     });
   }
+<<<<<<< HEAD
 
   //** 後端回傳的 user 物件結構不太一致，這裡做一次轉換 */
   private buildLoginUser(res: any): User {
@@ -57,4 +75,6 @@ export class LoginComponent {
       updated_at: user.updated_at ?? ''
     };
   }
+=======
+>>>>>>> origin/ZJ
 }
