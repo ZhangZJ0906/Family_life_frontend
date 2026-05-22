@@ -28,7 +28,7 @@ export class LoginComponent {
           return;
         }
 
-        console.log("id0001: " + res.userId)
+        // console.log("id0001: " + res.userId)
 
         this.authService.setCurrentUser(this.buildLoginUser(res));
         localStorage.setItem('isLogin', 'true');

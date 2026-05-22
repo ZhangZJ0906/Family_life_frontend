@@ -38,7 +38,7 @@ export class RegisterComponent {
       email: this.email,
       pwd: this.password,
       avatar: this.avatar ?? '',
-      notify: this.is_notify ?? true
+      // notify: this.is_notify ?? true
     }).subscribe({
       next: (res) => {
         console.log('register response:', res);

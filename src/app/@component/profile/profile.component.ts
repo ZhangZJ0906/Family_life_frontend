@@ -43,7 +43,8 @@ export class ProfileComponent {
   //公開個人清單
   publicInventoryObj: { [groupId: number]: boolean } = {};
 
-  //
+  //大頭貼
+  file: any;
 
   constructor(
     private http: HttpClient,
@@ -73,7 +74,7 @@ export class ProfileComponent {
         this.endDateNotify = res.notifyByEndDate;
         this.emailNotify = res.notifyByEmail;
         this.avatarUrl = res.avatar;
-        // console.log(res.email)
+        console.log(res.notifyByEmail)
       },
 
       error: (err) => {
@@ -220,23 +221,23 @@ openAvatarDialog(): void {
 
     preConfirm: () => {
       const input = document.getElementById('avatarInput') as HTMLInputElement;
-      const file = input.files?.[0];
+      this.file = input.files?.[0];
 
-      if (!file) {
+      if (!this.file) {
         Swal.showValidationMessage('請選擇一張圖片');
         return false;
       }
 
-      return file;
+      return this.file;
     }
     }).then((result) => {
       if (!result.isConfirmed || !result.value) {
         return;
       }
 
-      const file = result.value as File;
+      this.file = result.value as File;
     // const reader = new FileReader();
-      this.avatarUrl = URL.createObjectURL(file);
+      this.avatarUrl = URL.createObjectURL(this.file);
 
   // reader.onload = () => {
   //   const file = event.target.files[0];
@@ -262,22 +263,38 @@ openAvatarDialog(): void {
       publicInventory: this.publicInventoryObj[g.groupId] ?? false
     }));
 
-    const userInfo = {
-        userId: Number(this.user_id),
-        userName: this.userName,
-        email: this.email,
-        avatar: this.avatarUrl,
-        notifyByEndDate: this.endDateNotify ?? false,
-        notifyByEmail: this.emailNotify ?? false
-      }
+    const formData = new FormData();
 
-      // console.log(userInfo);
-      // console.log(JSON.stringify(userInfo));
+    formData.append(
+      'userInfo',
+      new Blob(
+        [JSON.stringify({
+          userId: this.user_id,
+          userName: this.userName,
+          email: this.email,
+          notifyByEndDate: this.endDateNotify,
+          notifyByEmail: this.emailNotify
+        })],
+        { type: 'application/json' }
+      )
+    );
 
-    this.http.post('http://localhost:8080/users/update_info', {
-      userInfo: userInfo,
-      publicInventoryList: payload
-    }).subscribe({
+    formData.append(
+      'publicInventoryList',
+      new Blob(
+        [JSON.stringify(payload)],
+        { type: 'application/json' }
+      )
+    );
+
+    if (this.file) {
+      formData.append('avatar', this.file);
+    }
+
+    this.http.post(
+      'http://localhost:8080/users/update_info',
+      formData
+    ).subscribe({
 
       next: (res: any) => {
         Swal.fire('已儲存', '', 'success');
