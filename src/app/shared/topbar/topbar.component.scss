@@ -47,6 +47,11 @@
   color: #2f80ed;
 }
 
+.top-nav button.active {
+  background: #f3f6fb;
+  color: #2f80ed;
+}
+
 /* 右上角通知與頭像 */
 .top-actions {
   display: flex;

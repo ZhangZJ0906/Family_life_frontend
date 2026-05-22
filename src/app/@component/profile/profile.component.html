@@ -37,50 +37,60 @@
       </div>
 
       <div class="form-actions">
-        <button type="button" class="save-btn" (click)="openEditDialog()">修改</button>
+        <button type="button" class="revise-btn" (click)="openEditDialog()">修改</button>
       </div>
     </div>
 
     <!-- 右側：群組，往下跨兩列 -->
-    <div class="profile-card group-card">
-       <div class="group-header">
-          <h3>群組</h3>
-          <button class="back-btn" routerLink="/home-page">返回首頁</button>
-  </div>
+    <div class="profile-card group-card" >
+      <div class="group-header">
+          <h3>群組狀態</h3>
+      </div>
+
 
 
       <div class="group-list">
-        <details class="group-accordion" open>
-          <summary>我的家庭</summary>
+        <details class="group-accordion" *ngFor="let group of groups" open>
+          <summary>
+            <div class="group-summary-left">
+              <img class="group-avatar" [src]="group.avatar || 'assets/default-avatar.png'">
+
+              <span class="group-name">
+                {{ truncateName(group.groupName) }}
+              </span>
+            </div>
+
+            <!-- 右側：文字 + switch -->
+          <div class="group-share-setting">
+            <span class="group-share-text">
+              顯示個人清單給該群組
+            </span>
+
+            <label class="switch">
+              <input
+                type="checkbox"
+                name="publicInventory{{group.groupId}}"
+                [(ngModel)]="publicInventoryObj[group.groupId]"
+              >
+              <span class="slider"></span>
+            </label>
+          </div>
+        </summary>
           <div class="group-detail">
-            <p>邀請碼</p>
-            <h4>ABC123</h4>
+            <div class="invite-row">
+              <p>邀請碼 : {{ group.inviteCode }}</p>
+
+              <button
+                class="copy-btn"
+                (click)="copyInviteCode(group)"
+              >
+                複製
+              </button>
+            </div>
+
           </div>
         </details>
 
-        <details class="group-accordion">
-          <summary>外婆家</summary>
-          <div class="group-detail">
-            <p>邀請碼</p>
-            <h4>FAMILY02</h4>
-          </div>
-        </details>
-
-        <details class="group-accordion">
-          <summary>台北租屋處</summary>
-          <div class="group-detail">
-            <p>邀請碼</p>
-            <h4>HOME5566</h4>
-          </div>
-        </details>
-
-        <details class="group-accordion">
-          <summary>阿姨家</summary>
-          <div class="group-detail">
-            <p>邀請碼</p>
-            <h4>GROUP888</h4>
-          </div>
-        </details>
       </div>
     </div>
 
@@ -95,7 +105,7 @@
         </div>
 
         <label class="switch">
-          <input type="checkbox" checked>
+          <input type="checkbox" [(ngModel)]="endDateNotify">
           <span class="slider"></span>
         </label>
       </div>
@@ -107,12 +117,18 @@
         </div>
 
         <label class="switch">
-          <input type="checkbox" checked>
+          <input type="checkbox" [(ngModel)]="emailNotify">
           <span class="slider"></span>
         </label>
       </div>
     </div>
 
   </section>
+
+  <div class="save-wrapper">
+    <button class="save-btn" (click)="saveAll()">
+      儲存資料
+    </button>
+  </div>
 
 </div>

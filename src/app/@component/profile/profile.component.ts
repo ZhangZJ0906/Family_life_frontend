@@ -1,13 +1,20 @@
+import { GroupList } from './../../common/interfaceList';
 import { Component } from '@angular/core';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
 import { RouterLink } from '@angular/router';
 import Swal, { SweetAlertResult } from 'sweetalert2';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
+
+import { AuthService } from '../../@services/auth.service';
+import { map } from 'rxjs';
+
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [TopbarComponent, RouterLink, CommonModule],
+  imports: [TopbarComponent, RouterLink, CommonModule, FormsModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss'
 })
@@ -24,6 +31,110 @@ export class ProfileComponent {
 
   // 頭像圖片，空值代表用文字頭像
   avatarUrl = '';
+
+  groups: any[] = [];
+
+  //到期通知
+  endDateNotify = true;
+
+  //email通知
+  emailNotify = true;
+
+  //公開個人清單
+  publicInventoryObj: { [groupId: number]: boolean } = {};
+
+  //
+
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
+
+  user_id = 0;
+
+  ngOnInit(): void {
+    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
+    //Add 'implements OnInit' to the class.
+    this.user_id = this.authService.currentUser()?.user_id ?? 0;
+    this.getGroup();
+    this.getSelfInfo();
+    // console.log(this.authService);
+  }
+
+  getSelfInfo(){
+    this.http.get<any>(
+      `http://localhost:8080/users/get_user_info?userId=${this.user_id}`
+    ).subscribe({
+
+      next: (res) => {
+
+        this.userName = res.name;
+        this.email = res.email;
+        this.endDateNotify = res.notifyByEndDate;
+        this.emailNotify = res.notifyByEmail;
+        this.avatarUrl = res.avatar;
+        // console.log(res.email)
+      },
+
+      error: (err) => {
+        console.log(err);
+      }
+
+    });
+
+  }
+
+  getGroup() {
+
+    this.user_id = this.authService.currentUser()?.user_id ?? 0;
+
+    console.log("userId: " + this.user_id);
+
+    this.http.get<any>(
+      `http://localhost:8080/family_life/get_group_list?user_id=${this.user_id}`
+    ).subscribe({
+
+      next: (res) => {
+
+        this.groups = res.groupList;
+
+        res.groupList.forEach((group: any, index: number) => {
+          this.publicInventoryObj[group.groupId] = !!res.publicInventory[index];
+        });
+
+        console.log("list001:", this.publicInventoryObj[22]);
+      },
+
+      error: (err) => {
+        console.log(err);
+      }
+
+    });
+
+  }
+
+  truncateName(name: string): string {
+    if (!name) return '';
+
+    return name.length > 8
+      ? name.substring(0, 8) + '....'
+      : name;
+  }
+
+  copyInviteCode(n :any) {
+
+    navigator.clipboard.writeText(
+      n.inviteCode
+    );
+
+    Swal.fire({
+      icon: 'success',
+      title: '邀請碼已複製',
+      timer: 1200,
+      showConfirmButton: false
+    });
+
+  }
 
   // 開啟修改資料彈窗
   openEditDialog(): void {
@@ -92,7 +203,7 @@ export class ProfileComponent {
     });
   }
 
-  // 開啟更換頭像視窗
+// 開啟更換頭像視窗
 openAvatarDialog(): void {
   Swal.fire({
     title: '更換頭像',
@@ -118,25 +229,67 @@ openAvatarDialog(): void {
 
       return file;
     }
-  }).then((result) => {
-    if (!result.isConfirmed || !result.value) {
-      return;
-    }
+    }).then((result) => {
+      if (!result.isConfirmed || !result.value) {
+        return;
+      }
 
- const file = result.value as File;
-  const reader = new FileReader();
+      const file = result.value as File;
+    // const reader = new FileReader();
+      this.avatarUrl = URL.createObjectURL(file);
 
- reader.onload = () => {
-  this.avatarUrl = reader.result as string;
+  // reader.onload = () => {
+  //   const file = event.target.files[0];
+  //   this.avatarUrl = URL.createObjectURL(file);
 
-  // 存到 localStorage
-  localStorage.setItem('avatarUrl', this.avatarUrl);
+  //   // 存到 localStorage
+  //   localStorage.setItem('avatarUrl', this.avatarUrl);
 
-  // 通知 topbar 重新讀取頭像
-  window.dispatchEvent(new Event('avatarChanged'));
+  //   // 通知 topbar 重新讀取頭像
+  //   window.dispatchEvent(new Event('avatarChanged'));
+  // }
+
+      window.dispatchEvent(new Event('avatarChanged'));
+    // reader.readAsDataURL(file);
+    });
+
+
+  }
+
+  saveAll(){
+    const payload = this.groups.map(g => ({
+      groupId: g.groupId,
+      publicInventory: this.publicInventoryObj[g.groupId] ?? false
+    }));
+
+    const userInfo = {
+        userId: Number(this.user_id),
+        userName: this.userName,
+        email: this.email,
+        avatar: this.avatarUrl,
+        notifyByEndDate: this.endDateNotify ?? false,
+        notifyByEmail: this.emailNotify ?? false
+      }
+
+      // console.log(userInfo);
+      // console.log(JSON.stringify(userInfo));
+
+    this.http.post('http://localhost:8080/users/update_info', {
+      userInfo: userInfo,
+      publicInventoryList: payload
+    }).subscribe({
+
+      next: (res: any) => {
+        Swal.fire('已儲存', '', 'success');
+        this.getSelfInfo();
+      },
+
+      error: (err) => {
+        Swal.fire('失敗', '', 'error');
+        console.log(err);
+      }
+
+    });
+    console.log(payload);
+  }
 }
-  reader.readAsDataURL(file);
-  });
-
-
-}}
