@@ -68,9 +68,12 @@ selectedCategory = '全部';
   selection = new SelectionModel<any>(true, []);
   /*群組陣列 */
   userGroups: DropDownGroupList[] = [];
-  // 預設私人
-  currentGroupId: any;
-  currentUserId: any;
+ // 目前選擇的群組 id
+// null = 私人物品
+currentGroupId: number | null = null;
+
+// 目前登入使用者 id
+currentUserId: number = 0;
   itemDisplayedColumns: string[] = [
     'select',
     'name',
@@ -274,10 +277,10 @@ medicineDisplayedColumns: string[] = [
             }),
           );
           this.userGroups.unshift({
-            groupId: 0,
-            groupName: '私人物品',
-          });
-          this.currentGroupId = 0;
+          groupId: null as any,
+          groupName: '私人物品',
+        });
+        this.currentGroupId = null;
           this.getItemByGroupId(this.currentGroupId);
         },
         error: (err) => {
@@ -409,11 +412,21 @@ updateMedicine(data: any): void {
   // 查詢某群組的訂閱資料
   getSubscriptionByGroupId(groupId: number | null): void {
 
-    this.isSubscriptionMode = true;
-    this.displayedColumns = this.subscriptionDisplayedColumns;
+   this.isSubscriptionMode = true;
+  this.displayedColumns = this.subscriptionDisplayedColumns;
 
-    this.http
-      .getApi(this.basicUrl + `subscription/getByGroup?groupId=${groupId}&userId=${this.currentUserId}`)
+  // 基本 url
+  let url =
+    this.basicUrl +
+    `subscription/getByGroup?userId=${this.currentUserId}`;
+
+  // 如果不是私人模式才加 groupId
+  if (groupId !== null) {
+    url += `&groupId=${groupId}`;
+  }
+
+  this.http
+    .getApi(url)
       .subscribe({
         next: (res: any) => {
           if (res.code !== 200) {
@@ -446,13 +459,23 @@ updateMedicine(data: any): void {
   // 查詢保固資料
   getWarrantyByGroupId(groupId: number|null): void {
 
-  this.isWarrantyMode = true;
+   this.isWarrantyMode = true;
   this.isSubscriptionMode = false;
   this.isMedicineMode = false;
   this.displayedColumns = this.warrantyDisplayedColumns;
 
+  // 基本 url
+  let url =
+    this.basicUrl +
+    `warranty/getByGroup?userId=${this.currentUserId}`;
+
+  // 如果不是私人模式才加 groupId
+  if (groupId !== null) {
+    url += `&groupId=${groupId}`;
+  }
+
   this.http
-    .getApi(this.basicUrl + `warranty/getByGroup?groupId=${groupId}&userId=${this.currentUserId}`)
+    .getApi(url)
     .subscribe({
       next: (res: any) => {
         if (res.code !== 200) {
@@ -486,8 +509,18 @@ getMedicineByGroupId(groupId: number|null): void {
   this.isWarrantyMode = false;
   this.displayedColumns = this.medicineDisplayedColumns;
 
+  // 基本 url
+  let url =
+    this.basicUrl +
+    `medicine/getByGroup?userId=${this.currentUserId}`;
+
+  // 如果不是私人模式才加 groupId
+  if (groupId !== null) {
+    url += `&groupId=${groupId}`;
+  }
+
   this.http
-    .getApi(this.basicUrl + `medicine/getByGroup?groupId=${groupId}&userId=${this.currentUserId}`)
+    .getApi(url)
     .subscribe({
       next: (res: any) => {
         if (res.code !== 200) {
@@ -514,34 +547,54 @@ getMedicineByGroupId(groupId: number|null): void {
 }
 
   // 查詢一般物品資料
-  getItemByGroupId(groupId: number): void {
-    this.currentGroupId = groupId;
+  getItemByGroupId(groupId: number | null): void {
+    // 更新目前群組
+  this.currentGroupId = groupId;
 
-    console.log("UID: ", this.currentUserId);
-    console.log("GID: ", this.currentGroupId);
+  console.log('UID:', this.currentUserId);
+  console.log('GID:', this.currentGroupId);
 
-    // 切換群組時，如果目前在訂閱模式，就查訂閱
-    if (this.isSubscriptionMode) {
-      this.getSubscriptionByGroupId(groupId);
-      return;
-    }
-
-    // 切換群組時，如果目前在保固模式，就查保固
-    if (this.isWarrantyMode) {
-    this.getWarrantyByGroupId(groupId);
+  // =========================
+  // 如果目前是訂閱模式
+  // =========================
+  if (this.isSubscriptionMode) {
+    this.getSubscriptionByGroupId(groupId);
     return;
-
   }
 
-    // 切換群組時，如果目前在藥品模式，就查藥品
-    if (this.isMedicineMode) {
+  // =========================
+  // 如果目前是保固模式
+  // =========================
+  if (this.isWarrantyMode) {
+    this.getWarrantyByGroupId(groupId);
+    return;
+  }
+
+  // =========================
+  // 如果目前是藥品模式
+  // =========================
+  if (this.isMedicineMode) {
     this.getMedicineByGroupId(groupId);
     return;
   }
 
+  // =========================
+  // 一般物品查詢
+  // =========================
 
-    this.http
-      .getApi(this.basicUrl + `item/getItems?userId=${this.currentUserId}&groupId=${this.currentGroupId}`)
+  // 先建立基本 url
+  let url =
+    this.basicUrl +
+    `item/getItems?userId=${this.currentUserId}`;
+
+  // 如果不是私人模式
+  // 才加 groupId
+  if (groupId !== null) {
+    url += `&groupId=${groupId}`;
+  }
+
+  this.http
+    .getApi(url)
       .subscribe({
         next: (res: any) => {
           this.itemList = res.items || [];

@@ -14,10 +14,13 @@
       <div class="col-6">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>所屬群組</mat-label>
-          <mat-select required [(ngModel)]="item.groupId">
-            <!-- <mat-option [value]="0">私人物品</mat-option> -->
+         <mat-select required [(ngModel)]="item.groupId">
+            <mat-option [value]="null">私人物品</mat-option>
+
             @for (g of group; track $index) {
-            <mat-option [value]="g.groupId">{{g.groupName}}</mat-option>
+              <mat-option [value]="g.groupId">
+                {{ g.groupName }}
+              </mat-option>
             }
           </mat-select>
         </mat-form-field>

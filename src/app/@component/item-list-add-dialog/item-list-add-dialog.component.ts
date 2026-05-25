@@ -47,12 +47,13 @@ import { AuthService } from '../../@services/auth.service';
   styleUrl: './item-list-add-dialog.component.scss',
 })
 export class ItemListAddDialogComponent implements OnInit {
-  // 初始化對應資料庫欄位的物件
-  groupId: number[] = [1, 2, 3, 4, 5, 6];
+   // 初始化對應資料庫欄位的物件
+  groupId: number | null = null;
   location: LocationAndCategory[] = [];
   categories: LocationAndCategory[] = [];
   minDate: string = ''; // 日期限制
   today = new Date();
+
 
   subscriptionCategoryId = 4; // 依照你的資料庫分類 id 調整，訂閱如果不是 4 就改成正確 id
 
@@ -198,7 +199,7 @@ isMedicineCategory(): boolean {
     ...this.item,
     price: this.totalPrice,
     userId: this.item.created_by_id,
-    groupId: this.item.groupId || 0,
+    groupId: this.item.groupId,
     purchaseDate: this.formatDate(this.item.purchaseDate),
     expireDate: this.formatDate(this.item.expireDate),
   };
