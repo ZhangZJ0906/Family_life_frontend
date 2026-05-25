@@ -1,0 +1,60 @@
+<h2 mat-dialog-title>{{ data.mode === 'create' ? '新增活動' : '修改活動' }}</h2>
+
+<mat-dialog-content>
+  <div class="dialog-form">
+
+    <mat-form-field appearance="outline">
+      <mat-label>活動名稱</mat-label>
+      <input matInput [(ngModel)]="form.title" placeholder="請輸入活動名稱">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>活動描述</mat-label>
+      <input matInput [(ngModel)]="form.description" placeholder="請輸入活動描述">
+    </mat-form-field>
+
+    <!-- 開始日期 -->
+    <mat-form-field appearance="outline">
+      <mat-label>開始日期</mat-label>
+      <input matInput [matDatepicker]="startDatePicker" [(ngModel)]="form.eventDate">
+      <mat-datepicker-toggle matIconSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+      <mat-datepicker #startDatePicker></mat-datepicker>
+    </mat-form-field>
+
+    <!-- 開始時間 -->
+    <mat-form-field appearance="outline">
+      <mat-label>開始時間</mat-label>
+      <input matInput [matTimepicker]="startTimePicker" [(ngModel)]="form.eventTime">
+      <mat-timepicker-toggle matIconSuffix [for]="startTimePicker"></mat-timepicker-toggle>
+      <mat-timepicker #startTimePicker></mat-timepicker>
+    </mat-form-field>
+
+    <!-- 結束日期 -->
+    <mat-form-field appearance="outline">
+      <mat-label>結束日期</mat-label>
+      <input matInput [matDatepicker]="endDatePicker" [(ngModel)]="form.endDate">
+      <mat-datepicker-toggle matIconSuffix [for]="endDatePicker"></mat-datepicker-toggle>
+      <mat-datepicker #endDatePicker></mat-datepicker>
+    </mat-form-field>
+
+    <!-- 結束時間 -->
+    <mat-form-field appearance="outline">
+      <mat-label>結束時間</mat-label>
+      <input matInput [matTimepicker]="endTimePicker" [(ngModel)]="form.endTime">
+      <mat-timepicker-toggle matIconSuffix [for]="endTimePicker"></mat-timepicker-toggle>
+      <mat-timepicker #endTimePicker></mat-timepicker>
+    </mat-form-field>
+
+    <!-- 提醒時間 -->
+    <mat-form-field appearance="outline">
+      <mat-label>提醒時間（分鐘）</mat-label>
+      <input matInput type="number" [(ngModel)]="form.notifyBefore">
+    </mat-form-field>
+
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">取消</button>
+  <button mat-flat-button color="primary" (click)="confirm()">確認</button>
+</mat-dialog-actions>
