@@ -8,13 +8,14 @@ import { HttpClient } from '@angular/common/http';
 import Swal from 'sweetalert2';
 import { MatIconModule } from '@angular/material/icon';
 
-import { NotifyDialogComponent } from '../../@group/notify-dialog/notify-dialog.component';
+
+import { MatIcon } from "@angular/material/icon";
 import { AuthService } from '../../@services/auth.service';
+import { NotifyDialogComponent } from '../../@group/notify-dialog/notify-dialog.component';
 
 
 @Component({
   selector: 'app-topbar',
-  standalone: true,
   imports: [
     RouterLink,
     RouterLinkActive,
@@ -22,6 +23,9 @@ import { AuthService } from '../../@services/auth.service';
     MatDialogModule,
     MatBadgeModule,
     FormsModule,
+    MatIcon,
+    FormsModule,
+
     MatIconModule
   ],
   templateUrl: './topbar.component.html',
