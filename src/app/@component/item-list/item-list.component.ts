@@ -166,6 +166,7 @@ medicineDisplayedColumns: string[] = [
         isSubscriptionMode: this.isSubscriptionMode,
         isWarrantyMode: this.isWarrantyMode,
         isMedicineMode: this.isMedicineMode,
+        groups: this.userGroups
       },
     });
 
@@ -200,6 +201,7 @@ medicineDisplayedColumns: string[] = [
         isSubscriptionMode: this.isSubscriptionMode,
         isWarrantyMode: this.isWarrantyMode,
         isMedicineMode: this.isMedicineMode,
+        groups: this.userGroups
       },
     });
 
@@ -406,20 +408,12 @@ updateMedicine(data: any): void {
 
   // 查詢某群組的訂閱資料
   getSubscriptionByGroupId(groupId: number | null): void {
-    if (!groupId || groupId <= 0) {
-      Swal.fire({
-        title: '錯誤',
-        text: '群組 ID 不可為空',
-        icon: 'error',
-      });
-      return;
-    }
 
     this.isSubscriptionMode = true;
     this.displayedColumns = this.subscriptionDisplayedColumns;
 
     this.http
-      .getApi(this.basicUrl + `subscription/getByGroup?groupId=${groupId}`)
+      .getApi(this.basicUrl + `subscription/getByGroup?groupId=${groupId}&userId=${this.currentUserId}`)
       .subscribe({
         next: (res: any) => {
           if (res.code !== 200) {
@@ -451,14 +445,6 @@ updateMedicine(data: any): void {
 
   // 查詢保固資料
   getWarrantyByGroupId(groupId: number|null): void {
-  if (!groupId || groupId <= 0) {
-    Swal.fire({
-      title: '錯誤',
-      text: '群組 ID 不可為空',
-      icon: 'error',
-    });
-    return;
-  }
 
   this.isWarrantyMode = true;
   this.isSubscriptionMode = false;
@@ -466,7 +452,7 @@ updateMedicine(data: any): void {
   this.displayedColumns = this.warrantyDisplayedColumns;
 
   this.http
-    .getApi(this.basicUrl + `warranty/getByGroup?groupId=${groupId}`)
+    .getApi(this.basicUrl + `warranty/getByGroup?groupId=${groupId}&userId=${this.currentUserId}`)
     .subscribe({
       next: (res: any) => {
         if (res.code !== 200) {
@@ -494,14 +480,6 @@ updateMedicine(data: any): void {
 
 // 查詢藥品資料
 getMedicineByGroupId(groupId: number|null): void {
-  if (!groupId || groupId <= 0) {
-    Swal.fire({
-      title: '錯誤',
-      text: '群組 ID 不可為空',
-      icon: 'error',
-    });
-    return;
-  }
 
   this.isMedicineMode = true;
   this.isSubscriptionMode = false;
@@ -509,7 +487,7 @@ getMedicineByGroupId(groupId: number|null): void {
   this.displayedColumns = this.medicineDisplayedColumns;
 
   this.http
-    .getApi(this.basicUrl + `medicine/getByGroup?groupId=${groupId}`)
+    .getApi(this.basicUrl + `medicine/getByGroup?groupId=${groupId}&userId=${this.currentUserId}`)
     .subscribe({
       next: (res: any) => {
         if (res.code !== 200) {

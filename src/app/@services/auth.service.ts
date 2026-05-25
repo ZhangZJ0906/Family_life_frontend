@@ -34,11 +34,11 @@ export class AuthService {
   }
 
   logout(): void {
-    this.currentUserSignal.set(null);
+  this.currentUserSignal.set(null);
 
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem('isLogin');
-    localStorage.removeItem('loginUser');
+    sessionStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem('isLogin');
+    sessionStorage.removeItem('loginUser');
 
     this.router.navigate(['/login']);
   }
@@ -51,11 +51,11 @@ export class AuthService {
   setCurrentUser(user: User): void {
     this.currentUserSignal.set(user);
     console.log(user)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(user));
   }
 
   private readStoredUser(): User | null {
-    const rawUser = localStorage.getItem(STORAGE_KEY);
+    const rawUser = sessionStorage.getItem(STORAGE_KEY);
 
     if (!rawUser) {
       return null;
@@ -64,7 +64,7 @@ export class AuthService {
     try {
       return JSON.parse(rawUser) as User;
     } catch {
-      localStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem(STORAGE_KEY);
       return null;
     }
   }

@@ -18,8 +18,8 @@
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>所屬群組</mat-label>
           <mat-select [(ngModel)]="item.groupId">
-            @for (g of groups; track g.id) {
-            <mat-option [value]="g.id">{{ g.name }}</mat-option>
+            @for (g of group; track g.groupId) {
+            <mat-option [value]="g.groupId">{{ g.groupName }}</mat-option>
             }
           </mat-select>
         </mat-form-field>

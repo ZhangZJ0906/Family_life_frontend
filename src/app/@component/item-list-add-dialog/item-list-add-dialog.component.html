@@ -15,8 +15,9 @@
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>所屬群組</mat-label>
           <mat-select required [(ngModel)]="item.groupId">
-            @for (g of groupId; track $index) {
-            <mat-option [value]="g">群組 {{g}}</mat-option>
+            <!-- <mat-option [value]="0">私人物品</mat-option> -->
+            @for (g of group; track $index) {
+            <mat-option [value]="g.groupId">{{g.groupName}}</mat-option>
             }
           </mat-select>
         </mat-form-field>
@@ -104,7 +105,7 @@
               開啟到期提醒
             </div>
             <div class="text-muted" style="font-size: 12px;">
-              {{ item.notify ? '系統將在物品過期前發送通知' : '目前已暫停此物品的提醒' }}
+              {{ item.notify ? '系統將在物品過期前3天發送通知' : '目前已暫停此物品的提醒' }}
             </div>
           </div>
           <mat-slide-toggle [(ngModel)]="item.notify" color="primary"></mat-slide-toggle>

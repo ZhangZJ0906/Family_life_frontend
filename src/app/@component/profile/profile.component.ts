@@ -163,7 +163,7 @@ export class ProfileComponent {
       `,
 
       showCancelButton: true,
-      confirmButtonText: '儲存修改',
+      confirmButtonText: '修改',
       cancelButtonText: '取消',
 
       preConfirm: () => {
@@ -216,7 +216,7 @@ openAvatarDialog(): void {
     `,
 
     showCancelButton: true,
-    confirmButtonText: '儲存',
+    confirmButtonText: '修改',
     cancelButtonText: '取消',
 
     preConfirm: () => {

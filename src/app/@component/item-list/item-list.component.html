@@ -20,26 +20,30 @@
 
       <!-- 分類按鈕 -->
       <mat-chip-listbox aria-label="分類篩選">
-        @for (cat of categories; track cat.id) {
-          <mat-chip-option
-            [selected]="selectedCategory === cat.name"
-            (click)="filterByCategory(cat.id)">
 
-            <span class="chip-icon">
-              @switch (cat.name) {
-                @case ('食品') { 🥬 }
-                @case ('藥品') { 💊 }
-                @case ('日用品') { 🧴 }
-                @case ('訂閱') { 💳 }
-                @case ('清潔用品') { 🧽 }
-                @case ('保固') { 🛡️ }
-                @default {  }
-              }
-            </span>
+      @for (cat of categories; track cat.id) {
 
-            {{ cat.name }}
+        <mat-chip-option
+          [value]="cat.id"
+          [selected]="selectedCategory === cat.name"
+          (click)="filterByCategory(cat.id)">
+
+          <span class="chip-icon">
+            @switch (cat.name) {
+              @case ('食品') { 🥬 }
+              @case ('藥品') { 💊 }
+              @case ('日用品') { 🧴 }
+              @case ('訂閱') { 💳 }
+              @case ('清潔用品') { 🧽 }
+              @case ('保固') { 🛡️ }
+              @default { }
+            }
+          </span>
+
+          {{ cat.name }}
 
         </mat-chip-option>
+
       }
     </mat-chip-listbox>
 </div>

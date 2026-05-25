@@ -56,14 +56,14 @@
   <div
     class="notify-item"
     *ngFor="let n of filteredNotifies()"
-    [class.unread]="!n.isRead"
+    [class.unread]="n.isRead !== 1"
     (click)="markAsRead(n)"
   >
 
     <!-- 未讀紅點 -->
     <div
       class="unread-dot"
-      *ngIf="!n.isRead"
+      *ngIf="n.isRead !== 1"
     ></div>
 
     <!-- 頭像 -->
