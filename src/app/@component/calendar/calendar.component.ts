@@ -64,7 +64,7 @@ export class CalendarComponent {
     private http: HttpClientService,
   ) {
     this.userInfo = JSON.parse(
-      localStorage.getItem('family-life-current-user')!,
+      sessionStorage.getItem('family-life-current-user')!,
     );
     this.createdBy = this.userInfo.user_id;
     this.getUserGroupList(this.createdBy);
