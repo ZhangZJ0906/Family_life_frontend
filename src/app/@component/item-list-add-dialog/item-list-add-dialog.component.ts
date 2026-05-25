@@ -22,6 +22,8 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { HttpClientService } from '../../@services/http-client.service';
 import Swal from 'sweetalert2';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
+import { AuthService } from '../../@services/auth.service';
+
 @Component({
   selector: 'app-item-list-add-dialog',
   imports: [
@@ -114,13 +116,18 @@ isMedicineCategory(): boolean {
   };
 
   basicUrl!: string;
+  group: any[] = [];
   constructor(
     public dialogRef: MatDialogRef<ItemListAddDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private http: HttpClientService,
+    private authService: AuthService
   ) {
     this.basicUrl = this.http.basicUrl;
+    this.group = this.data.groups;
+    this.item.created_by_id = this.authService.currentUser()?.user_id ?? 0;
   }
+
   ngOnInit(): void {
     this.minDate = this.today.toISOString().split('T')[0];
 
@@ -160,7 +167,9 @@ isMedicineCategory(): boolean {
   }
 }
 
+  getUserGroupData() {
 
+  }
 
   get totalPrice(): number {
     return (this.item.unitPrice || 0) * (this.item.quantity || 0);

@@ -15,6 +15,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { Item, LocationAndCategory } from '../../common/interfaceList';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
+import { AuthService } from '../../@services/auth.service';
+
 @Component({
   selector: 'app-item-list-edit-dialog',
   imports: [
@@ -61,10 +63,16 @@ isMedicineCategory(): boolean {
   return this.isMedicineMode;
 }
 
+group: any[] = [];
+
   constructor(
     public dialogRef: MatDialogRef<ItemListEditDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-  ) {}
+    private authService: AuthService
+  ) {
+    this.group = this.data.groups;
+    this.item.userId = this.authService.currentUser()?.user_id ?? 0;
+  }
 
   ngOnInit(): void {
   if (this.data && this.data.item) {
