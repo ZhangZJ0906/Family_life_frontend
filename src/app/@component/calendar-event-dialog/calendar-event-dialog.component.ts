@@ -12,6 +12,9 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatTimepickerModule } from '@angular/material/timepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { provideNativeDateAdapter } from '@angular/material/core';
+import { ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
+import Swal from 'sweetalert2';
 @Component({
   selector: 'app-calendar-event-dialog',
   imports: [
@@ -38,6 +41,7 @@ export class CalendarEventDialogComponent {
     endTime: null as Date | null,
     notifyBefore: 0,
   };
+  @ViewChild('dialogForm') dialogForm!: NgForm;
 
   constructor(
     public dialogRef: MatDialogRef<CalendarEventDialogComponent>,
@@ -62,31 +66,48 @@ export class CalendarEventDialogComponent {
     }
   }
 
-confirm() {
-  if (!this.form.title || !this.form.eventDate || !this.form.eventTime) return;
+  confirm() {
+    // 觸發所有欄位的 touched 狀態，讓錯誤訊息顯示出來
+    this.dialogForm.form.markAllAsTouched();
 
-  const startDateTime = this.combineDateAndTime(this.form.eventDate, this.form.eventTime);
-  const endDateTime = this.form.endDate && this.form.endTime
-    ? this.combineDateAndTime(this.form.endDate, this.form.endTime)
-    : null;
+    if (this.dialogForm.invalid) return;
 
-  if (endDateTime && startDateTime > endDateTime) return;
+    const startDateTime = this.combineDateAndTime(
+      this.form.eventDate!,
+      this.form.eventTime!,
+    );
+    const endDateTime =
+      this.form.endDate && this.form.endTime
+        ? this.combineDateAndTime(this.form.endDate, this.form.endTime)
+        : null;
 
-  this.dialogRef.close({
-    title: this.form.title,
-    description: this.form.description,
-    eventTime: startDateTime,
-    endTime: endDateTime,
-    notifyBefore: this.form.notifyBefore,
-  });
-}
+    if (endDateTime && startDateTime > endDateTime) {
+      Swal.fire({ icon: 'warning', title: '開始時間不可大於結束時間' });
+      return;
+    }
 
-// 日期 + 時間合併成 ISO 字串
-combineDateAndTime(date: Date, time: Date): string {
-  const d = new Date(date);
-  d.setHours(time.getHours(), time.getMinutes(), 0);
-  return d.toISOString().substring(0, 19);
-}
+    this.dialogRef.close({
+      title: this.form.title,
+      description: this.form.description,
+      eventTime: startDateTime,
+      endTime: endDateTime,
+      notifyBefore: this.form.notifyBefore,
+    });
+  }
+
+  // 日期 + 時間合併成 ISO 字串
+  combineDateAndTime(date: Date, time: Date): string {
+    const d = new Date(date);
+    d.setHours(time.getHours(), time.getMinutes(), 0, 0);
+
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}:00`;
+  }
 
   cancel() {
     this.dialogRef.close();
