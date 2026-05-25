@@ -23,6 +23,9 @@ import { ItemListEditDialogComponent } from '../item-list-edit-dialog/item-list-
 import { MatSelect, MatOption } from '@angular/material/select';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
 
+import { AuthService } from '../../@services/auth.service';
+
+
 @Component({
   selector: 'app-item-list',
   imports: [
@@ -65,8 +68,8 @@ selectedCategory = '全部';
   selection = new SelectionModel<any>(true, []);
   /*群組陣列 */
   userGroups: DropDownGroupList[] = [];
-  // 現在的群組
-  currentGroupId!: number | null;
+  // 預設私人
+  currentGroupId: any;
   currentUserId: any;
   itemDisplayedColumns: string[] = [
     'select',
@@ -136,12 +139,12 @@ medicineDisplayedColumns: string[] = [
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  constructor(private http: HttpClientService) {
+  constructor(private http: HttpClientService,private authService: AuthService) {
     this.basicUrl = this.http.basicUrl;
-    this.getUserGroupData();
+    this.currentUserId = this.authService.currentUser()?.user_id ?? 0;
 
-    // 預設載入第一個群組資料
-    this.getItemByGroupId(this.userGroups[0].groupId);
+    // this.currentGroupId = 0;
+    this.getUserGroupData();
 
   }
 
@@ -272,7 +275,7 @@ medicineDisplayedColumns: string[] = [
             groupId: 0,
             groupName: '私人物品',
           });
-          this.currentGroupId = null;
+          this.currentGroupId = 0;
           this.getItemByGroupId(this.currentGroupId);
         },
         error: (err) => {
@@ -533,8 +536,11 @@ getMedicineByGroupId(groupId: number|null): void {
 }
 
   // 查詢一般物品資料
-  getItemByGroupId(groupId: number|null): void {
+  getItemByGroupId(groupId: number): void {
     this.currentGroupId = groupId;
+
+    console.log("UID: ", this.currentUserId);
+    console.log("GID: ", this.currentGroupId);
 
     // 切換群組時，如果目前在訂閱模式，就查訂閱
     if (this.isSubscriptionMode) {
@@ -557,12 +563,13 @@ getMedicineByGroupId(groupId: number|null): void {
 
 
     this.http
-      .getApi(this.basicUrl + `item/getItems?groupId=${this.currentGroupId}`)
+      .getApi(this.basicUrl + `item/getItems?userId=${this.currentUserId}&groupId=${this.currentGroupId}`)
       .subscribe({
         next: (res: any) => {
           this.itemList = res.items || [];
           this.dataSource.data = this.itemList;
 
+          console.log("res: " + res.categoriesMap)
           // 後端 locationMap 轉成陣列
           this.location = Object.entries(res.locationMap || {}).map(
             ([id, name]) => ({
@@ -577,7 +584,7 @@ getMedicineByGroupId(groupId: number|null): void {
               id: Number(id),
               name: name as string,
             })
-          );
+          ) || [];
 
           // 最前面補「全部」
           this.categories.unshift({ id: 0, name: '全部' });
