@@ -21,6 +21,7 @@ import { ExpensesAddComponent } from '../expenses-add/expenses-add.component';
 import { ExpensesEditComponent } from '../expenses-edit/expenses-edit.component';
 import Swal from 'sweetalert2';
 import { AuthService } from '../../@services/auth.service';
+import { TopbarComponent } from "../../shared/topbar/topbar.component";
 
 @Component({
   selector: 'app-expense-tracker',
@@ -37,7 +38,8 @@ import { AuthService } from '../../@services/auth.service';
     MatButtonModule,
     MatTableModule,
     MatIconModule,
-  ],
+    TopbarComponent
+],
   templateUrl: './expenses.component.html',
   styleUrl: './expenses.component.scss',
 })

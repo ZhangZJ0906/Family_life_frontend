@@ -38,183 +38,159 @@ import { AuthService } from '../../@services/auth.service';
 export class ItemListEditDialogComponent implements OnInit {
   // 綁定表單的資料結構
   item: any = {};
+  group: any[] = [];
 
-  groups: LocationAndCategory[] = [
-    { id: 1, name: 'test' },
-    { id: 2, name: 'test2' },
-    { id: 3, name: 'test3' },
-  ];
   categories: LocationAndCategory[] = [];
   location: LocationAndCategory[] = [];
 
-isSubscriptionMode = false;
-isWarrantyMode = false;
-isMedicineMode = false;
+  isSubscriptionCategory(): boolean {
+    const selectedCategory = this.categories.find(
+      (cat) => Number(cat.id) === Number(this.item.categoryId),
+    );
+    return selectedCategory?.name === '訂閱';
+  }
 
-isSubscriptionCategory(): boolean {
-  return this.isSubscriptionMode;
-}
+  isWarrantyCategory(): boolean {
+    const selectedCategory = this.categories.find(
+      (cat) => Number(cat.id) === Number(this.item.categoryId),
+    );
+    return selectedCategory?.name === '保固';
+  }
 
-isWarrantyCategory(): boolean {
-  return this.isWarrantyMode;
-}
-
-isMedicineCategory(): boolean {
-  return this.isMedicineMode;
-}
-
-group: any[] = [];
+  isMedicineCategory(): boolean {
+    const selectedCategory = this.categories.find(
+      (cat) => Number(cat.id) === Number(this.item.categoryId),
+    );
+    return selectedCategory?.name === '藥品';
+  }
 
   constructor(
     public dialogRef: MatDialogRef<ItemListEditDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private authService: AuthService
+    private authService: AuthService,
   ) {
     this.group = this.data.groups;
     this.item.userId = this.authService.currentUser()?.user_id ?? 0;
   }
 
   ngOnInit(): void {
-  if (this.data && this.data.item) {
-    this.isSubscriptionMode = this.data?.isSubscriptionMode || false;
-    this.isWarrantyMode = this.data?.isWarrantyMode || false;
-    this.isMedicineMode = this.data?.isMedicineMode || false;
-    this.item = { ...this.data.item };
+    if (this.data && this.data.item) {
+      this.item = { ...this.data.item };
 
-    this.location = this.data.locationMap || [];
-    this.categories = this.data.categoriesMap || [];
-
-    if (this.isSubscriptionMode) {
-      const subscriptionCategory = this.categories.find(cat => cat.name === '訂閱');
-
-      if (subscriptionCategory) {
-        this.item.categoryId = subscriptionCategory.id;
-      }
-    }
-     if (this.isWarrantyMode) {
-      const warrantyCategory = this.categories.find(cat => cat.name === '保固');
-      if (warrantyCategory) {
-        this.item.categoryId = warrantyCategory.id;
-      }
+      this.location = this.data.locationMap || [];
+      this.categories = this.data.categoriesMap || [];
 
       // 保固資料後端欄位是 productName，Dialog 共用 item.name
-      this.item.name = this.item.productName;
+      if (this.data?.isWarrantyMode) {
+        this.item.name = this.item.productName;
+      }
+
+      this.item.expireDate = this.formatDate(this.item.expireDate);
+      this.item.purchaseDate = this.formatDate(this.item.purchaseDate);
+      this.item.trialEndDate = this.formatDate(this.item.trialEndDate);
+      this.item.nextBillingDate = this.formatDate(this.item.nextBillingDate);
+      this.item.warrantyEndDate = this.formatDate(this.item.warrantyEndDate);
     }
-
-    this.item.expireDate = this.formatDate(this.item.expireDate);
-    this.item.purchaseDate = this.formatDate(this.item.purchaseDate);
-    this.item.trialEndDate = this.formatDate(this.item.trialEndDate);
-    this.item.nextBillingDate = this.formatDate(this.item.nextBillingDate);
-    this.item.warrantyEndDate = this.formatDate(this.item.warrantyEndDate);
   }
-
-  if (this.isMedicineMode) {
-  const medicineCategory = this.categories.find(cat => cat.name === '藥品');
-  if (medicineCategory) {
-    this.item.categoryId = medicineCategory.id;
-  }
-
-  this.item.purchaseDate = this.formatDate(this.item.purchaseDate);
-
-  this.item.expireDate = this.formatDate(this.item.expireDate);
-}
-}
   // 在你的 Component 內，或是物件 model 內
   get totalPrice(): number {
     return (this.item.unitPrice || 0) * (this.item.quantity || 0);
   }
 
   // 日期格式化小工具：統一轉成 HTML date input 可用的 YYYY-MM-DD
-private formatDate(date: any): string {
-  if (!date) return '';
+  private formatDate(date: any): string {
+    if (!date) return '';
 
-  // 如果後端回來是 2026-05-18，直接回傳
-  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    return date;
+    // 如果後端回來是 2026-05-18，直接回傳
+    if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return date;
+    }
+
+    // 如果後端回來是 2026/05/18，轉成 2026-05-18
+    if (typeof date === 'string' && /^\d{4}\/\d{2}\/\d{2}$/.test(date)) {
+      return date.replaceAll('/', '-');
+    }
+
+    // 如果是 Date 物件或其他日期格式，轉成 YYYY-MM-DD
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '';
+
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
   }
-
-  // 如果後端回來是 2026/05/18，轉成 2026-05-18
-  if (typeof date === 'string' && /^\d{4}\/\d{2}\/\d{2}$/.test(date)) {
-    return date.replaceAll('/', '-');
-  }
-
-  // 如果是 Date 物件或其他日期格式，轉成 YYYY-MM-DD
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return '';
-
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-
-  return `${year}-${month}-${day}`;
-}
   // 訂閱修改時，不需要前端傳 nextBillingDate，後端會用 trialEndDate + billingCycle 自動算
-onOkClose(): void {
-  let payload: any;
+  onOkClose(): void {
+    let payload: any;
 
-  if (this.isSubscriptionCategory()) {
-    payload = {
-      id: this.item.id,
-      groupId: this.item.groupId,
-      userId: this.item.userId || this.item.createdById || 1,
-      name: this.item.name,
-      price: this.item.price || this.item.unitPrice,
-      billingCycle: this.item.billingCycle,
-      purchaseDate: this.formatDate(this.item.purchaseDate),
-      trialEndDate: this.formatDate(this.item.trialEndDate),
-      notify: this.item.notify,
-      note: this.item.note,
-    };
-  } else if (this.isWarrantyCategory()) {
-    payload = {
-      id: this.item.id,
-      groupId: this.item.groupId,
-      userId: this.item.userId || 1,
-      productName: this.item.name,
-      brand: this.item.brand,
-      model: this.item.model,
-      serialNumber: this.item.serialNumber,
-      purchaseDate: this.formatDate(this.item.purchaseDate),
-      warrantyEndDate: this.formatDate(this.item.warrantyEndDate),
-      storeName: this.item.storeName,
-      price: this.item.price || 0,
-      notify: this.item.notify,
-      note: this.item.note,
-    };
-  } else if (this.isMedicineCategory()) {
-  payload = {
-    id: this.item.id,
-    groupId: this.item.groupId,
-    userId: this.item.userId || 1,
-    name: this.item.name,
-    medicineType: this.item.medicineType,
-    quantity: this.item.quantity,
-    unit: this.item.unit,
-    safeQuantity: this.item.safeQuantity ?? 0,
-    purchaseDate: this.formatDate(this.item.purchaseDate),
-    expireDate: this.formatDate(this.item.expireDate),
-    dosage: this.item.dosage,
-    usageMethod: this.item.usageMethod,
-    unitPrice: this.item.unitPrice,
-    location: this.item.location,
-    source: this.item.source,
-    notify: this.item.notify,
-    note: this.item.note,
-  };
-}
-  else {
-    payload = {
-      ...this.item,
-      purchaseDate: this.formatDate(this.item.purchaseDate),
-      expireDate: this.formatDate(this.item.expireDate),
-      price: this.totalPrice,
-      safeQuantity: this.item.safeQuantity ?? 0,
-    };
+    if (this.isSubscriptionCategory()) {
+      payload = {
+        _type: 'subscription',
+        id: this.item.id,
+        groupId: this.item.groupId,
+        userId: this.item.userId || this.item.createdById || 1,
+        name: this.item.name,
+        price: this.item.price || this.item.unitPrice,
+        billingCycle: this.item.billingCycle,
+        purchaseDate: this.formatDate(this.item.purchaseDate),
+        trialEndDate: this.formatDate(this.item.trialEndDate),
+        notify: this.item.notify,
+        note: this.item.note,
+      };
+    } else if (this.isWarrantyCategory()) {
+      payload = {
+        _type: 'warranty',
+        id: this.item.id,
+        groupId: this.item.groupId,
+        userId: this.item.userId || 1,
+        productName: this.item.name,
+        brand: this.item.brand,
+        model: this.item.model,
+        serialNumber: this.item.serialNumber,
+        purchaseDate: this.formatDate(this.item.purchaseDate),
+        warrantyEndDate: this.formatDate(this.item.warrantyEndDate),
+        storeName: this.item.storeName,
+        price: this.item.price || 0,
+        notify: this.item.notify,
+        note: this.item.note,
+      };
+    } else if (this.isMedicineCategory()) {
+      payload = {
+        _type: 'medicine',
+        id: this.item.id,
+        groupId: this.item.groupId,
+        userId: this.item.userId || 1,
+        name: this.item.name,
+        medicineType: this.item.medicineType,
+        quantity: this.item.quantity,
+        unit: this.item.unit,
+        safeQuantity: this.item.safeQuantity ?? 0,
+        purchaseDate: this.formatDate(this.item.purchaseDate),
+        expireDate: this.formatDate(this.item.expireDate),
+        dosage: this.item.dosage,
+        usageMethod: this.item.usageMethod,
+        unitPrice: this.item.unitPrice,
+        location: this.item.location,
+        source: this.item.source,
+        notify: this.item.notify,
+        note: this.item.note,
+      };
+    } else {
+      payload = {
+        _type: 'general', 
+        ...this.item,
+        purchaseDate: this.formatDate(this.item.purchaseDate),
+        expireDate: this.formatDate(this.item.expireDate),
+        price: this.totalPrice,
+        safeQuantity: this.item.safeQuantity ?? 0,
+      };
+    }
+
+    this.dialogRef.close(payload);
   }
-
-  this.dialogRef.close(payload);
-}
-onCancel(): void {
-  this.dialogRef.close();
-}
+  onCancel(): void {
+    this.dialogRef.close();
+  }
 }

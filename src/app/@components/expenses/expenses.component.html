@@ -1,4 +1,5 @@
 <div class="container-fluid py-3">
+  <app-topbar></app-topbar>
   <!-- HEADER -->
   <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
@@ -131,7 +132,9 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"
+        ></tr>
+        <!-- (click)="openEditDialog(row)" -->
       </table>
     </div>
   </div>
