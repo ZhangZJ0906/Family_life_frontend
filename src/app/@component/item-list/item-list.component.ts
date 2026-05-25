@@ -1,4 +1,8 @@
-import { Item, LocationAndCategory } from './../../common/interfaceList';
+import {
+  DropDownGroupList,
+  Item,
+  LocationAndCategory,
+} from './../../common/interfaceList';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipListbox, MatChipOption } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
@@ -44,7 +48,7 @@ export class ItemListComponent {
   readonly dialog = inject(MatDialog);
 
   basicUrl!: string;
-
+selectedCategory = '全部';
   // 存放地點清單
   location: LocationAndCategory[] = [];
 
@@ -59,24 +63,11 @@ export class ItemListComponent {
 
   // checkbox 多選
   selection = new SelectionModel<any>(true, []);
-
-  // 使用者群組，之後可以改成從後端取得
-  userGroups: any[] = [
-    { id: 1, name: '陳家大宅' },
-    { id: 2, name: '林老師' },
-  ];
-
-  // 目前選到的群組
-  currentGroupId: number = 0;
-
-  // 目前選到的分類名稱
-  selectedCategory = '全部';
-
-  // 是否為訂閱模式
-  isSubscriptionMode = false;
-
-  // 一般物品表格欄位
-  // status 是後端算好的狀態：正常、已到期、即將到期、庫存不足
+  /*群組陣列 */
+  userGroups: DropDownGroupList[] = [];
+  // 現在的群組
+  currentGroupId!: number | null;
+  currentUserId: any;
   itemDisplayedColumns: string[] = [
     'select',
     'name',
@@ -138,20 +129,28 @@ medicineDisplayedColumns: string[] = [
   // Material Table 資料來源
   dataSource = new MatTableDataSource<any>([]);
 
+
+  // 判斷目前是不是訂閱模式
+  isSubscriptionMode = false;
+
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(private http: HttpClientService) {
     this.basicUrl = this.http.basicUrl;
+    this.getUserGroupData();
 
     // 預設載入第一個群組資料
-    this.getItemByGroupId(this.userGroups[0].id);
+    this.getItemByGroupId(this.userGroups[0].groupId);
+
   }
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
   }
 
-  // 開啟新增 Dialog
+  /*TODO 缺少 拿user 資料跟  通知功能 */
+  /*新增物品 */
   openAddDialog() {
     const dialogRef = this.dialog.open(ItemListAddDialogComponent, {
       width: '540px',
@@ -247,7 +246,44 @@ medicineDisplayedColumns: string[] = [
       },
     });
   }
+ getUserGroupData() {
+    this.http
+      .getApi(
+        this.basicUrl +
+          `family_life/getGroupList?user_Id=${this.currentUserId}`,
+      )
+      .subscribe({
+        next: (res: any) => {
+          if (res.code != 200) {
+            Swal.fire({
+              title: '拉取群組錯誤',
+              text: res.message || 'server error ',
+              icon: 'error',
+            });
+          }
 
+          this.userGroups = Object.entries(res.groupIdList).map(
+            ([id, name]) => ({
+              groupId: Number(id),
+              groupName: name as string,
+            }),
+          );
+          this.userGroups.unshift({
+            groupId: 0,
+            groupName: '私人物品',
+          });
+          this.currentGroupId = null;
+          this.getItemByGroupId(this.currentGroupId);
+        },
+        error: (err) => {
+          Swal.fire({
+            title: '拉取群組錯誤',
+            text: err.message || 'server error ',
+            icon: 'error',
+          });
+        },
+      });
+  }
 
   //修改保固
   updateWarranty(data: any) {
@@ -362,8 +398,11 @@ updateMedicine(data: any): void {
     }
   }
 
-  // 查詢訂閱資料
-  getSubscriptionByGroupId(groupId: number): void {
+
+
+
+  // 查詢某群組的訂閱資料
+  getSubscriptionByGroupId(groupId: number | null): void {
     if (!groupId || groupId <= 0) {
       Swal.fire({
         title: '錯誤',
@@ -406,8 +445,9 @@ updateMedicine(data: any): void {
       });
   }
 
+
   // 查詢保固資料
-  getWarrantyByGroupId(groupId: number): void {
+  getWarrantyByGroupId(groupId: number|null): void {
   if (!groupId || groupId <= 0) {
     Swal.fire({
       title: '錯誤',
@@ -450,7 +490,7 @@ updateMedicine(data: any): void {
 }
 
 // 查詢藥品資料
-getMedicineByGroupId(groupId: number): void {
+getMedicineByGroupId(groupId: number|null): void {
   if (!groupId || groupId <= 0) {
     Swal.fire({
       title: '錯誤',
@@ -493,7 +533,7 @@ getMedicineByGroupId(groupId: number): void {
 }
 
   // 查詢一般物品資料
-  getItemByGroupId(groupId: number) {
+  getItemByGroupId(groupId: number|null): void {
     this.currentGroupId = groupId;
 
     // 切換群組時，如果目前在訂閱模式，就查訂閱
@@ -515,14 +555,6 @@ getMedicineByGroupId(groupId: number): void {
     return;
   }
 
-    if (this.currentGroupId <= 0) {
-      Swal.fire({
-        title: 'fail',
-        text: '群組ID參數錯誤',
-        icon: 'error',
-      });
-      return;
-    }
 
     this.http
       .getApi(this.basicUrl + `item/getItems?groupId=${this.currentGroupId}`)
@@ -659,8 +691,11 @@ getMedicineByGroupId(groupId: number): void {
         return;
       }
 
+      // =========================
       // 訂閱模式刪除
+      // =========================
       if (this.isSubscriptionMode) {
+        // 多筆刪除
         selectedIds.forEach((id) => {
           this.http
             .deleteApi(this.basicUrl + `subscription/delete?id=${id}`)
@@ -675,7 +710,7 @@ getMedicineByGroupId(groupId: number): void {
                   return;
                 }
 
-                // 最後一筆完成後重新查詢
+                // 最後一筆刪除成功後刷新
                 if (id === selectedIds[selectedIds.length - 1]) {
                   Swal.fire({
                     title: '刪除成功',
@@ -683,9 +718,12 @@ getMedicineByGroupId(groupId: number): void {
                   });
 
                   this.selection.clear();
+
+                  // 重新查詢訂閱列表
                   this.getSubscriptionByGroupId(this.currentGroupId);
                 }
               },
+
               error: (err: any) => {
                 Swal.fire({
                   title: '刪除錯誤',

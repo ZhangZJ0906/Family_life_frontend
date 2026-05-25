@@ -25,7 +25,7 @@ import {
 export class GroupMemberDialogComponent {
 
   user_id!: string;
-
+  avatar = " ";
   constructor(
     private dialogRef: MatDialogRef<GroupMemberDialogComponent>,
 
@@ -79,9 +79,9 @@ export class GroupMemberDialogComponent {
       next: (res) => {
         // console.log(group_id);
         // console.log(this.data.userId);
-        this.invited_members = res.invitedMemberList;
+        this.invited_members = res.invitedMembersList;
 
-        console.log(res.invitedMemberList);
+        console.log(res);
       },
 
       error: (err) => {

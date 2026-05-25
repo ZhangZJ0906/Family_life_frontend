@@ -1,25 +1,120 @@
-<!-- <main class="page">
+<main class="page">
   <a class="back-link" routerLink="/shopping-list">返回購物清單</a>
 
   <section class="page-heading">
-    <p class="eyebrow">Items</p>
-    <h1>購物項目</h1>
+    <div>
+      <p class="eyebrow">Purchase Items</p>
+      <h1>新增購物項目</h1>
+      <!-- <p class="subtitle">清單 ID {{ listId }}</p> -->
+    </div>
+
+    <button class="ghost-button" type="button" (click)="loadItems()" [disabled]="isLoading">
+      重新整理
+    </button>
+  </section>
+
+  <section class="summary-grid" aria-label="購物項目統計">
+    <article class="summary-card">
+      <span>全部項目</span>
+      <strong>{{ totalCount }}</strong>
+    </article>
+
+    <article class="summary-card">
+      <span>尚未購買</span>
+      <strong>{{ remainingCount }}</strong>
+    </article>
+
+    <article class="summary-card">
+      <span>已完成</span>
+      <strong>{{ progressPercent }}%</strong>
+    </article>
+  </section>
+
+  <section class="add-panel" aria-label="新增項目">
+    <form class="add-form" (ngSubmit)="addItem()">
+      <label class="field item-field">
+        <span>項目名稱</span>
+        <input
+          type="text"
+          name="item"
+          [(ngModel)]="newItem.item"
+          placeholder="例如：牛奶"
+          autocomplete="off"
+        />
+      </label>
+
+      <label class="field quantity-field">
+        <span>數量</span>
+        <input
+          type="number"
+          name="quantity"
+          [(ngModel)]="newItem.quantity"
+          min="1"
+          step="1"
+        />
+      </label>
+
+      <label class="field category-field">
+        <span>分類</span>
+        <select name="categoryId" [(ngModel)]="newItem.categoryId">
+          <option *ngFor="let category of categories" [ngValue]="category.id">
+            {{ category.name }}
+          </option>
+        </select>
+      </label>
+
+      <button class="primary-button" type="submit" [disabled]="isSaving">
+        {{ isSaving ? '新增中' : '新增項目' }}
+      </button>
+    </form>
+
+    <p class="form-error" *ngIf="formError">{{ formError }}</p>
   </section>
 
   <section class="items-panel" aria-label="購物項目列表">
-    @for (item of purchaseItems; track item.id) {
-      <button
-        type="button"
+    <div class="panel-header">
+      <h2>項目列表</h2>
+      <span>{{ boughtCount }} / {{ totalCount }} 已完成</span>
+    </div>
+
+    <div class="progress-track" aria-hidden="true">
+      <div class="progress-bar" [style.width.%]="progressPercent"></div>
+    </div>
+
+    <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+    <div class="state-box" *ngIf="isLoading">項目載入中...</div>
+
+    <div class="state-box" *ngIf="!isLoading && items.length === 0">
+      這份清單目前沒有項目，先新增第一個購物項目。
+    </div>
+
+    <div class="item-list" *ngIf="!isLoading && items.length > 0">
+      <article
         class="item-row"
-        [class.is-bought]="item.isBought"
-        (click)="toggleItem(item)"
+        *ngFor="let item of items; trackBy: trackByItemId"
+        [class.is-checked]="item.check"
       >
-        <span class="check">{{ item.isBought ? '✓' : '' }}</span>
-        <span class="name">{{ item.name }}</span>
+        <label class="check-control">
+          <input
+            type="checkbox"
+            [checked]="item.check"
+            (change)="toggleCheck(item)"
+          />
+          <span></span>
+        </label>
+
+        <div class="item-content">
+          <strong>{{ item.item }}</strong>
+          <small>{{ getCategoryName(item.categoryId) }}</small>
+        </div>
+
         <span class="quantity">x {{ item.quantity }}</span>
-      </button>
-    } @empty {
-      <p class="empty">這份清單目前沒有項目</p>
-    }
+
+        <button class="icon-button" type="button" (click)="deleteItem(item)" aria-label="刪除項目">
+          刪除
+        </button>
+      </article>
+    </div>
   </section>
-</main> -->
+</main>

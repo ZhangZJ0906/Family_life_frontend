@@ -1,0 +1,16 @@
+// 確保 Angular Material 的 Form Field 滿寬，才能完美配合 Bootstrap 的 col 寬度
+mat-form-field {
+  width: 100%;
+}
+
+// 移除 Material 預設 dialog actions 的內距，改用 Bootstrap 控制
+.mat-mdc-dialog-actions {
+  padding: 0;
+  min-height: auto;
+}
+
+// 針對美化卡片微調
+.card {
+  // 圓角微調
+  border-radius: 4px;
+}

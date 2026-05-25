@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+
 import Swal from 'sweetalert2';
 
 import { MatDialog } from '@angular/material/dialog';
@@ -10,6 +11,8 @@ import { MatBadgeModule } from '@angular/material/badge';
 
 import { GroupMemberDialogComponent } from '../group-member-dialog/group-member-dialog.component';
 import { NotifyDialogComponent } from '../notify-dialog/notify-dialog.component';
+import { TopbarComponent } from '../../shared/topbar/topbar.component';
+import { AuthService } from '../../@services/auth.service';
 
 @Component({
   selector: 'app-group-page',
@@ -19,7 +22,8 @@ import { NotifyDialogComponent } from '../notify-dialog/notify-dialog.component'
     FormsModule,
     GroupMemberDialogComponent,
     MatIconModule,
-    MatBadgeModule
+    MatBadgeModule,
+    TopbarComponent
   ],
   templateUrl: './group-page.component.html',
   styleUrls: ['./group-page.component.scss']
@@ -38,16 +42,18 @@ export class GroupPageComponent{
   // 真正顯示的資料
   filteredGroups: any[] = [];
 
-  user_id = 2;
-
   unreadCount!: number;
 
   constructor(
     private dialog: MatDialog,
-    private http: HttpClient
+    private http: HttpClient,
+    private authService: AuthService
   ) {}
 
+  user_id = 0;
+
   ngOnInit(): void {
+    this.user_id = this.authService.currentUser()?.user_id ?? 0;
     this.getGroup();
     this.getUnreadNotifyCount();
   }
@@ -133,7 +139,7 @@ export class GroupPageComponent{
 
   }
 
-  pageSize = 4;
+  pageSize = 5;
 
   get totalPages(): number {
     return Math.ceil(this.filteredGroups.length / this.pageSize) || 1;

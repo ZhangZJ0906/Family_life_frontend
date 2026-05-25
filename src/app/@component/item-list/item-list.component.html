@@ -17,6 +17,7 @@
     <!-- 中間：分類 + 群組 -->
     <div class="header-filter">
 
+
       <!-- 分類按鈕 -->
       <mat-chip-listbox aria-label="分類篩選">
         @for (cat of categories; track cat.id) {
@@ -38,28 +39,24 @@
 
             {{ cat.name }}
 
-          </mat-chip-option>
+        </mat-chip-option>
+      }
+    </mat-chip-listbox>
+</div>
+    <mat-form-field appearance="outline" class="group-select">
+      <mat-label>切換群組</mat-label>
+      <mat-select [(value)]="currentGroupId" (selectionChange)="getItemByGroupId($event.value)">
+        @for (group of userGroups; track $index) {
+          <mat-option [value]="group.groupId">
+            🏠 {{ group.groupName }}
+          </mat-option>
         }
-      </mat-chip-listbox>
+      <!-- </mat-chip-listbox> -->
 
       <!-- 群組切換 -->
-      <mat-form-field appearance="outline" class="group-select">
-        <mat-label>切換群組</mat-label>
-
-        <mat-select
-          [(value)]="currentGroupId"
-          (selectionChange)="getItemByGroupId($event.value)">
-
-          @for (group of userGroups; track group.id) {
-            <mat-option [value]="group.id">
-              🏠 {{ group.name }}
-            </mat-option>
-          }
-
-        </mat-select>
+      </mat-select>
       </mat-form-field>
 
-    </div>
 
     <!-- 右側搜尋 -->
     <mat-form-field appearance="outline" class="search-field">

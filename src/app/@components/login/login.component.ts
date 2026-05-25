@@ -1,39 +1,51 @@
-import { AuthService } from './../../@services/auth.service';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-
+import { Router, RouterLink } from '@angular/router';
+import { User } from '../../@models/user.model';
+import { AuthService } from '../../@services/auth.service';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  styleUrl: './login.component.scss',
 })
 export class LoginComponent {
-
-  email = '123@example.com';
-  password = '123';
+  email = '';
+  password = '';
   errorMessage = '';
 
   constructor(
     private readonly authService: AuthService,
-    private readonly router: Router
+    private readonly router: Router,
   ) {}
 
-
-  signIn() {
-    const success = this.authService.login(this.email, this.password);
-
-    if (!success) {
-      this.errorMessage = 'Email 或密碼不正確';
-      return;
-    }
-
-    this.errorMessage = '';
-    this.router.navigate(['/shopping-list']);
+  signIn(): void {
+    this.authService.login(this.email, this.password).subscribe({
+      next: (res) => {
+        if (res.code !== 200) {
+          this.errorMessage = 'Email 或密碼不正確';
+          return;
+        }
+        const payload = {
+          user_id: res.userId,
+          name: res.name,
+          email: res.email,
+          password: '',
+          avatar: res.avatar ?? '',
+          notifyByEndDate: res.notifyByEndDate ?? true,
+          notifyByEmail: res.notifyByEmail ?? true,
+          // created_at: res.created_at ??  '',
+          // updated_at: res.updated_at ?? '',
+        };
+        this.authService.setCurrentUser(payload);
+        localStorage.setItem('isLogin', 'true');
+        this.router.navigate(['/home-page']); // 👉 登入成功後導向的頁面，可以自己改路徑。
+      },
+      error: (err) => {
+        console.error(err);
+        this.errorMessage = 'Email 或密碼不正確';
+      },
+    });
   }
-
-
 }
