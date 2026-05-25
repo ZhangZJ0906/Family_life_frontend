@@ -284,28 +284,45 @@ td.mat-mdc-cell {
   border-radius: 999px;
   font-size: 13px;
   font-weight: 800;
-  margin-bottom: 4px;
 }
 
-/* 正常 */
+/* 一般物品：正常 */
 .status-normal {
   background: #eef8f0;
   color: #3d9b5f;
 }
 
-/* 試用中 */
+/* 一般物品：已到期 */
+.status-expired {
+  background: #fdeeee;
+  color: #d85c5c;
+}
+
+/* 一般物品：即將到期 */
+.status-soon {
+  background: #fff7e8;
+  color: #e69a2a;
+}
+
+/* 一般物品：庫存不足 */
+.status-low {
+  background: #eef4ff;
+  color: #2f80ed;
+}
+
+/* 訂閱：試用中 */
 .status-trial {
   background: #eef4ff;
   color: #2f80ed;
 }
 
-/* 試用即將結束 / 即將扣款 */
+/* 訂閱：試用即將結束 / 即將扣款 */
 .status-warning {
   background: #fff7e8;
   color: #e69a2a;
 }
 
-/* 已逾期扣款 */
+/* 訂閱：已逾期扣款 */
 .status-danger {
   background: #fdeeee;
   color: #d85c5c;
@@ -318,12 +335,11 @@ td.mat-mdc-cell {
   font-size: 13px;
 }
 
-/* 提醒 icon，跟一般物品表格一致 */
+/* 提醒 icon */
 .notify-icon {
   color: #111;
   font-size: 24px;
 }
-
 /* 沒有資料區 */
 .no-data {
   text-align: center;

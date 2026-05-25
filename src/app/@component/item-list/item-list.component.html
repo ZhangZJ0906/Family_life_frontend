@@ -2,43 +2,47 @@
 
   <app-topbar></app-topbar>
 
- <section class="item-header-card">
+  <!-- 上方標題、分類、群組、搜尋區 -->
+  <section class="item-header-card">
 
-  <!-- 左側標題 -->
-  <div class="item-title">
-    <div class="title-row">
-      <div class="title-icon">📦</div>
-      <h2>物品清單</h2>
+    <!-- 左側標題 -->
+    <div class="item-title">
+      <div class="title-row">
+        <div class="title-icon">📦</div>
+        <h2>物品清單</h2>
+      </div>
+      <p>管理家庭物品、庫存與到期提醒</p>
     </div>
-    <p>管理家庭物品、庫存與到期提醒</p>
-  </div>
 
-  <!-- 中間：分類 + 群組 -->
-  <div class="header-filter">
+    <!-- 中間：分類 + 群組 -->
+    <div class="header-filter">
 
-    <mat-chip-listbox aria-label="分類篩選">
-      @for (cat of categories; track cat.id) {
-        <mat-chip-option
-          [selected]="selectedCategory === cat.name"
-          (click)="filterByCategory(cat.id); selectedCategory = cat.name">
 
-          <span class="chip-icon">
-            @switch (cat.name) {
-              @case ('食品') { 🥬 }
-              @case ('藥品') { 💊 }
-              @case ('日用品') { 🧴 }
-              @case ('訂閱') { 💳 }
-              @case ('清潔用品') { 🧽 }
-              @default {  }
-            }
-          </span>
+      <!-- 分類按鈕 -->
+      <mat-chip-listbox aria-label="分類篩選">
+        @for (cat of categories; track cat.id) {
+          <mat-chip-option
+            [selected]="selectedCategory === cat.name"
+            (click)="filterByCategory(cat.id)">
 
-          {{ cat.name }}
+            <span class="chip-icon">
+              @switch (cat.name) {
+                @case ('食品') { 🥬 }
+                @case ('藥品') { 💊 }
+                @case ('日用品') { 🧴 }
+                @case ('訂閱') { 💳 }
+                @case ('清潔用品') { 🧽 }
+                @case ('保固') { 🛡️ }
+                @default {  }
+              }
+            </span>
+
+            {{ cat.name }}
 
         </mat-chip-option>
       }
     </mat-chip-listbox>
-
+</div>
     <mat-form-field appearance="outline" class="group-select">
       <mat-label>切換群組</mat-label>
       <mat-select [(value)]="currentGroupId" (selectionChange)="getItemByGroupId($event.value)">
@@ -47,23 +51,33 @@
             🏠 {{ group.groupName }}
           </mat-option>
         }
+      <!-- </mat-chip-listbox> -->
+
+      <!-- 群組切換 -->
       </mat-select>
+      </mat-form-field>
+
+
+    <!-- 右側搜尋 -->
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>搜尋物品</mat-label>
+      <input
+        matInput
+        (keyup)="applyFilter($event)"
+        placeholder="例如：牛奶"
+        #input>
+      <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
 
-  </div>
+  </section>
 
-  <!-- 右側搜尋：注意，這個要放在 header-filter 外面 -->
-  <mat-form-field appearance="outline" class="search-field">
-    <mat-label>搜尋物品</mat-label>
-    <input matInput (keyup)="applyFilter($event)" placeholder="例如：牛奶" #input>
-    <mat-icon matSuffix>search</mat-icon>
-  </mat-form-field>
-
-</section>
+  <!-- 表格卡片 -->
   <section class="table-card">
     <div class="table-responsive">
+
       <table mat-table [dataSource]="dataSource" class="w-100">
 
+        <!-- 勾選欄位 -->
         <ng-container matColumnDef="select">
           <th mat-header-cell *matHeaderCellDef>
             <mat-checkbox
@@ -84,11 +98,15 @@
           </td>
         </ng-container>
 
+        <!-- 名稱欄位，一般物品與訂閱共用 -->
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef>物品名稱</th>
-          <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+          <td mat-cell *matCellDef="let element">
+            {{ element.name }}
+          </td>
         </ng-container>
 
+        <!-- 一般物品：數量 -->
         <ng-container matColumnDef="quantity">
           <th mat-header-cell *matHeaderCellDef>目前數量</th>
           <td mat-cell *matCellDef="let element">
@@ -98,6 +116,7 @@
           </td>
         </ng-container>
 
+        <!-- 一般物品：單價 -->
         <ng-container matColumnDef="unitPrice">
           <th mat-header-cell *matHeaderCellDef>單價</th>
           <td mat-cell *matCellDef="let element">
@@ -105,6 +124,9 @@
           </td>
         </ng-container>
 
+
+
+        <!-- 一般物品 / 訂閱共用：價格 -->
         <ng-container matColumnDef="price">
           <th mat-header-cell *matHeaderCellDef>總價格</th>
           <td mat-cell *matCellDef="let element" class="price-text">
@@ -112,6 +134,7 @@
           </td>
         </ng-container>
 
+        <!-- 一般物品：到期日 -->
         <ng-container matColumnDef="expireDate">
           <th mat-header-cell *matHeaderCellDef>到期日</th>
           <td mat-cell *matCellDef="let element">
@@ -121,16 +144,19 @@
           </td>
         </ng-container>
 
+        <!-- 一般物品 / 訂閱共用：提醒 -->
         <ng-container matColumnDef="notify">
           <th mat-header-cell *matHeaderCellDef class="text-center">提醒</th>
           <td mat-cell *matCellDef="let element" class="text-center">
-            <mat-icon [color]="element.notify ? 'primary' : 'disabled'">
+            <mat-icon
+              class="notify-icon"
+              [color]="element.notify ? 'primary' : 'disabled'">
               {{ element.notify ? 'notifications_active' : 'notifications_off' }}
             </mat-icon>
           </td>
         </ng-container>
 
-              <!-- 扣款週期 -->
+        <!-- 訂閱：扣款週期 -->
         <ng-container matColumnDef="billingCycle">
           <th mat-header-cell *matHeaderCellDef>扣款週期</th>
           <td mat-cell *matCellDef="let element">
@@ -140,7 +166,7 @@
           </td>
         </ng-container>
 
-        <!-- 試用結束日 -->
+        <!-- 訂閱：試用結束日 -->
         <ng-container matColumnDef="trialEndDate">
           <th mat-header-cell *matHeaderCellDef>試用結束日</th>
           <td mat-cell *matCellDef="let element">
@@ -148,7 +174,7 @@
           </td>
         </ng-container>
 
-        <!-- 下次扣款日 -->
+        <!-- 訂閱：下次扣款日 -->
         <ng-container matColumnDef="nextBillingDate">
           <th mat-header-cell *matHeaderCellDef>下次扣款日</th>
           <td mat-cell *matCellDef="let element">
@@ -156,29 +182,98 @@
           </td>
         </ng-container>
 
-        <!-- 狀態 -->
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>狀態</th>
+        <!-- 保固：產品名稱 -->
+        <ng-container matColumnDef="productName">
+          <th mat-header-cell *matHeaderCellDef>產品名稱</th>
           <td mat-cell *matCellDef="let element">
-            <span
-              class="status-badge"
-              [class.status-trial]="element.status === '試用中'"
-              [class.status-warning]="element.status === '試用即將結束' || element.status === '即將扣款'"
-              [class.status-danger]="element.status === '已逾期扣款'"
-              [class.status-normal]="element.status === '正常'">
-              {{ element.status || '正常' }}
-            </span>
-
-            <p class="remind-text">
-              {{ element.remindMessage }}
-            </p>
+            {{ element.productName }}
           </td>
         </ng-container>
 
+        <!-- 保固：品牌 -->
+        <ng-container matColumnDef="brand">
+          <th mat-header-cell *matHeaderCellDef>品牌</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.brand || '無' }}
+          </td>
+        </ng-container>
 
+        <!-- 保固：型號 -->
+        <ng-container matColumnDef="model">
+          <th mat-header-cell *matHeaderCellDef>型號</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.model || '無' }}
+          </td>
+        </ng-container>
 
+        <!-- 保固：序號 -->
+        <ng-container matColumnDef="serialNumber">
+          <th mat-header-cell *matHeaderCellDef>序號</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.serialNumber || '無' }}
+          </td>
+        </ng-container>
+
+        <!-- 保固：購買日期 -->
+        <ng-container matColumnDef="purchaseDate">
+          <th mat-header-cell *matHeaderCellDef>購買日期</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.purchaseDate || '無' }}
+          </td>
+        </ng-container>
+
+        <!-- 保固：保固到期日 -->
+        <ng-container matColumnDef="warrantyEndDate">
+          <th mat-header-cell *matHeaderCellDef>保固到期日</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.warrantyEndDate || '無' }}
+          </td>
+        </ng-container>
+
+        <!-- 藥品：藥品類型 -->
+      <ng-container matColumnDef="medicineType">
+        <th mat-header-cell *matHeaderCellDef>藥品類型</th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.medicineType || '無' }}
+        </td>
+      </ng-container>
+
+      <!-- 藥品：用法 -->
+      <ng-container matColumnDef="usageMethod">
+        <th mat-header-cell *matHeaderCellDef>用法</th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.usageMethod || '無' }}
+        </td>
+      </ng-container>
+
+        <!-- 一般物品 / 訂閱共用：狀態 -->
+     <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef>狀態</th>
+
+      <td mat-cell *matCellDef="let element">
+        <span
+          class="status-badge"
+          [class.status-normal]="element.status === '正常'"
+          [class.status-expired]="element.status === '已到期'"
+          [class.status-soon]="element.status === '即將到期'"
+          [class.status-low]="element.status === '庫存不足'"
+          [class.status-trial]="element.status === '試用中'"
+          [class.status-warning]="element.status === '試用即將結束' || element.status === '即將扣款'"
+          [class.status-danger]="element.status === '已逾期扣款'">
+          {{ element.status || '正常' }}
+        </span>
+
+        @if (element.remindMessage) {
+          <p class="remind-text">
+            {{ element.remindMessage }}
+          </p>
+        }
+      </td>
+    </ng-container>
+        <!-- 表頭 -->
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
 
+        <!-- 表身 -->
         <tr
           mat-row
           *matRowDef="let row; columns: displayedColumns"
@@ -187,6 +282,7 @@
           (click)="openEditDialog(row)">
         </tr>
 
+        <!-- 沒資料 -->
         <tr class="mat-row" *matNoDataRow>
           <td class="mat-cell no-data" colspan="10">
             <mat-icon>inventory_2</mat-icon>
@@ -195,12 +291,17 @@
         </tr>
 
       </table>
+
     </div>
 
+    <!-- 分頁 -->
     <mat-paginator [pageSizeOptions]="[10, 20]" showFirstLastButtons></mat-paginator>
   </section>
 
+  <!-- 右下角浮動按鈕 -->
   <div class="fab-container">
+
+    <!-- 有勾選資料時顯示刪除按鈕 -->
     <button
       mat-fab
       color="warn"
@@ -210,9 +311,11 @@
       <span class="fab-badge">{{ selection.selected.length }}</span>
     </button>
 
+    <!-- 新增按鈕 -->
     <button mat-fab color="primary" (click)="openAddDialog()">
       <mat-icon>add</mat-icon>
     </button>
+
   </div>
 
 </div>

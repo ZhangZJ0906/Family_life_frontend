@@ -153,7 +153,9 @@ export class CalendarComponent {
 
     //2026-05-24 by ZJ 試試看新東西
     let url = this.http.basicUrl + `calendar/getUserEventInfo?userId=${userId}`;
-    if (groupId != null) url += `&groupId=${groupId}`;
+    if (groupId !== null && groupId !== 0) {
+      url += `&groupId=${groupId}`;
+    }
     this.http.getApi(url).subscribe({
       next: (res: any) => {
         if (res.code !== 200) {
@@ -195,7 +197,7 @@ export class CalendarComponent {
   }
 
   onGroupChange(event: MatSelectChange) {
-    this.currentGroupId = event.value;
+    this.currentGroupId = event.value === 0 ? null : event.value;
     this.loadCalendarEvents(this.currentGroupId, this.createdBy);
   }
   // 點擊日期時新增活動，日期會帶入使用者點到的日期
@@ -221,374 +223,404 @@ export class CalendarComponent {
   }
 
   // HTML「新增活動」按鈕會呼叫這個方法
-//   openCreateDialog(): void {
-//     this.createCalendarEvent();
-//   }
-//   // 共用新增活動方法
-//   createCalendarEvent(dateStr?: string): void {
-//     Swal.fire({
-//       title: '新增行事曆事件',
-//       didOpen: () => {
-//         (document.getElementById('createEventTime') as HTMLInputElement).value =
-//           '';
-//         (document.getElementById('createEndTime') as HTMLInputElement).value =
-//           '';
-//       },
-//       html: `
-//   <div class="swal-form">
+  //   openCreateDialog(): void {
+  //     this.createCalendarEvent();
+  //   }
+  //   // 共用新增活動方法
+  //   createCalendarEvent(dateStr?: string): void {
+  //     Swal.fire({
+  //       title: '新增行事曆事件',
+  //       didOpen: () => {
+  //         (document.getElementById('createEventTime') as HTMLInputElement).value =
+  //           '';
+  //         (document.getElementById('createEndTime') as HTMLInputElement).value =
+  //           '';
+  //       },
+  //       html: `
+  //   <div class="swal-form">
 
-//     <div class="form-row">
-//       <label>活動名稱</label>
-//       <input id="createTitle" class="swal2-input" placeholder="請輸入活動名稱">
-//     </div>
+  //     <div class="form-row">
+  //       <label>活動名稱</label>
+  //       <input id="createTitle" class="swal2-input" placeholder="請輸入活動名稱">
+  //     </div>
 
-//     <div class="form-row">
-//       <label>活動描述</label>
-//       <input id="createDescription" class="swal2-input" placeholder="請輸入活動描述">
-//     </div>
+  //     <div class="form-row">
+  //       <label>活動描述</label>
+  //       <input id="createDescription" class="swal2-input" placeholder="請輸入活動描述">
+  //     </div>
 
-//     <div class="form-row">
-//       <label>開始日期</label>
-//       <input id="createEventDate" type="date" class="swal2-input" value="${dateStr || ''}">
-//     </div>
+  //     <div class="form-row">
+  //       <label>開始日期</label>
+  //       <input id="createEventDate" type="date" class="swal2-input" value="${dateStr || ''}">
+  //     </div>
 
-//     <div class="form-row">
-//       <label>開始時間</label>
-//       <input id="createEventTime" type="time" class="swal2-input" value="" autocomplete="off">
-//     </div>
+  //     <div class="form-row">
+  //       <label>開始時間</label>
+  //       <input id="createEventTime" type="time" class="swal2-input" value="" autocomplete="off">
+  //     </div>
 
-//     <div class="form-row">
-//       <label>結束日期</label>
-//       <input id="createEndDate" type="date" class="swal2-input" value="${dateStr || ''}">
-//     </div>
+  //     <div class="form-row">
+  //       <label>結束日期</label>
+  //       <input id="createEndDate" type="date" class="swal2-input" value="${dateStr || ''}">
+  //     </div>
 
-//     <div class="form-row">
-//       <label>結束時間</label>
-//       <input id="createEndTime" type="time" class="swal2-input" value="" autocomplete="off">
-//     </div>
+  //     <div class="form-row">
+  //       <label>結束時間</label>
+  //       <input id="createEndTime" type="time" class="swal2-input" value="" autocomplete="off">
+  //     </div>
 
-//     <div class="form-row">
-//       <label>提醒時間</label>
-//       <input id="createNotifyBefore" type="number" class="swal2-input" placeholder="提前幾分鐘通知">
-//     </div>
+  //     <div class="form-row">
+  //       <label>提醒時間</label>
+  //       <input id="createNotifyBefore" type="number" class="swal2-input" placeholder="提前幾分鐘通知">
+  //     </div>
 
-//   </div>
-// `,
-//       preConfirm: () => {
-//         const title = (
-//           document.getElementById('createTitle') as HTMLInputElement
-//         ).value;
-//         const description = (
-//           document.getElementById('createDescription') as HTMLInputElement
-//         ).value;
-//         const eventDate = (
-//           document.getElementById('createEventDate') as HTMLInputElement
-//         ).value;
-//         const eventTime = (
-//           document.getElementById('createEventTime') as HTMLInputElement
-//         ).value;
-//         const endDate = (
-//           document.getElementById('createEndDate') as HTMLInputElement
-//         ).value;
-//         const endTime = (
-//           document.getElementById('createEndTime') as HTMLInputElement
-//         ).value;
-//         const notifyBefore = Number(
-//           (document.getElementById('createNotifyBefore') as HTMLInputElement)
-//             .value,
-//         );
-//         const startDateTime = `${eventDate}T${eventTime}:00`;
-//         const endDateTime = `${endDate}T${endTime}:00`;
-//         const today = new Date();
-//         today.setHours(0, 0, 0, 0);
+  //   </div>
+  // `,
+  //       preConfirm: () => {
+  //         const title = (
+  //           document.getElementById('createTitle') as HTMLInputElement
+  //         ).value;
+  //         const description = (
+  //           document.getElementById('createDescription') as HTMLInputElement
+  //         ).value;
+  //         const eventDate = (
+  //           document.getElementById('createEventDate') as HTMLInputElement
+  //         ).value;
+  //         const eventTime = (
+  //           document.getElementById('createEventTime') as HTMLInputElement
+  //         ).value;
+  //         const endDate = (
+  //           document.getElementById('createEndDate') as HTMLInputElement
+  //         ).value;
+  //         const endTime = (
+  //           document.getElementById('createEndTime') as HTMLInputElement
+  //         ).value;
+  //         const notifyBefore = Number(
+  //           (document.getElementById('createNotifyBefore') as HTMLInputElement)
+  //             .value,
+  //         );
+  //         const startDateTime = `${eventDate}T${eventTime}:00`;
+  //         const endDateTime = `${endDate}T${endTime}:00`;
+  //         const today = new Date();
+  //         today.setHours(0, 0, 0, 0);
 
-//         const selectedDate = new Date(eventDate);
-//         selectedDate.setHours(0, 0, 0, 0);
+  //         const selectedDate = new Date(eventDate);
+  //         selectedDate.setHours(0, 0, 0, 0);
 
-//         if (selectedDate < today) {
-//           Swal.showValidationMessage('不可新增到今日之前');
-//           return;
-//         }
+  //         if (selectedDate < today) {
+  //           Swal.showValidationMessage('不可新增到今日之前');
+  //           return;
+  //         }
 
-//         if (!title) {
-//           Swal.showValidationMessage('活動名稱不可為空');
-//           return;
-//         }
+  //         if (!title) {
+  //           Swal.showValidationMessage('活動名稱不可為空');
+  //           return;
+  //         }
 
-//         if (!eventDate) {
-//           Swal.showValidationMessage('活動日期不可為空');
-//           return;
-//         }
+  //         if (!eventDate) {
+  //           Swal.showValidationMessage('活動日期不可為空');
+  //           return;
+  //         }
 
-//         if (!eventTime) {
-//           Swal.showValidationMessage('開始時間不可為空');
-//           return;
-//         }
+  //         if (!eventTime) {
+  //           Swal.showValidationMessage('開始時間不可為空');
+  //           return;
+  //         }
 
-//         if (endDate && !endTime) {
-//           Swal.showValidationMessage('結束時間不可為空');
-//           return;
-//         }
+  //         if (endDate && !endTime) {
+  //           Swal.showValidationMessage('結束時間不可為空');
+  //           return;
+  //         }
 
-//         if (endDate && startDateTime > endDateTime) {
-//           Swal.showValidationMessage('開始時間不可大於結束時間');
-//           return;
-//         }
-//         return {
-//           groupId: this.currentGroupId,
-//           createdBy: this.createdBy,
-//           title,
-//           description,
-//           eventTime: startDateTime,
-//           endTime: endDate ? endDateTime : null,
-//           notifyBefore,
-//         };
-//       },
-//     }).then((result) => {
-//       if (!result.isConfirmed || !result.value) {
-//         return;
-//       }
+  //         if (endDate && startDateTime > endDateTime) {
+  //           Swal.showValidationMessage('開始時間不可大於結束時間');
+  //           return;
+  //         }
+  //         return {
+  //           groupId: this.currentGroupId,
+  //           createdBy: this.createdBy,
+  //           title,
+  //           description,
+  //           eventTime: startDateTime,
+  //           endTime: endDate ? endDateTime : null,
+  //           notifyBefore,
+  //         };
+  //       },
+  //     }).then((result) => {
+  //       if (!result.isConfirmed || !result.value) {
+  //         return;
+  //       }
 
-//       this.calendarApiService.create(result.value).subscribe({
-//         next: () => {
-//           Swal.fire({
-//             icon: 'success',
-//             title: '新增成功',
-//             showConfirmButton: true,
-//             confirmButtonText: '確認',
-//           });
+  //       this.calendarApiService.create(result.value).subscribe({
+  //         next: () => {
+  //           Swal.fire({
+  //             icon: 'success',
+  //             title: '新增成功',
+  //             showConfirmButton: true,
+  //             confirmButtonText: '確認',
+  //           });
 
-//           this.loadCalendarEvents(this.currentGroupId, this.createdBy);
-//         },
-//         error: (err) => {
-//           Swal.fire({
-//             icon: 'error',
-//             title: '新增失敗',
-//             text: err.error?.message || '請稍後再試',
-//             showConfirmButton: true,
-//             confirmButtonText: '確認',
-//           });
-//         },
-//       });
-//     });
-//   }
+  //           this.loadCalendarEvents(this.currentGroupId, this.createdBy);
+  //         },
+  //         error: (err) => {
+  //           Swal.fire({
+  //             icon: 'error',
+  //             title: '新增失敗',
+  //             text: err.error?.message || '請稍後再試',
+  //             showConfirmButton: true,
+  //             confirmButtonText: '確認',
+  //           });
+  //         },
+  //       });
+  //     });
+  //   }
 
-createCalendarEvent(dateStr?: string): void {
-  const ref = this.dialog.open(CalendarEventDialogComponent, {
-    width: '480px',
-    data: { mode: 'create', dateStr }
-  });
-
-  ref.afterClosed().subscribe(result => {
-    const payload ={
-      groupId: this.currentGroupId,
-      createdBy: this.createdBy,
-      ...result
-    }
-    console.log(payload)
-    //這邊也要去 隨著 group ID = 0 去做變更
-    
-    // if (!result) return;
-    // this.calendarApiService.create({
-    //   groupId: this.currentGroupId,
-    //   createdBy: this.createdBy,
-    //   ...result
-    // }).subscribe({
-    //   next: () => {
-    //     Swal.fire({ icon: 'success', title: '新增成功', confirmButtonText: '確認' });
-    //     this.loadCalendarEvents(this.currentGroupId, this.createdBy);
-    //   },
-    //   error: (err) => Swal.fire({ icon: 'error', title: '新增失敗', text: err.error?.message })
-    // });
-  });
-}
-  // 修改活動視窗
-//   openUpdateDialog(info: EventClickArg): void {
-//     const eventId = Number(info.event.id);
-
-//     const oldTitle = info.event.title;
-//     const oldDescription = info.event.extendedProps['description'] || '';
-//     const oldNotifyBefore = info.event.extendedProps['notifyBefore'] || '';
-
-//     const oldDate = info.event.startStr.substring(0, 10);
-//     const oldTime = info.event.startStr.substring(11, 16);
-//     const oldEndDate = info.event.endStr
-//       ? info.event.endStr.substring(0, 10)
-//       : '';
-//     const oldEndTime = info.event.endStr
-//       ? info.event.endStr.substring(11, 16)
-//       : '';
-//     Swal.fire({
-//       title: '修改行事曆事件',
-//       html: `
-//   <div class="swal-form">
-
-//     <div class="form-row">
-//       <label>活動名稱</label>
-//       <input
-//         id="updateTitle"
-//         class="swal2-input"
-//         placeholder="活動名稱"
-//         value="${oldTitle}">
-//     </div>
-
-//     <div class="form-row">
-//       <label>活動描述</label>
-//       <input
-//         id="updateDescription"
-//         class="swal2-input"
-//         placeholder="活動描述"
-//         value="${oldDescription}">
-//     </div>
-
-//     <div class="form-row">
-//       <label>開始日期</label>
-//       <input
-//         id="updateEventDate"
-//         type="date"
-//         class="swal2-input"
-//         value="${oldDate}">
-//     </div>
-
-//     <div class="form-row">
-//       <label>開始時間</label>
-//       <input
-//         id="updateEventTime"
-//         type="time"
-//         class="swal2-input"
-//         value="${oldTime}">
-//     </div>
-
-//     <div class="form-row">
-//       <label>結束日期</label>
-//       <input
-//         id="updateEndDate"
-//         type="date"
-//         class="swal2-input"
-//         value="${oldEndDate}">
-//     </div>
-
-//     <div class="form-row">
-//       <label>結束時間</label>
-//       <input
-//         id="updateEndTime"
-//         type="time"
-//         class="swal2-input"
-//         value="${oldEndTime}">
-//     </div>
-
-//     <div class="form-row">
-//       <label>提醒時間</label>
-//       <input
-//         id="updateNotifyBefore"
-//         type="number"
-//         class="swal2-input"
-//         placeholder="提前幾分鐘通知"
-//         value="${oldNotifyBefore}">
-//     </div>
-
-//   </div>
-// `,
-//       preConfirm: () => {
-//         const title = (
-//           document.getElementById('updateTitle') as HTMLInputElement
-//         ).value;
-//         const description = (
-//           document.getElementById('updateDescription') as HTMLInputElement
-//         ).value;
-//         const eventDate = (
-//           document.getElementById('updateEventDate') as HTMLInputElement
-//         ).value;
-//         const eventTime = (
-//           document.getElementById('updateEventTime') as HTMLInputElement
-//         ).value;
-//         const endDate = (
-//           document.getElementById('updateEndDate') as HTMLInputElement
-//         ).value;
-//         const endTime = (
-//           document.getElementById('updateEndTime') as HTMLInputElement
-//         ).value;
-//         const notifyBefore = Number(
-//           (document.getElementById('updateNotifyBefore') as HTMLInputElement)
-//             .value,
-//         );
-//         const startDateTime = `${eventDate}T${eventTime}:00`;
-//         const endDateTime = `${endDate}T${endTime}:00`;
-//         const today = new Date();
-//         today.setHours(0, 0, 0, 0);
-//         const selectedDate = new Date(eventDate);
-//         selectedDate.setHours(0, 0, 0, 0);
-//         if (selectedDate < today) {
-//           Swal.showValidationMessage('不可新增到今日之前');
-//           return;
-//         }
-
-//         if (!title) {
-//           Swal.showValidationMessage('活動名稱不可為空');
-//           return;
-//         }
-
-//         if (!eventDate) {
-//           Swal.showValidationMessage('活動日期不可為空');
-//           return;
-//         }
-
-//         if (endDate && startDateTime > endDateTime) {
-//           Swal.showValidationMessage('開始時間不可大於結束時間');
-//           return;
-//         }
-
-//         return {
-//           title,
-//           description,
-//           eventTime: startDateTime,
-//           endTime: endDate ? endDateTime : null,
-//           notifyBefore,
-//         };
-//       },
-//     }).then((result) => {
-//       if (!result.isConfirmed || !result.value) {
-//         return;
-//       }
-
-//       this.calendarApiService.update(eventId, result.value).subscribe({
-//         next: () => {
-//           Swal.fire({
-//             icon: 'success',
-//             title: '修改成功',
-//             confirmButtonText: '確認',
-//           });
-
-//           this.loadCalendarEvents(this.currentGroupId, this.createdBy);
-//         },
-//         error: (err) => {
-//           Swal.fire({
-//             icon: 'error',
-//             title: '修改失敗',
-//             text: err.error?.message || '請稍後再試',
-//           });
-//         },
-//       });
-//     });
-//   }
-
-openUpdateDialog(info: EventClickArg): void {
-  const ref = this.dialog.open(CalendarEventDialogComponent, {
-    width: '480px',
-    data: { mode: 'update', event: info.event }
-  });
-
-  ref.afterClosed().subscribe(result => {
-    if (!result) return;
-    this.calendarApiService.update(Number(info.event.id), result).subscribe({
-      next: () => {
-        Swal.fire({ icon: 'success', title: '修改成功', confirmButtonText: '確認' });
-        this.loadCalendarEvents(this.currentGroupId, this.createdBy);
-      },
-      error: (err) => Swal.fire({ icon: 'error', title: '修改失敗', text: err.error?.message })
+  createCalendarEvent(dateStr?: string): void {
+    const ref = this.dialog.open(CalendarEventDialogComponent, {
+      width: '480px',
+      data: { mode: 'create', dateStr },
     });
-  });
-}
+
+    ref.afterClosed().subscribe((result) => {
+      if (this.currentGroupId == 0) {
+        this.currentGroupId = null;
+      }
+      const payload = {
+        groupId: this.currentGroupId,
+        createdBy: this.createdBy,
+        ...result,
+      };
+      if (!result) return;
+      this.calendarApiService.create(payload).subscribe({
+        next: (res: any) => {
+          if (res.code !== 200) {
+            Swal.fire({
+              icon: 'error',
+              title: '新增失敗',
+              text: res.message,
+            });
+            return;
+          }
+          Swal.fire({
+            icon: 'success',
+            title: '新增成功',
+            confirmButtonText: '確認',
+          });
+          this.loadCalendarEvents(this.currentGroupId, this.createdBy);
+        },
+        error: (err) =>
+          Swal.fire({
+            icon: 'error',
+            title: '新增失敗',
+            text: err.error?.message,
+          }),
+      });
+    });
+  }
+  // 修改活動視窗
+  //   openUpdateDialog(info: EventClickArg): void {
+  //     const eventId = Number(info.event.id);
+
+  //     const oldTitle = info.event.title;
+  //     const oldDescription = info.event.extendedProps['description'] || '';
+  //     const oldNotifyBefore = info.event.extendedProps['notifyBefore'] || '';
+
+  //     const oldDate = info.event.startStr.substring(0, 10);
+  //     const oldTime = info.event.startStr.substring(11, 16);
+  //     const oldEndDate = info.event.endStr
+  //       ? info.event.endStr.substring(0, 10)
+  //       : '';
+  //     const oldEndTime = info.event.endStr
+  //       ? info.event.endStr.substring(11, 16)
+  //       : '';
+  //     Swal.fire({
+  //       title: '修改行事曆事件',
+  //       html: `
+  //   <div class="swal-form">
+
+  //     <div class="form-row">
+  //       <label>活動名稱</label>
+  //       <input
+  //         id="updateTitle"
+  //         class="swal2-input"
+  //         placeholder="活動名稱"
+  //         value="${oldTitle}">
+  //     </div>
+
+  //     <div class="form-row">
+  //       <label>活動描述</label>
+  //       <input
+  //         id="updateDescription"
+  //         class="swal2-input"
+  //         placeholder="活動描述"
+  //         value="${oldDescription}">
+  //     </div>
+
+  //     <div class="form-row">
+  //       <label>開始日期</label>
+  //       <input
+  //         id="updateEventDate"
+  //         type="date"
+  //         class="swal2-input"
+  //         value="${oldDate}">
+  //     </div>
+
+  //     <div class="form-row">
+  //       <label>開始時間</label>
+  //       <input
+  //         id="updateEventTime"
+  //         type="time"
+  //         class="swal2-input"
+  //         value="${oldTime}">
+  //     </div>
+
+  //     <div class="form-row">
+  //       <label>結束日期</label>
+  //       <input
+  //         id="updateEndDate"
+  //         type="date"
+  //         class="swal2-input"
+  //         value="${oldEndDate}">
+  //     </div>
+
+  //     <div class="form-row">
+  //       <label>結束時間</label>
+  //       <input
+  //         id="updateEndTime"
+  //         type="time"
+  //         class="swal2-input"
+  //         value="${oldEndTime}">
+  //     </div>
+
+  //     <div class="form-row">
+  //       <label>提醒時間</label>
+  //       <input
+  //         id="updateNotifyBefore"
+  //         type="number"
+  //         class="swal2-input"
+  //         placeholder="提前幾分鐘通知"
+  //         value="${oldNotifyBefore}">
+  //     </div>
+
+  //   </div>
+  // `,
+  //       preConfirm: () => {
+  //         const title = (
+  //           document.getElementById('updateTitle') as HTMLInputElement
+  //         ).value;
+  //         const description = (
+  //           document.getElementById('updateDescription') as HTMLInputElement
+  //         ).value;
+  //         const eventDate = (
+  //           document.getElementById('updateEventDate') as HTMLInputElement
+  //         ).value;
+  //         const eventTime = (
+  //           document.getElementById('updateEventTime') as HTMLInputElement
+  //         ).value;
+  //         const endDate = (
+  //           document.getElementById('updateEndDate') as HTMLInputElement
+  //         ).value;
+  //         const endTime = (
+  //           document.getElementById('updateEndTime') as HTMLInputElement
+  //         ).value;
+  //         const notifyBefore = Number(
+  //           (document.getElementById('updateNotifyBefore') as HTMLInputElement)
+  //             .value,
+  //         );
+  //         const startDateTime = `${eventDate}T${eventTime}:00`;
+  //         const endDateTime = `${endDate}T${endTime}:00`;
+  //         const today = new Date();
+  //         today.setHours(0, 0, 0, 0);
+  //         const selectedDate = new Date(eventDate);
+  //         selectedDate.setHours(0, 0, 0, 0);
+  //         if (selectedDate < today) {
+  //           Swal.showValidationMessage('不可新增到今日之前');
+  //           return;
+  //         }
+
+  //         if (!title) {
+  //           Swal.showValidationMessage('活動名稱不可為空');
+  //           return;
+  //         }
+
+  //         if (!eventDate) {
+  //           Swal.showValidationMessage('活動日期不可為空');
+  //           return;
+  //         }
+
+  //         if (endDate && startDateTime > endDateTime) {
+  //           Swal.showValidationMessage('開始時間不可大於結束時間');
+  //           return;
+  //         }
+
+  //         return {
+  //           title,
+  //           description,
+  //           eventTime: startDateTime,
+  //           endTime: endDate ? endDateTime : null,
+  //           notifyBefore,
+  //         };
+  //       },
+  //     }).then((result) => {
+  //       if (!result.isConfirmed || !result.value) {
+  //         return;
+  //       }
+
+  //       this.calendarApiService.update(eventId, result.value).subscribe({
+  //         next: () => {
+  //           Swal.fire({
+  //             icon: 'success',
+  //             title: '修改成功',
+  //             confirmButtonText: '確認',
+  //           });
+
+  //           this.loadCalendarEvents(this.currentGroupId, this.createdBy);
+  //         },
+  //         error: (err) => {
+  //           Swal.fire({
+  //             icon: 'error',
+  //             title: '修改失敗',
+  //             text: err.error?.message || '請稍後再試',
+  //           });
+  //         },
+  //       });
+  //     });
+  //   }
+
+  openUpdateDialog(info: EventClickArg): void {
+    const ref = this.dialog.open(CalendarEventDialogComponent, {
+      width: '480px',
+      data: { mode: 'update', event: info.event },
+    });
+
+    ref.afterClosed().subscribe((result) => {
+      if (!result) return;
+      this.calendarApiService.update(Number(info.event.id), result).subscribe({
+        next: (res: any) => {
+          if (res.code !== 200) {
+            Swal.fire({
+              icon: 'error',
+              title: '更新失敗',
+              text: res.message,
+            });
+            return;
+          }
+          Swal.fire({
+            icon: 'success',
+            title: '修改成功',
+            confirmButtonText: '確認',
+          });
+          this.loadCalendarEvents(this.currentGroupId, this.createdBy);
+        },
+        error: (err) =>
+          Swal.fire({
+            icon: 'error',
+            title: '修改失敗',
+            text: err.error?.message,
+          }),
+      });
+    });
+  }
   // 點擊活動後，可選擇修改或刪除
   handleEventClick(info: EventClickArg): void {
     const eventId = Number(info.event.id);
