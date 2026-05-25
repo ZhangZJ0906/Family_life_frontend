@@ -59,19 +59,21 @@ export class NotifyDialogComponent {
   markAsRead(n: any) {
 
     // 已讀就不打 API
-    if (n.isRead) {
+    if (n.isRead === 1) {
       return;
     }
 
     this.http.post(
-    `http://localhost:8080/family_life/read_notify?notify_id=${n.id}`,
-    {}
+      `http://localhost:8080/family_life/read_notify?notify_id=${n.id}`,
+      {}
     ).subscribe({
 
       next: () => {
 
-        // 前端直接更新
         n.isRead = 1;
+
+        // 🔥 重新計算
+        this.calculateUnread();
 
       },
 
@@ -119,46 +121,54 @@ export class NotifyDialogComponent {
     const list = this.notifies || [];
 
     if (type === 'all') {
-      return list.filter(n => !n.isRead).length;
+      return list.filter(n => Number(n.isRead) !== 1).length;
     }
 
     return list.filter(n =>
-      !n.isRead && n.type === type
+      Number(n.isRead) !== 1 && n.type === type
     ).length;
 
   }
 
   calculateUnread() {
 
-    this.unreadMap.all = this.notifies.filter(n => !n.isRead).length;
+    this.unreadMap.all = this.notifies.filter(
+      n => n.isRead !== 1
+    ).length;
 
     this.unreadMap.invite = this.notifies.filter(
-      n => !n.isRead && n.type === 'invite'
+      n => n.isRead !== 1 && n.type === 'invite'
     ).length;
 
     this.unreadMap.group = this.notifies.filter(
-      n => !n.isRead && n.type === 'group'
+      n => n.isRead !== 1 && n.type === 'group'
     ).length;
 
     this.unreadMap.update = this.notifies.filter(
-      n => !n.isRead && n.type === 'update'
+      n => n.isRead !== 1 && n.type === 'update'
     ).length;
 
   }
 
-  getNotify(){
+  getNotify() {
+
     this.http.get<any>(
       `http://localhost:8080/family_life/get_notify?user_id=${this.user_id}`
     ).subscribe({
 
       next: (res) => {
-        // 後端如果是 groupMemberDao.getNotifyList(userId)
-        this.notifies = res.notifies;
+
+        // 🔥 把 isRead 轉成 number
+        this.notifies = res.notifies.map((n: any) => ({
+          ...n,
+          isRead: Number(n.isRead)
+        }));
 
         this.calculateUnread();
 
         console.log('res:', res);
         console.log('notify:', this.notifies);
+
       },
 
       error: (err) => {
@@ -166,6 +176,7 @@ export class NotifyDialogComponent {
       }
 
     });
+
   }
 
   close(): void {

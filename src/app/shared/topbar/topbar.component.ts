@@ -64,11 +64,15 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
       next: (res) => {
 
-        const notifyList = res.notifies || [];
+        const notifyList = (res.notifies || []).map((n: any) => ({
+          ...n,
+          isRead: Number(n.isRead)
+        }));
 
         console.log(notifyList);
+
         this.unreadCount = notifyList.filter(
-          (n: any) => n.isRead === 0
+          (n: any) => n.isRead !== 1
         ).length;
 
       },

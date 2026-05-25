@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
 import { CreateListReq, ShoppingList } from '../../@models/shopping_list.model';
+import { TopbarComponent } from '../../shared/topbar/topbar.component';
 import { AuthService } from '../../@services/auth.service';
 import { ShoppingListService } from '../../@services/shopping-list.service';
 
@@ -14,7 +15,7 @@ interface GroupOption {
 
 @Component({
   selector: 'app-shopping-list',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, TopbarComponent],
   templateUrl: './shopping-list.component.html',
   styleUrl: './shopping-list.component.scss'
 })
