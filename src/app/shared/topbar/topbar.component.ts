@@ -21,14 +21,7 @@ import { NotifyDialogComponent } from '../../@group/notify-dialog/notify-dialog.
     MatDialogModule,
     MatBadgeModule,
     FormsModule,
-<<<<<<< HEAD
     MatIconModule,
-=======
-    MatIcon,
-    FormsModule,
-
-    MatIconModule
->>>>>>> origin/ZJ
   ],
   templateUrl: './topbar.component.html',
   styleUrl: './topbar.component.scss',

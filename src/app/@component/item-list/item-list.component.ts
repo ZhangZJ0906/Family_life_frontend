@@ -155,6 +155,7 @@ export class ItemListComponent {
 
   initData(groupId: number) {
     this.currentGroupId = groupId;
+    if(groupId == null) groupId = 0;
     this.getUserGroupData(groupId);
   }
 
@@ -583,10 +584,8 @@ export class ItemListComponent {
       this.getMedicineByGroupId(groupId);
       return;
     }
-    let url = `${this.basicUrl}item/getItems?userId=${this.currentUserId}`;
-    if (groupId !== 0 && groupId != null) {
-      url += `&groupId=${groupId}`;
-    }
+    let url = `${this.basicUrl}item/getItems?userId=${this.currentUserId}&groupId=${groupId}`;
+
     this.http.getApi(url).subscribe({
       next: (res: any) => {
         this.itemList = res.items || [];
