@@ -346,6 +346,7 @@
   <mat-form-field appearance="outline" class="w-100">
     <mat-label>單價</mat-label>
     <input matInput type="number" [(ngModel)]="item.unitPrice" min="0">
+
     <span matPrefix>$&nbsp;</span>
   </mat-form-field>
 </div>
@@ -353,7 +354,11 @@
   <div class="col-3">
     <mat-form-field appearance="outline" class="w-100">
       <mat-label>單位</mat-label>
-      <input matInput [(ngModel)]="item.unit" placeholder="顆/瓶/盒">
+      <mat-select required [(ngModel)]="item.unit">
+        <mat-option value="顆">顆</mat-option>
+        <mat-option value="瓶">瓶</mat-option>
+        <mat-option value="盒">盒</mat-option>
+      </mat-select>
     </mat-form-field>
   </div>
 

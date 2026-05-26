@@ -732,7 +732,7 @@ export class ItemListComponent {
         // 多筆刪除
         selectedIds.forEach((id) => {
           this.http
-            .deleteApi(this.basicUrl + `subscription/delete?id=${id}`)
+            .deleteApi(this.basicUrl + `subscription/delete?id=${id}&userId=${this.currentUserId}`)
             .subscribe({
               next: (res: any) => {
                 if (res.code !== 200) {
@@ -775,7 +775,7 @@ export class ItemListComponent {
       if (this.isWarrantyMode) {
         selectedIds.forEach((id) => {
           this.http
-            .deleteApi(this.basicUrl + `warranty/delete?id=${id}`)
+            .deleteApi(this.basicUrl + `warranty/delete?id=${id}&userId=${this.currentUserId}`)
             .subscribe({
               next: (res: any) => {
                 if (res.code !== 200) {
@@ -814,7 +814,7 @@ export class ItemListComponent {
       if (this.isMedicineMode) {
         selectedIds.forEach((id) => {
           this.http
-            .deleteApi(this.basicUrl + `medicine/delete?id=${id}`)
+            .deleteApi(this.basicUrl + `medicine/delete?id=${id}&userId=${this.currentUserId}`)
             .subscribe({
               next: (res: any) => {
                 if (res.code !== 200) {
@@ -851,7 +851,7 @@ export class ItemListComponent {
       }
 
       // 一般物品刪除
-      this.http.postApi(this.basicUrl + 'item/delete', selectedIds).subscribe({
+      this.http.postApi(this.basicUrl + `item/delete?userId=${this.currentUserId}`, selectedIds).subscribe({
         next: (res: any) => {
           if (res.code != 200) {
             Swal.fire({
