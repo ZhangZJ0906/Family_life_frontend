@@ -101,18 +101,25 @@
   border: 1px solid #e5e7eb;
   border-radius: 22px;
   padding: 28px;
-  min-height: 170px;
+  min-height: 150px;
   margin-bottom: 20px;
 
   display: grid;
-  grid-template-columns: 360px 1fr 420px;
-  align-items: start;
-  gap: 28px;
+
+  /* 左側標題 / 中間分類 / 右側群組+搜尋 */
+  grid-template-columns: 300px minmax(760px, 1fr) 520px;
+
+  align-items: center;
+  gap: 24px;
 }
 
 /* 左側標題 */
 .item-title {
   min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .title-row {
@@ -149,26 +156,43 @@
   font-size: 24px;
 }
 
-/* 中間分類按鈕 */
+/* 中間分類按鈕區 */
 .header-filter {
+  min-width: 0;
+  width: 100%;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-top: 6px;
-  min-width: 0;
 }
 
+/* 分類按鈕強制同一行 */
 .header-filter mat-chip-listbox {
   display: flex;
   flex-wrap: nowrap;
+  align-items: center;
   gap: 8px;
-  overflow-x: auto;
+
+  width: 100%;
   max-width: 100%;
-  padding-bottom: 4px;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  white-space: nowrap;
+  padding-bottom: 0;
+
+  scrollbar-width: none;
 }
 
 .header-filter mat-chip-listbox::-webkit-scrollbar {
-  height: 0;
+  display: none;
+}
+
+/* 每個分類按鈕不換行、不被壓縮 */
+.header-filter mat-chip-option {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .chip-icon {
@@ -176,12 +200,14 @@
   font-size: 15px;
 }
 
-/* 右側：群組 + 搜尋，整組靠右 */
+/* 右側：群組 + 搜尋 */
 .header-right {
   display: flex;
   justify-content: flex-end;
-  align-items: flex-start;
-  gap: 16px;
+  align-items: center;
+  gap: 14px;
+  margin-right: 150px;
+  margin-top: 15px;
 }
 
 /* 群組選擇器 */
@@ -190,9 +216,9 @@
   flex-shrink: 0;
 }
 
-/* 搜尋框放在最右邊 */
+/* 搜尋框 */
 .search-field {
-  width: 260px;
+  width: 200px;
   flex-shrink: 0;
 }
 
