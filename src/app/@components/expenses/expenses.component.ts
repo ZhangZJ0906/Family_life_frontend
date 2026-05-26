@@ -20,6 +20,8 @@ import { HttpClientService } from '../../@services/http-client.service';
 import { ExpensesAddComponent } from '../expenses-add/expenses-add.component';
 import { ExpensesEditComponent } from '../expenses-edit/expenses-edit.component';
 import Swal from 'sweetalert2';
+import { AuthService } from '../../@services/auth.service';
+import { TopbarComponent } from "../../shared/topbar/topbar.component";
 
 @Component({
   selector: 'app-expense-tracker',
@@ -36,7 +38,8 @@ import Swal from 'sweetalert2';
     MatButtonModule,
     MatTableModule,
     MatIconModule,
-  ],
+    TopbarComponent
+],
   templateUrl: './expenses.component.html',
   styleUrl: './expenses.component.scss',
 })
@@ -84,12 +87,18 @@ export class ExpensesComponent {
   constructor(
     private http: HttpClientService,
     private dialog: MatDialog,
+    private auth: AuthService,
   ) {
     this.basicUrl = this.http.basicUrl;
-    const raw = localStorage.getItem('family-life-current-user');
+    // 取 session storage id
+    //  this.currentUserId = this.auth.currentUser()?.user_id;
+    const raw = sessionStorage.getItem('family-life-current-user'); // ← localStorage 改 sessionStorage
     this.user = JSON.parse(raw!);
     this.currentUserId = this.user.user_id;
-    
+    // const raw = localStorage.getItem('family-life-current-user');
+    // this.user = JSON.parse(raw!);
+    // this.currentUserId = this.user.user_id;
+
     this.dataSource.filterPredicate = (data: ExpenseRecord, filter: string) => {
       const f = JSON.parse(filter);
 

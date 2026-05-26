@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { User } from '../../@models/user.model';
 import { AuthService } from '../../@services/auth.service';
+<<<<<<< HEAD
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -10,6 +11,23 @@ import { MatIconModule } from '@angular/material/icon';
   imports: [FormsModule,
             RouterLink,
             MatIconModule],
+=======
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+
+@Component({
+  selector: 'app-login',
+  imports: [
+    FormsModule,
+    RouterLink,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    MatButtonModule,
+  ],
+>>>>>>> origin/ZJ
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
@@ -17,6 +35,7 @@ export class LoginComponent {
   email = '';
   password = '';
   errorMessage = '';
+  showPassword: boolean = false;
 
   constructor(
     private readonly authService: AuthService,
@@ -42,7 +61,7 @@ export class LoginComponent {
           // updated_at: res.updated_at ?? '',
         };
         this.authService.setCurrentUser(payload);
-        localStorage.setItem('isLogin', 'true');
+        sessionStorage.setItem('isLogin', 'true');
         this.router.navigate(['/home-page']); // 👉 登入成功後導向的頁面，可以自己改路徑。
       },
       error: (err) => {
@@ -50,5 +69,9 @@ export class LoginComponent {
         this.errorMessage = 'Email 或密碼不正確';
       },
     });
+  }
+
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
   }
 }

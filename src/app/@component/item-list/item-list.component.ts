@@ -28,7 +28,6 @@ import { ActivatedRoute } from '@angular/router';
 
 import { AuthService } from '../../@services/auth.service';
 
-
 @Component({
   selector: 'app-item-list',
   imports: [
@@ -54,7 +53,7 @@ export class ItemListComponent {
   readonly dialog = inject(MatDialog);
 
   basicUrl!: string;
-selectedCategory = '全部';
+  selectedCategory = '全部';
   // 存放地點清單
   location: LocationAndCategory[] = [];
 
@@ -72,7 +71,7 @@ selectedCategory = '全部';
   /*群組陣列 */
   userGroups: DropDownGroupList[] = [];
   // 預設私人
-  currentGroupId: any;
+  currentGroupId: any = null;
   currentUserId: any;
   itemDisplayedColumns: string[] = [
     'select',
@@ -83,6 +82,7 @@ selectedCategory = '全部';
     'expireDate',
     'status',
     'notify',
+    'actions',
   ];
 
   // 訂閱表格欄位
@@ -95,39 +95,42 @@ selectedCategory = '全部';
     'nextBillingDate',
     'status',
     'notify',
+    'actions',
   ];
 
   // 保固資料
-warrantyList: any[] = [];
-isWarrantyMode = false;
+  warrantyList: any[] = [];
+  isWarrantyMode = false;
 
-warrantyDisplayedColumns: string[] = [
-  'select',
-  'productName',
-  'brand',
-  'model',
-  'serialNumber',
-  'purchaseDate',
-  'warrantyEndDate',
-  'status',
-  'notify',
-];
+  warrantyDisplayedColumns: string[] = [
+    'select',
+    'productName',
+    'brand',
+    'model',
+    'serialNumber',
+    'purchaseDate',
+    'warrantyEndDate',
+    'status',
+    'notify',
+    'actions',
+  ];
 
-// 藥品資料
-medicineList: any[] = [];
-isMedicineMode = false;
+  // 藥品資料
+  medicineList: any[] = [];
+  isMedicineMode = false;
 
-// 藥品表格重要欄位
-medicineDisplayedColumns: string[] = [
-  'select',
-  'name',
-  'medicineType',
-  'quantity',
-  'expireDate',
-  'usageMethod',
-  'status',
-  'notify',
-];
+  // 藥品表格重要欄位
+  medicineDisplayedColumns: string[] = [
+    'select',
+    'name',
+    'medicineType',
+    'quantity',
+    'expireDate',
+    'usageMethod',
+    'status',
+    'notify',
+    'actions',
+  ];
 
   // 目前實際顯示的表格欄位
   displayedColumns: string[] = this.itemDisplayedColumns;
@@ -135,18 +138,19 @@ medicineDisplayedColumns: string[] = [
   // Material Table 資料來源
   dataSource = new MatTableDataSource<any>([]);
 
-
   // 判斷目前是不是訂閱模式
   isSubscriptionMode = false;
 
-
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  constructor(private http: HttpClientService,private authService: AuthService,
-    private router: Router, private route: ActivatedRoute) {
+  constructor(
+    private http: HttpClientService,
+    private authService: AuthService,
+    private router: Router,
+    private route: ActivatedRoute,
+  ) {
     this.basicUrl = this.http.basicUrl;
     this.currentUserId = this.authService.currentUser()?.user_id ?? 0;
-
   }
 
   initData(groupId: number) {
@@ -155,7 +159,7 @@ medicineDisplayedColumns: string[] = [
   }
 
   ngOnInit() {
-    this.route.params.subscribe(params => {
+    this.route.params.subscribe((params) => {
       const groupId = Number(params['groupId']) || 0;
       this.initData(groupId);
     });
@@ -219,8 +223,8 @@ medicineDisplayedColumns: string[] = [
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      //TODO 這邊有可能為何何不能轉 每張表 的欄位都不同所以 可能會有差別最重要的就是 他ID 找不到 所以更新不了
-      // 另一作法 新增 先刪除 後新增
+      //TODO 這邊有可能不能轉 每張表 的欄位都不同所以 可能會有差別最重要的就是 他ID 找不到 所以更新不了
+      // 另一作法  先刪除 後新增
       if (!result) return;
 
       const { _type, ...payload } = result; // 把 _type 拆出來，不傳給後端
@@ -562,10 +566,6 @@ medicineDisplayedColumns: string[] = [
   // 查詢一般物品資料
   getItemByGroupId(groupId: number): void {
     this.currentGroupId = groupId;
-
-    console.log('UID: ', this.currentUserId);
-    console.log('GID: ', this.currentGroupId);
-
     // 切換群組時，如果目前在訂閱模式，就查訂閱
     if (this.isSubscriptionMode) {
       this.getSubscriptionByGroupId(groupId);
@@ -583,51 +583,53 @@ medicineDisplayedColumns: string[] = [
       this.getMedicineByGroupId(groupId);
       return;
     }
+    let url = `${this.basicUrl}item/getItems?userId=${this.currentUserId}`;
+    if (groupId !== 0 && groupId != null) {
+      url += `&groupId=${groupId}`;
+    }
+    this.http.getApi(url).subscribe({
+      next: (res: any) => {
+        this.itemList = res.items || [];
+        this.dataSource.data = this.itemList;
 
-    this.http
-      .getApi(
-        this.basicUrl +
-          `item/getItems?userId=${this.currentUserId}&groupId=${this.currentGroupId}`,
-      )
-      .subscribe({
-        next: (res: any) => {
-          this.itemList = res.items || [];
-          this.dataSource.data = this.itemList;
+        console.log('res: ' + res.categoriesMap);
+        // 後端 locationMap 轉成陣列
+        this.location = Object.entries(res.locationMap || {}).map(
+          ([id, name]) => ({
+            id: Number(id),
+            name: name as string,
+          }),
+        );
 
-          console.log('res: ' + res.categoriesMap);
-          // 後端 locationMap 轉成陣列
-          this.location = Object.entries(res.locationMap || {}).map(
-            ([id, name]) => ({
-              id: Number(id),
-              name: name as string,
-            }),
-          );
+        // 後端 categoriesMap 轉成陣列
+        this.categories =
+          Object.entries(res.categoriesMap || {}).map(([id, name]) => ({
+            id: Number(id),
+            name: name as string,
+          })) || [];
 
-          // 後端 categoriesMap 轉成陣列
-          this.categories =
-            Object.entries(res.categoriesMap || {}).map(([id, name]) => ({
-              id: Number(id),
-              name: name as string,
-            })) || [];
+        // 最前面補「全部」
+        this.categories.unshift({ id: 0, name: '全部' });
 
-          // 最前面補「全部」
-          this.categories.unshift({ id: 0, name: '全部' });
+        this.displayedColumns = this.itemDisplayedColumns;
+        this.selectedCategory = '全部';
 
-          this.displayedColumns = this.itemDisplayedColumns;
-          this.selectedCategory = '全部';
+        if (this.dataSource.paginator) {
+          this.dataSource.paginator.firstPage();
+        }
 
-          if (this.dataSource.paginator) {
-            this.dataSource.paginator.firstPage();
-          }
-        },
-        error: (err: any) => {
-          Swal.fire({
-            title: '錯誤',
-            text: err.message || 'Server error',
-            icon: 'error',
-          });
-        },
-      });
+        this.warrantyList = res.data || [];
+        this.dataSource.data = this.warrantyList;
+        this.dataSource.paginator?.firstPage();
+      },
+      error: (err: any) => {
+        Swal.fire({
+          title: '錯誤',
+          text: err.message || 'Server error',
+          icon: 'error',
+        });
+      },
+    });
 
     this.router.navigate(['/itemList', groupId]);
   }

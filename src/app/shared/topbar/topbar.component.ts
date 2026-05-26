@@ -7,12 +7,13 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 
-import { NotifyDialogComponent } from '../../@group/notify-dialog/notify-dialog.component';
+
+import { MatIcon } from "@angular/material/icon";
 import { AuthService } from '../../@services/auth.service';
+import { NotifyDialogComponent } from '../../@group/notify-dialog/notify-dialog.component';
 
 @Component({
   selector: 'app-topbar',
-  standalone: true,
   imports: [
     RouterLink,
     RouterLinkActive,
@@ -20,7 +21,14 @@ import { AuthService } from '../../@services/auth.service';
     MatDialogModule,
     MatBadgeModule,
     FormsModule,
+<<<<<<< HEAD
     MatIconModule,
+=======
+    MatIcon,
+    FormsModule,
+
+    MatIconModule
+>>>>>>> origin/ZJ
   ],
   templateUrl: './topbar.component.html',
   styleUrl: './topbar.component.scss',
