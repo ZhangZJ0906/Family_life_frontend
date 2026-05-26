@@ -1,32 +1,69 @@
-<section>
-  <h1>註冊</h1>
+<section class="auth-page">
+  <!-- 左側圖片區 -->
+  <div class="brand-section">
+    <img
+      class="auth-hero-img"
+      src="images/auth-hero.png"
+      alt="家庭生活到期管家介紹圖"
+    />
+  </div>
 
-  <form (ngSubmit)="register()">
-    <label>
+  <!-- 右側註冊表單 -->
+  <form class="auth-card register-card" (ngSubmit)="register()">
+    <div class="form-icon register-icon">
+      <mat-icon>person_add</mat-icon>
+    </div>
+
+    <h1>註冊</h1>
+    <p class="subtitle">建立帳號，開始管理您的生活！</p>
+
+    <label class="form-label">
       姓名
-      <input type="text" name="name" [(ngModel)]="name" required />
+      <div class="input-box">
+        <mat-icon>person</mat-icon>
+        <input
+          type="text"
+          name="name"
+          [(ngModel)]="name"
+          placeholder="請輸入姓名"
+          required
+        />
+      </div>
     </label>
 
-    <label>
+    <label class="form-label">
       Email
-      <input type="email" name="email" [(ngModel)]="email" required />
+      <div class="input-box">
+        <mat-icon>mail</mat-icon>
+        <input
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          placeholder="請輸入 Email"
+          required
+        />
+      </div>
     </label>
 
-    <label>
+    <label class="form-label">
       密碼
-      <input type="password" name="password" [(ngModel)]="password" required />
+      <div class="input-box">
+        <mat-icon>lock</mat-icon>
+        <input
+          type="password"
+          name="password"
+          [(ngModel)]="password"
+          placeholder="請輸入密碼"
+          required
+        />
+      </div>
     </label>
 
-    <label>
-      頭像網址
-      <input type="text" name="avatar" [(ngModel)]="avatar" />
-    </label>
+    <button type="submit" class="register-btn">註冊</button>
 
-    <!-- <label>
-      <input type="checkbox" name="is_notify" [(ngModel)]="is_notify" />
-      開啟通知
-    </label> -->
-
-    <button type="submit">註冊</button>
+    <p class="switch-text">
+      已有帳號？
+      <a [routerLink]="['/login']">立即登入</a>
+    </p>
   </form>
 </section>
