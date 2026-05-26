@@ -51,7 +51,7 @@ export class LoginComponent {
           // updated_at: res.updated_at ?? '',
         };
         this.authService.setCurrentUser(payload);
-        localStorage.setItem('isLogin', 'true');
+        sessionStorage.setItem('isLogin', 'true');
         this.router.navigate(['/home-page']); // 👉 登入成功後導向的頁面，可以自己改路徑。
       },
       error: (err) => {
