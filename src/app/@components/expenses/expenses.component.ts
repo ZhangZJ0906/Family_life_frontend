@@ -21,7 +21,7 @@ import { ExpensesAddComponent } from '../expenses-add/expenses-add.component';
 import { ExpensesEditComponent } from '../expenses-edit/expenses-edit.component';
 import Swal from 'sweetalert2';
 import { AuthService } from '../../@services/auth.service';
-import { TopbarComponent } from "../../shared/topbar/topbar.component";
+import { TopbarComponent } from '../../shared/topbar/topbar.component';
 
 @Component({
   selector: 'app-expense-tracker',
@@ -38,8 +38,8 @@ import { TopbarComponent } from "../../shared/topbar/topbar.component";
     MatButtonModule,
     MatTableModule,
     MatIconModule,
-    TopbarComponent
-],
+    TopbarComponent,
+  ],
   templateUrl: './expenses.component.html',
   styleUrl: './expenses.component.scss',
 })
@@ -52,8 +52,8 @@ export class ExpensesComponent {
   selection = new SelectionModel<ExpenseRecord>(true, []);
   expense: ExpenseRecord[] = [];
   itemMap: { [key: number]: any } = {};
-  currentGroupId: number | null = null;
-  currentUserId = 1;
+  currentGroupId!: number ;
+  currentUserId !:number;
   // 月份切換
   selectedYear = signal(new Date().getFullYear());
   selectedMonth = signal(new Date().getMonth() + 1);
@@ -90,15 +90,9 @@ export class ExpensesComponent {
     private auth: AuthService,
   ) {
     this.basicUrl = this.http.basicUrl;
-    // 取 session storage id
-    //  this.currentUserId = this.auth.currentUser()?.user_id;
     const raw = sessionStorage.getItem('family-life-current-user'); // ← localStorage 改 sessionStorage
     this.user = JSON.parse(raw!);
     this.currentUserId = this.user.user_id;
-    // const raw = localStorage.getItem('family-life-current-user');
-    // this.user = JSON.parse(raw!);
-    // this.currentUserId = this.user.user_id;
-
     this.dataSource.filterPredicate = (data: ExpenseRecord, filter: string) => {
       const f = JSON.parse(filter);
 
@@ -124,7 +118,6 @@ export class ExpensesComponent {
     };
 
     this.getCatgories();
-    this.getExpense(this.currentGroupId, this.currentUserId);
     this.getUserGroupData();
   }
 
@@ -279,18 +272,25 @@ export class ExpensesComponent {
           );
           this.userGroups.unshift({ groupId: 0, groupName: '私人記帳' });
           this.currentGroupId = 0;
+          this.getExpense(this.currentGroupId, this.currentUserId);
+        },
+        error: (err) => {
+          Swal.fire({
+            title: '錯誤',
+            text: err.message,
+            icon: 'error',
+          });
         },
       });
   }
 
-  onGroupChange(groupId: number | null) {
+  onGroupChange(groupId: number ) {
     this.currentGroupId = groupId;
     this.selection.clear();
-    const id = groupId === 0 ? null : groupId;
-    this.getExpense(id, this.currentUserId);
+    this.getExpense(groupId, this.currentUserId);
   }
 
-  getExpense(groupId: number | null, userId: number) {
+  getExpense(groupId: number , userId: number) {
     let url = `${this.basicUrl}expense/getInfo?userId=${userId}`;
     if (groupId != null) url += `&groupId=${groupId}`;
 
