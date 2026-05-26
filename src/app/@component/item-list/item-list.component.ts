@@ -79,6 +79,7 @@ export class ItemListComponent {
     'expireDate',
     'status',
     'notify',
+    'actions',
   ];
 
   // 訂閱表格欄位
@@ -91,6 +92,7 @@ export class ItemListComponent {
     'nextBillingDate',
     'status',
     'notify',
+    'actions',
   ];
 
   // 保固資料
@@ -107,6 +109,7 @@ export class ItemListComponent {
     'warrantyEndDate',
     'status',
     'notify',
+    'actions',
   ];
 
   // 藥品資料
@@ -123,6 +126,7 @@ export class ItemListComponent {
     'usageMethod',
     'status',
     'notify',
+    'actions',
   ];
 
   // 目前實際顯示的表格欄位
