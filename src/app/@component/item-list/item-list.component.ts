@@ -68,7 +68,7 @@ export class ItemListComponent {
   /*群組陣列 */
   userGroups: DropDownGroupList[] = [];
   // 預設私人
-  currentGroupId: any;
+  currentGroupId: any = null;
   currentUserId: any;
   itemDisplayedColumns: string[] = [
     'select',
@@ -209,8 +209,8 @@ export class ItemListComponent {
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      //TODO 這邊有可能為何何不能轉 每張表 的欄位都不同所以 可能會有差別最重要的就是 他ID 找不到 所以更新不了
-      // 另一作法 新增 先刪除 後新增
+      //TODO 這邊有可能不能轉 每張表 的欄位都不同所以 可能會有差別最重要的就是 他ID 找不到 所以更新不了
+      // 另一作法  先刪除 後新增
       if (!result) return;
 
       const { _type, ...payload } = result; // 把 _type 拆出來，不傳給後端
@@ -574,51 +574,50 @@ export class ItemListComponent {
       this.getMedicineByGroupId(groupId);
       return;
     }
+    let url = `${this.basicUrl}item/getItems?userId=${this.currentUserId}`;
+    if (groupId !== null && groupId !== 0) {
+      url += `&groupId=${groupId}`;
+    }
+    console.log(url);
+    this.http.getApi(url).subscribe({
+      next: (res: any) => {
+        this.itemList = res.items || [];
+        this.dataSource.data = this.itemList;
 
-    this.http
-      .getApi(
-        this.basicUrl +
-          `item/getItems?userId=${this.currentUserId}&groupId=${this.currentGroupId}`,
-      )
-      .subscribe({
-        next: (res: any) => {
-          this.itemList = res.items || [];
-          this.dataSource.data = this.itemList;
+        console.log('res: ' + res.categoriesMap);
+        // 後端 locationMap 轉成陣列
+        this.location = Object.entries(res.locationMap || {}).map(
+          ([id, name]) => ({
+            id: Number(id),
+            name: name as string,
+          }),
+        );
 
-          console.log('res: ' + res.categoriesMap);
-          // 後端 locationMap 轉成陣列
-          this.location = Object.entries(res.locationMap || {}).map(
-            ([id, name]) => ({
-              id: Number(id),
-              name: name as string,
-            }),
-          );
+        // 後端 categoriesMap 轉成陣列
+        this.categories =
+          Object.entries(res.categoriesMap || {}).map(([id, name]) => ({
+            id: Number(id),
+            name: name as string,
+          })) || [];
 
-          // 後端 categoriesMap 轉成陣列
-          this.categories =
-            Object.entries(res.categoriesMap || {}).map(([id, name]) => ({
-              id: Number(id),
-              name: name as string,
-            })) || [];
+        // 最前面補「全部」
+        this.categories.unshift({ id: 0, name: '全部' });
 
-          // 最前面補「全部」
-          this.categories.unshift({ id: 0, name: '全部' });
+        this.displayedColumns = this.itemDisplayedColumns;
+        this.selectedCategory = '全部';
 
-          this.displayedColumns = this.itemDisplayedColumns;
-          this.selectedCategory = '全部';
-
-          if (this.dataSource.paginator) {
-            this.dataSource.paginator.firstPage();
-          }
-        },
-        error: (err: any) => {
-          Swal.fire({
-            title: '錯誤',
-            text: err.message || 'Server error',
-            icon: 'error',
-          });
-        },
-      });
+        if (this.dataSource.paginator) {
+          this.dataSource.paginator.firstPage();
+        }
+      },
+      error: (err: any) => {
+        Swal.fire({
+          title: '錯誤',
+          text: err.message || 'Server error',
+          icon: 'error',
+        });
+      },
+    });
   }
 
   // 搜尋功能
