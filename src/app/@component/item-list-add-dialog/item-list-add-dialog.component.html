@@ -15,7 +15,6 @@
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>所屬群組</mat-label>
           <mat-select required [(ngModel)]="item.groupId">
-            <!-- <mat-option [value]="0">私人物品</mat-option> -->
             @for (g of group; track $index) {
             <mat-option [value]="g.groupId">{{g.groupName}}</mat-option>
             }
@@ -43,7 +42,14 @@
       <div class="col-4">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>單位</mat-label>
-          <input matInput [(ngModel)]="item.unit" required placeholder="個/瓶">
+          <mat-select required [(ngModel)]="item.unit">
+            <mat-option value="個">個</mat-option>
+            <mat-option value="瓶">瓶</mat-option>
+            <mat-option value="罐">罐</mat-option>
+            <mat-option value="支">支</mat-option>
+            <mat-option value="尾">尾</mat-option>
+          </mat-select>
+          <!-- <input matInput [(ngModel)]="item.unit" required placeholder="個/瓶"> -->
         </mat-form-field>
       </div>
       <div class="col-4">

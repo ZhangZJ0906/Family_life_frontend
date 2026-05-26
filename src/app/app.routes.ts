@@ -11,6 +11,11 @@ import { authGuard } from './@guard/auth.guard';
 export const routes: Routes = [
   {
     path: 'itemList',
+    redirectTo: 'itemList/全部',
+    pathMatch: 'full'
+  },
+  {
+    path: 'itemList/:groupId',
     component: ItemListComponent,
     title: '我的物品清單',
     canActivate: [authGuard], //未登入跳到這頁面會被返回到登入葉面

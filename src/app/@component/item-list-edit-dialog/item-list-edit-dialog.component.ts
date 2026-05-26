@@ -87,40 +87,39 @@ export class ItemListEditDialogComponent implements OnInit {
   ) {
     console.log(this.data);
     this.group = this.data.groups;
-    this.item.userId = this.authService.currentUser()?.user_id ?? 0;
   }
 
   ngOnInit(): void {
-    if (this.data && this.data.item) {
-      this.item = { ...this.data.item };
+      if (this.data && this.data.item) {
+        this.item = { ...this.data.item };
 
-      this.location = this.data.locationMap || [];
-      this.categories = this.data.categoriesMap || [];
+        this.location = this.data.locationMap || [];
+        this.categories = this.data.categoriesMap || [];
 
-      if (!this.item.categoryId) {
-        let modeCategoryName = '';
-        if (this.data?.isSubscriptionMode) modeCategoryName = '訂閱';
-        else if (this.data?.isWarrantyMode) modeCategoryName = '保固';
-        else if (this.data?.isMedicineMode) modeCategoryName = '藥品';
+        if (!this.item.categoryId) {
+          let modeCategoryName = '';
+          if (this.data?.isSubscriptionMode) modeCategoryName = '訂閱';
+          else if (this.data?.isWarrantyMode) modeCategoryName = '保固';
+          else if (this.data?.isMedicineMode) modeCategoryName = '藥品';
 
-        if (modeCategoryName) {
-          const found = this.categories.find(
-            (cat) => cat.name === modeCategoryName,
-          );
-          if (found) this.item.categoryId = found.id;
+          if (modeCategoryName) {
+            const found = this.categories.find(
+              (cat) => cat.name === modeCategoryName,
+            );
+            if (found) this.item.categoryId = found.id;
+          }
         }
-      }
-      // 保固資料後端欄位是 productName，Dialog 共用 item.name
-      if (this.data?.isWarrantyMode) {
-        this.item.name = this.item.productName;
-      }
+        // 保固資料後端欄位是 productName，Dialog 共用 item.name
+        if (this.data?.isWarrantyMode) {
+          this.item.name = this.item.productName;
+        }
 
-      this.item.expireDate = this.formatDate(this.item.expireDate);
-      this.item.purchaseDate = this.formatDate(this.item.purchaseDate);
-      this.item.trialEndDate = this.formatDate(this.item.trialEndDate);
-      this.item.nextBillingDate = this.formatDate(this.item.nextBillingDate);
-      this.item.warrantyEndDate = this.formatDate(this.item.warrantyEndDate);
-    }
+        this.item.expireDate = this.formatDate(this.item.expireDate);
+        this.item.purchaseDate = this.formatDate(this.item.purchaseDate);
+        this.item.trialEndDate = this.formatDate(this.item.trialEndDate);
+        this.item.nextBillingDate = this.formatDate(this.item.nextBillingDate);
+        this.item.warrantyEndDate = this.formatDate(this.item.warrantyEndDate);
+      }
   }
   // 在你的 Component 內，或是物件 model 內
   get totalPrice(): number {
@@ -152,7 +151,7 @@ export class ItemListEditDialogComponent implements OnInit {
     return `${year}-${month}-${day}`;
   }
   // 訂閱修改時，不需要前端傳 nextBillingDate，後端會用 trialEndDate + billingCycle 自動算
-  onOkClose(): void {
+  onOkClose(userId :number): void {
     let payload: any;
     const newCat = this.categories.find(
       (cat) => Number(cat.id) === Number(this.item.categoryId),
@@ -184,70 +183,67 @@ export class ItemListEditDialogComponent implements OnInit {
     }
 
     if (this.isSubscriptionCategory()) {
-      payload = {
-        _type: 'subscription',
-        id: this.item.id,
-        groupId: this.item.groupId,
-        userId: this.item.userId || this.item.createdById || 1,
-        name: this.item.name,
-        price: this.item.price || this.item.unitPrice,
-        billingCycle: this.item.billingCycle,
-        purchaseDate: this.formatDate(this.item.purchaseDate),
-        trialEndDate: this.formatDate(this.item.trialEndDate),
-        notify: this.item.notify,
-        note: this.item.note,
-      };
-    } else if (this.isWarrantyCategory()) {
-      payload = {
-        _type: 'warranty',
-        id: this.item.id,
-        groupId: this.item.groupId,
-        userId: this.item.userId || 1,
-        productName: this.item.name,
-        brand: this.item.brand,
-        model: this.item.model,
-        serialNumber: this.item.serialNumber,
-        purchaseDate: this.formatDate(this.item.purchaseDate),
-        warrantyEndDate: this.formatDate(this.item.warrantyEndDate),
-        storeName: this.item.storeName,
-        price: this.item.price || 0,
-        notify: this.item.notify,
-        note: this.item.note,
-      };
-    } else if (this.isMedicineCategory()) {
-      payload = {
-        _type: 'medicine',
-        id: this.item.id,
-        groupId: this.item.groupId,
-        userId: this.item.userId || 1,
-        name: this.item.name,
-        medicineType: this.item.medicineType,
-        quantity: this.item.quantity,
-        unit: this.item.unit,
-        safeQuantity: this.item.safeQuantity ?? 0,
-        purchaseDate: this.formatDate(this.item.purchaseDate),
-        expireDate: this.formatDate(this.item.expireDate),
-        dosage: this.item.dosage,
-        usageMethod: this.item.usageMethod,
-        unitPrice: this.item.unitPrice,
-        location: this.item.location,
-        source: this.item.source,
-        notify: this.item.notify,
-        note: this.item.note,
-      };
-    } else {
-      payload = {
-        _type: 'general',
-        ...this.item,
-        purchaseDate: this.formatDate(this.item.purchaseDate),
-        expireDate: this.formatDate(this.item.expireDate),
-        price: this.totalPrice,
-        safeQuantity: this.item.safeQuantity ?? 0,
-      };
-    }
+    payload = {
+      id: this.item.id,
+      groupId: this.item.groupId,
+      userId: userId,
+      name: this.item.name,
+      price: this.item.price || this.item.unitPrice || 0,
+      billingCycle: this.item.billingCycle,
+      purchaseDate: this.formatDate(this.item.purchaseDate),
+      trialEndDate: this.formatDate(this.item.trialEndDate),
+      notify: this.item.notify,
+      note: this.item.note,
+    };
+  } else if (this.isWarrantyCategory()) {
+    payload = {
+      id: this.item.id,
+      groupId: this.item.groupId,
+      userId: userId,
+      productName: this.item.name,
+      brand: this.item.brand,
+      model: this.item.model,
+      serialNumber: this.item.serialNumber,
+      purchaseDate: this.formatDate(this.item.purchaseDate),
+      warrantyEndDate: this.formatDate(this.item.warrantyEndDate),
+      storeName: this.item.storeName,
+      price: this.item.price || 0,
+      notify: this.item.notify,
+      note: this.item.note,
+    };
+  } else if (this.isMedicineCategory()) {
+  payload = {
+    id: this.item.id,
+    groupId: this.item.groupId,
+    userId: userId,
+    name: this.item.name,
+    medicineType: this.item.medicineType,
+    quantity: this.item.quantity,
+    unit: this.item.unit,
+    safeQuantity: this.item.safeQuantity ?? 0,
+    purchaseDate: this.formatDate(this.item.purchaseDate),
+    expireDate: this.formatDate(this.item.expireDate),
+    dosage: this.item.dosage,
+    usageMethod: this.item.usageMethod,
+    unitPrice: this.item.unitPrice,
+    location: this.item.location,
+    source: this.item.source,
+    notify: this.item.notify,
+    note: this.item.note,
+  };
+}
+  else {
+    payload = {
+      ...this.item,
+      purchaseDate: this.formatDate(this.item.purchaseDate),
+      expireDate: this.formatDate(this.item.expireDate),
+      price: this.totalPrice,
+      safeQuantity: this.item.safeQuantity ?? 0,
+    };
 
     this.dialogRef.close(payload);
   }
+}
   onCancel(): void {
     this.dialogRef.close();
   }

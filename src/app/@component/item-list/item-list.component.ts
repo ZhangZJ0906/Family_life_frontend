@@ -23,6 +23,9 @@ import { ItemListEditDialogComponent } from '../item-list-edit-dialog/item-list-
 import { MatSelect, MatOption } from '@angular/material/select';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
 
+import { Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+
 import { AuthService } from '../../@services/auth.service';
 
 @Component({
@@ -140,15 +143,23 @@ export class ItemListComponent {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  constructor(
-    private http: HttpClientService,
-    private authService: AuthService,
-  ) {
+  constructor(private http: HttpClientService,private authService: AuthService,
+    private router: Router, private route: ActivatedRoute) {
     this.basicUrl = this.http.basicUrl;
     this.currentUserId = this.authService.currentUser()?.user_id ?? 0;
 
-    // this.currentGroupId = 0;
-    this.getUserGroupData();
+  }
+
+  initData(groupId: number) {
+    this.currentGroupId = groupId;
+    this.getUserGroupData(groupId);
+  }
+
+  ngOnInit() {
+    this.route.params.subscribe(params => {
+      const groupId = Number(params['groupId']) || 0;
+      this.initData(groupId);
+    });
   }
 
   ngAfterViewInit() {
@@ -286,7 +297,7 @@ export class ItemListComponent {
       },
     });
   }
-  getUserGroupData() {
+  getUserGroupData(groupId: any) {
     this.http
       .getApi(
         this.basicUrl +
@@ -312,8 +323,7 @@ export class ItemListComponent {
             groupId: 0,
             groupName: '私人物品',
           });
-          this.currentGroupId = 0;
-          this.getItemByGroupId(this.currentGroupId);
+          this.getItemByGroupId(groupId);
         },
         error: (err) => {
           Swal.fire({
@@ -574,51 +584,62 @@ export class ItemListComponent {
       this.getMedicineByGroupId(groupId);
       return;
     }
-    let url = `${this.basicUrl}item/getItems?userId=${this.currentUserId}`;
-    if (groupId !== null && groupId !== 0) {
-      url += `&groupId=${groupId}`;
-    }
-    console.log(url);
-    this.http.getApi(url).subscribe({
-      next: (res: any) => {
-        this.itemList = res.items || [];
-        this.dataSource.data = this.itemList;
 
-        console.log('res: ' + res.categoriesMap);
-        // 後端 locationMap 轉成陣列
-        this.location = Object.entries(res.locationMap || {}).map(
-          ([id, name]) => ({
-            id: Number(id),
-            name: name as string,
-          }),
-        );
+    this.http
+      .getApi(
+        this.basicUrl +
+          `item/getItems?userId=${this.currentUserId}&groupId=${this.currentGroupId}`,
+      )
+      .subscribe({
+        next: (res: any) => {
+          this.itemList = res.items || [];
+          this.dataSource.data = this.itemList;
 
-        // 後端 categoriesMap 轉成陣列
-        this.categories =
-          Object.entries(res.categoriesMap || {}).map(([id, name]) => ({
-            id: Number(id),
-            name: name as string,
-          })) || [];
+          console.log('res: ' + res.categoriesMap);
+          // 後端 locationMap 轉成陣列
+          this.location = Object.entries(res.locationMap || {}).map(
+            ([id, name]) => ({
+              id: Number(id),
+              name: name as string,
+            }),
+          );
 
-        // 最前面補「全部」
-        this.categories.unshift({ id: 0, name: '全部' });
+          // 後端 categoriesMap 轉成陣列
+          this.categories =
+            Object.entries(res.categoriesMap || {}).map(([id, name]) => ({
+              id: Number(id),
+              name: name as string,
+            })) || [];
 
-        this.displayedColumns = this.itemDisplayedColumns;
-        this.selectedCategory = '全部';
+          // 最前面補「全部」
+          this.categories.unshift({ id: 0, name: '全部' });
 
-        if (this.dataSource.paginator) {
-          this.dataSource.paginator.firstPage();
-        }
-      },
-      error: (err: any) => {
-        Swal.fire({
-          title: '錯誤',
-          text: err.message || 'Server error',
-          icon: 'error',
-        });
-      },
-    });
+          this.displayedColumns = this.itemDisplayedColumns;
+          this.selectedCategory = '全部';
+
+          if (this.dataSource.paginator) {
+            this.dataSource.paginator.firstPage();
+          }
+
+          this.warrantyList = res.data || [];
+          this.dataSource.data = this.warrantyList;
+          this.dataSource.paginator?.firstPage();
+        },
+        error: (err: any) => {
+          Swal.fire({
+            title: '錯誤',
+            text: err.message || 'Server error',
+            icon: 'error',
+          });
+        },
+      });
+
+    this.router.navigate(['/itemList', groupId]);
   }
+
+  
+
+
 
   // 搜尋功能
   applyFilter(event: Event) {
