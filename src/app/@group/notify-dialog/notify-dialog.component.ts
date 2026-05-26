@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -36,6 +37,8 @@ export class NotifyDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: any,
 
     private http: HttpClient,
+    private router: Router
+
   ) {
     this.user_id = data.userId;
   }
@@ -242,8 +245,8 @@ export class NotifyDialogComponent {
       });
   }
 
-  goItemList(){
-
+  goItemList(n: any){
+    this.router.navigate(['/itemList', n.sendUserId]);
   }
 
   deleteRead(){

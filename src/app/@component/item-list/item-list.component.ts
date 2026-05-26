@@ -23,6 +23,9 @@ import { ItemListEditDialogComponent } from '../item-list-edit-dialog/item-list-
 import { MatSelect, MatOption } from '@angular/material/select';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
 
+import { Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+
 import { AuthService } from '../../@services/auth.service';
 
 
@@ -139,13 +142,23 @@ medicineDisplayedColumns: string[] = [
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  constructor(private http: HttpClientService,private authService: AuthService) {
+  constructor(private http: HttpClientService,private authService: AuthService,
+    private router: Router, private route: ActivatedRoute) {
     this.basicUrl = this.http.basicUrl;
     this.currentUserId = this.authService.currentUser()?.user_id ?? 0;
 
-    // this.currentGroupId = 0;
-    this.getUserGroupData();
+  }
 
+  initData(groupId: number) {
+    this.currentGroupId = groupId;
+    this.getUserGroupData(groupId);
+  }
+
+  ngOnInit() {
+    this.route.params.subscribe(params => {
+      const groupId = Number(params['groupId']) || 0;
+      this.initData(groupId);
+    });
   }
 
   ngAfterViewInit() {
@@ -251,7 +264,7 @@ medicineDisplayedColumns: string[] = [
       },
     });
   }
- getUserGroupData() {
+ getUserGroupData(groupId: number) {
     this.http
       .getApi(
         this.basicUrl +
@@ -278,7 +291,7 @@ medicineDisplayedColumns: string[] = [
             groupName: '私人物品',
           });
           this.currentGroupId = 0;
-          this.getItemByGroupId(this.currentGroupId);
+          this.getItemByGroupId(groupId);
         },
         error: (err) => {
           Swal.fire({
@@ -520,6 +533,7 @@ getMedicineByGroupId(groupId: number|null): void {
     console.log("UID: ", this.currentUserId);
     console.log("GID: ", this.currentGroupId);
 
+
     // 切換群組時，如果目前在訂閱模式，就查訂閱
     if (this.isSubscriptionMode) {
       this.getSubscriptionByGroupId(groupId);
@@ -582,6 +596,8 @@ getMedicineByGroupId(groupId: number|null): void {
           });
         },
       });
+
+      this.router.navigate(['/itemList', groupId]);
   }
 
   // 搜尋功能

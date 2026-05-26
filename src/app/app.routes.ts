@@ -10,6 +10,11 @@ import { ExpensesComponent } from './@components/expenses/expenses.component';
 export const routes: Routes = [
   {
     path: 'itemList',
+    redirectTo: 'itemList/全部',
+    pathMatch: 'full'
+  },
+  {
+    path: 'itemList/:groupId',
     component: ItemListComponent,
     title: '我的物品清單',
   },
