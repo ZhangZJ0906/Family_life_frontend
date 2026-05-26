@@ -276,10 +276,10 @@ isMedicineCategory(): boolean {
     return;
   }
 
-  if (!payload.groupId) {
-    this.showError('請選擇所屬群組');
-    return;
-  }
+  // if (!payload.groupId) {
+  //   this.showError('請選擇所屬群組'+ payload.groupId);
+  //   return;
+  // }
 
   if (payload.price < 0) {
     this.showError('訂閱金額不可小於 0');
@@ -341,10 +341,10 @@ addWarrantyInfo(): void {
     return;
   }
 
-  if (!payload.groupId) {
-    this.showError('請選擇所屬群組');
-    return;
-  }
+  // if (!payload.groupId) {
+  //   this.showError('請選擇所屬群組');
+  //   return;
+  // }
 
   if (!payload.purchaseDate) {
     this.showError('請選擇購買日期');

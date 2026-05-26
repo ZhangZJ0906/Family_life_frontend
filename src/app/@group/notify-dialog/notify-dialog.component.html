@@ -36,11 +36,11 @@
       </span>
     </button>
 
-    <button [class.active]="filterType === 'group'" (click)="filterType = 'group'">
+    <button [class.active]="filterType === 'group' || filterType === 'itemlist'" (click)="filterType = 'group'">
       群組通知
 
-      <span class="tab-badge" *ngIf="unreadMap.group > 0">
-        {{ unreadMap.group }}
+      <span class="tab-badge" *ngIf="(unreadMap.group + unreadMap.itemlist) > 0">
+        {{ unreadMap.group + unreadMap.itemlist }}
       </span>
     </button>
 
@@ -131,6 +131,17 @@
         >
           已拒絕加入該群組
         </div>
+
+      </ng-container>
+
+      <!-- itemlist -->
+      <ng-container *ngIf="n.type === 'itemlist'">
+
+        <button
+          class="view-btn"
+        >
+          查看
+        </button>
 
       </ng-container>
 

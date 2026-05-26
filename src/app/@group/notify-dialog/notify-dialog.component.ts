@@ -27,6 +27,7 @@ export class NotifyDialogComponent {
     all: 0,
     invite: 0,
     group: 0,
+    itemlist: 0,
     update: 0
   };
 
@@ -39,12 +40,20 @@ export class NotifyDialogComponent {
     this.user_id = data.userId;
   }
 
-  filterType: 'all' | 'invite' | 'group' | 'update' = 'all';
+  filterType: 'all' | 'invite' | 'group' | 'itemlist' | 'update' = 'all';
 
   filteredNotifies() {
     if (this.filterType === 'all') {
       return this.notifies;
     }
+
+     // 🔥 group tab 同時包含 itemlist
+    if (this.filterType === 'group') {
+      return this.notifies.filter(n =>
+        n.type === 'group' || n.type === 'itemlist'
+      );
+    }
+
     return this.notifies.filter(n => n.type === this.filterType);
   }
 
@@ -144,6 +153,10 @@ export class NotifyDialogComponent {
       n => n.isRead !== 1 && n.type === 'group'
     ).length;
 
+    this.unreadMap.itemlist = this.notifies.filter(
+      n => n.isRead !== 1 && n.type === 'itemlist'
+    ).length;
+
     this.unreadMap.update = this.notifies.filter(
       n => n.isRead !== 1 && n.type === 'update'
     ).length;
@@ -227,6 +240,10 @@ export class NotifyDialogComponent {
           });
         }
       });
+  }
+
+  goItemList(){
+
   }
 
   deleteRead(){

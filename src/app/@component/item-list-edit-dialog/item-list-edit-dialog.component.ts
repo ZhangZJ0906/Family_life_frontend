@@ -158,7 +158,7 @@ onOkClose(): void {
       groupId: this.item.groupId,
       userId: this.item.userId || this.item.createdById || 1,
       name: this.item.name,
-      price: this.item.price || this.item.unitPrice,
+      price: this.item.price || this.item.unitPrice || 0,
       billingCycle: this.item.billingCycle,
       purchaseDate: this.formatDate(this.item.purchaseDate),
       trialEndDate: this.formatDate(this.item.trialEndDate),
