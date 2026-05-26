@@ -143,11 +143,14 @@ export class ItemListComponent {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  constructor(private http: HttpClientService,private authService: AuthService,
-    private router: Router, private route: ActivatedRoute) {
+  constructor(
+    private http: HttpClientService,
+    private authService: AuthService,
+    private router: Router,
+    private route: ActivatedRoute,
+  ) {
     this.basicUrl = this.http.basicUrl;
     this.currentUserId = this.authService.currentUser()?.user_id ?? 0;
-
   }
 
   initData(groupId: number) {
@@ -156,7 +159,7 @@ export class ItemListComponent {
   }
 
   ngOnInit() {
-    this.route.params.subscribe(params => {
+    this.route.params.subscribe((params) => {
       const groupId = Number(params['groupId']) || 0;
       this.initData(groupId);
     });
@@ -563,10 +566,6 @@ export class ItemListComponent {
   // 查詢一般物品資料
   getItemByGroupId(groupId: number): void {
     this.currentGroupId = groupId;
-
-    console.log('UID: ', this.currentUserId);
-    console.log('GID: ', this.currentGroupId);
-
     // 切換群組時，如果目前在訂閱模式，就查訂閱
     if (this.isSubscriptionMode) {
       this.getSubscriptionByGroupId(groupId);
@@ -584,62 +583,56 @@ export class ItemListComponent {
       this.getMedicineByGroupId(groupId);
       return;
     }
+    let url = `${this.basicUrl}item/getItems?userId=${this.currentUserId}`;
+    if (groupId !== 0 && groupId != null) {
+      url += `&groupId=${groupId}`;
+    }
+    this.http.getApi(url).subscribe({
+      next: (res: any) => {
+        this.itemList = res.items || [];
+        this.dataSource.data = this.itemList;
 
-    this.http
-      .getApi(
-        this.basicUrl +
-          `item/getItems?userId=${this.currentUserId}&groupId=${this.currentGroupId}`,
-      )
-      .subscribe({
-        next: (res: any) => {
-          this.itemList = res.items || [];
-          this.dataSource.data = this.itemList;
+        console.log('res: ' + res.categoriesMap);
+        // 後端 locationMap 轉成陣列
+        this.location = Object.entries(res.locationMap || {}).map(
+          ([id, name]) => ({
+            id: Number(id),
+            name: name as string,
+          }),
+        );
 
-          console.log('res: ' + res.categoriesMap);
-          // 後端 locationMap 轉成陣列
-          this.location = Object.entries(res.locationMap || {}).map(
-            ([id, name]) => ({
-              id: Number(id),
-              name: name as string,
-            }),
-          );
+        // 後端 categoriesMap 轉成陣列
+        this.categories =
+          Object.entries(res.categoriesMap || {}).map(([id, name]) => ({
+            id: Number(id),
+            name: name as string,
+          })) || [];
 
-          // 後端 categoriesMap 轉成陣列
-          this.categories =
-            Object.entries(res.categoriesMap || {}).map(([id, name]) => ({
-              id: Number(id),
-              name: name as string,
-            })) || [];
+        // 最前面補「全部」
+        this.categories.unshift({ id: 0, name: '全部' });
 
-          // 最前面補「全部」
-          this.categories.unshift({ id: 0, name: '全部' });
+        this.displayedColumns = this.itemDisplayedColumns;
+        this.selectedCategory = '全部';
 
-          this.displayedColumns = this.itemDisplayedColumns;
-          this.selectedCategory = '全部';
+        if (this.dataSource.paginator) {
+          this.dataSource.paginator.firstPage();
+        }
 
-          if (this.dataSource.paginator) {
-            this.dataSource.paginator.firstPage();
-          }
-
-          this.warrantyList = res.data || [];
-          this.dataSource.data = this.warrantyList;
-          this.dataSource.paginator?.firstPage();
-        },
-        error: (err: any) => {
-          Swal.fire({
-            title: '錯誤',
-            text: err.message || 'Server error',
-            icon: 'error',
-          });
-        },
-      });
+        this.warrantyList = res.data || [];
+        this.dataSource.data = this.warrantyList;
+        this.dataSource.paginator?.firstPage();
+      },
+      error: (err: any) => {
+        Swal.fire({
+          title: '錯誤',
+          text: err.message || 'Server error',
+          icon: 'error',
+        });
+      },
+    });
 
     this.router.navigate(['/itemList', groupId]);
   }
-
-  
-
-
 
   // 搜尋功能
   applyFilter(event: Event) {
