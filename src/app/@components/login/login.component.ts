@@ -3,10 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { User } from '../../@models/user.model';
 import { AuthService } from '../../@services/auth.service';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule,
+            RouterLink,
+            MatIconModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
