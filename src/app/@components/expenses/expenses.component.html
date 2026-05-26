@@ -1,45 +1,47 @@
+
 <div class="container-fluid py-3">
-  <!-- HEADER -->
-  <div class="d-flex justify-content-between align-items-center mb-3">
+  <app-topbar></app-topbar>
+
+  <!-- HEADER + 月份 + 統計卡片 -->
+<section class="expense-header-card">
+
+  <!-- 左側：標題 -->
+  <div class="expense-title">
+    <div class="title-icon">💳</div>
+
     <div>
       <h3 class="fw-bold mb-0">家庭記帳系統</h3>
       <small class="text-muted">費用管理 Dashboard</small>
     </div>
-    <button mat-fab color="primary" (click)="openCreateDialog()" class="position-fixed bottom-0 end-0 m-4">
-      <mat-icon>add</mat-icon>
-    </button>
   </div>
 
-  <!-- 月份切換 -->
-  <div class="d-flex align-items-center justify-content-center gap-3 mb-3">
+  <!-- 中間：月份切換 -->
+  <div class="month-switch">
     <button mat-icon-button (click)="prevMonth()">
       <mat-icon>chevron_left</mat-icon>
     </button>
-    <span class="fw-bold fs-6">{{ selectedYear() }} 年 {{ selectedMonth() }} 月</span>
+
+    <span>{{ selectedYear() }} 年 {{ selectedMonth() }} 月</span>
+
     <button mat-icon-button (click)="nextMonth()" [disabled]="isCurrentMonth()">
       <mat-icon>chevron_right</mat-icon>
     </button>
   </div>
 
-  <!-- SUMMARY -->
-  <div class="row g-3 mb-3">
-    <div class="col-md-6">
-      <div class="card summary-card bg-primary text-white">
-        <div class="card-body">
-          <div class="label">本月支出</div>
-          <div class="value">${{ totalExpense() }}</div>
-        </div>
-      </div>
+  <!-- 右側：統計卡片 -->
+  <div class="summary-row">
+    <div class="summary-card summary-expense">
+      <div class="label">本月支出</div>
+      <div class="value">${{ totalExpense() }}</div>
     </div>
-    <div class="col-md-6">
-      <div class="card summary-card bg-dark text-white">
-        <div class="card-body">
-          <div class="label">當月筆數</div>
-          <div class="value">{{ dataSource.filteredData.length }}</div>
-        </div>
-      </div>
+
+    <div class="summary-card summary-count">
+      <div class="label">當月筆數</div>
+      <div class="value">{{ dataSource.filteredData.length }}</div>
     </div>
   </div>
+
+</section>
 
   <!-- TABLE CARD -->
   <div class="card shadow-sm">

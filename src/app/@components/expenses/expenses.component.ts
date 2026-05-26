@@ -20,6 +20,7 @@ import { HttpClientService } from '../../@services/http-client.service';
 import { ExpensesAddComponent } from '../expenses-add/expenses-add.component';
 import { ExpensesEditComponent } from '../expenses-edit/expenses-edit.component';
 import Swal from 'sweetalert2';
+import { TopbarComponent } from '../../shared/topbar/topbar.component';
 
 @Component({
   selector: 'app-expense-tracker',
@@ -36,6 +37,7 @@ import Swal from 'sweetalert2';
     MatButtonModule,
     MatTableModule,
     MatIconModule,
+    TopbarComponent,
   ],
   templateUrl: './expenses.component.html',
   styleUrl: './expenses.component.scss',
@@ -89,7 +91,7 @@ export class ExpensesComponent {
     const raw = localStorage.getItem('family-life-current-user');
     this.user = JSON.parse(raw!);
     this.currentUserId = this.user.user_id;
-    
+
     this.dataSource.filterPredicate = (data: ExpenseRecord, filter: string) => {
       const f = JSON.parse(filter);
 
