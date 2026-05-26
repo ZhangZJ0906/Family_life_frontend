@@ -1,9 +1,4 @@
-.search-field {
-  width: 300px;
-  ::ng-deep .mat-mdc-text-field-wrapper {
-    background-color: white;
-  }
-}
+
 
 .element-row:hover {
   background-color: #f8f9fa; // Bootstrap light gray
@@ -85,10 +80,7 @@
   border: 2px solid white;
 }
 
-/* 搜尋框寬度微調 */
-.search-field {
-  width: 250px;
-}
+
 
 /* 群組選擇器寬度 */
 .group-select {
@@ -103,59 +95,43 @@
 }
 
 
-/* 第二個區塊：標題、篩選、搜尋放同一張卡 */
+/* 第二個區塊：標題、分類、群組、搜尋 */
 .item-header-card {
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 22px;
   padding: 28px;
-  min-height: 120px;
+  min-height: 170px;
   margin-bottom: 20px;
 
   display: grid;
-  grid-template-columns: 360px 1fr 300px;
-  align-items: center;
+  grid-template-columns: 360px 1fr 420px;
+  align-items: start;
   gap: 28px;
 }
 
 /* 左側標題 */
 .item-title {
-  flex-shrink: 0;
+  min-width: 0;
 }
 
-/* 中間篩選區：固定在整張卡片正中間 */
-.header-filter {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  white-space: nowrap;
-}
-
-/* 分類按鈕不換行 */
-.header-filter mat-chip-listbox {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 8px;
-}
-
-
-/* 右側搜尋框 */
-.search-field {
-  width: 300px;
-  margin-left: auto;
-}
-
-/* 群組選擇器 */
-.group-select {
-  width: 180px;
-}
-
-/* 標題列 */
 .title-row {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.title-row h2 {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.item-title p {
+  margin: 8px 0 0;
+  color: #111827;
+  font-size: 15px;
 }
 
 /* 標題左側 icon */
@@ -173,18 +149,52 @@
   font-size: 24px;
 }
 
-/* 分類 chip 裡的小圖示 */
+/* 中間分類按鈕 */
+.header-filter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 6px;
+  min-width: 0;
+}
+
+.header-filter mat-chip-listbox {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  max-width: 100%;
+  padding-bottom: 4px;
+}
+
+.header-filter mat-chip-listbox::-webkit-scrollbar {
+  height: 0;
+}
+
 .chip-icon {
   margin-right: 6px;
   font-size: 15px;
 }
 
-/* 搜尋 icon 顏色 */
-.search-field {
-  width: 300px;
-  justify-self: end;
+/* 右側：群組 + 搜尋，整組靠右 */
+.header-right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: 16px;
 }
 
+/* 群組選擇器 */
+.group-select {
+  width: 190px;
+  flex-shrink: 0;
+}
+
+/* 搜尋框放在最右邊 */
+.search-field {
+  width: 260px;
+  flex-shrink: 0;
+}
 
 /* Angular Material 欄位白底 */
 .search-field ::ng-deep .mat-mdc-text-field-wrapper,
@@ -389,23 +399,45 @@ mat-paginator {
 }
 
 /* 小螢幕排版 */
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
   .item-header-card {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 18px;
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 
-  .search-field {
+  .header-filter {
+    justify-content: flex-start;
+  }
+
+  .header-right {
     width: 100%;
-  }
-
-  .filter-card {
-    flex-direction: column;
-    align-items: flex-start;
+    justify-content: space-between;
   }
 
   .group-select {
+    width: 220px;
+  }
+
+
+}
+
+@media (max-width: 768px) {
+  .item-page {
+    padding: 16px;
+  }
+
+  .item-header-card {
+    padding: 20px;
+  }
+
+  .header-right {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .group-select,
+  .search-field {
     width: 100%;
   }
 }
+
