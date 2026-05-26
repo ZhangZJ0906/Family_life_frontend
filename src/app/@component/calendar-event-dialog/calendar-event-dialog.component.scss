@@ -1,0 +1,183 @@
+/* Dialog 外層 */
+.event-dialog {
+  width: 720px;
+  max-width: 90vw;
+  background: #ffffff;
+  border-radius: 28px;
+  overflow: hidden;
+}
+
+/* 標題區 */
+.dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  padding: 28px 32px 18px;
+  border-bottom: 1px solid #eef0f3;
+}
+
+.header-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+
+  background: #eef4ff;
+  color: #2f80ed;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 26px;
+}
+
+.dialog-header h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.dialog-header p {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 15px;
+}
+
+/* 內容區 */
+.dialog-content {
+  padding: 24px 32px 8px !important;
+  max-height: 62vh;
+  overflow-y: auto;
+}
+
+/* 表單：兩欄排版 */
+.dialog-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 20px;
+}
+
+/* 橫跨兩欄 */
+.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Material 欄位樣式 */
+mat-form-field {
+  width: 100%;
+}
+
+/* 欄位白底圓角 */
+::ng-deep .event-dialog .mat-mdc-text-field-wrapper {
+  background: #ffffff;
+  border-radius: 14px;
+}
+
+/* 輸入框高度 */
+::ng-deep .event-dialog .mat-mdc-form-field-infix {
+  min-height: 48px;
+}
+
+/* textarea 不要太高 */
+textarea {
+  resize: none;
+}
+
+/* 底部按鈕列 */
+.dialog-actions {
+  padding: 18px 32px 28px !important;
+  border-top: 1px solid #eef0f3;
+  gap: 12px;
+}
+
+/* 取消按鈕 */
+.cancel-btn {
+  color: #2563eb;
+  font-weight: 700;
+  padding: 0 22px;
+}
+
+/* 確認按鈕 */
+.confirm-btn {
+  min-width: 110px;
+  height: 46px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 16px;
+}
+
+/* 手機版改成單欄 */
+@media (max-width: 720px) {
+  .event-dialog {
+    width: 92vw;
+  }
+
+  .dialog-header {
+    padding: 22px 22px 14px;
+  }
+
+  .dialog-header h2 {
+    font-size: 24px;
+  }
+
+  .dialog-content {
+    padding: 20px 22px 6px !important;
+    max-height: 65vh;
+  }
+
+  .dialog-form {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .full-width {
+    grid-column: auto;
+  }
+
+  .dialog-actions {
+    padding: 16px 22px 22px !important;
+  }
+
+  .readonly-field {
+  input {
+    color: #1e3a8a;
+    font-weight: 700;
+    cursor: default;
+  }
+}
+
+/* 所屬群組唯讀欄位 */
+.readonly-group-field {
+  grid-column: 1 / -1;
+}
+
+/* 唯讀欄位背景 */
+.readonly-group-field ::ng-deep .mat-mdc-text-field-wrapper {
+  background: #f8fafc !important;
+  border-radius: 14px;
+}
+
+/* 唯讀欄位文字 */
+.readonly-group-field input {
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: default;
+}
+
+/* 左側圖示 */
+.readonly-prefix {
+  margin-right: 10px;
+  font-size: 20px;
+  line-height: 1;
+}
+
+/* 右側鎖頭 */
+.readonly-suffix {
+  margin-left: 10px;
+  font-size: 18px;
+  line-height: 1;
+}
+}

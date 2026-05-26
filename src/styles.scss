@@ -75,3 +75,14 @@ body {
 body {
   background: #f7fafc;
 }
+
+.calendar-event-dialog-panel .mat-mdc-dialog-container {
+  --mdc-dialog-container-shape: 28px;
+}
+
+.calendar-event-dialog-panel .mdc-dialog__surface {
+  border-radius: 28px !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.18) !important;
+}
