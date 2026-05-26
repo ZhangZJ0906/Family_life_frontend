@@ -1,26 +1,46 @@
 <header class="topbar">
-
-  <!-- 左側 Logo 區 -->
+  <!-- 左側 Logo -->
   <div class="logo-area" routerLink="/home-page">
-    <img src="images/logo.png" class="logo-img" alt="Logo">
+    <img src="images/logo.png" class="logo-img" alt="家庭生活到期管家 Logo" />
   </div>
 
-  <nav class="top-nav">
-    <button routerLink="/food" routerLinkActive="active">新增食材</button>
-    <button routerLink="/medicine" routerLinkActive="active">新增藥品</button>
-    <button routerLink="/warranty" routerLinkActive="active">新增保固</button>
-    <button routerLink="/itemList" routerLinkActive="active">物品清單</button>
-    <button routerLink="/shopping-list" routerLinkActive="active">購物清單</button>
-    <button routerLink="/calendar" routerLinkActive="active">家庭行事曆</button>
-<button routerLink="/expenses" routerLinkActive="active">記帳</button>
-    <button routerLink="/group" routerLinkActive="active">我的群組</button>
-    <button routerLink="/profile" routerLinkActive="active">個人資料</button>
+  <!-- 手機版選單按鈕 -->
+  <button class="menu-toggle" type="button" (click)="toggleMenu()">
+    <mat-icon>{{ isMenuOpen ? 'close' : 'menu' }}</mat-icon>
+  </button>
+
+  <!-- 導覽選單 -->
+  <nav class="top-nav" [class.open]="isMenuOpen">
+    <button routerLink="/itemList" routerLinkActive="active" (click)="closeMenu()">
+      物品清單
+    </button>
+
+    <button routerLink="/shopping-list" routerLinkActive="active" (click)="closeMenu()">
+      購物清單
+    </button>
+
+    <button routerLink="/calendar" routerLinkActive="active" (click)="closeMenu()">
+      家庭行事曆
+    </button>
+
+    <button routerLink="/expenses" routerLinkActive="active" (click)="closeMenu()">
+      記帳
+    </button>
+
+    <button routerLink="/group" routerLinkActive="active" (click)="closeMenu()">
+      我的群組
+    </button>
+
+    <button routerLink="/profile" routerLinkActive="active" (click)="closeMenu()">
+      個人資料
+    </button>
   </nav>
 
-
+  <!-- 右側功能區 -->
   <div class="top-actions">
-
-    <button class="icon-btn"
+    <button
+      class="icon-btn"
+      type="button"
       (click)="openNotifyDialog()"
       [matBadge]="unreadCount"
       matBadgeColor="warn"
@@ -29,23 +49,17 @@
     >
       🔔
     </button>
-    <!-- 右上角使用者頭像 -->
+
     <div class="user-avatar">
+      <img *ngIf="avatarUrl; else defaultAvatar" [src]="avatarUrl" alt="使用者頭像" />
 
-      <!-- 有頭像圖片時顯示圖片 -->
-      <img *ngIf="avatarUrl; else defaultAvatar" [src]="avatarUrl" alt="使用者頭像">
-
-      <!-- 沒有頭像圖片時顯示 J -->
       <ng-template #defaultAvatar>
         J
       </ng-template>
-
     </div>
 
-    <!-- 🔥 新增 logout button -->
-    <button class="logout-btn" (click)="logout()">
+    <button class="logout-btn" type="button" (click)="logout()">
       <mat-icon>logout</mat-icon>
     </button>
   </div>
-
 </header>
