@@ -71,53 +71,52 @@ group: any[] = [];
     private authService: AuthService
   ) {
     this.group = this.data.groups;
-    this.item.userId = this.authService.currentUser()?.user_id ?? 0;
   }
 
   ngOnInit(): void {
-  if (this.data && this.data.item) {
-    this.isSubscriptionMode = this.data?.isSubscriptionMode || false;
-    this.isWarrantyMode = this.data?.isWarrantyMode || false;
-    this.isMedicineMode = this.data?.isMedicineMode || false;
-    this.item = { ...this.data.item };
+    if (this.data && this.data.item) {
+      this.isSubscriptionMode = this.data?.isSubscriptionMode || false;
+      this.isWarrantyMode = this.data?.isWarrantyMode || false;
+      this.isMedicineMode = this.data?.isMedicineMode || false;
+      this.item = { ...this.data.item, userId: this.authService.currentUser()?.user_id ?? 0 };
 
-    this.location = this.data.locationMap || [];
-    this.categories = this.data.categoriesMap || [];
+      this.location = this.data.locationMap || [];
+      this.categories = this.data.categoriesMap || [];
 
-    if (this.isSubscriptionMode) {
-      const subscriptionCategory = this.categories.find(cat => cat.name === '訂閱');
+      if (this.isSubscriptionMode) {
+        const subscriptionCategory = this.categories.find(cat => cat.name === '訂閱');
 
-      if (subscriptionCategory) {
-        this.item.categoryId = subscriptionCategory.id;
+        if (subscriptionCategory) {
+          this.item.categoryId = subscriptionCategory.id;
+        }
       }
-    }
-     if (this.isWarrantyMode) {
-      const warrantyCategory = this.categories.find(cat => cat.name === '保固');
-      if (warrantyCategory) {
-        this.item.categoryId = warrantyCategory.id;
+      if (this.isWarrantyMode) {
+        const warrantyCategory = this.categories.find(cat => cat.name === '保固');
+        if (warrantyCategory) {
+          this.item.categoryId = warrantyCategory.id;
+        }
+
+        // 保固資料後端欄位是 productName，Dialog 共用 item.name
+        this.item.name = this.item.productName;
       }
 
-      // 保固資料後端欄位是 productName，Dialog 共用 item.name
-      this.item.name = this.item.productName;
+      this.item.expireDate = this.formatDate(this.item.expireDate);
+      this.item.purchaseDate = this.formatDate(this.item.purchaseDate);
+      this.item.trialEndDate = this.formatDate(this.item.trialEndDate);
+      this.item.nextBillingDate = this.formatDate(this.item.nextBillingDate);
+      this.item.warrantyEndDate = this.formatDate(this.item.warrantyEndDate);
     }
+
+    if (this.isMedicineMode) {
+    const medicineCategory = this.categories.find(cat => cat.name === '藥品');
+    if (medicineCategory) {
+      this.item.categoryId = medicineCategory.id;
+    }
+
+    this.item.purchaseDate = this.formatDate(this.item.purchaseDate);
 
     this.item.expireDate = this.formatDate(this.item.expireDate);
-    this.item.purchaseDate = this.formatDate(this.item.purchaseDate);
-    this.item.trialEndDate = this.formatDate(this.item.trialEndDate);
-    this.item.nextBillingDate = this.formatDate(this.item.nextBillingDate);
-    this.item.warrantyEndDate = this.formatDate(this.item.warrantyEndDate);
   }
-
-  if (this.isMedicineMode) {
-  const medicineCategory = this.categories.find(cat => cat.name === '藥品');
-  if (medicineCategory) {
-    this.item.categoryId = medicineCategory.id;
-  }
-
-  this.item.purchaseDate = this.formatDate(this.item.purchaseDate);
-
-  this.item.expireDate = this.formatDate(this.item.expireDate);
-}
 }
   // 在你的 Component 內，或是物件 model 內
   get totalPrice(): number {
@@ -149,14 +148,14 @@ private formatDate(date: any): string {
   return `${year}-${month}-${day}`;
 }
   // 訂閱修改時，不需要前端傳 nextBillingDate，後端會用 trialEndDate + billingCycle 自動算
-onOkClose(): void {
+onOkClose(userId: string): void {
   let payload: any;
 
   if (this.isSubscriptionCategory()) {
     payload = {
       id: this.item.id,
       groupId: this.item.groupId,
-      userId: this.item.userId || this.item.createdById || 1,
+      userId: userId,
       name: this.item.name,
       price: this.item.price || this.item.unitPrice || 0,
       billingCycle: this.item.billingCycle,
@@ -169,7 +168,7 @@ onOkClose(): void {
     payload = {
       id: this.item.id,
       groupId: this.item.groupId,
-      userId: this.item.userId || 1,
+      userId: userId,
       productName: this.item.name,
       brand: this.item.brand,
       model: this.item.model,
@@ -185,7 +184,7 @@ onOkClose(): void {
   payload = {
     id: this.item.id,
     groupId: this.item.groupId,
-    userId: this.item.userId || 1,
+    userId: userId,
     name: this.item.name,
     medicineType: this.item.medicineType,
     quantity: this.item.quantity,
