@@ -25,13 +25,13 @@
 
           <span class="chip-icon">
             @switch (cat.name) {
-              @case ('食品') { 🥬 }
-              @case ('藥品') { 💊 }
-              @case ('日用品') { 🧴 }
-              @case ('訂閱') { 💳 }
-              @case ('清潔用品') { 🧽 }
-              @case ('保固') { 🛡️ }
-              @default { }
+            @case ('食品') { 🥬 }
+            @case ('藥品') { 💊 }
+            @case ('日用品') { 🧴 }
+            @case ('訂閱') { 💳 }
+            @case ('清潔用品') { 🧽 }
+            @case ('保固') { 🛡️ }
+            @default { }
             }
           </span>
 
@@ -50,21 +50,16 @@
         (selectionChange)="getItemByGroupId($event.value)">
 
         @for (group of userGroups; track $index) {
-          <mat-option [value]="group.groupId">
-            🏠 {{ group.groupName }}
-          </mat-option>
+        <mat-option [value]="group.groupId">
+          🏠 {{ group.groupName }}
+        </mat-option>
         }
-
       </mat-select>
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="search-field">
       <mat-label>搜尋物品</mat-label>
-      <input
-        matInput
-        (keyup)="applyFilter($event)"
-        placeholder="例如：牛奶"
-        #input>
+      <input matInput (keyup)="applyFilter($event)" placeholder="例如：牛奶" #input>
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
   </div>
@@ -80,20 +75,14 @@
         <!-- 勾選欄位 -->
         <ng-container matColumnDef="select">
           <th mat-header-cell *matHeaderCellDef>
-            <mat-checkbox
-              (change)="$event ? masterToggle() : null"
-              [checked]="selection.hasValue() && isAllSelected()"
-              [indeterminate]="selection.hasValue() && !isAllSelected()"
-              color="primary">
+            <mat-checkbox (change)="$event ? masterToggle() : null" [checked]="selection.hasValue() && isAllSelected()"
+              [indeterminate]="selection.hasValue() && !isAllSelected()" color="primary">
             </mat-checkbox>
           </th>
 
           <td mat-cell *matCellDef="let row">
-            <mat-checkbox
-              (click)="$event.stopPropagation()"
-              (change)="$event ? selection.toggle(row) : null"
-              [checked]="selection.isSelected(row)"
-              color="primary">
+            <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
+              [checked]="selection.isSelected(row)" color="primary">
             </mat-checkbox>
           </td>
         </ng-container>
@@ -148,13 +137,12 @@
         <ng-container matColumnDef="notify">
           <th mat-header-cell *matHeaderCellDef class="text-center">提醒</th>
           <td mat-cell *matCellDef="let element" class="text-center">
-            <mat-icon
-              class="notify-icon"
-              [color]="element.notify ? 'primary' : 'disabled'">
+            <mat-icon class="notify-icon" [color]="element.notify ? 'primary' : 'disabled'">
               {{ element.notify ? 'notifications_active' : 'notifications_off' }}
             </mat-icon>
           </td>
         </ng-container>
+
 
         <!-- 訂閱：扣款週期 -->
         <ng-container matColumnDef="billingCycle">
@@ -231,56 +219,58 @@
         </ng-container>
 
         <!-- 藥品：藥品類型 -->
-      <ng-container matColumnDef="medicineType">
-        <th mat-header-cell *matHeaderCellDef>藥品類型</th>
-        <td mat-cell *matCellDef="let element">
-          {{ element.medicineType || '無' }}
-        </td>
-      </ng-container>
+        <ng-container matColumnDef="medicineType">
+          <th mat-header-cell *matHeaderCellDef>藥品類型</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.medicineType || '無' }}
+          </td>
+        </ng-container>
 
-      <!-- 藥品：用法 -->
-      <ng-container matColumnDef="usageMethod">
-        <th mat-header-cell *matHeaderCellDef>用法</th>
-        <td mat-cell *matCellDef="let element">
-          {{ element.usageMethod || '無' }}
-        </td>
-      </ng-container>
+        <!-- 藥品：用法 -->
+        <ng-container matColumnDef="usageMethod">
+          <th mat-header-cell *matHeaderCellDef>用法</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.usageMethod || '無' }}
+          </td>
+        </ng-container>
 
         <!-- 一般物品 / 訂閱共用：狀態 -->
-     <ng-container matColumnDef="status">
-      <th mat-header-cell *matHeaderCellDef>狀態</th>
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>狀態</th>
 
-      <td mat-cell *matCellDef="let element">
-        <span
-          class="status-badge"
-          [class.status-normal]="element.status === '正常'"
-          [class.status-expired]="element.status === '已到期'"
-          [class.status-soon]="element.status === '即將到期'"
-          [class.status-low]="element.status === '庫存不足'"
-          [class.status-trial]="element.status === '試用中'"
-          [class.status-warning]="element.status === '試用即將結束' || element.status === '即將扣款'"
-          [class.status-danger]="element.status === '已逾期扣款'">
-          {{ element.status || '正常' }}
-        </span>
+          <td mat-cell *matCellDef="let element">
+            <span class="status-badge" [class.status-normal]="element.status === '正常'"
+              [class.status-expired]="element.status === '已到期'" [class.status-soon]="element.status === '即將到期'"
+              [class.status-low]="element.status === '庫存不足'" [class.status-trial]="element.status === '試用中'"
+              [class.status-warning]="element.status === '試用即將結束' || element.status === '即將扣款'"
+              [class.status-danger]="element.status === '已逾期扣款'">
+              {{ element.status || '正常' }}
+            </span>
 
-        @if (element.remindMessage) {
-          <p class="remind-text">
-            {{ element.remindMessage }}
-          </p>
-        }
-      </td>
-    </ng-container>
+            @if (element.remindMessage) {
+            <p class="remind-text">
+              {{ element.remindMessage }}
+            </p>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let e">
+            <button mat-icon-button color="primary" (click)="openEditDialog(e)">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </td>
+        </ng-container>
         <!-- 表頭 -->
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
 
         <!-- 表身 -->
-        <tr
-          mat-row
-          *matRowDef="let row; columns: displayedColumns"
-          class="element-row"
-          [class.selected-row]="selection.isSelected(row)"
-          (click)="openEditDialog(row)">
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" class="element-row"
+          [class.selected-row]="selection.isSelected(row)">
         </tr>
+        <!-- (click)="openEditDialog(row)" -->
 
         <!-- 沒資料 -->
         <tr class="mat-row" *matNoDataRow>
@@ -302,11 +292,7 @@
   <div class="fab-container">
 
     <!-- 有勾選資料時顯示刪除按鈕 -->
-    <button
-      mat-fab
-      color="warn"
-      *ngIf="selection.selected.length > 0"
-      (click)="deleteSelectedItems()">
+    <button mat-fab color="warn" *ngIf="selection.selected.length > 0" (click)="deleteSelectedItems()">
       <mat-icon>delete</mat-icon>
       <span class="fab-badge">{{ selection.selected.length }}</span>
     </button>

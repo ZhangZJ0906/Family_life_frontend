@@ -10,22 +10,32 @@ import { ProfileComponent } from './@component/profile/profile.component';
 
 import { ItemListComponent } from './@component/item-list/item-list.component';
 import { ExpensesComponent } from './@components/expenses/expenses.component';
+import { authGuard } from './@guard/auth.guard';
+import { pendingChangesGuard } from './@guard/pending-changes.guard';
 
 export const routes: Routes = [
   {
     path: 'itemList',
+    redirectTo: 'itemList/全部',
+    pathMatch: 'full'
+  },
+  {
+    path: 'itemList/:groupId',
     component: ItemListComponent,
     title: '我的物品清單',
+    canActivate: [authGuard], //未登入跳到這頁面會被返回到登入葉面
   },
   {
     path: 'expenses',
     component: ExpensesComponent,
     data: { title: '記帳' },
+    canActivate: [authGuard], //未登入跳到這頁面會被返回到登入葉面
   },
   {
     path: 'group',
     component: GroupPageComponent,
     title: '我的群組',
+    canActivate: [authGuard], //未登入跳到這頁面會被返回到登入葉面
   },
   {
     path: 'login',
@@ -43,14 +53,15 @@ export const routes: Routes = [
         (m) => m.ShoppingListComponent,
       ),
     data: { title: '購物清單' },
+    canActivate: [authGuard], //未登入跳到這頁面會被返回到登入葉面
   },
   {
 
     path: 'purchase-item/:listId',
     loadComponent: () =>
       import('./@components/purchase-item/purchase-item.component').then(
-        (m) => m.PurchaseItemComponent
-      )
+        (m) => m.PurchaseItemComponent,
+      ),
   },
   {
     path: '',
@@ -76,8 +87,8 @@ export const routes: Routes = [
     path: 'register',
     loadComponent: () =>
       import('./@components/register/register.component').then(
-        (m) => m.RegisterComponent
-      )
+        (m) => m.RegisterComponent,
+      ),
   },
   {
     path: '',
@@ -85,16 +96,34 @@ export const routes: Routes = [
     redirectTo: 'login'
   },
 
+  //預設calendar path
   {
     path: 'calendar',
+    redirectTo: 'calendar/full',
+    pathMatch: 'full'
+  },
+  {
+    path: 'calendar/:groupId',
     component: CalendarComponent,
     data: { title: '行事曆' },
+    canActivate: [authGuard], //未登入跳到這頁面會被返回到登入葉面
   },
   {
     path: 'home-page',
     component: HomePageComponent,
     data: { title: '首頁' },
+    canActivate: [authGuard], //未登入跳到這頁面會被返回到登入葉面
   },
-  { path: 'profile', component: ProfileComponent, data: { title: '個人資訊' } },
-  // { path: 'topbar', component: TopbarComponent, data: { title: '物品清單' } },
+  {
+    path: 'profile',
+    component: ProfileComponent,
+    data: { title: '個人資訊' },
+    canActivate: [authGuard, pendingChangesGuard], //未登入跳到這頁面會被返回到登入葉面
+    canDeactivate: [pendingChangesGuard]// 切換頁面如果未儲存就會跳出為儲存警告
+  },
+  {
+    path: '**',
+    redirectTo: 'home-page', // 或導向 404 頁面
+
+  },
 ];

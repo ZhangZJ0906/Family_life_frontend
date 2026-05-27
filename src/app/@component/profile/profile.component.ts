@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../@services/auth.service';
 import { map } from 'rxjs';
 
+import { CanComponentDeactivate } from '../../@guard/pending-changes.guard';
 
 @Component({
   selector: 'app-profile',
@@ -18,7 +19,7 @@ import { map } from 'rxjs';
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss'
 })
-export class ProfileComponent {
+export class ProfileComponent implements CanComponentDeactivate {
 
   // 使用者名稱
   userName = 'Jack';
@@ -45,6 +46,9 @@ export class ProfileComponent {
 
   //大頭貼
   file: any;
+
+  //切到其它分頁時護衛模式
+  isDirty = false;
 
   constructor(
     private http: HttpClient,
@@ -195,6 +199,9 @@ export class ProfileComponent {
       this.userName = result.value.userName;
       this.email = result.value.email;
 
+      //暫存
+      this.isDirty = true;
+
       Swal.fire({
         icon: 'success',
         title: '修改成功',
@@ -241,87 +248,108 @@ openAvatarDialog(): void {
     // 2. 先在畫面上預覽新頭像
     this.avatarUrl = URL.createObjectURL(this.file);
 
-    // 3. 直接送到後端，更新資料庫
-    this.saveAll();
+    //暫存
+    this.isDirty = true;
   });
 
   }
 
   saveAll(){
     const payload = this.groups.map(g => ({
-    groupId: g.groupId,
-    publicInventory: this.publicInventoryObj[g.groupId] ?? false
-  }));
+      groupId: g.groupId,
+      publicInventory: this.publicInventoryObj[g.groupId] ?? false
+    }));
 
-  const formData = new FormData();
+    const formData = new FormData();
 
-  formData.append(
-    'userInfo',
-    new Blob(
-      [JSON.stringify({
-        userId: this.user_id,
-        userName: this.userName,
-        email: this.email,
-        notifyByEndDate: this.endDateNotify,
-        notifyByEmail: this.emailNotify
-      })],
-      { type: 'application/json' }
-    )
-  );
+    formData.append(
+      'userInfo',
+      new Blob(
+        [JSON.stringify({
+          userId: this.user_id,
+          userName: this.userName,
+          email: this.email,
+          notifyByEndDate: this.endDateNotify,
+          notifyByEmail: this.emailNotify
+        })],
+        { type: 'application/json' }
+      )
+    );
 
-  formData.append(
-    'publicInventoryList',
-    new Blob(
-      [JSON.stringify(payload)],
-      { type: 'application/json' }
-    )
-  );
+    formData.append(
+      'publicInventoryList',
+      new Blob(
+        [JSON.stringify(payload)],
+        { type: 'application/json' }
+      )
+    );
 
-  // 有選新頭像時才送 avatar
-  if (this.file) {
-    formData.append('avatar', this.file);
-  }
+    // 有選新頭像時才送 avatar
+    if (this.file) {
+      formData.append('avatar', this.file);
+    }
 
-  this.http.post(
-    'http://localhost:8080/users/update_info',
-    formData
-  ).subscribe({
-    next: (res: any) => {
-      if (res.code !== 200) {
+    this.http.post(
+      'http://localhost:8080/users/update_info',
+      formData
+    ).subscribe({
+      next: (res: any) => {
+        if (res.code !== 200) {
+          Swal.fire({
+            icon: 'error',
+            title: '儲存失敗',
+            text: res.message || '資料更新失敗'
+          });
+          return;
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: '已儲存',
+          text: '資料已更新',
+          confirmButtonText: '確認'
+        });
+
+        //存進db
+        this.isDirty = false;
+
+        // 清掉暫存檔案，避免下次儲存又重複上傳同一張
+        this.file = null;
+
+        // 重新抓資料庫最新資料
+        this.getSelfInfo();
+
+        // 通知 topbar 重新讀取資料庫頭像
+        window.dispatchEvent(new Event('avatarChanged'));
+      },
+
+      error: (err) => {
         Swal.fire({
           icon: 'error',
-          title: '儲存失敗',
-          text: res.message || '資料更新失敗'
+          title: '失敗',
+          text: err.error?.message || '伺服器發生錯誤'
         });
-        return;
+
+        console.log(err);
       }
+    });
+  }
 
-      Swal.fire({
-        icon: 'success',
-        title: '已儲存',
-        text: '資料已更新',
-        confirmButtonText: '確認'
-      });
+  canDeactivate(): Promise<boolean> | boolean {
 
-      // 清掉暫存檔案，避免下次儲存又重複上傳同一張
-      this.file = null;
-
-      // 重新抓資料庫最新資料
-      this.getSelfInfo();
-
-      // 通知 topbar 重新讀取資料庫頭像
-      window.dispatchEvent(new Event('avatarChanged'));
-    },
-
-    error: (err) => {
-      Swal.fire({
-        icon: 'error',
-        title: '失敗',
-        text: err.error?.message || '伺服器發生錯誤'
-      });
-
-      console.log(err);
+    if (!this.isDirty) {
+      return true;
     }
-  });
-}
+
+    return Swal.fire({
+      title: '尚未儲存',
+      text: '是否離開此頁面？未儲存的資料將會遺失',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: '離開',
+      cancelButtonText: '留在此頁'
+    }).then(result => {
+      return result.isConfirmed;
+    });
+  }
 }

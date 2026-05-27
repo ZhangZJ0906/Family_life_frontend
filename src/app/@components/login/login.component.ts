@@ -17,6 +17,7 @@ export class LoginComponent {
   email = '';
   password = '';
   errorMessage = '';
+  showPassword: boolean = false;
 
   constructor(
     private readonly authService: AuthService,
@@ -42,7 +43,7 @@ export class LoginComponent {
           // updated_at: res.updated_at ?? '',
         };
         this.authService.setCurrentUser(payload);
-        localStorage.setItem('isLogin', 'true');
+        sessionStorage.setItem('isLogin', 'true');
         this.router.navigate(['/home-page']); // 👉 登入成功後導向的頁面，可以自己改路徑。
       },
       error: (err) => {
@@ -50,5 +51,9 @@ export class LoginComponent {
         this.errorMessage = 'Email 或密碼不正確';
       },
     });
+  }
+
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
   }
 }

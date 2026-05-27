@@ -133,44 +133,40 @@ isMedicineCategory(): boolean {
   ngOnInit(): void {
     this.minDate = this.today.toISOString().split('T')[0];
 
-  if (this.data && this.data.location) {
-    this.location = [...this.data.location];
-  }
-
-  if (this.data && this.data.categories) {
-    this.categories = [...this.data.categories];
-    this.categories.shift();
-  }
-
-  if (this.data?.currentGroupId) {
-    this.item.groupId = this.data.currentGroupId;
-  }
-
-  if (this.data?.isSubscriptionMode) {
-    const subscriptionCategory = this.categories.find(cat => cat.name === '訂閱');
-    if (subscriptionCategory) {
-      this.item.categoryId = subscriptionCategory.id;
+    if (this.data && this.data.location) {
+      this.location = [...this.data.location];
     }
-  }
 
-  if (this.data?.isWarrantyMode) {
-    const warrantyCategory = this.categories.find(cat => cat.name === '保固');
-    if (warrantyCategory) {
-      this.item.categoryId = warrantyCategory.id;
+    if (this.data && this.data.categories) {
+      this.categories = [...this.data.categories];
+      this.categories.shift();
     }
-  }
 
-  // 藥品要獨立判斷，不能放在訂閱裡面
-  if (this.data?.isMedicineMode) {
-    const medicineCategory = this.categories.find(cat => cat.name === '藥品');
-    if (medicineCategory) {
-      this.item.categoryId = medicineCategory.id;
+    if (this.data?.currentGroupId) {
+      this.item.groupId = this.data.currentGroupId;
     }
-  }
-}
 
-  getUserGroupData() {
+    if (this.data?.isSubscriptionMode) {
+      const subscriptionCategory = this.categories.find(cat => cat.name === '訂閱');
+      if (subscriptionCategory) {
+        this.item.categoryId = subscriptionCategory.id;
+      }
+    }
 
+    if (this.data?.isWarrantyMode) {
+      const warrantyCategory = this.categories.find(cat => cat.name === '保固');
+      if (warrantyCategory) {
+        this.item.categoryId = warrantyCategory.id;
+      }
+    }
+
+    // 藥品要獨立判斷，不能放在訂閱裡面
+    if (this.data?.isMedicineMode) {
+      const medicineCategory = this.categories.find(cat => cat.name === '藥品');
+      if (medicineCategory) {
+        this.item.categoryId = medicineCategory.id;
+      }
+    }
   }
 
   get totalPrice(): number {
@@ -278,10 +274,10 @@ isMedicineCategory(): boolean {
     return;
   }
 
-  if (!payload.groupId) {
-    this.showError('請選擇所屬群組');
-    return;
-  }
+  // if (!payload.groupId) {
+  //   this.showError('請選擇所屬群組'+ payload.groupId);
+  //   return;
+  // }
 
   if (payload.price < 0) {
     this.showError('訂閱金額不可小於 0');
@@ -343,10 +339,10 @@ addWarrantyInfo(): void {
     return;
   }
 
-  if (!payload.groupId) {
-    this.showError('請選擇所屬群組');
-    return;
-  }
+  // if (!payload.groupId) {
+  //   this.showError('請選擇所屬群組');
+  //   return;
+  // }
 
   if (!payload.purchaseDate) {
     this.showError('請選擇購買日期');

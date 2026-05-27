@@ -20,7 +20,9 @@ import { HttpClientService } from '../../@services/http-client.service';
 import { ExpensesAddComponent } from '../expenses-add/expenses-add.component';
 import { ExpensesEditComponent } from '../expenses-edit/expenses-edit.component';
 import Swal from 'sweetalert2';
+import { AuthService } from '../../@services/auth.service';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
+
 
 @Component({
   selector: 'app-expense-tracker',
@@ -37,7 +39,7 @@ import { TopbarComponent } from '../../shared/topbar/topbar.component';
     MatButtonModule,
     MatTableModule,
     MatIconModule,
-    TopbarComponent,
+TopbarComponent,
   ],
   templateUrl: './expenses.component.html',
   styleUrl: './expenses.component.scss',
@@ -86,9 +88,12 @@ export class ExpensesComponent {
   constructor(
     private http: HttpClientService,
     private dialog: MatDialog,
+    private auth: AuthService,
   ) {
     this.basicUrl = this.http.basicUrl;
-    const raw = localStorage.getItem('family-life-current-user');
+    // 取 session storage id
+    //  this.currentUserId = this.auth.currentUser()?.user_id;
+    const raw = sessionStorage.getItem('family-life-current-user'); // ← localStorage 改 sessionStorage
     this.user = JSON.parse(raw!);
     this.currentUserId = this.user.user_id;
 

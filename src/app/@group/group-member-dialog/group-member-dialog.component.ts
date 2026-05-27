@@ -40,6 +40,8 @@ export class GroupMemberDialogComponent {
   members: any[] = [];
   invited_members: any[] = [];
 
+  selectedTab: 'members' | 'waiting' = 'members';
+
   ngOnInit(): void {
     this.getGroupMember();
     this.getInvitedMemembers();

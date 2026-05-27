@@ -16,6 +16,7 @@ import { Item, LocationAndCategory } from '../../common/interfaceList';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { AuthService } from '../../@services/auth.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-item-list-edit-dialog',
@@ -36,129 +37,158 @@ import { AuthService } from '../../@services/auth.service';
   styleUrl: './item-list-edit-dialog.component.scss',
 })
 export class ItemListEditDialogComponent implements OnInit {
+  private readonly specialCategories = ['訂閱', '保固', '藥品']; // 特殊類
+
   // 綁定表單的資料結構
   item: any = {};
+  group: any[] = [];
 
-  groups: LocationAndCategory[] = [
-    { id: 1, name: 'test' },
-    { id: 2, name: 'test2' },
-    { id: 3, name: 'test3' },
-  ];
   categories: LocationAndCategory[] = [];
   location: LocationAndCategory[] = [];
 
-isSubscriptionMode = false;
-isWarrantyMode = false;
-isMedicineMode = false;
+  isSubscriptionCategory(): boolean {
+    // 優先用 categoryId 判斷，找不到才 fallback 到 mode 旗標
+    if (this.item.categoryId) {
+      const selectedCategory = this.categories.find(
+        (cat) => Number(cat.id) === Number(this.item.categoryId),
+      );
+      return selectedCategory?.name === '訂閱';
+    }
+    return this.data?.isSubscriptionMode === true;
+  }
 
-isSubscriptionCategory(): boolean {
-  return this.isSubscriptionMode;
-}
+  isWarrantyCategory(): boolean {
+    if (this.item.categoryId) {
+      const selectedCategory = this.categories.find(
+        (cat) => Number(cat.id) === Number(this.item.categoryId),
+      );
+      return selectedCategory?.name === '保固';
+    }
+    return this.data?.isWarrantyMode === true;
+  }
 
-isWarrantyCategory(): boolean {
-  return this.isWarrantyMode;
-}
-
-isMedicineCategory(): boolean {
-  return this.isMedicineMode;
-}
-
-group: any[] = [];
+  isMedicineCategory(): boolean {
+    if (this.item.categoryId) {
+      const selectedCategory = this.categories.find(
+        (cat) => Number(cat.id) === Number(this.item.categoryId),
+      );
+      return selectedCategory?.name === '藥品';
+    }
+    return this.data?.isMedicineMode === true;
+  }
+  get isOriginalSpecial(): boolean {
+    return this.specialCategories.includes(this.originalCategoryName);
+  }
 
   constructor(
     public dialogRef: MatDialogRef<ItemListEditDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private authService: AuthService
+    private authService: AuthService,
   ) {
+    console.log(this.data);
     this.group = this.data.groups;
-    this.item.userId = this.authService.currentUser()?.user_id ?? 0;
   }
 
   ngOnInit(): void {
-  if (this.data && this.data.item) {
-    this.isSubscriptionMode = this.data?.isSubscriptionMode || false;
-    this.isWarrantyMode = this.data?.isWarrantyMode || false;
-    this.isMedicineMode = this.data?.isMedicineMode || false;
-    this.item = { ...this.data.item };
+      if (this.data && this.data.item) {
+        this.item = { ...this.data.item };
 
-    this.location = this.data.locationMap || [];
-    this.categories = this.data.categoriesMap || [];
+        this.location = this.data.locationMap || [];
+        this.categories = this.data.categoriesMap || [];
 
-    if (this.isSubscriptionMode) {
-      const subscriptionCategory = this.categories.find(cat => cat.name === '訂閱');
+        if (!this.item.categoryId) {
+          let modeCategoryName = '';
+          if (this.data?.isSubscriptionMode) modeCategoryName = '訂閱';
+          else if (this.data?.isWarrantyMode) modeCategoryName = '保固';
+          else if (this.data?.isMedicineMode) modeCategoryName = '藥品';
 
-      if (subscriptionCategory) {
-        this.item.categoryId = subscriptionCategory.id;
+          if (modeCategoryName) {
+            const found = this.categories.find(
+              (cat) => cat.name === modeCategoryName,
+            );
+            if (found) this.item.categoryId = found.id;
+          }
+        }
+        // 保固資料後端欄位是 productName，Dialog 共用 item.name
+        if (this.data?.isWarrantyMode) {
+          this.item.name = this.item.productName;
+        }
+
+        this.item.expireDate = this.formatDate(this.item.expireDate);
+        this.item.purchaseDate = this.formatDate(this.item.purchaseDate);
+        this.item.trialEndDate = this.formatDate(this.item.trialEndDate);
+        this.item.nextBillingDate = this.formatDate(this.item.nextBillingDate);
+        this.item.warrantyEndDate = this.formatDate(this.item.warrantyEndDate);
       }
-    }
-     if (this.isWarrantyMode) {
-      const warrantyCategory = this.categories.find(cat => cat.name === '保固');
-      if (warrantyCategory) {
-        this.item.categoryId = warrantyCategory.id;
-      }
-
-      // 保固資料後端欄位是 productName，Dialog 共用 item.name
-      this.item.name = this.item.productName;
-    }
-
-    this.item.expireDate = this.formatDate(this.item.expireDate);
-    this.item.purchaseDate = this.formatDate(this.item.purchaseDate);
-    this.item.trialEndDate = this.formatDate(this.item.trialEndDate);
-    this.item.nextBillingDate = this.formatDate(this.item.nextBillingDate);
-    this.item.warrantyEndDate = this.formatDate(this.item.warrantyEndDate);
   }
-
-  if (this.isMedicineMode) {
-  const medicineCategory = this.categories.find(cat => cat.name === '藥品');
-  if (medicineCategory) {
-    this.item.categoryId = medicineCategory.id;
-  }
-
-  this.item.purchaseDate = this.formatDate(this.item.purchaseDate);
-
-  this.item.expireDate = this.formatDate(this.item.expireDate);
-}
-}
   // 在你的 Component 內，或是物件 model 內
   get totalPrice(): number {
     return (this.item.unitPrice || 0) * (this.item.quantity || 0);
   }
 
   // 日期格式化小工具：統一轉成 HTML date input 可用的 YYYY-MM-DD
-private formatDate(date: any): string {
-  if (!date) return '';
+  private formatDate(date: any): string {
+    if (!date) return '';
 
-  // 如果後端回來是 2026-05-18，直接回傳
-  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    return date;
+    // 如果後端回來是 2026-05-18，直接回傳
+    if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return date;
+    }
+
+    // 如果後端回來是 2026/05/18，轉成 2026-05-18
+    if (typeof date === 'string' && /^\d{4}\/\d{2}\/\d{2}$/.test(date)) {
+      return date.replaceAll('/', '-');
+    }
+
+    // 如果是 Date 物件或其他日期格式，轉成 YYYY-MM-DD
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '';
+
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
   }
-
-  // 如果後端回來是 2026/05/18，轉成 2026-05-18
-  if (typeof date === 'string' && /^\d{4}\/\d{2}\/\d{2}$/.test(date)) {
-    return date.replaceAll('/', '-');
-  }
-
-  // 如果是 Date 物件或其他日期格式，轉成 YYYY-MM-DD
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return '';
-
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-
-  return `${year}-${month}-${day}`;
-}
   // 訂閱修改時，不需要前端傳 nextBillingDate，後端會用 trialEndDate + billingCycle 自動算
-onOkClose(): void {
-  let payload: any;
+  onOkClose(userId :number): void {
+    let payload: any;
+    const newCat = this.categories.find(
+      (cat) => Number(cat.id) === Number(this.item.categoryId),
+    );
+    const newCatName = newCat?.name || '';
+    const isOriginalSpecial = this.specialCategories.includes(
+      this.originalCategoryName,
+    );
+    const isNewSpecial = this.specialCategories.includes(newCatName);
 
-  if (this.isSubscriptionCategory()) {
+    // 特殊類 → 只能是同一個
+    if (isOriginalSpecial && newCatName !== this.originalCategoryName) {
+      Swal.fire({
+        title: '分類不可變更',
+        text: `${this.originalCategoryName} 不可切換至其他分類`,
+        icon: 'warning',
+      });
+      return;
+    }
+
+    // 一般類 → 不可切換到特殊類
+    if (!isOriginalSpecial && isNewSpecial) {
+      Swal.fire({
+        title: '分類不可變更',
+        text: '一般物品不可切換至訂閱、保固或藥品',
+        icon: 'warning',
+      });
+      return;
+    }
+
+    if (this.isSubscriptionCategory()) {
     payload = {
       id: this.item.id,
       groupId: this.item.groupId,
-      userId: this.item.userId || this.item.createdById || 1,
+      userId: userId,
       name: this.item.name,
-      price: this.item.price || this.item.unitPrice,
+      price: this.item.price || this.item.unitPrice || 0,
       billingCycle: this.item.billingCycle,
       purchaseDate: this.formatDate(this.item.purchaseDate),
       trialEndDate: this.formatDate(this.item.trialEndDate),
@@ -169,7 +199,7 @@ onOkClose(): void {
     payload = {
       id: this.item.id,
       groupId: this.item.groupId,
-      userId: this.item.userId || 1,
+      userId: userId,
       productName: this.item.name,
       brand: this.item.brand,
       model: this.item.model,
@@ -185,7 +215,7 @@ onOkClose(): void {
   payload = {
     id: this.item.id,
     groupId: this.item.groupId,
-    userId: this.item.userId || 1,
+    userId: userId,
     name: this.item.name,
     medicineType: this.item.medicineType,
     quantity: this.item.quantity,
@@ -210,11 +240,41 @@ onOkClose(): void {
       price: this.totalPrice,
       safeQuantity: this.item.safeQuantity ?? 0,
     };
+
+    this.dialogRef.close(payload);
+  }
+}
+  onCancel(): void {
+    this.dialogRef.close();
   }
 
-  this.dialogRef.close(payload);
-}
-onCancel(): void {
-  this.dialogRef.close();
-}
+  get originalCategoryName(): string {
+    if (this.data?.item?.categoryId) {
+      const original = this.categories.find(
+        (cat) => Number(cat.id) === Number(this.data.item.categoryId),
+      );
+      if (original?.name) return original.name;
+    }
+
+    // 沒有 categoryId，用 mode 旗標推斷
+    if (this.data?.isSubscriptionMode) return '訂閱';
+    if (this.data?.isWarrantyMode) return '保固';
+    if (this.data?.isMedicineMode) return '藥品';
+
+    return '';
+  }
+
+  isCategoryDisabled(cat: LocationAndCategory): boolean {
+    const isOriginalSpecial = this.specialCategories.includes(
+      this.originalCategoryName,
+    );
+
+    if (isOriginalSpecial) {
+      // 原始是特殊類 → 只能選「同一個」特殊類，其他全禁
+      return cat.name !== this.originalCategoryName;
+    } else {
+      // 原始是一般類 → 特殊類全禁，一般類可換
+      return this.specialCategories.includes(cat.name);
+    }
+  }
 }
