@@ -7,6 +7,7 @@ import { TopbarComponent } from './shared/topbar/topbar.component';
 import { ItemListComponent } from './@component/item-list/item-list.component';
 import { ExpensesComponent } from './@components/expenses/expenses.component';
 import { authGuard } from './@guard/auth.guard';
+import { pendingChangesGuard } from './@guard/pending-changes.guard';
 
 export const routes: Routes = [
   {
@@ -93,7 +94,8 @@ export const routes: Routes = [
     path: 'profile',
     component: ProfileComponent,
     data: { title: '個人資訊' },
-    canActivate: [authGuard], //未登入跳到這頁面會被返回到登入葉面
+    canActivate: [authGuard, pendingChangesGuard], //未登入跳到這頁面會被返回到登入葉面
+    canDeactivate: [pendingChangesGuard]// 切換頁面如果未儲存就會跳出為儲存警告
   },
   {
     path: '**',
