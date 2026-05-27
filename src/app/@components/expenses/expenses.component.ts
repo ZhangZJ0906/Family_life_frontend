@@ -99,6 +99,7 @@ export class ExpensesComponent {
     const raw = sessionStorage.getItem('family-life-current-user'); // ← localStorage 改 sessionStorage
     this.user = JSON.parse(raw!);
     this.currentUserId = this.user.user_id;
+    // console.log(this.currentUserId)
     this.dataSource.filterPredicate = (data: ExpenseRecord, filter: string) => {
       const f = JSON.parse(filter);
 
@@ -341,12 +342,11 @@ export class ExpensesComponent {
     ];
   }
   getExpense(groupId: number, userId: number) {
-    let url = `${this.basicUrl}expense/getInfo?userId=${userId}`;
-    if (groupId != null) url += `&groupId=${groupId}`;
+    let url = `${this.basicUrl}expense/getInfo?userId=${userId}&groupId=${groupId}`;
 
     this.http.getApi(url).subscribe({
       next: (res: any) => {
-        
+
 
         if (res.code !== 200) {
           Swal.fire({ title: '錯誤', text: res.message, icon: 'error' });
@@ -355,7 +355,7 @@ export class ExpensesComponent {
         this.expense = res.list ? [...res.list] : [];
         this.itemMap = res.itemMap || {};
         this.groupUserInfo = res.userMap; // 私人肯定沒有
-        
+
         this.displayedColumns = this.getDisplayedColumns(groupId);
         this.dataSource.data = this.expense;
         // 資料進來後觸發月份 filter

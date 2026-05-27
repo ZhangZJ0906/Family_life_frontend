@@ -618,9 +618,16 @@ export class CalendarComponent {
       data: { mode: 'update', event: info.event },
     });
 
+    console.log("GID:: ", info.event);
     ref.afterClosed().subscribe((result) => {
       if (!result) return;
-      this.calendarApiService.update(Number(info.event.id), result).subscribe({
+      const payload = {
+        groupId: this.currentGroupId,   // ⭐補這個
+        createdBy: this.createdBy,      // ⭐建議也補
+        ...result,
+      };
+
+      this.calendarApiService.update(Number(info.event.id), payload).subscribe({
         next: (res: any) => {
           if (res.code !== 200) {
             Swal.fire({
@@ -649,7 +656,6 @@ export class CalendarComponent {
   // 點擊活動後，可選擇修改或刪除
   handleEventClick(info: EventClickArg): void {
     const eventId = Number(info.event.id);
-
     Swal.fire({
       title: info.event.title,
       text: '請選擇要執行的操作',
@@ -764,7 +770,13 @@ export class CalendarComponent {
         return;
       }
 
-      this.calendarApiService.update(eventId, data).subscribe({
+      const payload = {
+        groupId: this.currentGroupId,   // ⭐補這個
+        createdBy: this.createdBy,      // ⭐建議也補
+        ...data,
+      };
+
+      this.calendarApiService.update(eventId, payload).subscribe({
         next: () => {
           Swal.fire({
             icon: 'success',
