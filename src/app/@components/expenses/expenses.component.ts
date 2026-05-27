@@ -10,23 +10,25 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { SelectionModel } from '@angular/cdk/collections';
+import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import {
   DropDownGroupList,
   ExpenseRecord,
+  GroupUser,
   LocationAndCategory,
 } from '../../common/interfaceList';
 import { HttpClientService } from '../../@services/http-client.service';
 import { ExpensesAddComponent } from '../expenses-add/expenses-add.component';
 import { ExpensesEditComponent } from '../expenses-edit/expenses-edit.component';
 import Swal from 'sweetalert2';
-import { AuthService } from '../../@services/auth.service';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
 
 @Component({
   selector: 'app-expense-tracker',
   standalone: true,
   imports: [
+    OverlayModule,
     MatCheckboxModule,
     MatDialogModule,
     CommonModule,
@@ -46,14 +48,18 @@ import { TopbarComponent } from '../../shared/topbar/topbar.component';
 export class ExpensesComponent {
   user: any;
   basicUrl!: string;
+  groupUserInfo: { [key: number]: GroupUser } = {};
   userGroups: DropDownGroupList[] = [];
   categoryMap: LocationAndCategory[] = [];
   dataSource = new MatTableDataSource<ExpenseRecord>([]);
   selection = new SelectionModel<ExpenseRecord>(true, []);
   expense: ExpenseRecord[] = [];
   itemMap: { [key: number]: any } = {};
-  currentGroupId!: number ;
-  currentUserId !:number;
+  currentGroupId!: number;
+  currentUserId!: number;
+  // 資訊小卡
+  activeExpenseId: number | null = null;
+
   // 月份切換
   selectedYear = signal(new Date().getFullYear());
   selectedMonth = signal(new Date().getMonth() + 1);
@@ -65,6 +71,7 @@ export class ExpensesComponent {
     'category_id',
     'note',
     'price',
+    'user',
     'actions',
   ];
   filteredExpense = signal<ExpenseRecord[]>([]);
@@ -87,7 +94,6 @@ export class ExpensesComponent {
   constructor(
     private http: HttpClientService,
     private dialog: MatDialog,
-    private auth: AuthService,
   ) {
     this.basicUrl = this.http.basicUrl;
     const raw = sessionStorage.getItem('family-life-current-user'); // ← localStorage 改 sessionStorage
@@ -121,6 +127,15 @@ export class ExpensesComponent {
     this.getUserGroupData();
   }
 
+  overlayPositions: ConnectedPosition[] = [
+    {
+      originX: 'center',
+      originY: 'top',
+      overlayX: 'center',
+      overlayY: 'bottom',
+      offsetY: -8,
+    },
+  ];
   // ─── 月份切換 ───────────────────────────────────────
   prevMonth() {
     let y = this.selectedYear();
@@ -246,11 +261,25 @@ export class ExpensesComponent {
   getCatgories() {
     this.http.getApi(this.basicUrl + 'categories/get').subscribe({
       next: (res: any) => {
-        if (res.code != 200) return;
+        if (res.code != 200) {
+          Swal.fire({
+            title: '錯誤',
+            text: res.message,
+            icon: 'error',
+          });
+          return;
+        }
         this.categoryMap = Object.keys(res.categoiesMap).map((key) => ({
           id: Number(key),
           name: res.categoiesMap[key],
         }));
+      },
+      error(err) {
+        Swal.fire({
+          title: '錯誤',
+          text: err.message,
+          icon: 'error',
+        });
       },
     });
   }
@@ -263,7 +292,15 @@ export class ExpensesComponent {
       )
       .subscribe({
         next: (res: any) => {
-          if (res.code != 200) return;
+          if (res.code != 200) {
+            Swal.fire({
+              title: '錯誤',
+              text: res.message,
+              icon: 'error',
+            });
+            return;
+          }
+
           this.userGroups = Object.entries(res.groupIdList).map(
             ([id, name]) => ({
               groupId: Number(id),
@@ -284,21 +321,42 @@ export class ExpensesComponent {
       });
   }
 
-  onGroupChange(groupId: number ) {
+  onGroupChange(groupId: number) {
     this.currentGroupId = groupId;
     this.selection.clear();
     this.getExpense(groupId, this.currentUserId);
   }
-
-  getExpense(groupId: number , userId: number) {
+  //根據有沒有group ID 變換顯示 user  資訊
+  private getDisplayedColumns(groupId: number): string[] {
+    const isGroup = groupId !== 0;
+    return [
+      'select',
+      'expense_date',
+      'related_item_name',
+      'category_id',
+      'note',
+      'price',
+      ...(isGroup ? ['user'] : []),
+      'actions',
+    ];
+  }
+  getExpense(groupId: number, userId: number) {
     let url = `${this.basicUrl}expense/getInfo?userId=${userId}`;
     if (groupId != null) url += `&groupId=${groupId}`;
 
     this.http.getApi(url).subscribe({
       next: (res: any) => {
-        if (res.code !== 200) return;
+        console.log(res);
+
+        if (res.code !== 200) {
+          Swal.fire({ title: '錯誤', text: res.message, icon: 'error' });
+          return;
+        }
         this.expense = res.list ? [...res.list] : [];
         this.itemMap = res.itemMap || {};
+        this.groupUserInfo = res.userMap; // 私人肯定沒有
+        console.log(this.groupUserInfo);
+        this.displayedColumns = this.getDisplayedColumns(groupId);
         this.dataSource.data = this.expense;
         // 資料進來後觸發月份 filter
         this.dataSource.filter = JSON.stringify(this.filterValues);
