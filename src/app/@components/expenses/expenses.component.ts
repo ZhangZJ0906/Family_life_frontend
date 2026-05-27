@@ -68,16 +68,15 @@ export class ExpensesComponent {
   selectedYear = signal(new Date().getFullYear());
   selectedMonth = signal(new Date().getMonth() + 1);
 
-  displayedColumns: string[] = [
-    'select',
-    'expense_date',
-    'related_item_name',
-    'category_id',
-    'note',
-    'price',
-    'user',
-    'actions',
-  ];
+displayedColumns: string[] = [
+  'select',
+  'expense_date',
+  'related_item_name',
+  'category_id',
+  'note',
+  'price',
+  'actions',
+];
   filteredExpense = signal<ExpenseRecord[]>([]);
   filterValues = {
     search: '',
@@ -382,8 +381,6 @@ private getDisplayedColumns(groupId: number): string[] {
 }
 
 getExpense(groupId: number, userId: number) {
-  // 後端目前要求 groupId 必填
-  // 私人記帳也要傳 groupId=0
   const finalGroupId =
     groupId === undefined || groupId === null
       ? 0
@@ -392,8 +389,12 @@ getExpense(groupId: number, userId: number) {
   const url =
     `${this.basicUrl}expense/getInfo?userId=${userId}&groupId=${finalGroupId}`;
 
+  console.log('查詢記帳 URL:', url);
+
   this.http.getApi(url).subscribe({
     next: (res: any) => {
+      console.log('記帳查詢回傳:', res);
+
       if (res.code !== 200) {
         Swal.fire({
           title: '錯誤',
@@ -403,32 +404,31 @@ getExpense(groupId: number, userId: number) {
         return;
       }
 
-      // 後端回傳的記帳資料
-      this.expense = res.list ? [...res.list] : [];
+      const list =
+        res.list ||
+        res.expenseList ||
+        res.resultList ||
+        res.data ||
+        [];
 
-      // 物品對照表
+      this.expense = [...list];
+
       this.itemMap = res.itemMap || {};
-
-      // 使用者對照表，私人記帳可能沒有
       this.groupUserInfo = res.userMap || {};
 
-      // 根據私人/群組切換欄位
       this.displayedColumns = this.getDisplayedColumns(finalGroupId);
 
-      // 放入表格資料
       this.dataSource.data = this.expense;
-
-      // 資料進來後套用目前月份與篩選條件
       this.dataSource.filter = JSON.stringify(this.filterValues);
-
-      // 更新統計用資料
       this.filteredExpense.set(this.dataSource.filteredData);
     },
 
     error: (err) => {
+      console.log('記帳查詢錯誤:', err);
+
       Swal.fire({
         title: '錯誤',
-        text: err.message,
+        text: err.error?.message || err.message,
         icon: 'error',
       });
     },
