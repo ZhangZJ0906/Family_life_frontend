@@ -71,8 +71,14 @@ export const routes: Routes = [
     data: { title: '物品清單' },
   },
 
+  //預設calendar path
   {
     path: 'calendar',
+    redirectTo: 'calendar/full',
+    pathMatch: 'full'
+  },
+  {
+    path: 'calendar/:groupId',
     component: CalendarComponent,
     data: { title: '行事曆' },
     canActivate: [authGuard], //未登入跳到這頁面會被返回到登入葉面
@@ -92,6 +98,6 @@ export const routes: Routes = [
   {
     path: '**',
     redirectTo: 'home-page', // 或導向 404 頁面
-    
+
   },
 ];

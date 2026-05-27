@@ -29,6 +29,7 @@ export class NotifyDialogComponent {
     invite: 0,
     group: 0,
     itemlist: 0,
+    calendar: 0,
     update: 0
   };
 
@@ -43,17 +44,17 @@ export class NotifyDialogComponent {
     this.user_id = data.userId;
   }
 
-  filterType: 'all' | 'invite' | 'group' | 'itemlist' | 'update' = 'all';
+  filterType: 'all' | 'invite' | 'group' | 'itemlist' | 'calendar' | 'update' = 'all';
 
   filteredNotifies() {
     if (this.filterType === 'all') {
       return this.notifies;
     }
 
-     // 🔥 group tab 同時包含 itemlist
+     // 🔥 group tab 同時包含 itemlist，calendar
     if (this.filterType === 'group') {
       return this.notifies.filter(n =>
-        n.type === 'group' || n.type === 'itemlist'
+        n.type === 'group' || n.type === 'itemlist' || n.type === 'calendar'
       );
     }
 
@@ -160,6 +161,10 @@ export class NotifyDialogComponent {
       n => n.isRead !== 1 && n.type === 'itemlist'
     ).length;
 
+    this.unreadMap.calendar = this.notifies.filter(
+      n => n.isRead !== 1 && n.type === 'calendar'
+    ).length;
+
     this.unreadMap.update = this.notifies.filter(
       n => n.isRead !== 1 && n.type === 'update'
     ).length;
@@ -247,6 +252,10 @@ export class NotifyDialogComponent {
 
   goItemList(n: any){
     this.router.navigate(['/itemList', n.sendUserId]);
+  }
+
+  goCalendar(n: any){
+    this.router.navigate(['/calendar', n.sendUserId]);
   }
 
   deleteRead(){

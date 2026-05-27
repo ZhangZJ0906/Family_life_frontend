@@ -19,6 +19,9 @@ import { DropDownGroupList } from '../../common/interfaceList';
 import { MatDialog } from '@angular/material/dialog';
 import { CalendarEventDialogComponent } from '../calendar-event-dialog/calendar-event-dialog.component';
 
+import { Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+
 @Component({
   selector: 'app-calendar',
   standalone: true,
@@ -37,9 +40,11 @@ import { CalendarEventDialogComponent } from '../calendar-event-dialog/calendar-
 export class CalendarComponent {
   selectedGroupId: any;
   userGroupList: DropDownGroupList[] = [];
-  currentGroupId: number | null = null;
+  currentGroupId: number = 0;
   userInfo!: any;
   createdBy!: number;
+
+  routeGroupId: number = 0;
 
   // FullCalendar 的主要設定
   calendarOptions: CalendarOptions = {
@@ -62,6 +67,8 @@ export class CalendarComponent {
     private dialog: MatDialog,
     private calendarApiService: CalendarApiService,
     private http: HttpClientService,
+    private router: Router,
+    private route: ActivatedRoute,
   ) {
     this.userInfo = JSON.parse(
       sessionStorage.getItem('family-life-current-user')!,
@@ -95,8 +102,20 @@ export class CalendarComponent {
             groupId: 0,
             groupName: '私人活動',
           });
-          this.selectedGroupId = this.userGroupList[0].groupId;
-          this.currentGroupId = this.userGroupList[0].groupId;
+
+          // 取得網址上的 groupId
+          this.routeGroupId = Number(
+            this.route.snapshot.paramMap.get('groupId')
+          );
+
+          // 如果網址沒有 groupId 就預設私人
+          if (!this.routeGroupId && this.routeGroupId !== 0) {
+            this.routeGroupId = 0;
+          }
+
+          this.selectedGroupId = this.routeGroupId;
+          this.currentGroupId = this.routeGroupId;
+
           this.loadCalendarEvents(this.currentGroupId, this.createdBy);
         },
         error: (err) => {
@@ -152,10 +171,15 @@ export class CalendarComponent {
      });*/
 
     //2026-05-24 by ZJ 試試看新東西
-    let url = this.http.basicUrl + `calendar/getUserEventInfo?userId=${userId}`;
-    if (groupId !== null && groupId !== 0) {
-      url += `&groupId=${groupId}`;
+    let url = "";
+    console.log("groupid:", groupId)
+    if(groupId == 0){ //看私人
+      url = this.http.basicUrl + `calendar/getUserEventInfo?userId=${userId}&groupId=${groupId}`;
     }
+    else{ //看特定群組
+      url = this.http.basicUrl + `calendar/group/${groupId}`;
+    }
+
     this.http.getApi(url).subscribe({
       next: (res: any) => {
         if (res.code !== 200) {
@@ -197,8 +221,9 @@ export class CalendarComponent {
   }
 
   onGroupChange(event: MatSelectChange) {
-    this.currentGroupId = event.value === 0 ? null : event.value;
+    this.currentGroupId = event.value;
     this.loadCalendarEvents(this.currentGroupId, this.createdBy);
+    this.router.navigate(['/calendar', this.currentGroupId]);
   }
   // 點擊日期時新增活動，日期會帶入使用者點到的日期
   handleDateClick(info: DateClickArg): void {
@@ -382,9 +407,6 @@ export class CalendarComponent {
     });
 
     ref.afterClosed().subscribe((result) => {
-      if (this.currentGroupId == 0) {
-        this.currentGroupId = null;
-      }
       const payload = {
         groupId: this.currentGroupId,
         createdBy: this.createdBy,
@@ -661,7 +683,7 @@ export class CalendarComponent {
         return;
       }
 
-      this.calendarApiService.delete(eventId).subscribe({
+      this.calendarApiService.delete(eventId, this.createdBy, this.currentGroupId).subscribe({
         next: () => {
           Swal.fire({
             icon: 'success',
