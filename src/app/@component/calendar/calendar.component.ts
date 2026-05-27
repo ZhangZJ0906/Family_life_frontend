@@ -404,44 +404,84 @@ export class CalendarComponent {
   //   }
 
   createCalendarEvent(dateStr?: string): void {
-    const ref = this.dialog.open(CalendarEventDialogComponent, {
-      width: '480px',
-      data: { mode: 'create', dateStr },
-    });
 
-    ref.afterClosed().subscribe((result) => {
-      const payload = {
-        groupId: this.currentGroupId,
-        createdBy: this.createdBy,
-        ...result,
-      };
-      if (!result) return;
-      this.calendarApiService.create(payload).subscribe({
-        next: (res: any) => {
-          if (res.code !== 200) {
-            Swal.fire({
-              icon: 'error',
-              title: '新增失敗',
-              text: res.message,
-            });
-            return;
-          }
-          Swal.fire({
-            icon: 'success',
-            title: '新增成功',
-            confirmButtonText: '確認',
-          });
-          this.loadCalendarEvents(this.currentGroupId, this.createdBy);
-        },
-        error: (err) =>
+  // 後端目前私人活動是 groupId = 0，不是 null
+  const groupId =
+    this.currentGroupId === undefined ||
+    this.currentGroupId === null
+      ? 0
+      : Number(this.currentGroupId);
+
+  // 找出目前選到的群組名稱，給 Dialog 顯示唯讀欄位用
+  const selectedGroup = this.userGroupList.find(
+    group => Number(group.groupId) === Number(groupId)
+  );
+
+  // groupId = 0 代表私人活動
+  const groupName =
+    groupId === 0
+      ? '私人活動'
+      : selectedGroup?.groupName || '未選擇群組';
+
+  const ref = this.dialog.open(CalendarEventDialogComponent, {
+    width: '760px',
+    maxWidth: '95vw',
+    maxHeight: '90vh',
+    panelClass: 'calendar-event-dialog-panel',
+    autoFocus: false,
+    data: {
+      mode: 'create',
+      dateStr,
+      groupId,
+      groupName,
+    },
+  });
+
+  ref.afterClosed().subscribe((result) => {
+    // 使用者按取消或關閉 Dialog，不做任何事
+    if (!result) {
+      return;
+    }
+
+    // 後端目前私人活動要吃 groupId = 0
+    const payload = {
+      groupId,
+      createdBy: this.createdBy,
+      ...result,
+    };
+
+    console.log('createCalendarEvent payload:', payload);
+
+    this.calendarApiService.create(payload).subscribe({
+      next: (res: any) => {
+        if (res.code !== 200) {
           Swal.fire({
             icon: 'error',
             title: '新增失敗',
-            text: err.error?.message,
-          }),
-      });
+            text: res.message || '新增失敗',
+          });
+          return;
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: '新增成功',
+          confirmButtonText: '確認',
+        });
+
+        this.loadCalendarEvents(groupId, this.createdBy);
+      },
+
+      error: (err) => {
+        Swal.fire({
+          icon: 'error',
+          title: '新增失敗',
+          text: err.error?.message || '伺服器發生錯誤',
+        });
+      },
     });
-  }
+  });
+}
   // 修改活動視窗
   //   openUpdateDialog(info: EventClickArg): void {
   //     const eventId = Number(info.event.id);
@@ -613,39 +653,85 @@ export class CalendarComponent {
   //   }
 
   openUpdateDialog(info: EventClickArg): void {
-    const ref = this.dialog.open(CalendarEventDialogComponent, {
-      width: '480px',
-      data: { mode: 'update', event: info.event },
-    });
 
-    ref.afterClosed().subscribe((result) => {
-      if (!result) return;
-      this.calendarApiService.update(Number(info.event.id), result).subscribe({
-        next: (res: any) => {
-          if (res.code !== 200) {
-            Swal.fire({
-              icon: 'error',
-              title: '更新失敗',
-              text: res.message,
-            });
-            return;
-          }
-          Swal.fire({
-            icon: 'success',
-            title: '修改成功',
-            confirmButtonText: '確認',
-          });
-          this.loadCalendarEvents(this.currentGroupId, this.createdBy);
-        },
-        error: (err) =>
+  // 後端目前私人活動是 groupId = 0，不是 null
+  const groupId =
+    this.currentGroupId === undefined ||
+    this.currentGroupId === null
+      ? 0
+      : Number(this.currentGroupId);
+
+  // 找出目前選到的群組名稱
+  const selectedGroup = this.userGroupList.find(
+    group => Number(group.groupId) === Number(groupId)
+  );
+
+  // Dialog 顯示用的群組名稱
+  const groupName =
+    groupId === 0
+      ? '私人活動'
+      : selectedGroup?.groupName || '未選擇群組';
+
+  const ref = this.dialog.open(CalendarEventDialogComponent, {
+    width: '760px',
+    maxWidth: '95vw',
+    maxHeight: '90vh',
+    panelClass: 'calendar-event-dialog-panel',
+    autoFocus: false,
+    data: {
+      mode: 'update',
+      event: info.event,
+
+      // 傳給 Dialog 顯示唯讀欄位
+      groupId,
+      groupName,
+    },
+  });
+
+  ref.afterClosed().subscribe((result) => {
+    // 使用者按取消或關閉 Dialog，不做任何事
+    if (!result) {
+      return;
+    }
+
+    const payload = {
+      groupId,
+      createdBy: this.createdBy,
+      ...result,
+    };
+
+    console.log('updateCalendarEvent payload:', payload);
+
+    this.calendarApiService.update(Number(info.event.id), payload).subscribe({
+      next: (res: any) => {
+        if (res.code !== 200) {
           Swal.fire({
             icon: 'error',
-            title: '修改失敗',
-            text: err.error?.message,
-          }),
-      });
+            title: '更新失敗',
+            text: res.message || '更新失敗',
+          });
+          return;
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: '修改成功',
+          confirmButtonText: '確認',
+        });
+
+        this.loadCalendarEvents(groupId, this.createdBy);
+      },
+
+      error: (err) => {
+        Swal.fire({
+          icon: 'error',
+          title: '修改失敗',
+          text: err.error?.message || '伺服器發生錯誤',
+        });
+      },
     });
-  }
+  });
+}
   // 點擊活動後，可選擇修改或刪除
   handleEventClick(info: EventClickArg): void {
     const eventId = Number(info.event.id);
