@@ -183,6 +183,7 @@ isMedicineCategory(): boolean {
       name: prefill.name ?? this.item.name,
       quantity: prefill.quantity ?? this.item.quantity,
       purchaseDate: prefill.purchaseDate ?? this.item.purchaseDate,
+      unit: (prefill.unit ?? this.item.unit) || '個',
     };
   }
 

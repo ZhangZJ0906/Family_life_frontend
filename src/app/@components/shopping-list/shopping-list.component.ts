@@ -220,7 +220,7 @@ export class ShoppingListComponent implements OnInit {
     return this.groupOptions.find((group) => group.id === groupId)?.name ?? '未知群組';
   }
 
-    getItems(listId: number): PurchaseItemVo[] {
+  getItems(listId: number): PurchaseItemVo[] {
     return this.itemsByListId[listId] ?? [];
   }
 
@@ -266,6 +266,7 @@ export class ShoppingListComponent implements OnInit {
           name: item.item,
           categoryId: item.categoryId,
           quantity: item.quantity,
+          unit: '個',
           purchaseDate: this.getTodayDate(),
           groupId: list.group_id ?? 0
         }
@@ -348,10 +349,13 @@ export class ShoppingListComponent implements OnInit {
   }
 
   private deleteMatchedItemListItem(list: ShoppingList, item: PurchaseItemVo, onDeleted: () => void): void {
-    let url = `${this.http.basicUrl}item/getItems?userId=${this.userId}`;
-    if (list.group_id !== null) {
-      url += `&groupId=${list.group_id}`;
-    }
+    const groupId = list.group_id ?? 0; //TODO: 後端購物清單項目改為必帶groupId後，這裡就不需要再判斷一次了
+    const url = `${this.http.basicUrl}item/getItems?userId=${this.userId}&groupId=${groupId}`;
+
+    // let url = `${this.http.basicUrl}item/getItems?userId=${this.userId}`;
+    // if (list.group_id !== null) {
+    //   url += `&groupId=${list.group_id}`;
+    // }
 
     this.http.getApi(url).subscribe({
       next: (res: any) => {
