@@ -171,6 +171,18 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
       </table>
+
     </div>
   </div>
+
+  <!-- 固定在畫面右下角的新增支出按鈕 -->
+  <button
+    mat-fab
+    type="button"
+    class="expense-add-fab"
+    (click)="openCreateDialog()"
+    title="新增支出"
+  >
+    <mat-icon>add</mat-icon>
+  </button>
 </div>

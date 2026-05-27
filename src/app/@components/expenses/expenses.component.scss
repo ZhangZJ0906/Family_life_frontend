@@ -455,6 +455,46 @@ tr.mat-mdc-row:hover {
   background: #f8fafc;
 }
 
+/* 右下角新增支出按鈕：固定在瀏覽器視窗右下角 */
+.expense-add-fab {
+  position: fixed !important;
+  right: 34px;
+  bottom: 34px;
+
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 18px !important;
+
+  background: #dbe6ff !important;
+  color: #1d4ed8 !important;
+
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 9999 !important;
+
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.22) !important;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* 新增按鈕 icon */
+.expense-add-fab mat-icon {
+  font-size: 30px;
+  width: 30px;
+  height: 30px;
+}
+
+/* hover 效果 */
+.expense-add-fab:hover {
+  background: #c7d7ff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.26) !important;
+}
+
 
 
 /* RWD：中等螢幕，標題卡片改成上下排列 */
@@ -471,6 +511,12 @@ tr.mat-mdc-row:hover {
   .summary-row {
     grid-template-columns: 1fr 1fr;
   }
+  .expense-add-fab {
+  position: fixed !important;
+  right: 34px;
+  bottom: 34px;
+  z-index: 9999 !important;
+}
 }
 
 /* RWD：平板以下，篩選列換行 */
@@ -489,6 +535,11 @@ tr.mat-mdc-row:hover {
   .filter-field {
     width: calc(33.333% - 8px);
     min-width: 180px;
+  }
+
+  .expense-add-fab {
+    right: 20px;
+    bottom: 20px;
   }
 }
 
@@ -542,9 +593,9 @@ tr.mat-mdc-row:hover {
     padding: 16px 14px;
   }
 
-  button.position-fixed.bottom-0.end-0 {
-    right: 20px !important;
-    bottom: 20px !important;
+  .expense-add-fab {
+    right: 20px;
+    bottom: 20px;
   }
 }
 
