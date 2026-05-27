@@ -10,24 +10,29 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { SelectionModel } from '@angular/cdk/collections';
+import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import {
   DropDownGroupList,
   ExpenseRecord,
+  GroupUser,
   LocationAndCategory,
 } from '../../common/interfaceList';
 import { HttpClientService } from '../../@services/http-client.service';
 import { ExpensesAddComponent } from '../expenses-add/expenses-add.component';
 import { ExpensesEditComponent } from '../expenses-edit/expenses-edit.component';
 import Swal from 'sweetalert2';
+
 import { AuthService } from '../../@services/auth.service';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
+
 
 
 @Component({
   selector: 'app-expense-tracker',
   standalone: true,
   imports: [
+    OverlayModule,
     MatCheckboxModule,
     MatDialogModule,
     CommonModule,
@@ -39,7 +44,7 @@ import { TopbarComponent } from '../../shared/topbar/topbar.component';
     MatButtonModule,
     MatTableModule,
     MatIconModule,
-TopbarComponent,
+    TopbarComponent,
   ],
   templateUrl: './expenses.component.html',
   styleUrl: './expenses.component.scss',
@@ -47,14 +52,18 @@ TopbarComponent,
 export class ExpensesComponent {
   user: any;
   basicUrl!: string;
+  groupUserInfo: { [key: number]: GroupUser } = {};
   userGroups: DropDownGroupList[] = [];
   categoryMap: LocationAndCategory[] = [];
   dataSource = new MatTableDataSource<ExpenseRecord>([]);
   selection = new SelectionModel<ExpenseRecord>(true, []);
   expense: ExpenseRecord[] = [];
   itemMap: { [key: number]: any } = {};
-  currentGroupId: number | null = null;
-  currentUserId = 1;
+  currentGroupId!: number;
+  currentUserId!: number;
+  // 資訊小卡
+  activeExpenseId: number | null = null;
+
   // 月份切換
   selectedYear = signal(new Date().getFullYear());
   selectedMonth = signal(new Date().getMonth() + 1);
@@ -66,6 +75,7 @@ export class ExpensesComponent {
     'category_id',
     'note',
     'price',
+    'user',
     'actions',
   ];
   filteredExpense = signal<ExpenseRecord[]>([]);
@@ -86,46 +96,66 @@ export class ExpensesComponent {
   });
 
   constructor(
-    private http: HttpClientService,
-    private dialog: MatDialog,
-    private auth: AuthService,
-  ) {
-    this.basicUrl = this.http.basicUrl;
-    // 取 session storage id
-    //  this.currentUserId = this.auth.currentUser()?.user_id;
-    const raw = sessionStorage.getItem('family-life-current-user'); // ← localStorage 改 sessionStorage
-    this.user = JSON.parse(raw!);
+  private http: HttpClientService,
+  private dialog: MatDialog,
+) {
+  this.basicUrl = this.http.basicUrl;
+
+  // 取得目前登入者資料
+  const raw = sessionStorage.getItem('family-life-current-user');
+
+  if (raw) {
+    this.user = JSON.parse(raw);
     this.currentUserId = this.user.user_id;
-
-    this.dataSource.filterPredicate = (data: ExpenseRecord, filter: string) => {
-      const f = JSON.parse(filter);
-
-      const matchCategory =
-        f.category == null || data.categoryId === f.category;
-
-      const keyword = f.search;
-      const matchSearch =
-        !keyword ||
-        (data.note ?? '').toLowerCase().includes(keyword) ||
-        (data.relatedItemName ?? '').toLowerCase().includes(keyword) ||
-        this.getCategoryName(data.categoryId).toLowerCase().includes(keyword) ||
-        (data.price?.toString() ?? '').includes(keyword) ||
-        (data.expenseDate ?? '').toLowerCase().includes(keyword);
-
-      const matchMonth = (() => {
-        if (!data.expenseDate) return false;
-        const [y, m] = data.expenseDate.split('-').map(Number);
-        return y === f.year && m === f.month;
-      })();
-
-      return matchCategory && matchSearch && matchMonth;
-    };
-
-    this.getCatgories();
-    // this.getExpense(this.currentGroupId, this.currentUserId);
-    this.getUserGroupData();
   }
 
+  // 設定表格篩選邏輯
+  this.dataSource.filterPredicate = (data: ExpenseRecord, filter: string) => {
+    const f = JSON.parse(filter);
+
+    // 分類篩選
+    const matchCategory =
+      f.category == null || data.categoryId === f.category;
+
+    // 關鍵字搜尋
+    const keyword = f.search;
+    const matchSearch =
+      !keyword ||
+      (data.note ?? '').toLowerCase().includes(keyword) ||
+      (data.relatedItemName ?? '').toLowerCase().includes(keyword) ||
+      this.getCategoryName(data.categoryId).toLowerCase().includes(keyword) ||
+      (data.price?.toString() ?? '').includes(keyword) ||
+      (data.expenseDate ?? '').toLowerCase().includes(keyword);
+
+    // 月份篩選
+    const matchMonth = (() => {
+      if (!data.expenseDate) {
+        return false;
+      }
+
+      const [y, m] = data.expenseDate.split('-').map(Number);
+
+      return y === f.year && m === f.month;
+    })();
+
+    return matchCategory && matchSearch && matchMonth;
+  };
+
+  // 先載入分類
+  this.getCatgories();
+
+  // 再載入群組，載入完成後會自動查私人記帳資料
+  this.getUserGroupData();
+}
+  overlayPositions: ConnectedPosition[] = [
+    {
+      originX: 'center',
+      originY: 'top',
+      overlayX: 'center',
+      overlayY: 'bottom',
+      offsetY: -8,
+    },
+  ];
   // ─── 月份切換 ───────────────────────────────────────
   prevMonth() {
     let y = this.selectedYear();
@@ -251,63 +281,159 @@ export class ExpensesComponent {
   getCatgories() {
     this.http.getApi(this.basicUrl + 'categories/get').subscribe({
       next: (res: any) => {
-        if (res.code != 200) return;
+        if (res.code != 200) {
+          Swal.fire({
+            title: '錯誤',
+            text: res.message,
+            icon: 'error',
+          });
+          return;
+        }
         this.categoryMap = Object.keys(res.categoiesMap).map((key) => ({
           id: Number(key),
           name: res.categoiesMap[key],
         }));
       },
+      error(err) {
+        Swal.fire({
+          title: '錯誤',
+          text: err.message,
+          icon: 'error',
+        });
+      },
     });
   }
 
   getUserGroupData() {
-    this.http
-      .getApi(
-        this.basicUrl +
-          `family_life/getGroupList?user_Id=${this.currentUserId}`,
-      )
-      .subscribe({
-        next: (res: any) => {
-          if (res.code != 200) return;
-          this.userGroups = Object.entries(res.groupIdList).map(
-            ([id, name]) => ({
-              groupId: Number(id),
-              groupName: name as string,
-            }),
-          );
-          this.userGroups.unshift({ groupId: 0, groupName: '私人記帳' });
-          this.currentGroupId = 0;
-          this.getExpense(this.currentGroupId, this.currentUserId);
-        },
-      });
-  }
-
-  onGroupChange(groupId: number | null) {
-    this.currentGroupId = groupId;
-    this.selection.clear();
-    const id = groupId === 0 ? null : groupId;
-    this.getExpense(id, this.currentUserId);
-  }
-
-  getExpense(groupId: number | null, userId: number) {
-    let url = `${this.basicUrl}expense/getInfo?userId=${userId}&groupId=${groupId}`;
-
-
-    this.http.getApi(url).subscribe({
+  this.http
+    .getApi(
+      this.basicUrl +
+        `family_life/getGroupList?user_Id=${this.currentUserId}`,
+    )
+    .subscribe({
       next: (res: any) => {
-        if (res.code !== 200) return;
-        this.expense = res.list ? [...res.list] : [];
-        this.itemMap = res.itemMap || {};
-        this.dataSource.data = this.expense;
-        // 資料進來後觸發月份 filter
-        this.dataSource.filter = JSON.stringify(this.filterValues);
-        this.filteredExpense.set(this.dataSource.filteredData);
-      },
-      error: (err) =>
-        Swal.fire({ title: '錯誤', text: err.message, icon: 'error' }),
-    });
-  }
+        if (res.code != 200) {
+          Swal.fire({
+            title: '錯誤',
+            text: res.message,
+            icon: 'error',
+          });
+          return;
+        }
 
+        // 後端回傳 groupIdList，例如：{ 1: '我的家庭' }
+        this.userGroups = Object.entries(res.groupIdList).map(
+          ([id, name]) => ({
+            groupId: Number(id),
+            groupName: name as string,
+          }),
+        );
+
+        // 私人記帳固定放第一個
+        this.userGroups.unshift({
+          groupId: 0,
+          groupName: '私人記帳',
+        });
+
+        // 預設查私人記帳
+        this.currentGroupId = 0;
+
+        // 查詢記帳資料
+        this.getExpense(this.currentGroupId, this.currentUserId);
+      },
+
+      error: (err) => {
+        Swal.fire({
+          title: '錯誤',
+          text: err.message,
+          icon: 'error',
+        });
+      },
+    });
+}
+
+  onGroupChange(groupId: number) {
+  // 切換目前群組
+  this.currentGroupId = Number(groupId);
+
+  // 清除勾選狀態
+  this.selection.clear();
+
+  // 重新查詢資料
+  this.getExpense(this.currentGroupId, this.currentUserId);
+}
+
+// 根據群組判斷要不要顯示「使用者」欄位
+// 私人記帳 groupId = 0，不顯示 user 欄
+// 群組記帳 groupId != 0，顯示 user 欄
+private getDisplayedColumns(groupId: number): string[] {
+  const isGroup = groupId !== 0;
+
+  return [
+    'select',
+    'expense_date',
+    'related_item_name',
+    'category_id',
+    'note',
+    'price',
+    ...(isGroup ? ['user'] : []),
+    'actions',
+  ];
+}
+
+getExpense(groupId: number, userId: number) {
+  // 後端目前要求 groupId 必填
+  // 私人記帳也要傳 groupId=0
+  const finalGroupId =
+    groupId === undefined || groupId === null
+      ? 0
+      : Number(groupId);
+
+  const url =
+    `${this.basicUrl}expense/getInfo?userId=${userId}&groupId=${finalGroupId}`;
+
+  this.http.getApi(url).subscribe({
+    next: (res: any) => {
+      if (res.code !== 200) {
+        Swal.fire({
+          title: '錯誤',
+          text: res.message,
+          icon: 'error',
+        });
+        return;
+      }
+
+      // 後端回傳的記帳資料
+      this.expense = res.list ? [...res.list] : [];
+
+      // 物品對照表
+      this.itemMap = res.itemMap || {};
+
+      // 使用者對照表，私人記帳可能沒有
+      this.groupUserInfo = res.userMap || {};
+
+      // 根據私人/群組切換欄位
+      this.displayedColumns = this.getDisplayedColumns(finalGroupId);
+
+      // 放入表格資料
+      this.dataSource.data = this.expense;
+
+      // 資料進來後套用目前月份與篩選條件
+      this.dataSource.filter = JSON.stringify(this.filterValues);
+
+      // 更新統計用資料
+      this.filteredExpense.set(this.dataSource.filteredData);
+    },
+
+    error: (err) => {
+      Swal.fire({
+        title: '錯誤',
+        text: err.message,
+        icon: 'error',
+      });
+    },
+  });
+}
   // ─── 篩選 ─────────────────────────────────────────────
   getCategoryName(categoryId: number): string {
     return this.categoryMap.find((c) => c.id === categoryId)?.name || '未分類';

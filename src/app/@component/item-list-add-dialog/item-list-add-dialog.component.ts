@@ -126,7 +126,7 @@ isMedicineCategory(): boolean {
     private authService: AuthService
   ) {
     this.basicUrl = this.http.basicUrl;
-    this.group = this.data.groups;
+    this.group = this.data?.groups ?? [];
     this.item.created_by_id = this.authService.currentUser()?.user_id ?? 0;
   }
 
@@ -142,7 +142,7 @@ isMedicineCategory(): boolean {
       this.categories.shift();
     }
 
-    if (this.data?.currentGroupId) {
+    if (this.data?.currentGroupId !== undefined && this.data?.currentGroupId !== null) {
       this.item.groupId = this.data.currentGroupId;
     }
 
@@ -167,6 +167,26 @@ isMedicineCategory(): boolean {
         this.item.categoryId = medicineCategory.id;
       }
     }
+
+    this.applyPrefillItem();
+  }
+
+  private applyPrefillItem(): void {
+    const prefill = this.data?.prefillItem;
+
+    if (!prefill) {
+      return;
+    }
+
+    this.item = {
+      ...this.item,
+      groupId: prefill.groupId ?? this.item.groupId,
+      categoryId: prefill.categoryId ?? this.item.categoryId,
+      name: prefill.name ?? this.item.name,
+      quantity: prefill.quantity ?? this.item.quantity,
+      purchaseDate: prefill.purchaseDate ?? this.item.purchaseDate,
+      unit: (prefill.unit ?? this.item.unit) || '個',
+    };
   }
 
   get totalPrice(): number {
@@ -237,13 +257,7 @@ isMedicineCategory(): boolean {
         return;
       }
 
-      Swal.fire({
-        title: '成功',
-        text: res.message,
-        icon: 'success',
-      });
-
-      this.dialogRef.close(true);
+      this.createExpenseForItem(payload, res);
     },
     error: (err: any) => {
       Swal.fire({
@@ -253,6 +267,67 @@ isMedicineCategory(): boolean {
       });
     },
   });
+  }
+
+  private createExpenseForItem(itemPayload: any, itemAddRes: any): void {
+    if (!itemPayload.price || itemPayload.price <= 0) {
+      Swal.fire({
+        title: '成功',
+        text: '物品已新增',
+        icon: 'success',
+      });
+      this.dialogRef.close(true);
+      return;
+    }
+
+    const expensePayload = {
+      userId: itemPayload.userId,
+      groupId: itemPayload.groupId ?? 0,
+      categoryId: itemPayload.categoryId,
+      relatedItemId: this.getCreatedItemId(itemAddRes),
+      relatedItemName: itemPayload.name,
+      price: itemPayload.price,
+      note: itemPayload.note || '由物品清單自動建立',
+      expenseDate: itemPayload.purchaseDate,
+    };
+
+    this.http.postApi(this.basicUrl + 'expense/addInfo', expensePayload).subscribe({
+      next: (res: any) => {
+        if (res.code != 200) {
+          Swal.fire({
+            title: '物品已新增，記帳建立失敗',
+            text: res.message || 'Server error',
+            icon: 'warning',
+          });
+          this.dialogRef.close(true);
+          return;
+        }
+
+        Swal.fire({
+          title: '成功',
+          text: '物品與記帳已新增',
+          icon: 'success',
+        });
+        this.dialogRef.close(true);
+      },
+      error: (err: any) => {
+        Swal.fire({
+          title: '物品已新增，記帳建立失敗',
+          text: err.message || 'Server error',
+          icon: 'warning',
+        });
+        this.dialogRef.close(true);
+      },
+    });
+  }
+
+  private getCreatedItemId(res: any): number | null {
+    return res?.itemId ??
+      res?.id ??
+      res?.data?.id ??
+      res?.item?.id ??
+      res?.itemInfo?.id ??
+      null;
   }
 
   // 訂閱的新增流程
