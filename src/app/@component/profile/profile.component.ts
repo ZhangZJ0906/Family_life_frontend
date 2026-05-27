@@ -206,7 +206,7 @@ export class ProfileComponent {
 
 // 開啟更換頭像視窗
 openAvatarDialog(): void {
-  Swal.fire({
+ Swal.fire({
     title: '更換頭像',
 
     html: `
@@ -221,92 +221,107 @@ openAvatarDialog(): void {
 
     preConfirm: () => {
       const input = document.getElementById('avatarInput') as HTMLInputElement;
-      this.file = input.files?.[0];
+      const selectedFile = input.files?.[0];
 
-      if (!this.file) {
+      if (!selectedFile) {
         Swal.showValidationMessage('請選擇一張圖片');
         return false;
       }
 
-      return this.file;
+      return selectedFile;
     }
-    }).then((result) => {
-      if (!result.isConfirmed || !result.value) {
-        return;
-      }
+  }).then((result) => {
+    if (!result.isConfirmed || !result.value) {
+      return;
+    }
 
-      this.file = result.value as File;
-    // const reader = new FileReader();
-      this.avatarUrl = URL.createObjectURL(this.file);
+    // 1. 暫存使用者選到的檔案
+    this.file = result.value as File;
 
-  // reader.onload = () => {
-  //   const file = event.target.files[0];
-  //   this.avatarUrl = URL.createObjectURL(file);
+    // 2. 先在畫面上預覽新頭像
+    this.avatarUrl = URL.createObjectURL(this.file);
 
-  //   // 存到 localStorage
-  //   localStorage.setItem('avatarUrl', this.avatarUrl);
-
-  //   // 通知 topbar 重新讀取頭像
-  //   window.dispatchEvent(new Event('avatarChanged'));
-  // }
-
-      window.dispatchEvent(new Event('avatarChanged'));
-    // reader.readAsDataURL(file);
-    });
-
+    // 3. 直接送到後端，更新資料庫
+    // this.saveAll();
+  });
 
   }
 
   saveAll(){
     const payload = this.groups.map(g => ({
-      groupId: g.groupId,
-      publicInventory: this.publicInventoryObj[g.groupId] ?? false
-    }));
+    groupId: g.groupId,
+    publicInventory: this.publicInventoryObj[g.groupId] ?? false
+  }));
 
-    const formData = new FormData();
+  const formData = new FormData();
 
-    formData.append(
-      'userInfo',
-      new Blob(
-        [JSON.stringify({
-          userId: this.user_id,
-          userName: this.userName,
-          email: this.email,
-          notifyByEndDate: this.endDateNotify,
-          notifyByEmail: this.emailNotify
-        })],
-        { type: 'application/json' }
-      )
-    );
+  formData.append(
+    'userInfo',
+    new Blob(
+      [JSON.stringify({
+        userId: this.user_id,
+        userName: this.userName,
+        email: this.email,
+        notifyByEndDate: this.endDateNotify,
+        notifyByEmail: this.emailNotify
+      })],
+      { type: 'application/json' }
+    )
+  );
 
-    formData.append(
-      'publicInventoryList',
-      new Blob(
-        [JSON.stringify(payload)],
-        { type: 'application/json' }
-      )
-    );
+  formData.append(
+    'publicInventoryList',
+    new Blob(
+      [JSON.stringify(payload)],
+      { type: 'application/json' }
+    )
+  );
 
-    if (this.file) {
-      formData.append('avatar', this.file);
-    }
+  // 有選新頭像時才送 avatar
+  if (this.file) {
+    formData.append('avatar', this.file);
+  }
 
-    this.http.post(
-      'http://localhost:8080/users/update_info',
-      formData
-    ).subscribe({
-
-      next: (res: any) => {
-        Swal.fire('已儲存', '', 'success');
-        this.getSelfInfo();
-      },
-
-      error: (err) => {
-        Swal.fire('失敗', '', 'error');
-        console.log(err);
+  this.http.post(
+    'http://localhost:8080/users/update_info',
+    formData
+  ).subscribe({
+    next: (res: any) => {
+      if (res.code !== 200) {
+        Swal.fire({
+          icon: 'error',
+          title: '儲存失敗',
+          text: res.message || '資料更新失敗'
+        });
+        return;
       }
 
-    });
-    console.log(payload);
-  }
+      Swal.fire({
+        icon: 'success',
+        title: '已儲存',
+        text: '資料已更新',
+        confirmButtonText: '確認'
+      });
+
+      // 清掉暫存檔案，避免下次儲存又重複上傳同一張
+      this.file = null;
+
+      // 重新抓資料庫最新資料
+      this.getSelfInfo();
+
+      // 通知 topbar 重新讀取資料庫頭像
+      window.dispatchEvent(new Event('avatarChanged'));
+    },
+
+    error: (err) => {
+      Swal.fire({
+        icon: 'error',
+        title: '失敗',
+        text: err.error?.message || '伺服器發生錯誤'
+      });
+
+      console.log(err);
+    }
+  });
+}
 }
