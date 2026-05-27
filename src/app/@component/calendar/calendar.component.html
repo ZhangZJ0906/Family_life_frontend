@@ -1,45 +1,59 @@
-<div class="calendar-card">
-  <!-- 上方標題列 -->
+<div class="calendar-page">
+
+  <!-- 上方導覽列 -->
   <app-topbar></app-topbar>
 
-  <div
-    class="calendar-header d-flex justify-content-between align-items-center flex-wrap gap-3"
-  >
-    <!-- 左邊：標題與說明 -->
+  <!-- 上方標題與操作區 -->
+  <section class="calendar-header-card">
+
+    <!-- 左側：標題 -->
     <div class="calendar-title">
-      <h2>家庭行事曆</h2>
-      <p class="text-muted mb-0">管理家庭活動、提醒與重要日期</p>
+      <div class="title-icon">
+        📅
+      </div>
+
+      <div>
+        <h2>家庭行事曆</h2>
+        <p>管理家庭活動、提醒與重要日期</p>
+      </div>
     </div>
 
-    <!-- 右邊：下拉選單 + 新增活動 -->
-    <div class="calendar-actions d-flex align-items-center gap-3">
-      <!-- 群組下拉選單 (Material 19) -->
-      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <!-- 右側：群組選擇 + 新增活動 -->
+    <div class="calendar-actions">
+
+      <!-- 群組下拉選單 -->
+      <mat-form-field appearance="outline" class="calendar-group-select">
         <mat-label>選擇群組</mat-label>
+
         <mat-select
           [(ngModel)]="selectedGroupId"
           (selectionChange)="onGroupChange($event)"
         >
           @for (group of userGroupList; track group.groupId) {
             <mat-option [value]="group.groupId">
-            👥  {{ group.groupName }}
+              👥 {{ group.groupName }}
             </mat-option>
           }
         </mat-select>
       </mat-form-field>
 
       <!-- 新增活動按鈕 -->
-      <button type="button" class="add-btn" (click)="createCalendarEvent()">
-        ＋ 新增活動
+      <button
+        type="button"
+        class="add-btn"
+        (click)="createCalendarEvent()"
+      >
+        <mat-icon>add</mat-icon>
+        新增活動
       </button>
 
-      <!-- 返回首頁按鈕 -->
-      <!-- <button type="button" class="back-home-btn" routerLink="/home-page">
-        返回首頁
-      </button> -->
     </div>
-  </div>
 
-  <!-- FullCalendar -->
-  <full-calendar [options]="calendarOptions"></full-calendar>
+  </section>
+
+  <!-- FullCalendar 主卡片 -->
+  <section class="calendar-main-card">
+    <full-calendar [options]="calendarOptions"></full-calendar>
+  </section>
+
 </div>

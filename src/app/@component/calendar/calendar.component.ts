@@ -18,6 +18,7 @@ import { FormsModule } from '@angular/forms'; // ← 加這個
 import { DropDownGroupList } from '../../common/interfaceList';
 import { MatDialog } from '@angular/material/dialog';
 import { CalendarEventDialogComponent } from '../calendar-event-dialog/calendar-event-dialog.component';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-calendar',
@@ -30,6 +31,8 @@ import { CalendarEventDialogComponent } from '../calendar-event-dialog/calendar-
     MatFormFieldModule,
     MatSelect,
     MatSelectModule,
+    MatIconModule
+
   ],
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss',
