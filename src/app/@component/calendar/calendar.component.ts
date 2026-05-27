@@ -758,40 +758,56 @@ export class CalendarComponent {
     });
   }
 
-  // 刪除活動
-  deleteCalendarEvent(eventId: number, title: string): void {
-    Swal.fire({
-      icon: 'warning',
-      title: `是否刪除「${title}」？`,
-      text: '刪除後無法復原',
-      showCancelButton: true,
-      confirmButtonText: '刪除',
-      cancelButtonText: '取消',
-    }).then((result) => {
-      if (!result.isConfirmed) {
-        return;
-      }
+ deleteCalendarEvent(eventId: number, title: string): void {
+  Swal.fire({
+    icon: 'warning',
+    title: `是否刪除「${title}」？`,
+    text: '刪除後無法復原',
+    showCancelButton: true,
+    confirmButtonText: '刪除',
+    cancelButtonText: '取消',
+  }).then((result) => {
+    if (!result.isConfirmed) {
+      return;
+    }
 
-      this.calendarApiService.delete(eventId, this.createdBy, this.currentGroupId).subscribe({
-        next: () => {
-          Swal.fire({
-            icon: 'success',
-            title: '刪除成功',
-            confirmButtonText: '確認',
-          });
+    // 後端目前私人活動是 groupId = 0，不是 null
+    const groupId =
+      this.currentGroupId === undefined ||
+      this.currentGroupId === null
+        ? 0
+        : Number(this.currentGroupId);
 
-          this.loadCalendarEvents(this.currentGroupId, this.createdBy);
-        },
-        error: (err) => {
+    this.calendarApiService.delete(eventId, this.createdBy, groupId).subscribe({
+      next: (res: any) => {
+        if (res.code !== 200) {
           Swal.fire({
             icon: 'error',
             title: '刪除失敗',
-            text: err.error?.message || '請稍後再試',
+            text: res.message || '刪除失敗',
           });
-        },
-      });
+          return;
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: '刪除成功',
+          confirmButtonText: '確認',
+        });
+
+        this.loadCalendarEvents(groupId, this.createdBy);
+      },
+
+      error: (err) => {
+        Swal.fire({
+          icon: 'error',
+          title: '刪除失敗',
+          text: err.error?.message || '請稍後再試',
+        });
+      },
     });
-  }
+  });
+}
   // 拖曳活動到其他日期後，更新後端資料
   handleEventDrop(info: any): void {
     const eventId = Number(info.event.id);
@@ -815,6 +831,7 @@ export class CalendarComponent {
       eventTime: newDateTime,
       endTime: newEndTime,
       notifyBefore: notifyBefore,
+      groupId: this.currentGroupId,
     };
 
     //拖曳後日期早於今天，就還原位置

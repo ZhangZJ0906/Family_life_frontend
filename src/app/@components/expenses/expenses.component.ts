@@ -122,7 +122,7 @@ export class ExpensesComponent {
     };
 
     this.getCatgories();
-    this.getExpense(this.currentGroupId, this.currentUserId);
+    // this.getExpense(this.currentGroupId, this.currentUserId);
     this.getUserGroupData();
   }
 
@@ -277,6 +277,7 @@ export class ExpensesComponent {
           );
           this.userGroups.unshift({ groupId: 0, groupName: '私人記帳' });
           this.currentGroupId = 0;
+          this.getExpense(this.currentGroupId, this.currentUserId);
         },
       });
   }
@@ -289,8 +290,8 @@ export class ExpensesComponent {
   }
 
   getExpense(groupId: number | null, userId: number) {
-    let url = `${this.basicUrl}expense/getInfo?userId=${userId}`;
-    if (groupId != null) url += `&groupId=${groupId}`;
+    let url = `${this.basicUrl}expense/getInfo?userId=${userId}&groupId=${groupId}`;
+
 
     this.http.getApi(url).subscribe({
       next: (res: any) => {
