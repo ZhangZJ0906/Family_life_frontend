@@ -14,6 +14,8 @@ import {
   MatSelectChange,
   MatSelectModule,
 } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+
 import { FormsModule } from '@angular/forms'; // ← 加這個
 import { DropDownGroupList } from '../../common/interfaceList';
 import { MatDialog } from '@angular/material/dialog';
@@ -33,6 +35,7 @@ import { ActivatedRoute } from '@angular/router';
     MatFormFieldModule,
     MatSelect,
     MatSelectModule,
+    MatIconModule
   ],
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss',
