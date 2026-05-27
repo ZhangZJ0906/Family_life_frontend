@@ -346,7 +346,7 @@ export class ExpensesComponent {
 
     this.http.getApi(url).subscribe({
       next: (res: any) => {
-        console.log(res);
+        
 
         if (res.code !== 200) {
           Swal.fire({ title: '錯誤', text: res.message, icon: 'error' });
@@ -355,7 +355,7 @@ export class ExpensesComponent {
         this.expense = res.list ? [...res.list] : [];
         this.itemMap = res.itemMap || {};
         this.groupUserInfo = res.userMap; // 私人肯定沒有
-        console.log(this.groupUserInfo);
+        
         this.displayedColumns = this.getDisplayedColumns(groupId);
         this.dataSource.data = this.expense;
         // 資料進來後觸發月份 filter
