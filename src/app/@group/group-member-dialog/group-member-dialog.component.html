@@ -39,8 +39,30 @@
 
   </div>
 
-  <!-- Member List -->
-  <div class="member-list">
+  <!-- 分類按鈕 -->
+  <div class="tab-buttons">
+
+    <button
+      [class.active]="selectedTab === 'members'"
+      (click)="selectedTab = 'members'"
+    >
+      成員
+    </button>
+
+    <button
+      [class.active]="selectedTab === 'waiting'"
+      (click)="selectedTab = 'waiting'"
+    >
+      等待加入
+    </button>
+
+  </div>
+
+  <!-- 成員 -->
+  <div
+    class="member-list"
+    *ngIf="selectedTab === 'members'"
+  >
 
     <div
       class="member-card"
@@ -49,9 +71,10 @@
 
       <div class="member-left">
 
-        <div class="avatar">
-          <img class="avatar" [src]=" member.avatar || 'assets/default-avatar.png'">
-        </div>
+        <img
+          class="avatar"
+          [src]="member.avatar || 'assets/default-avatar.png'"
+        >
 
         <div>
 
@@ -69,31 +92,26 @@
 
       <div class="member-actions">
 
-        <button *ngIf="member.publicInventory == 0"
-                disabled
-                class="check-btn">
+        <button
+          *ngIf="member.publicInventory == 0"
+          disabled
+          class="check-btn"
+        >
           個人清單
         </button>
 
-        <button *ngIf="member.publicInventory == 1"
-                class="check-btn">
+        <button
+          *ngIf="member.publicInventory == 1"
+          class="check-btn"
+        >
           清單
         </button>
 
         <button
-          *ngIf="member.user_id != data.userId"
           class="remove-btn"
           (click)="removeMember(member)"
         >
-          踢出群組
-        </button>
-
-        <button
-          *ngIf="member.user_id == data.userId"
-          class="remove-btn"
-          (click)="removeMember(member)"
-        >
-          退出群組
+          {{ member.user_id != data.userId ? '踢出群組' : '退出群組' }}
         </button>
 
       </div>
@@ -102,11 +120,11 @@
 
   </div>
 
-  <div>
-    <h3>已邀請</h3>
-  </div>
-
-  <div class="member-list">
+  <!-- 等待加入 -->
+  <div
+    class="member-list"
+    *ngIf="selectedTab === 'waiting'"
+  >
 
     <div
       class="member-card"
@@ -115,9 +133,10 @@
 
       <div class="member-left">
 
-        <div class="avatar">
-          <img class="avatar" [src]="member.avatar || 'assets/default-avatar.png'">
-        </div>
+        <img
+          class="avatar"
+          [src]="member.avatar || 'assets/default-avatar.png'"
+        >
 
         <div>
 
@@ -133,17 +152,17 @@
 
       </div>
 
-      <div class="member-actions">
-
-      </div>
-
     </div>
 
   </div>
+
   <!-- Footer -->
   <div class="dialog-footer">
 
-    <button class="invite-btn" (click)="openInviteDialog()">
+    <button
+      class="invite-btn"
+      (click)="openInviteDialog()"
+    >
       邀請成員
     </button>
 

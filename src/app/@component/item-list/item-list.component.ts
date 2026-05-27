@@ -152,22 +152,21 @@ export class ItemListComponent {
     this.basicUrl = this.http.basicUrl;
     this.currentUserId = this.authService.currentUser()?.user_id ?? 0;
   }
-
-  initData(groupId: number) {
-    this.currentGroupId = groupId;
-    if(groupId == null) groupId = 0;
-    this.getUserGroupData(groupId);
-  }
-
   ngOnInit() {
     this.route.params.subscribe((params) => {
       const groupId = Number(params['groupId']) || 0;
       this.initData(groupId);
+      this.getItemByGroupId(groupId)
     });
   }
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
+  }
+  initData(groupId: number) {
+    this.currentGroupId = groupId;
+    if (groupId == null) groupId = 0;
+    this.getUserGroupData(groupId);
   }
 
   /*TODO 缺少   通知功能 */
@@ -224,8 +223,6 @@ export class ItemListComponent {
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      //TODO 這邊有可能不能轉 每張表 的欄位都不同所以 可能會有差別最重要的就是 他ID 找不到 所以更新不了
-      // 另一作法  先刪除 後新增
       if (!result) return;
 
       const { _type, ...payload } = result; // 把 _type 拆出來，不傳給後端
@@ -616,10 +613,6 @@ export class ItemListComponent {
         if (this.dataSource.paginator) {
           this.dataSource.paginator.firstPage();
         }
-
-        this.warrantyList = res.data || [];
-        this.dataSource.data = this.warrantyList;
-        this.dataSource.paginator?.firstPage();
       },
       error: (err: any) => {
         Swal.fire({
@@ -732,7 +725,7 @@ export class ItemListComponent {
         // 多筆刪除
         selectedIds.forEach((id) => {
           this.http
-            .deleteApi(this.basicUrl + `subscription/delete?id=${id}&userId=${this.currentUserId}`)
+            .deleteApi(this.basicUrl + `subscription/delete?id=${id}`)
             .subscribe({
               next: (res: any) => {
                 if (res.code !== 200) {
@@ -775,7 +768,7 @@ export class ItemListComponent {
       if (this.isWarrantyMode) {
         selectedIds.forEach((id) => {
           this.http
-            .deleteApi(this.basicUrl + `warranty/delete?id=${id}&userId=${this.currentUserId}`)
+            .deleteApi(this.basicUrl + `warranty/delete?id=${id}`)
             .subscribe({
               next: (res: any) => {
                 if (res.code !== 200) {
@@ -814,7 +807,7 @@ export class ItemListComponent {
       if (this.isMedicineMode) {
         selectedIds.forEach((id) => {
           this.http
-            .deleteApi(this.basicUrl + `medicine/delete?id=${id}&userId=${this.currentUserId}`)
+            .deleteApi(this.basicUrl + `medicine/delete?id=${id}`)
             .subscribe({
               next: (res: any) => {
                 if (res.code !== 200) {
@@ -851,7 +844,7 @@ export class ItemListComponent {
       }
 
       // 一般物品刪除
-      this.http.postApi(this.basicUrl + `item/delete?userId=${this.currentUserId}`, selectedIds).subscribe({
+      this.http.postApi(this.basicUrl + 'item/delete', selectedIds).subscribe({
         next: (res: any) => {
           if (res.code != 200) {
             Swal.fire({

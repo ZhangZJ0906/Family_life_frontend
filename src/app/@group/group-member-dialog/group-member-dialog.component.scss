@@ -158,3 +158,28 @@
 .invite-btn:hover {
   background: #1565c0;
 }
+
+.tab-buttons {
+  display: flex;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.tab-buttons button {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #e5e7eb;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.tab-buttons button.active {
+  background: #3b82f6;
+  color: white;
+  font-weight: bold;
+}
+
+.tab-buttons button:hover {
+  opacity: 0.9;
+}
