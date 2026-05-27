@@ -1,7 +1,5 @@
 export interface ShoppingList {
   id: number;
-  // GROUP_FEATURE: group_id 是 groups 表的 foreign key。
-  // 目前建立清單可選「無」，所以這裡允許 null；之後接群組功能時改成帶實際 group_id。
   group_id: number | null;
   title: string;
   createrId: number;
@@ -16,11 +14,12 @@ export interface PurchaseItemVo {
   listId: number;
   id: number;
   check: boolean;
+  checkDate?: string;
+  checkMan?: number;
 }
 
 export interface CreateListReq {
   shoppingList: ShoppingList;
-  // 清單可以純建立，購物項目會在 PurchaseItemComponent 裡新增。
   purchaseItemVoList: PurchaseItemVo[];
 }
 
@@ -33,4 +32,10 @@ export interface AddPurchaseItemReq {
 export interface BasicRes {
   code: number;
   message: string;
+}
+
+export interface GroupListRes {
+  code: number;
+  message?: string;
+  groupIdList?: Record<string, string>;
 }

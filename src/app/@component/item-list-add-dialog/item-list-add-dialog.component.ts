@@ -124,7 +124,7 @@ isMedicineCategory(): boolean {
     private authService: AuthService
   ) {
     this.basicUrl = this.http.basicUrl;
-    this.group = this.data.groups;
+    this.group = this.data?.groups ?? [];
     this.item.created_by_id = this.authService.currentUser()?.user_id ?? 0;
   }
 
@@ -140,7 +140,7 @@ isMedicineCategory(): boolean {
       this.categories.shift();
     }
 
-    if (this.data?.currentGroupId) {
+    if (this.data?.currentGroupId !== undefined && this.data?.currentGroupId !== null) {
       this.item.groupId = this.data.currentGroupId;
     }
 
@@ -165,6 +165,25 @@ isMedicineCategory(): boolean {
         this.item.categoryId = medicineCategory.id;
       }
     }
+
+    this.applyPrefillItem();
+  }
+
+  private applyPrefillItem(): void {
+    const prefill = this.data?.prefillItem;
+
+    if (!prefill) {
+      return;
+    }
+
+    this.item = {
+      ...this.item,
+      groupId: prefill.groupId ?? this.item.groupId,
+      categoryId: prefill.categoryId ?? this.item.categoryId,
+      name: prefill.name ?? this.item.name,
+      quantity: prefill.quantity ?? this.item.quantity,
+      purchaseDate: prefill.purchaseDate ?? this.item.purchaseDate,
+    };
   }
 
   get totalPrice(): number {

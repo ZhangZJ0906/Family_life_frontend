@@ -6,6 +6,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AddPurchaseItemReq, PurchaseItemVo } from '../../@models/shopping_list.model';
 import { AuthService } from '../../@services/auth.service';
 import { ShoppingListService } from '../../@services/shopping-list.service';
+import { TopbarComponent } from "../../shared/topbar/topbar.component";
 
 interface CategoryOption {
   id: number;
@@ -14,15 +15,15 @@ interface CategoryOption {
 
 @Component({
   selector: 'app-purchase-item',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, TopbarComponent],
   templateUrl: './purchase-item.component.html',
   styleUrl: './purchase-item.component.scss'
 })
 export class PurchaseItemComponent implements OnInit {
   readonly categories: CategoryOption[] = [
-    { id: 1, name: '食品' },
+    { id: 1, name: '食材' },
     { id: 2, name: '日用品' },
-    { id: 3, name: '清潔' },
+    { id: 3, name: '用品' },
     { id: 4, name: '其他' }
   ];
 
@@ -51,22 +52,6 @@ export class PurchaseItemComponent implements OnInit {
     this.listId = Number(this.route.snapshot.paramMap.get('listId'));
     this.userId = this.authService.currentUser()?.user_id ?? 1;
     this.loadItems();
-  }
-
-  get totalCount(): number {
-    return this.items.length;
-  }
-
-  get boughtCount(): number {
-    return this.items.filter((item) => item.check).length;
-  }
-
-  get remainingCount(): number {
-    return this.totalCount - this.boughtCount;
-  }
-
-  get progressPercent(): number {
-    return this.totalCount === 0 ? 0 : Math.round((this.boughtCount / this.totalCount) * 100);
   }
 
   loadItems(): void {
@@ -122,7 +107,7 @@ export class PurchaseItemComponent implements OnInit {
         this.isSaving = false;
 
         if (res.code !== 200) {
-          this.formError = res.message ?? '新增項目失敗';
+          this.formError = res.message ?? '新增購物項目失敗';
           return;
         }
 
@@ -135,7 +120,7 @@ export class PurchaseItemComponent implements OnInit {
       },
       error: (err) => {
         console.error(err);
-        this.formError = err.error?.message ?? '新增項目失敗';
+        this.formError = err.error?.message ?? '新增購物項目失敗';
         this.isSaving = false;
       }
     });
@@ -151,7 +136,7 @@ export class PurchaseItemComponent implements OnInit {
     this.shoppingService.deleteItem(this.listId, item.id).subscribe({
       next: (res) => {
         if (res.code !== 200) {
-          this.errorMessage = res.message ?? '刪除項目失敗';
+          this.errorMessage = res.message ?? '刪除購物項目失敗';
           return;
         }
 
@@ -159,20 +144,7 @@ export class PurchaseItemComponent implements OnInit {
       },
       error: (err) => {
         console.error(err);
-        this.errorMessage = err.error?.message ?? '刪除項目失敗';
-      }
-    });
-  }
-
-  toggleCheck(item: PurchaseItemVo): void {
-    const nextValue = !item.check;
-    item.check = nextValue;
-
-    this.shoppingService.updateCheck(this.listId, item.id, nextValue, this.userId).subscribe({
-      error: (err) => {
-        console.error(err);
-        item.check = !nextValue;
-        this.errorMessage = err.error?.message ?? '更新勾選狀態失敗';
+        this.errorMessage = err.error?.message ?? '刪除購物項目失敗';
       }
     });
   }
