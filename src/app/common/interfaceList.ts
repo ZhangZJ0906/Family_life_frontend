@@ -39,7 +39,14 @@ export interface ExpenseRecord {
   note: string;
   createdAt?: string;
 }
+/*記帳消費者專用 2026-05-27 by ZJ */
 
+export interface GroupUser {
+  userId: number;
+  userName: string;
+  email: string;
+  avatar: string | null;
+}
 /*============================================ */
 /*群組 2026-05-20 by zj */
 export interface GroupList {

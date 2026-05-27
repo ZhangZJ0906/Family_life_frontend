@@ -7,11 +7,12 @@ import { AddPurchaseItemReq, PurchaseItemVo } from '../../@models/shopping_list.
 import { AuthService } from '../../@services/auth.service';
 import { ShoppingListService } from '../../@services/shopping-list.service';
 import { TopbarComponent } from "../../shared/topbar/topbar.component";
+import { LocationAndCategory } from '../../common/interfaceList';
 
-interface CategoryOption {
-  id: number;
-  name: string;
-}
+// interface CategoryOption {
+//   id: number;
+//   name: string;
+// }
 
 @Component({
   selector: 'app-purchase-item',
@@ -20,12 +21,14 @@ interface CategoryOption {
   styleUrl: './purchase-item.component.scss'
 })
 export class PurchaseItemComponent implements OnInit {
-  readonly categories: CategoryOption[] = [
-    { id: 1, name: '食材' },
-    { id: 2, name: '日用品' },
-    { id: 3, name: '用品' },
-    { id: 4, name: '其他' }
-  ];
+  // readonly categories: CategoryOption[] = [
+  //   { id: 1, name: '食材' },
+  //   { id: 2, name: '日用品' },
+  //   { id: 3, name: '用品' },
+  //   { id: 4, name: '其他' }
+  // ];
+
+  categories: LocationAndCategory[] = [];
 
   listId = 0;
   userId = 1;
