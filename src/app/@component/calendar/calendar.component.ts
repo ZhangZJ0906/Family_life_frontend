@@ -152,10 +152,10 @@ export class CalendarComponent {
      });*/
 
     //2026-05-24 by ZJ 試試看新東西
-    let url = this.http.basicUrl + `calendar/getUserEventInfo?userId=${userId}`;
-    if (groupId !== null && groupId !== 0) {
-      url += `&groupId=${groupId}`;
-    }
+    let url =
+      this.http.basicUrl +
+      `calendar/getUserEventInfo?userId=${userId}&groupId=${groupId}`;
+
     this.http.getApi(url).subscribe({
       next: (res: any) => {
         if (res.code !== 200) {
@@ -382,9 +382,7 @@ export class CalendarComponent {
     });
 
     ref.afterClosed().subscribe((result) => {
-      if (this.currentGroupId == 0) {
-        this.currentGroupId = null;
-      }
+
       const payload = {
         groupId: this.currentGroupId,
         createdBy: this.createdBy,
@@ -697,13 +695,15 @@ export class CalendarComponent {
     const newEndTime = info.event.endStr
       ? info.event.endStr.substring(0, 19)
       : null;
-
+const currentGroupId = this.selectedGroupId ?? 0;
     const data = {
+      groupId: currentGroupId,
       title: title,
       description: description,
       eventTime: newDateTime,
       endTime: newEndTime,
       notifyBefore: notifyBefore,
+      createdBy: this.createdBy,
     };
 
     //拖曳後日期早於今天，就還原位置
