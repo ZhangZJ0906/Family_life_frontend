@@ -39,12 +39,12 @@ export class ExpensesAddComponent {
   basicUrl!: string;
   expenseForm!: FormGroup;
   currentGroupId!: number | null;
-
+  today = new Date();
   categoryMap: LocationAndCategory[] = []; // 分類對照
   userGroups: DropDownGroupList[] = []; // 儲存使用者擁有的群組清單
   itemList: any[] = []; // 動態變更的物品清單
-
-  currentUserId = 1; // 目前登入的使用者 ID
+  user: any;
+  currentUserId: number; // 目前登入的使用者 ID
 
   constructor(
     private fb: FormBuilder,
@@ -53,6 +53,9 @@ export class ExpensesAddComponent {
     @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
     this.basicUrl = this.http.basicUrl;
+    const raw = sessionStorage.getItem('family-life-current-user'); // ← localStorage 改 sessionStorage
+    this.user = JSON.parse(raw!);
+    this.currentUserId = this.user.user_id;
   }
 
   ngOnInit(): void {
@@ -125,7 +128,7 @@ export class ExpensesAddComponent {
     this.itemList = [];
 
     // 去後端重拉清單 (如果是 0 代表個人私帳，傳 null 給後端)
-    const groupIdParam = envId === 0 ? null : envId;
+    const groupIdParam = envId;
     this.getItemList(groupIdParam, this.currentUserId);
   }
 
@@ -146,7 +149,18 @@ export class ExpensesAddComponent {
       },
     });
   }
+  private validatePayload(formValues: any): string | null {
+    if (!formValues.categoryId) return '請選擇分類';
+    if (!formValues.price || formValues.price <= 0) return '請輸入有效金額';
+    if (!formValues.expenseDate) return '請選擇日期';
 
+    const selected = new Date(formValues.expenseDate);
+    const today = new Date();
+    today.setHours(23, 59, 59, 999); // 今天的最後一刻
+    if (selected > today) return '日期不能選未來';
+
+    return null;
+  }
   /**
    * 按下「儲存」送出
    */
@@ -155,13 +169,17 @@ export class ExpensesAddComponent {
 
     // ⚠️ 關鍵：使用 getRawValue() 才能抓到被 .disable() 鎖定的 note 欄位值！
     const formValues = this.expenseForm.getRawValue();
-
+    const error = this.validatePayload(formValues);
+    if (error) {
+      Swal.fire({ title: '請檢查輸入', text: error, icon: 'warning' });
+      return;
+    }
     // 建立要送去後端的 payload
     // group_id: formValues.selectedEnvId === 0 ? null : formValues.selectedEnvId,
     // 要變回 任意選群組就把group_id 改成上面這樣
     const payload = {
       userId: this.currentUserId,
-      groupId: this.currentGroupId === 0 ? null : this.currentGroupId,
+      groupId: this.currentGroupId,
       categoryId: formValues.categoryId,
       relatedItemId: formValues.related_item_id,
       relatedItemName: formValues.related_item_name,
@@ -169,7 +187,7 @@ export class ExpensesAddComponent {
       note: formValues.note,
       expenseDate: this.formatToBackendDate(formValues.expenseDate),
     };
-    console.log(payload);
+    // console.log(payload);
 
     this.http.postApi(this.basicUrl + 'expense/addInfo', payload).subscribe({
       next: (res: any) => {

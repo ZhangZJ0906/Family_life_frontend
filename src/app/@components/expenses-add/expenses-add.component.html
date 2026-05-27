@@ -59,7 +59,7 @@
       <div class="col-12 col-md-6">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>消費日期</mat-label>
-          <input matInput [matDatepicker]="picker" formControlName="expenseDate" required>
+          <input matInput [matDatepicker]="picker" formControlName="expenseDate" required [max]="today">
           <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
           @if (expenseForm.get('expenseDate')?.hasError('required')) {
