@@ -57,6 +57,10 @@ export class ShoppingListService {
     return this.http.post<BasicRes>(`${this.shoppingUrl}/items/add`, req);
   }
 
+  updateItem(req: AddPurchaseItemReq): Observable<BasicRes> {
+    return this.http.post<BasicRes>(`${this.shoppingUrl}/items/update`, req);
+  }
+
   deleteItem(listId: number, itemId: number): Observable<BasicRes> {
     return this.http.post<BasicRes>(
       `${this.shoppingUrl}/items/delete`,
@@ -75,6 +79,18 @@ export class ShoppingListService {
       `${this.shoppingUrl}/items/check`,
       null,
       { params: { listId, itemId, check, checkMan } }
+    );
+  }
+
+  updateAssignedUser(
+    listId: number,
+    itemId: number,
+    userId: number
+  ): Observable<BasicRes> {
+    return this.http.post<BasicRes>(
+      `${this.shoppingUrl}/items/assign`,
+      null,
+      { params: { listId, itemId, userId } }
     );
   }
 }

@@ -18,6 +18,12 @@ interface GroupOption {
   name: string;
 }
 
+interface GroupMember {
+  user_id: number;
+  user_name: string;
+  avatar?: string;
+}
+
 type StatusFilter = 'unfinished' | 'completed';
 type GroupFilter = number | null | 'all';
 
@@ -42,6 +48,8 @@ export class ShoppingListComponent implements OnInit {
   statusFilter: StatusFilter = 'unfinished';
   groupFilter: GroupFilter = 'all';
   itemsByListId: Record<number, PurchaseItemVo[]> = {};
+  membersByGroupId: Record<number, GroupMember[]> = {};
+  loadingMembersByGroupId: Record<number, boolean> = {};
 
 
 
@@ -53,7 +61,7 @@ export class ShoppingListComponent implements OnInit {
   formError = '';
   newTitle = '';
   selectedGroupId: number | null = null;
-    selectedStatsList: ShoppingList | null = null;
+  selectedStatsList: ShoppingList | null = null;
 
 
   constructor(
@@ -107,6 +115,10 @@ export class ShoppingListComponent implements OnInit {
 
     if (!this.itemsByListId[list.id]) {
       this.loadItemsForList(list.id);
+    }
+
+    if (list.group_id !== null) {
+      this.loadGroupMembers(list.group_id);
     }
   }
 
@@ -307,6 +319,17 @@ export class ShoppingListComponent implements OnInit {
     return this.categories.find((category) => category.id === categoryId)?.name ?? '其他';
   }
 
+  getMemberName(groupId: number | null, userId: number): string {
+    if (groupId === null) {
+      return '';
+    }
+
+    return this.membersByGroupId[groupId]?.find((member) => member.user_id === userId)?.user_name ?? `UID: ${userId}`;
+  }
+
+  isLoadingMembers(groupId: number | null): boolean {
+    return groupId !== null && !!this.loadingMembersByGroupId[groupId];
+  }
 
   trackByListId(_index: number, list: ShoppingList): number {
     return list.id;
@@ -390,24 +413,50 @@ export class ShoppingListComponent implements OnInit {
   }
 
   private loadItemsForLists(lists: ShoppingList[]): void {
-  lists.forEach((list) => this.loadItemsForList(list.id));
-}
+    lists.forEach((list) => {
+      this.loadItemsForList(list.id);
 
-private loadItemsForList(listId: number): void {
-  this.loadingItemsByListId[listId] = true;
+      if (list.group_id !== null) {
+        this.loadGroupMembers(list.group_id);
+      }
+    });
+  }
 
-  this.shoppingService.getItems(listId).subscribe({
-    next: (items) => {
-      this.itemsByListId[listId] = items ?? [];
-      this.loadingItemsByListId[listId] = false;
-    },
-    error: (err) => {
-      console.error(err);
-      this.itemsByListId[listId] = [];
-      this.loadingItemsByListId[listId] = false;
+  private loadItemsForList(listId: number): void {
+    this.loadingItemsByListId[listId] = true;
+
+    this.shoppingService.getItems(listId).subscribe({
+      next: (items) => {
+        this.itemsByListId[listId] = items ?? [];
+        this.loadingItemsByListId[listId] = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.itemsByListId[listId] = [];
+        this.loadingItemsByListId[listId] = false;
+      }
+    });
+  }
+
+  private loadGroupMembers(groupId: number): void {
+    if (this.membersByGroupId[groupId] || this.loadingMembersByGroupId[groupId]) {
+      return;
     }
-  });
-}
+
+    this.loadingMembersByGroupId[groupId] = true;
+
+    this.http.getApi(`${this.http.basicUrl}family_life/get_members?group_id=${groupId}`).subscribe({
+      next: (res: any) => {
+        this.membersByGroupId[groupId] = res.groupMembersList ?? [];
+        this.loadingMembersByGroupId[groupId] = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.membersByGroupId[groupId] = [];
+        this.loadingMembersByGroupId[groupId] = false;
+      }
+    });
+  }
 
   private getTodayDate(): string {
     const now = new Date();
