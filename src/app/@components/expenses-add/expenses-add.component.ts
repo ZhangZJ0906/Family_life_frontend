@@ -38,7 +38,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 export class ExpensesAddComponent {
   basicUrl!: string;
   expenseForm!: FormGroup;
-  currentGroupId!: number | null;
+  currentGroupId!: number ;
   today = new Date();
   categoryMap: LocationAndCategory[] = []; // 分類對照
   userGroups: DropDownGroupList[] = []; // 儲存使用者擁有的群組清單

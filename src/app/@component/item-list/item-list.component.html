@@ -3,27 +3,25 @@
   <app-topbar></app-topbar>
 
   <!-- 上方標題、分類、群組、搜尋區 -->
-  <section class="item-header-card">
+<section class="item-header-card">
 
-    <!-- 左側標題 -->
-    <div class="item-title">
-      <div class="title-row">
-        <div class="title-icon">📦</div>
-        <h2>物品清單</h2>
-      </div>
-      <p>管理家庭物品、庫存與到期提醒</p>
+  <!-- 左側標題 -->
+  <div class="item-title">
+    <div class="title-row">
+      <div class="title-icon">📦</div>
+      <h2>物品清單</h2>
     </div>
+    <p>管理家庭物品、庫存與到期提醒</p>
+  </div>
 
-    <!-- 中間：分類 + 群組 -->
-    <div class="header-filter">
-
-
-      <!-- 分類按鈕 -->
-      <mat-chip-listbox aria-label="分類篩選">
-
-        @for (cat of categories; track cat.id) {
-
-        <mat-chip-option [value]="cat.id" [selected]="selectedCategory === cat.name" (click)="filterByCategory(cat.id)">
+  <!-- 中間：分類按鈕 -->
+  <div class="header-filter">
+    <mat-chip-listbox aria-label="分類篩選">
+      @for (cat of categories; track cat.id) {
+        <mat-chip-option
+          [value]="cat.id"
+          [selected]="selectedCategory === cat.name"
+          (click)="filterByCategory(cat.id)">
 
           <span class="chip-icon">
             @switch (cat.name) {
@@ -38,35 +36,35 @@
           </span>
 
           {{ cat.name }}
-
         </mat-chip-option>
+      }
+    </mat-chip-listbox>
+  </div>
 
-        }
-      </mat-chip-listbox>
-    </div>
+  <!-- 右側：群組 + 搜尋 -->
+  <div class="header-right">
     <mat-form-field appearance="outline" class="group-select">
       <mat-label>切換群組</mat-label>
-      <mat-select [(value)]="currentGroupId" (selectionChange)="getItemByGroupId($event.value)">
+      <mat-select
+        [(value)]="currentGroupId"
+        (selectionChange)="getItemByGroupId($event.value)">
+
         @for (group of userGroups; track $index) {
         <mat-option [value]="group.groupId">
           🏠 {{ group.groupName }}
         </mat-option>
         }
-        <!-- </mat-chip-listbox> -->
-
-        <!-- 群組切換 -->
       </mat-select>
     </mat-form-field>
 
-
-    <!-- 右側搜尋 -->
     <mat-form-field appearance="outline" class="search-field">
       <mat-label>搜尋物品</mat-label>
       <input matInput (keyup)="applyFilter($event)" placeholder="例如：牛奶" #input>
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
+  </div>
 
-  </section>
+</section>
 
   <!-- 表格卡片 -->
   <section class="table-card">

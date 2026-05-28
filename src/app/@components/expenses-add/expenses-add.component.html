@@ -1,135 +1,160 @@
-<h2 mat-dialog-title class="d-flex align-items-center text-primary m-0 pt-3 px-3">
-  <mat-icon class="me-2 fs-3" style="width: 30px; height: 30px;">add_shopping_cart</mat-icon>
-  <span class="fw-bold">新增支出紀錄</span>
-</h2>
+<div class="expense-dialog">
 
-<mat-dialog-content class="px-3 py-2" style="overflow: hidden;">
-  <form [formGroup]="expenseForm" class="container-fluid p-0">
+  <!-- 標題區 -->
+  <div class="dialog-header">
+    <div class="header-icon">
+      <mat-icon>add_shopping_cart</mat-icon>
+    </div>
 
-    <!-- <div class="row g-3 mb-3">
-      <div class="col-12">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>選擇記帳環境</mat-label>
-          <mat-select formControlName="selectedEnvId" (selectionChange)="onEnvChange($event.value)" required>
-
-            @for (g of userGroups; track g.groupId) {
-            <mat-option [value]="g.groupId">👥 {{ g.groupName }}</mat-option>
-            }
-          </mat-select>
-          @if (expenseForm.get('selectedEnvId')?.hasError('required')) {
-          <mat-error>請選擇一個記帳環境</mat-error>
-          }
-        </mat-form-field>
-      </div>
-    </div> -->
-<div class="row g-3 mb-3">
-  <div class="col-12">
-    <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 border bg-light">
-      <mat-icon class="text-primary" style="font-size: 20px; width: 20px; height: 20px;">
-        groups
-      </mat-icon>
-      <div class="lh-1">
-        <div class="text-muted" style="font-size: 0.72rem;">記帳環境</div>
-        <div class="fw-bold text-dark" style="font-size: 0.95rem;">{{ currentGroupName }}</div>
-      </div>
-      <mat-icon class="ms-auto text-success" style="font-size: 18px; width: 18px; height: 18px;">
-        lock
-      </mat-icon>
+    <div class="header-text">
+      <h2>新增支出紀錄</h2>
+      <p>建立本次消費金額、分類與備註</p>
     </div>
   </div>
-</div>
 
+  <!-- 表單內容 -->
+  <mat-dialog-content class="dialog-content">
 
-      <div class="row g-3 mb-2">
-        <div class="col-12">
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>消費名稱</mat-label>
-            <input matInput formControlName="related_item_name"
-              [placeholder]="expenseForm.get('related_item_id')?.value ? '已自動帶入物品名稱' : '例如：午餐排骨飯...'" />
-            @if (expenseForm.get('related_item_id')?.value) {
-            <mat-hint class="text-primary fw-medium">
-              💡 已與物品連動，如需修改請先取消關聯物品。
-            </mat-hint>
-            }
-          </mat-form-field>
+    <form [formGroup]="expenseForm" class="expense-form">
+
+      <!-- 記帳環境：唯讀 -->
+      <div class="readonly-env full-width">
+        <div class="env-left">
+          <div class="env-icon">
+            <mat-icon>groups</mat-icon>
+          </div>
+
+          <div>
+            <div class="env-label">記帳環境</div>
+            <div class="env-name">{{ currentGroupName }}</div>
+          </div>
+        </div>
+
+        <div class="env-lock">
+          <mat-icon>lock</mat-icon>
+          <span>唯讀</span>
         </div>
       </div>
 
-    <div class="row g-3 mb-3">
-      <div class="col-12 col-md-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>消費日期</mat-label>
-          <input matInput [matDatepicker]="picker" formControlName="expenseDate" required [max]="today">
-          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
-          @if (expenseForm.get('expenseDate')?.hasError('required')) {
+      <!-- 消費名稱 -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>消費名稱</mat-label>
+
+        <input
+          matInput
+          formControlName="related_item_name"
+          [placeholder]="expenseForm.get('related_item_id')?.value ? '已自動帶入物品名稱' : '例如：午餐排骨飯、牛奶、藥品補貨'"
+        />
+
+        @if (expenseForm.get('related_item_name')?.hasError('required')) {
+          <mat-error>請輸入消費名稱</mat-error>
+        }
+
+        @if (expenseForm.get('related_item_id')?.value) {
+          <mat-hint>
+            已與物品清單連動，如需修改請先取消關聯物品。
+          </mat-hint>
+        }
+      </mat-form-field>
+
+      <!-- 消費日期 -->
+      <mat-form-field appearance="outline">
+        <mat-label>消費日期</mat-label>
+
+        <input
+          matInput
+          [matDatepicker]="picker"
+          formControlName="expenseDate"
+          required
+          [max]="today"
+        />
+
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+
+        @if (expenseForm.get('expenseDate')?.hasError('required')) {
           <mat-error>請選擇日期</mat-error>
-          }
-        </mat-form-field>
-      </div>
+        }
+      </mat-form-field>
 
-      <div class="col-12 col-md-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>支出金額</mat-label>
-          <input matInput type="number" formControlName="price" placeholder="請輸入金額" required min="0">
-          <span matPrefix class="me-1">$</span>
-          @if (expenseForm.get('price')?.hasError('required')) {
+      <!-- 支出金額 -->
+      <mat-form-field appearance="outline">
+        <mat-label>支出金額</mat-label>
+
+        <span matPrefix class="price-prefix">$&nbsp;</span>
+
+        <input
+          matInput
+          type="number"
+          formControlName="price"
+          placeholder="請輸入金額"
+          required
+          min="0"
+        />
+
+        @if (expenseForm.get('price')?.hasError('required')) {
           <mat-error>請輸入金額</mat-error>
-          }
-        </mat-form-field>
-      </div>
-    </div>
+        }
+      </mat-form-field>
 
-    <div class="row g-3 mb-3">
-      <div class="col-12 col-md-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>支出分類</mat-label>
-          <mat-select formControlName="categoryId" required>
-            @for (cat of categoryMap; track cat.id) {
-            <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
-            }
-          </mat-select>
-          @if (expenseForm.get('categoryId')?.hasError('required')) {
+      <!-- 支出分類 -->
+      <mat-form-field appearance="outline">
+        <mat-label>支出分類</mat-label>
+
+        <mat-select formControlName="categoryId" required>
+          @for (cat of categoryMap; track cat.id) {
+            <mat-option [value]="cat.id">
+              {{ cat.name }}
+            </mat-option>
+          }
+        </mat-select>
+
+        @if (expenseForm.get('categoryId')?.hasError('required')) {
           <mat-error>請選擇一個分類</mat-error>
-          }
-        </mat-form-field>
-      </div>
+        }
+      </mat-form-field>
 
-      <!-- <div class="col-12 col-md-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>關聯物品 (選填)</mat-label>
-          <mat-select formControlName="related_item_id"
-            placeholder="請選擇物品">
-            <mat-option [value]="null">無關聯物品 (自由輸入名稱)</mat-option>
-            @for (item of itemList; track item.id) {
-            <mat-option [value]="item.id">{{ item.name }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-      </div> -->
+      <!-- 空白欄位：讓分類維持左半邊，不要太寬 -->
+      <div class="empty-block"></div>
 
-    </div>
+      <!-- 備註 -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>備註（選填）</mat-label>
 
+        <textarea
+          matInput
+          formControlName="note"
+          rows="3"
+          placeholder="例如：由物品清單自動建立、家庭採買、臨時支出..."
+        ></textarea>
+      </mat-form-field>
 
+    </form>
 
-    <div class="row g-3 mb-5">
-      <div class="col-12">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>備註 (選填)</mat-label>
-          <textarea matInput formControlName="note" rows="2" placeholder="額外備註說明..."></textarea>
-        </mat-form-field>
-      </div>
-    </div>
+  </mat-dialog-content>
 
-  </form>
-</mat-dialog-content>
+  <!-- 底部按鈕 -->
+  <mat-dialog-actions align="end" class="dialog-actions">
+    <button
+      mat-button
+      type="button"
+      class="cancel-btn"
+      (click)="onCancel()"
+    >
+      取消
+    </button>
 
-<mat-dialog-actions class="d-flex justify-content-end gap-2 px-3 pb-3 pt-0">
-  <button mat-stroked-button type="button" (click)="onCancel()">
-    取消
-  </button>
-  <button mat-raised-button type="submit" color="primary" [disabled]="expenseForm.invalid" (click)="onSave()">
-    <mat-icon class="me-1">save</mat-icon>
-    儲存
-  </button>
-</mat-dialog-actions>
+    <button
+      mat-flat-button
+      type="button"
+      color="primary"
+      class="save-btn"
+      [disabled]="expenseForm.invalid"
+      (click)="onSave()"
+    >
+      <mat-icon>save</mat-icon>
+      儲存
+    </button>
+  </mat-dialog-actions>
+
+</div>

@@ -1,12 +1,18 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+  MatDialogRef
+} from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
+
+import { NotifyService } from '../../@services/NotifyService';
 
 @Component({
   selector: 'app-notify-dialog',
@@ -20,15 +26,27 @@ import Swal from 'sweetalert2';
   templateUrl: './notify-dialog.component.html',
   styleUrl: './notify-dialog.component.scss'
 })
-export class NotifyDialogComponent {
+export class NotifyDialogComponent implements OnInit {
 
-  user_id !: string;
+  user_id!: string;
+
+  notifies: any[] = [];
+
+  filterType:
+    | 'all'
+    | 'invite'
+    | 'group'
+    | 'itemlist'
+    | 'expense'
+    | 'calendar'
+    | 'update' = 'all';
 
   unreadMap = {
     all: 0,
     invite: 0,
     group: 0,
     itemlist: 0,
+    expense:0,
     calendar: 0,
     update: 0
   };
@@ -36,97 +54,15 @@ export class NotifyDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<NotifyDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-
     private http: HttpClient,
-    private router: Router
-
+    private router: Router,
+    private notifyService: NotifyService
   ) {
     this.user_id = data.userId;
   }
 
-  filterType: 'all' | 'invite' | 'group' | 'itemlist' | 'calendar' | 'update' = 'all';
-
-  filteredNotifies() {
-    if (this.filterType === 'all') {
-      return this.notifies;
-    }
-
-     // 🔥 group tab 同時包含 itemlist，calendar
-    if (this.filterType === 'group') {
-      return this.notifies.filter(n =>
-        n.type === 'group' || n.type === 'itemlist' || n.type === 'calendar'
-      );
-    }
-
-    return this.notifies.filter(n => n.type === this.filterType);
-  }
-
-  notifies: any[] = [];
-
   ngOnInit(): void {
-    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
-    //Add 'implements OnInit' to the class.
     this.getNotify();
-  }
-
-  markAsRead(n: any) {
-
-    // 已讀就不打 API
-    if (n.isRead === 1) {
-      return;
-    }
-
-    this.http.post(
-      `http://localhost:8080/family_life/read_notify?notify_id=${n.id}`,
-      {}
-    ).subscribe({
-
-      next: () => {
-
-        n.isRead = 1;
-
-        // 🔥 重新計算
-        this.calculateUnread();
-
-      },
-
-      error: (err) => {
-        console.log(err);
-      }
-
-    });
-
-  }
-
-  markAllAsRead() {
-
-    const unreadIds = this.notifies
-      .filter(n => !n.isRead)
-      .map(n => n.id);
-
-    if (unreadIds.length === 0) return;
-
-    this.http.post(
-      'http://localhost:8080/family_life/read_all_notify',
-      {
-        ids: unreadIds
-      }
-    ).subscribe({
-
-      next: () => {
-
-        this.notifies.forEach(n => n.isRead = 1);
-
-        this.calculateUnread();
-
-      },
-
-      error: (err) => {
-        console.log(err);
-      }
-
-    });
-
   }
 
   getUnreadCountByType(type: string): number {
@@ -143,90 +79,189 @@ export class NotifyDialogComponent {
 
   }
 
-  calculateUnread() {
 
-    this.unreadMap.all = this.notifies.filter(
-      n => n.isRead !== 1
-    ).length;
-
-    this.unreadMap.invite = this.notifies.filter(
-      n => n.isRead !== 1 && n.type === 'invite'
-    ).length;
-
-    this.unreadMap.group = this.notifies.filter(
-      n => n.isRead !== 1 && n.type === 'group'
-    ).length;
-
-    this.unreadMap.itemlist = this.notifies.filter(
-      n => n.isRead !== 1 && n.type === 'itemlist'
-    ).length;
-
-    this.unreadMap.calendar = this.notifies.filter(
-      n => n.isRead !== 1 && n.type === 'calendar'
-    ).length;
-
-    this.unreadMap.update = this.notifies.filter(
-      n => n.isRead !== 1 && n.type === 'update'
-    ).length;
-
-  }
 
   getNotify() {
-
     this.http.get<any>(
       `http://localhost:8080/family_life/get_notify?user_id=${this.user_id}`
     ).subscribe({
-
       next: (res) => {
 
-        // 🔥 把 isRead 轉成 number
-        this.notifies = res.notifies.map((n: any) => ({
+        this.notifies = (res.notifies || []).map((n: any) => ({
           ...n,
           isRead: Number(n.isRead)
         }));
 
         this.calculateUnread();
-
-        console.log('res:', res);
-        console.log('notify:', this.notifies);
+        this.syncBadge();
 
       },
-
       error: (err) => {
         console.log(err);
       }
+    });
+  }
+
+  // ========================
+  // 🔥 計算各類未讀
+  // ========================
+  calculateUnread() {
+
+    const list = this.notifies;
+
+    this.unreadMap.all = list.filter(n => n.isRead !== 1).length;
+    this.unreadMap.invite = list.filter(n => n.isRead !== 1 && n.type === 'invite').length;
+    this.unreadMap.group = list.filter(n => n.isRead !== 1 && n.type === 'group').length;
+    this.unreadMap.itemlist = list.filter(n => n.isRead !== 1 && n.type === 'itemlist').length;
+    this.unreadMap.calendar = list.filter(n => n.isRead !== 1 && n.type === 'calendar').length;
+    this.unreadMap.expense = list.filter(n => n.isRead !== 1 && n.type === 'expense').length;
+    this.unreadMap.update = list.filter(n => n.isRead !== 1 && n.type === 'update').length;
+  }
+
+  // ========================
+  // 🔥 同步 Topbar badge
+  // ========================
+  syncBadge() {
+    const unread = this.notifies.filter(n => n.isRead !== 1).length;
+    this.notifyService.setUnreadCount(unread);
+  }
+
+  // ========================
+  // 🔥 點擊已讀
+  // ========================
+  markAsRead(n: any) {
+
+    if (n.isRead === 1) return;
+
+    this.http.post(
+      `http://localhost:8080/family_life/read_notify?notify_id=${n.id}`,
+      {}
+    ).subscribe({
+      next: () => {
+
+        n.isRead = 1;
+
+        this.calculateUnread();
+        this.syncBadge();
+      },
+      error: (err) => console.log(err)
+    });
+  }
+
+  // ========================
+  // 🔥 全部已讀
+  // ========================
+  markAllAsRead() {
+
+    const unreadIds = this.notifies
+      .filter(n => n.isRead !== 1)
+      .map(n => n.id);
+
+    if (!unreadIds.length) return;
+
+    this.http.post(
+      'http://localhost:8080/family_life/read_all_notify',
+      { ids: unreadIds }
+    ).subscribe({
+      next: () => {
+
+        this.notifies.forEach(n => n.isRead = 1);
+
+        this.calculateUnread();
+        this.syncBadge();
+      },
+      error: (err) => console.log(err)
+    });
+  }
+
+  // ========================
+  // 🔥 刪除已讀
+  // ========================
+  deleteRead() {
+
+    const ids = this.notifies
+      .filter(n => n.isRead === 1)
+      .map(n => n.id);
+
+    if (!ids.length) return;
+
+    this.http.post(
+      'http://localhost:8080/family_life/delete_all_isReadNotify',
+      { ids }
+    ).subscribe({
+      next: () => {
+
+        this.notifies = this.notifies.filter(n => n.isRead !== 1);
+
+        this.calculateUnread();
+        this.syncBadge();
+      },
+      error: (err) => console.log(err)
+    });
+  }
+
+  // ========================
+  // 🔥 刪除單筆
+  // ========================
+  deleteNotify(n: any) {
+
+    Swal.fire({
+      title: "確定刪除?",
+      text: "該通知不會還原",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "確定",
+      cancelButtonText: "取消"
+    }).then((result) => {
+
+      if (!result.isConfirmed) return;
+
+      this.http.post(
+        `http://localhost:8080/family_life/delete_notify?notify_id=${n.id}`,
+        {}
+      ).subscribe({
+        next: () => {
+
+          this.notifies = this.notifies.filter(x => x.id !== n.id);
+
+          this.calculateUnread();
+          this.syncBadge();
+
+          Swal.fire({
+            icon: 'success',
+            title: '刪除成功'
+          });
+
+        },
+        error: () => {
+          Swal.fire({
+            icon: 'error',
+            title: '刪除失敗'
+          });
+        }
+      });
 
     });
-
   }
 
-  close(): void {
-    this.dialogRef.close();
-  }
-
-  acceptInvite(n: any){
+  // ========================
+  // 🔥 邀請
+  // ========================
+  acceptInvite(n: any) {
 
     n.status = 'accepted';
 
     this.http.post(
       `http://localhost:8080/family_life/accept_join_group?user_id=${this.user_id}&group_id=${n.targetGroupId}&notify_id=${n.id}`,
       {}
-      ).subscribe({
-        next: (res: any) => {
-          console.log(res);
-            Swal.fire({
-              icon: 'success',
-              title: `已加入該群組`
-            });
-          },
-        error: (err) => {
-          console.log(err);
-          Swal.fire({
-            icon: 'error',
-            title: '加入失敗'
-          });
-        }
-      });
+    ).subscribe({
+      next: () => {
+        Swal.fire('已加入該群組', '', 'success');
+      },
+      error: () => {
+        Swal.fire('加入失敗', '', 'error');
+      }
+    });
   }
 
   rejectInvite(n: any) {
@@ -236,103 +271,56 @@ export class NotifyDialogComponent {
     this.http.post(
       `http://localhost:8080/family_life/reject_join_group?user_id=${this.user_id}&group_id=${n.targetGroupId}&notify_id=${n.id}`,
       {}
-      ).subscribe({
-        next: (res: any) => {
-          console.log(res);
-          },
-        error: (err) => {
-          console.log(err);
-          Swal.fire({
-            icon: 'error',
-            title: '失敗'
-          });
-        }
-      });
-  }
-
-  goItemList(n: any){
-    this.router.navigate(['/itemList', n.sendUserId]);
-  }
-
-  goCalendar(n: any){
-    this.router.navigate(['/calendar', n.sendUserId]);
-  }
-
-  deleteRead(){
-    const isReadIds = this.notifies
-      .filter(n => n.isRead)
-      .map(n => n.id);
-
-    if (isReadIds.length === 0) return;
-
-    this.http.post(
-      'http://localhost:8080/family_life/delete_all_isReadNotify',
-      {
-        ids: isReadIds
-      }
     ).subscribe({
-
-      next: () => {
-
-        // ✅ 關鍵：同步更新畫面
-        this.notifies = this.notifies.filter(n => !n.isRead);
-
-        // ✅ 重新計算 badge
-        this.calculateUnread();
-
-      },
-
-      error: (err) => {
-        console.log(err);
+      error: () => {
+        Swal.fire('失敗', '', 'error');
       }
-
     });
   }
 
-  deleteNotify(n: any){
-    Swal.fire({
-          title: "確定刪除?",
-          text: "該通知不會還原",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#3085d6",
-          cancelButtonColor: "#d33",
-          confirmButtonText: "確定",
-          cancelButtonText: "取消"
-        }).then((result) => {
-          if (result.isConfirmed) {
+  // ========================
+  // 🔥 導頁
+  // ========================
+  goItemList(n: any) {
+    this.router.navigate(['/itemList', n.sendUserId]);
+  }
 
-            this.http.post(
-              `http://localhost:8080/family_life/delete_notify?notify_id=${n.id}`,{}
-            ).subscribe({
+  goCalendar(n: any) {
+    this.router.navigate(['/calendar', n.sendUserId]);
+  }
+goExpense(n:any){
+  this.dialogRef.close();
+this.router.navigate(['/expenses'], { queryParams: { groupId: n.sendUserId } });
+}
+  // ========================
+  // 🔥 filter
+  // ========================
+  filteredNotifies() {
 
-              next: (res: any) => {
+    if (this.filterType === 'all') return this.notifies;
 
-                console.log(res);
+    if (this.filterType === 'group') {
+      return this.notifies.filter(n =>
+        n.type === 'group' ||
+        n.type === 'itemlist' ||
+        n.type === 'calendar'||
+        n.type=== 'expense'
+      );
+    }
 
-                this.notifies = res.notifies;
+    return this.notifies.filter(n => n.type === this.filterType);
+  }
 
-                Swal.fire({
-                  icon: 'success',
-                  title: `刪除成功`
-                });
+  // ========================
+  // 🔥 close dialog
+  // ========================
+  close(): void {
 
-                // 🔥 建議：重新載入群組列表
-                this.getNotify();
+    const unread = this.notifies.filter(n => n.isRead !== 1).length;
 
-              },
-
-              error: (err) => {
-                console.log(err);
-                Swal.fire({
-                icon: 'error',
-                title: '刪除失敗'
-              });
-              }
-
-            });
-          }
-        });
-
+    // 回傳給 topbar（備用）
+    this.dialogRef.close({
+      unreadCount: unread
+    });
   }
 }

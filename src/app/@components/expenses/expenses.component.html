@@ -1,110 +1,211 @@
 <div class="container-fluid py-3">
+
+  <!-- 上方導覽列 -->
   <app-topbar></app-topbar>
-  <!-- HEADER -->
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-      <h3 class="fw-bold mb-0">家庭記帳系統</h3>
-      <small class="text-muted">費用管理 Dashboard</small>
+
+  <!-- HEADER + 月份 + 統計卡片 -->
+  <section class="expense-header-card">
+
+    <!-- 左側：標題 -->
+    <div class="expense-title">
+      <div class="title-icon">💳</div>
+
+      <div>
+        <h3 class="fw-bold mb-0">家庭記帳系統</h3>
+        <small class="text-muted">費用管理 Dashboard</small>
+      </div>
     </div>
-    <button mat-fab color="primary" (click)="openCreateDialog()" class="position-fixed bottom-0 end-0 m-4">
-      <mat-icon>add</mat-icon>
-    </button>
-  </div>
 
-  <!-- 月份切換 -->
-  <div class="d-flex align-items-center justify-content-center gap-3 mb-3">
-    <button mat-icon-button (click)="prevMonth()">
-      <mat-icon>chevron_left</mat-icon>
-    </button>
-    <span class="fw-bold fs-6">{{ selectedYear() }} 年 {{ selectedMonth() }} 月</span>
-    <button mat-icon-button (click)="nextMonth()" [disabled]="isCurrentMonth()">
-      <mat-icon>chevron_right</mat-icon>
-    </button>
-  </div>
+    <!-- 中間：月份切換 -->
+    <div class="month-switch">
 
-  <!-- SUMMARY -->
-  <div class="row g-3 mb-3">
-    <div class="col-md-6">
-      <div class="card summary-card bg-primary text-white">
-        <div class="card-body">
+      <button
+        mat-icon-button
+        class="month-arrow"
+        type="button"
+        (click)="prevMonth()"
+        title="上一個月"
+      >
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+
+      <div class="month-display">
+        <div class="month-label">目前月份</div>
+
+        <div class="month-value">
+          {{ selectedYear() }} 年 {{ selectedMonth() }} 月
+        </div>
+      </div>
+
+      <button
+        mat-icon-button
+        class="month-arrow"
+        type="button"
+        (click)="nextMonth()"
+        [disabled]="isCurrentMonth()"
+        title="下一個月"
+      >
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+
+    </div>
+
+    <!-- 右側：統計卡片 -->
+    <div class="summary-row">
+
+      <!-- 本月支出 -->
+      <div class="summary-card summary-expense">
+        <div class="summary-info">
           <div class="label">本月支出</div>
           <div class="value">${{ totalExpense() }}</div>
         </div>
+
+        <div class="summary-icon expense-icon">
+          <mat-icon>payments</mat-icon>
+        </div>
       </div>
-    </div>
-    <div class="col-md-6">
-      <div class="card summary-card bg-dark text-white">
-        <div class="card-body">
+
+      <!-- 當月筆數 -->
+      <div class="summary-card summary-count">
+        <div class="summary-info">
           <div class="label">當月筆數</div>
           <div class="value">{{ dataSource.filteredData.length }}</div>
         </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- TABLE CARD -->
-  <div class="card shadow-sm">
-    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-      <div class="fw-bold">支出明細</div>
-      <div class="d-flex gap-2">
-        @if (selection.selected.length > 0) {
-        <button mat-raised-button color="warn" (click)="deleteById()">
-          <mat-icon class="me-1">delete</mat-icon>
+        <div class="summary-icon count-icon">
+          <mat-icon>receipt_long</mat-icon>
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- 支出明細上方篩選區 -->
+  <section class="expense-filter-card">
+
+    <!-- 左側標題 -->
+    <div class="expense-list-title">
+      <h2>支出明細</h2>
+    </div>
+
+    <!-- 右側篩選列 -->
+    <div class="expense-filter-right">
+
+      <!-- 刪除已選 -->
+      @if (selection.selected.length > 0) {
+        <button
+          mat-raised-button
+          color="warn"
+          type="button"
+          class="delete-selected-btn"
+          (click)="deleteById()"
+        >
+          <mat-icon>delete</mat-icon>
           刪除已選 {{ selection.selected.length }} 筆
         </button>
-        }
-        <mat-form-field appearance="outline" class="filter-field">
-          <mat-label>記帳環境</mat-label>
-          <mat-select [value]="currentGroupId" (selectionChange)="onGroupChange($event.value)">
-            @for (g of userGroups; track g.groupId) {
-            <mat-option [value]="g.groupId">👥 {{ g.groupName }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="filter-field">
-          <mat-label>分類</mat-label>
-          <mat-select (selectionChange)="filterByCategory($event.value)">
-            <mat-option [value]="null">全部</mat-option>
-            @for (cat of categoryMap; track cat.id) {
-            <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="filter-field">
-          <mat-label>搜尋</mat-label>
-          <input matInput (input)="applyFilter($event)" />
-        </mat-form-field>
-      </div>
+      }
+
+      <!-- 記帳環境 -->
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>記帳環境</mat-label>
+
+        <mat-select
+          [value]="currentGroupId"
+          (selectionChange)="onGroupChange($event.value)"
+        >
+          @for (g of userGroups; track g.groupId) {
+            <mat-option [value]="g.groupId">
+              👥 {{ g.groupName }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <!-- 分類 -->
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>分類</mat-label>
+
+        <mat-select (selectionChange)="filterByCategory($event.value)">
+          <mat-option [value]="null">全部</mat-option>
+
+          @for (cat of categoryMap; track cat.id) {
+            <mat-option [value]="cat.id">
+              {{ cat.name }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <!-- 搜尋 -->
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>搜尋</mat-label>
+
+        <input
+          matInput
+          type="text"
+          (input)="applyFilter($event)"
+        />
+      </mat-form-field>
+
     </div>
 
-    <div class="table-responsive">
-      <table mat-table [dataSource]="dataSource" class="table table-hover align-middle mb-0 big-table">
+  </section>
 
+  <!-- 表格區 -->
+  <section class="table-card">
+
+    <div class="table-responsive">
+
+      <table
+        mat-table
+        [dataSource]="dataSource"
+        class="big-table"
+      >
+
+        <!-- 勾選欄 -->
         <ng-container matColumnDef="select">
           <th mat-header-cell *matHeaderCellDef>
-            <mat-checkbox (change)="$event ? masterToggle() : null" [checked]="selection.hasValue() && isAllSelected()"
-              [indeterminate]="selection.hasValue() && !isAllSelected()">
+            <mat-checkbox
+              (change)="$event ? masterToggle() : null"
+              [checked]="selection.hasValue() && isAllSelected()"
+              [indeterminate]="selection.hasValue() && !isAllSelected()"
+            >
             </mat-checkbox>
           </th>
+
           <td mat-cell *matCellDef="let row">
-            <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
-              [checked]="selection.isSelected(row)">
+            <mat-checkbox
+              (click)="$event.stopPropagation()"
+              (change)="$event ? selection.toggle(row) : null"
+              [checked]="selection.isSelected(row)"
+            >
             </mat-checkbox>
           </td>
         </ng-container>
 
+        <!-- 日期 -->
         <ng-container matColumnDef="expense_date">
           <th mat-header-cell *matHeaderCellDef>日期</th>
-          <td mat-cell *matCellDef="let e">{{ e.expenseDate }}</td>
+
+          <td mat-cell *matCellDef="let e">
+            {{ e.expenseDate }}
+          </td>
         </ng-container>
 
+        <!-- 消費名稱 -->
         <ng-container matColumnDef="related_item_name">
           <th mat-header-cell *matHeaderCellDef>消費名稱</th>
-          <td mat-cell *matCellDef="let e">{{ e.relatedItemName || '--' }}</td>
+
+          <td mat-cell *matCellDef="let e">
+            {{ e.relatedItemName || '--' }}
+          </td>
         </ng-container>
 
+        <!-- 分類 -->
         <ng-container matColumnDef="category_id">
           <th mat-header-cell *matHeaderCellDef>分類</th>
+
           <td mat-cell *matCellDef="let e">
             <span class="badge bg-primary px-3 py-2">
               {{ getCategoryName(e.categoryId) || '未分類' }}
@@ -112,72 +213,180 @@
           </td>
         </ng-container>
 
+        <!-- 備註 -->
         <ng-container matColumnDef="note">
           <th mat-header-cell *matHeaderCellDef>備註</th>
-          <td mat-cell *matCellDef="let e" class="note">{{ e.note || '--' }}</td>
-        </ng-container>
 
-        <ng-container matColumnDef="price">
-          <th mat-header-cell *matHeaderCellDef>金額</th>
-          <td mat-cell *matCellDef="let e" class="price">${{ e.price }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="user">
-          <th mat-header-cell *matHeaderCellDef>消費者</th>
-          <td mat-cell *matCellDef="let e">
-
-            <span class="user-chip" cdkOverlayOrigin #origin="cdkOverlayOrigin" (mouseenter)="activeExpenseId = e.id"
-              (mouseleave)="activeExpenseId = null">
-              @if(!groupUserInfo[e.userId]?.avatar){
-              <span class="avatar-sm">
-                {{ groupUserInfo[e.userId]?.userName?.slice(0,2) }}
-              </span>
-              }@else{
-              <img [src]="groupUserInfo[e.userId]?.avatar" alt="頭像"
-                style="width:28px; height:28px; border-radius:50%; object-fit:cover;">
-              }
-
-              {{ groupUserInfo[e.userId]?.userName || '未知使用者' }}
-            </span>
-
-            <ng-template cdkConnectedOverlay [cdkConnectedOverlayOrigin]="origin"
-              [cdkConnectedOverlayOpen]="activeExpenseId === e.id" [cdkConnectedOverlayPositions]="overlayPositions">
-              <div class="user-hover-card" (mouseenter)="activeExpenseId = e.id" (mouseleave)="activeExpenseId = null">
-
-                  @if(!groupUserInfo[e.userId]?.avatar){
-                  <span class="avatar-sm">
-                    {{ groupUserInfo[e.userId]?.userName?.slice(0,2) }}
-                  </span>
-                  }@else{
-                  <img [src]="groupUserInfo[e.userId]?.avatar" alt="頭像"
-                    style="width:28px; height:28px; border-radius:50%; object-fit:cover;">
-                  }
-
-                <p class="card-name">{{ groupUserInfo[e.userId]?.userName }}</p>
-                <div class="card-row">
-                  <mat-icon>email</mat-icon>
-                  {{ groupUserInfo[e.userId]?.email }}
-                </div>
-              </div>
-            </ng-template>
-
+          <td mat-cell *matCellDef="let e" class="note">
+            {{ e.note || '--' }}
           </td>
         </ng-container>
 
+        <!-- 金額 -->
+        <ng-container matColumnDef="price">
+          <th mat-header-cell *matHeaderCellDef>金額</th>
 
+          <td mat-cell *matCellDef="let e" class="price">
+            ${{ e.price }}
+          </td>
+        </ng-container>
+
+        <!-- 消費者 -->
+<!-- 私人記帳也保留這一欄，避免切換到群組時欄位跑版 -->
+<ng-container matColumnDef="user">
+  <th mat-header-cell *matHeaderCellDef>消費者</th>
+
+  <td mat-cell *matCellDef="let e">
+
+    <!-- 私人記帳 -->
+    @if (currentGroupId === 0) {
+      <span class="user-chip private-user">
+        <span class="avatar-sm">私</span>
+        <span class="user-name-text">私人</span>
+      </span>
+    }
+
+    <!-- 群組記帳 -->
+    @else {
+      <span
+        class="user-chip"
+        cdkOverlayOrigin
+        #origin="cdkOverlayOrigin"
+        (mouseenter)="activeExpenseId = e.id"
+        (mouseleave)="activeExpenseId = null"
+      >
+        @if (!groupUserInfo[e.userId]?.avatar) {
+          <span class="avatar-sm">
+            {{ groupUserInfo[e.userId]?.userName?.slice(0, 2) || '?' }}
+          </span>
+        } @else {
+          <img
+            [src]="groupUserInfo[e.userId]?.avatar"
+            alt="頭像"
+            class="user-avatar-img"
+          />
+        }
+
+<<<<<<< HEAD
+                @if (!groupUserInfo[e.userId]?.avatar) {
+                  <span class="avatar-sm">
+                    {{ groupUserInfo[e.userId]?.userName?.slice(0, 2) || '?' }}
+                  </span>
+                } @else {
+                  <img
+                    [src]="groupUserInfo[e.userId]?.avatar"
+                    alt="頭像"
+                    class="user-avatar-img"
+                  />
+                }
+=======
+        <span class="user-name-text">
+          {{ groupUserInfo[e.userId]?.userName || '未知使用者' }}
+        </span>
+      </span>
+>>>>>>> origin/feature-calendar
+
+      <!-- 使用者 hover 資訊卡 -->
+      <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="origin"
+        [cdkConnectedOverlayOpen]="activeExpenseId === e.id"
+        [cdkConnectedOverlayPositions]="overlayPositions"
+      >
+        <div
+          class="user-hover-card"
+          (mouseenter)="activeExpenseId = e.id"
+          (mouseleave)="activeExpenseId = null"
+        >
+          @if (!groupUserInfo[e.userId]?.avatar) {
+            <span class="avatar-sm">
+              {{ groupUserInfo[e.userId]?.userName?.slice(0, 2) || '?' }}
+            </span>
+          } @else {
+            <img
+              [src]="groupUserInfo[e.userId]?.avatar"
+              alt="頭像"
+              class="user-avatar-img"
+            />
+          }
+
+          <p class="card-name">
+            {{ groupUserInfo[e.userId]?.userName || '未知使用者' }}
+          </p>
+
+          <div class="card-row">
+            <mat-icon>email</mat-icon>
+            {{ groupUserInfo[e.userId]?.email || '未提供 Email' }}
+          </div>
+        </div>
+      </ng-template>
+    }
+
+<<<<<<< HEAD
+                  @if (!groupUserInfo[e.userId]?.avatar) {
+                    <span class="avatar-sm">
+                      {{ groupUserInfo[e.userId]?.userName?.slice(0, 2) || '?' }}
+                    </span>
+                  } @else {
+                    <img
+                      [src]="groupUserInfo[e.userId]?.avatar"
+                      alt="頭像"
+                      class="user-avatar-img"
+                    />
+                  }
+=======
+  </td>
+</ng-container>
+>>>>>>> origin/feature-calendar
+
+
+
+<<<<<<< HEAD
+                </div>
+              </ng-template>
+            }
+=======
+>>>>>>> origin/feature-calendar
+
+
+        <!-- 操作 -->
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef></th>
+
           <td mat-cell *matCellDef="let e">
-            <button mat-icon-button color="primary" (click)="openEditDialog(e)">
+            <button
+              mat-icon-button
+              color="primary"
+              type="button"
+              (click)="openEditDialog(e)"
+              title="修改"
+            >
               <mat-icon>edit</mat-icon>
             </button>
           </td>
         </ng-container>
 
+        <!-- 表頭列 -->
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+
+        <!-- 資料列 -->
         <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-        <!-- (click)="openEditDialog(row)" -->
+
       </table>
+
     </div>
-  </div>
+
+  </section>
+
+  <!-- 固定在畫面右下角的新增支出按鈕 -->
+  <button
+    mat-fab
+    type="button"
+    class="expense-add-fab"
+    (click)="openCreateDialog()"
+    title="新增支出"
+  >
+    <mat-icon>add</mat-icon>
+  </button>
+
 </div>

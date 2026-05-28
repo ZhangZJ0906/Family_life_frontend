@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
+import { NotifySettingService } from '../../@services/NotifySettingService';
 import { AuthService } from '../../@services/auth.service';
 import { map } from 'rxjs';
 
@@ -39,7 +40,7 @@ export class ProfileComponent implements CanComponentDeactivate {
   endDateNotify = true;
 
   //email通知
-  emailNotify = true;
+  emailNotify = false;
 
   //公開個人清單
   publicInventoryObj: { [groupId: number]: boolean } = {};
@@ -52,7 +53,8 @@ export class ProfileComponent implements CanComponentDeactivate {
 
   constructor(
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
+    private notifySettingService: NotifySettingService //共享userInfo
   ) {}
 
   user_id = 0;
@@ -79,6 +81,11 @@ export class ProfileComponent implements CanComponentDeactivate {
         this.emailNotify = res.notifyByEmail;
         this.avatarUrl = res.avatar;
         console.log(res.notifyByEmail)
+
+        //共享userInfo
+        this.notifySettingService.setName(res.name);
+        this.notifySettingService.setNotifyByEndDate(res.notifyByEndDate);
+        this.notifySettingService.setNotifyByEmail(res.notifyByEmail);
       },
 
       error: (err) => {
@@ -199,6 +206,9 @@ export class ProfileComponent implements CanComponentDeactivate {
       this.userName = result.value.userName;
       this.email = result.value.email;
 
+      //共享
+      this.notifySettingService.setName(this.userName);
+
       //暫存
       this.isDirty = true;
 
@@ -309,6 +319,11 @@ openAvatarDialog(): void {
           text: '資料已更新',
           confirmButtonText: '確認'
         });
+
+        //共享info
+        this.notifySettingService.setName(this.userName);
+        this.notifySettingService.setNotifyByEndDate(this.endDateNotify);
+        this.notifySettingService.setNotifyByEmail(this.emailNotify);
 
         //存進db
         this.isDirty = false;

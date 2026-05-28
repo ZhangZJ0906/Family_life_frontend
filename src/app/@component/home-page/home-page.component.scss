@@ -7,9 +7,7 @@
   box-sizing: border-box;
 }
 
-
-
-/* 歡迎卡片：包含早安 Jack 和橫向金額 */
+/* 歡迎卡片：包含早安 Jack、月份群組控制、金額摘要 */
 .welcome-card {
   background: #ffffff;
   border-radius: 22px;
@@ -19,9 +17,19 @@
   box-sizing: border-box;
 }
 
-/* 歡迎文字區 */
-.welcome-text {
+/* 歡迎卡片上半部：左標題 / 中月份 / 右群組 */
+.welcome-top {
+  display: grid;
+  grid-template-columns: 360px 1fr 240px;
+  align-items: center;
+  gap: 28px;
   margin-bottom: 24px;
+}
+
+
+/* 左側文字 */
+.welcome-text {
+  min-width: 0;
 }
 
 /* 歡迎標題 */
@@ -29,6 +37,7 @@
   margin: 0;
   font-size: 34px;
   font-weight: 800;
+  color: #111827;
 }
 
 /* 歡迎說明文字 */
@@ -36,6 +45,134 @@
   margin: 10px 0 0;
   color: #7a7a7a;
   font-size: 16px;
+}
+
+/* 首頁記帳控制區：月份切換 + 群組切換 */
+.home-expense-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  flex-wrap: nowrap;
+
+  /* 不要用 margin-right: auto，會把位置推歪 */
+  margin-right: 0;
+}
+
+/* 中間月份：強制置中 */
+.home-month-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+
+/* 月份左右切換按鈕：改成跟記帳頁接近 */
+.month-btn {
+  width: 52px;
+  height: 52px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+}
+
+/* 月份按鈕 hover */
+.month-btn:hover:not(:disabled) {
+  background: #eef4ff;
+}
+
+/* 月份按鈕 disabled 狀態 */
+.month-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* 月份 icon */
+.month-btn mat-icon {
+  font-size: 26px;
+  width: 26px;
+  height: 26px;
+}
+
+/* 目前月份顯示卡：放大成跟記帳頁視覺一致 */
+.month-info {
+  min-width: 210px;
+  height: 72px;
+
+  border: 1px solid #dbe6ff;
+  border-radius: 18px;
+  background: #eef4ff;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.08);
+}
+
+/* 目前月份小字 */
+.month-info span {
+  font-size: 13px;
+  font-weight: 800;
+  color: #3b63f6;
+  margin-bottom: 6px;
+}
+
+/* 年月文字 */
+.month-info strong {
+  font-size: 24px;
+  font-weight: 900;
+  color: #1e3a8a;
+  letter-spacing: 0.5px;
+}
+
+/* 記帳群組下拉：改成跟記帳頁 filter-field 一樣大小 */
+/* 右側群組 */
+.home-group-select {
+  width: 240px;
+  margin-bottom: 0;
+  justify-self: end;
+}
+
+/* Material 欄位高度 */
+.home-group-select ::ng-deep .mat-mdc-text-field-wrapper {
+  height: 66px;
+  background: #ffffff;
+  border-radius: 12px;
+}
+
+/* 讓文字垂直置中 */
+.home-group-select ::ng-deep .mat-mdc-form-field-flex {
+  height: 66px;
+  align-items: center;
+}
+
+/* 移除底部預留空間 */
+.home-group-select ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+/* 下拉文字大小 */
+.home-group-select ::ng-deep .mat-mdc-select-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* label 樣式 */
+.home-group-select ::ng-deep .mat-mdc-floating-label {
+  font-size: 14px;
 }
 
 /* 金額摘要橫向排列 */
@@ -104,7 +241,7 @@
   color: #3fa765;
 }
 
-/* 第二區：左右各半 */
+/* 第二區：左邊統計數量，右邊今日優先處理 */
 .bottom-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -247,16 +384,15 @@
   color: #2f80ed;
 }
 
-/* 窄螢幕時改成單欄 */
+/* 平板以下：首頁區塊改成直向排列 */
 @media (max-width: 1100px) {
-  .topbar {
-    grid-template-columns: 1fr;
-    height: auto;
-    padding: 18px;
+  .welcome-top {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  .top-nav {
-    flex-wrap: wrap;
+  .home-expense-toolbar {
+    width: 100%;
     justify-content: flex-start;
   }
 
@@ -264,5 +400,41 @@
   .bottom-grid,
   .summary-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* 手機版 */
+@media (max-width: 768px) {
+  .home-page {
+    padding: 16px;
+  }
+
+  .welcome-card {
+    padding: 22px;
+  }
+
+  .welcome-text h1 {
+    font-size: 28px;
+  }
+
+  .home-expense-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .home-month-switch {
+    justify-content: center;
+  }
+
+  .home-group-select {
+    width: 100%;
+  }
+
+  .money-item {
+    padding: 18px;
+  }
+
+  .money-item h2 {
+    font-size: 28px;
   }
 }
