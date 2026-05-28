@@ -24,8 +24,10 @@
     "@fullcalendar/core": "^6.1.20",
     "@fullcalendar/daygrid": "^6.1.20",
     "@fullcalendar/interaction": "^6.1.20",
+    "@stomp/stompjs": "^7.3.0",
     "bootstrap": "^5.3.8",
     "rxjs": "~7.8.0",
+    "sockjs-client": "^1.6.1",
     "sweetalert2": "^11.26.24",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
@@ -35,6 +37,7 @@
     "@angular/cli": "^19.0.5",
     "@angular/compiler-cli": "^19.0.0",
     "@types/jasmine": "~5.1.0",
+    "@types/sockjs-client": "^1.5.4",
     "jasmine-core": "~5.4.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",

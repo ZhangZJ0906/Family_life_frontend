@@ -29,6 +29,7 @@ export class NotifyDialogComponent {
     invite: 0,
     group: 0,
     itemlist: 0,
+    expense:0,
     update: 0
   };
 
@@ -43,17 +44,17 @@ export class NotifyDialogComponent {
     this.user_id = data.userId;
   }
 
-  filterType: 'all' | 'invite' | 'group' | 'itemlist' | 'update' = 'all';
+  filterType: 'all' | 'invite' | 'group' | 'itemlist' | 'expense'| 'update'= 'all';
 
   filteredNotifies() {
     if (this.filterType === 'all') {
       return this.notifies;
     }
-
+     // 2026-05-27 多加expense by ZJ
      // 🔥 group tab 同時包含 itemlist
     if (this.filterType === 'group') {
       return this.notifies.filter(n =>
-        n.type === 'group' || n.type === 'itemlist'
+        n.type === 'group' || n.type === 'itemlist'|| n.type === 'expense'
       );
     }
 
@@ -161,8 +162,14 @@ export class NotifyDialogComponent {
     ).length;
 
     this.unreadMap.update = this.notifies.filter(
+    n => n.isRead !== 1 &&
+    ( n.type === 'expense')
+    ).length;
+
+    this.unreadMap.update = this.notifies.filter(
       n => n.isRead !== 1 && n.type === 'update'
     ).length;
+
 
   }
 
