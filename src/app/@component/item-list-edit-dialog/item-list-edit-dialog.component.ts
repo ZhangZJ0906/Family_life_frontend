@@ -185,11 +185,7 @@ export class ItemListEditDialogComponent implements OnInit {
 
     if (this.isSubscriptionCategory()) {
     payload = {
-<<<<<<< HEAD
-      _type: "subscription",
-=======
       _type: 'subscription',       // ✅
->>>>>>> origin/ZJ
       id: this.item.id,
       groupId: this.item.groupId,
       userId: userId,
@@ -203,11 +199,7 @@ export class ItemListEditDialogComponent implements OnInit {
     };
   } else if (this.isWarrantyCategory()) {
     payload = {
-<<<<<<< HEAD
-      _type: "warranty",
-=======
       _type: 'warranty',           // ✅
->>>>>>> origin/ZJ
       id: this.item.id,
       groupId: this.item.groupId,
       userId: userId,
@@ -223,31 +215,6 @@ export class ItemListEditDialogComponent implements OnInit {
       note: this.item.note,
     };
   } else if (this.isMedicineCategory()) {
-<<<<<<< HEAD
-  payload = {
-    _type: "medicine",
-    id: this.item.id,
-    groupId: this.item.groupId,
-    userId: userId,
-    name: this.item.name,
-    medicineType: this.item.medicineType,
-    quantity: this.item.quantity,
-    unit: this.item.unit,
-    safeQuantity: this.item.safeQuantity ?? 0,
-    purchaseDate: this.formatDate(this.item.purchaseDate),
-    expireDate: this.formatDate(this.item.expireDate),
-    dosage: this.item.dosage,
-    usageMethod: this.item.usageMethod,
-    unitPrice: this.item.unitPrice,
-    location: this.item.location,
-    source: this.item.source,
-    notify: this.item.notify,
-    note: this.item.note,
-  };
-}
-  else {
-=======
->>>>>>> origin/ZJ
     payload = {
       _type: 'medicine',           // ✅
       id: this.item.id,
@@ -279,8 +246,8 @@ export class ItemListEditDialogComponent implements OnInit {
     };
   }
 
-  this.dialogRef.close(payload);   
-  
+  this.dialogRef.close(payload);
+
 }
   onCancel(): void {
     this.dialogRef.close();
