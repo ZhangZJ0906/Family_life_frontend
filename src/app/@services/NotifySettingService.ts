@@ -10,6 +10,10 @@ export class NotifySettingService {
   private nameSubject = new BehaviorSubject<string>('');
   nameSubject$ = this.nameSubject.asObservable();
 
+  //Email
+  private emailSubject = new BehaviorSubject<string>('');
+  emailSubject$ = this.emailSubject.asObservable();
+
   // 到期通知
   private notifyByEndDateSubject = new BehaviorSubject<boolean>(true);
   notifyByEndDate$ = this.notifyByEndDateSubject.asObservable();
@@ -21,6 +25,11 @@ export class NotifySettingService {
   // 更新名稱
   setName(value: string) {
     this.nameSubject.next(value);
+  }
+
+  // 更新Email
+  setEmail(value: string) {
+    this.emailSubject.next(value);
   }
 
   // 更新到期通知

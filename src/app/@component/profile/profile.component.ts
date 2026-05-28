@@ -40,7 +40,7 @@ export class ProfileComponent implements CanComponentDeactivate {
   endDateNotify = true;
 
   //email通知
-  emailNotify = true;
+  emailNotify = false;
 
   //公開個人清單
   publicInventoryObj: { [groupId: number]: boolean } = {};

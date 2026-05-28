@@ -7,6 +7,8 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { MatIcon } from "@angular/material/icon";
 import { NotifySettingService } from '../../@services/NotifySettingService';
@@ -54,6 +56,10 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
   //email通知
   NotifyByEmail!: boolean;
+  Email = "";
+
+  destroy$ = new Subject<void>();//避免重複傳送
+  lastUnreadCount = 0;
 
   constructor(
     private dialog: MatDialog,
@@ -63,20 +69,25 @@ export class TopbarComponent implements OnInit, OnDestroy {
     private browserNotify: BrowserNotifyService,
     private socketService: NotificationSocketService,
     private notifySettingService: NotifySettingService //共享userInfo
+
   ) {
-    this.notifySettingService.nameSubject$.subscribe(value => {
+    this.notifySettingService.nameSubject$.pipe(takeUntil(this.destroy$)).subscribe(value => {
       this.user_name = value;
     });
 
-    this.notifySettingService.notifyByEndDate$.subscribe(value => {
+    this.notifySettingService.emailSubject$.pipe(takeUntil(this.destroy$)).subscribe(value => {
+      this.Email = value;
+    });
+
+    this.notifySettingService.notifyByEndDate$.pipe(takeUntil(this.destroy$)).subscribe(value => {
       this.NotifyByEndDate = value;
 
-      if(this.NotifyByEndDate == true){
-          this.browserNotify.requestPermission();
+      if (value) {
+        this.browserNotify.requestPermission();
       }
     });
 
-    this.notifySettingService.notifyByEmail$.subscribe(value => {
+    this.notifySettingService.notifyByEmail$.pipe(takeUntil(this.destroy$)).subscribe(value => {
       this.NotifyByEmail = value;
     });
 
@@ -101,6 +112,8 @@ export class TopbarComponent implements OnInit, OnDestroy {
           `${this.user_name}目前有 ${count} 則未讀通知`
         );
       }
+
+      this.lastUnreadCount = count;
     });
 
     // 如果沒有登入資料，先不呼叫後端，避免 user_id=undefined 或 0 出錯
@@ -126,6 +139,9 @@ export class TopbarComponent implements OnInit, OnDestroy {
     // 離開頁面時移除監聽
     window.removeEventListener('avatarChanged', this.loadAvatar);
     this.socketService.disconnect();
+
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   // 開關手機版選單
@@ -222,4 +238,20 @@ export class TopbarComponent implements OnInit, OnDestroy {
         },
       });
   };
+
+  // //船Mail
+  // sendEmailTest(Email: string) {
+  //   this.http.get(
+  //     `http://localhost:8080/users/test-mail?email=${Email}`,
+  //     { responseType: 'text' }
+  //   ).subscribe({
+  //     next: (res) => {
+  //       console.log("success:", res);
+  //     },
+  //     error: (err) => {
+  //       console.log(err);
+  //     }
+  //   });
+  // }
+
 }
