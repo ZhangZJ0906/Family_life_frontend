@@ -37,6 +37,7 @@ export class NotifyDialogComponent implements OnInit {
     | 'invite'
     | 'group'
     | 'itemlist'
+    | 'expense'
     | 'calendar'
     | 'update' = 'all';
 
@@ -60,19 +61,9 @@ export class NotifyDialogComponent implements OnInit {
     this.user_id = data.userId;
   }
 
-  // filterType: 'all' | 'invite' | 'group' | 'itemlist' | 'expense'| 'update'= 'all';
-
-
-
-  
-
   ngOnInit(): void {
     this.getNotify();
   }
-
-
-
-
 
   getUnreadCountByType(type: string): number {
 

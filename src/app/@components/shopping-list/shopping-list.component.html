@@ -29,9 +29,9 @@
         <span>{{ filteredLists.length }} 筆</span>
         <select name="groupFilter" [(ngModel)]="groupFilter" aria-label="群組篩選">
           <option [ngValue]="'all'">全部群組</option>
-          <option [ngValue]="null">無</option>
+          <option [ngValue]="0">私人</option>
           @for (group of groupOptions; track group.id) {
-            @if (group.id !== null) {
+            @if (group.id !== 0) {
               <option [ngValue]="group.id">{{ group.name }}</option>
             }
           }
@@ -189,6 +189,8 @@
 
       @if (loadingItemsByListId[selectedStatsList.id]) {
         <div class="state-box compact">購物項目載入中...</div>
+      } @else if (isLoadingMembers(selectedStatsList.group_id)) {
+        <div class="state-box compact">群組成員載入中...</div>
       } @else if (getItems(selectedStatsList.id).length === 0) {
         <div class="state-box compact">這份清單目前沒有項目。</div>
       } @else {
@@ -212,6 +214,9 @@
                     · {{ item.checkDate }}
                   }
                 </small>
+                @if (selectedStatsList.group_id !== 0) {
+                  <small>指派給：{{ getMemberName(selectedStatsList.group_id, item.userId) }}</small>
+                }
               </div>
 
               <span class="quantity">x {{ item.quantity }}</span>

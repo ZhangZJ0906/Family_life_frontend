@@ -7,8 +7,11 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { MatIcon } from "@angular/material/icon";
+import { NotifySettingService } from '../../@services/NotifySettingService';
 import { AuthService } from '../../@services/auth.service';
 import { NotifyService } from '../../@services/NotifyService';
 import { BrowserNotifyService } from '../../@services/BrowserNotifyService';
@@ -37,6 +40,9 @@ export class TopbarComponent implements OnInit, OnDestroy {
   // 目前登入使用者 id
   user_id = 0;
 
+  //使用者名字
+  user_name = "";
+
   // 未讀通知數量，預設 0，避免畫面出現 undefined
   unreadCount = 0;
 
@@ -45,14 +51,48 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
   selected = '';
 
+  //到期通知
+  NotifyByEndDate!: boolean;
+
+  //email通知
+  NotifyByEmail!: boolean;
+  Email = "";
+
+  destroy$ = new Subject<void>();//避免重複傳送
+  lastUnreadCount = 0;
+
   constructor(
     private dialog: MatDialog,
     private http: HttpClient,
     private authService: AuthService,
     private notifyService: NotifyService,
     private browserNotify: BrowserNotifyService,
-    private socketService: NotificationSocketService
+    private socketService: NotificationSocketService,
+    private notifySettingService: NotifySettingService //共享userInfo
+
   ) {
+    this.notifySettingService.nameSubject$.pipe(takeUntil(this.destroy$)).subscribe(value => {
+      this.user_name = value;
+    });
+
+    this.notifySettingService.emailSubject$.pipe(takeUntil(this.destroy$)).subscribe(value => {
+      this.Email = value;
+    });
+
+    this.notifySettingService.notifyByEndDate$.pipe(takeUntil(this.destroy$)).subscribe(value => {
+      this.NotifyByEndDate = value;
+
+      if (value) {
+        this.browserNotify.requestPermission();
+      }
+    });
+
+    this.notifySettingService.notifyByEmail$.pipe(takeUntil(this.destroy$)).subscribe(value => {
+      this.NotifyByEmail = value;
+    });
+
+    // console.log("NE: ", this.NotifyByEndDate)
+
     this.user_id = this.authService.currentUser()?.user_id ?? 0;
   }
 
@@ -60,18 +100,20 @@ export class TopbarComponent implements OnInit, OnDestroy {
     // 取得目前登入使用者
     const currentUser = this.authService.currentUser();
 
-    this.browserNotify.requestPermission();
-
     this.socketService.unreadCount$.subscribe(count => {
       this.unreadCount = count;
       this.notifyService.setUnreadCount(count);
 
-      if (count > 0) {
+      console.log("count: ", count)
+
+      if (count > 0 && this.NotifyByEndDate) {
         this.browserNotify.send(
           '家庭系統通知',
-          `你目前有 ${count} 則未讀通知`
+          `${this.user_name}目前有 ${count} 則未讀通知`
         );
       }
+
+      this.lastUnreadCount = count;
     });
 
     // 如果沒有登入資料，先不呼叫後端，避免 user_id=undefined 或 0 出錯
@@ -97,6 +139,9 @@ export class TopbarComponent implements OnInit, OnDestroy {
     // 離開頁面時移除監聽
     window.removeEventListener('avatarChanged', this.loadAvatar);
     this.socketService.disconnect();
+
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   // 開關手機版選單
@@ -193,4 +238,20 @@ export class TopbarComponent implements OnInit, OnDestroy {
         },
       });
   };
+
+  // //船Mail
+  // sendEmailTest(Email: string) {
+  //   this.http.get(
+  //     `http://localhost:8080/users/test-mail?email=${Email}`,
+  //     { responseType: 'text' }
+  //   ).subscribe({
+  //     next: (res) => {
+  //       console.log("success:", res);
+  //     },
+  //     error: (err) => {
+  //       console.log(err);
+  //     }
+  //   });
+  // }
+
 }

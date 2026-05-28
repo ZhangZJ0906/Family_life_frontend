@@ -35,7 +35,7 @@ import { ActivatedRoute } from '@angular/router';
     MatFormFieldModule,
     MatSelect,
     MatSelectModule,
-    MatIconModule,
+    MatIconModule
   ],
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss',
@@ -683,19 +683,14 @@ export class CalendarComponent {
       },
     });
 
+    console.log("GID:: ", info.event);
     ref.afterClosed().subscribe((result) => {
-      // 使用者按取消或關閉 Dialog，不做任何事
-      if (!result) {
-        return;
-      }
-
+      if (!result) return;
       const payload = {
-        groupId,
-        createdBy: this.createdBy,
+        groupId: this.currentGroupId,   // ⭐補這個
+        createdBy: this.createdBy,      // ⭐建議也補
         ...result,
       };
-
-      console.log('updateCalendarEvent payload:', payload);
 
       this.calendarApiService.update(Number(info.event.id), payload).subscribe({
         next: (res: any) => {
@@ -730,7 +725,6 @@ export class CalendarComponent {
   // 點擊活動後，可選擇修改或刪除
   handleEventClick(info: EventClickArg): void {
     const eventId = Number(info.event.id);
-
     Swal.fire({
       title: info.event.title,
       text: '請選擇要執行的操作',
@@ -829,7 +823,6 @@ export class CalendarComponent {
       notifyBefore: notifyBefore,
 
       groupId: this.currentGroupId,
-      createdBy: this.createdBy,
     };
 
     //拖曳後日期早於今天，就還原位置
@@ -865,7 +858,13 @@ export class CalendarComponent {
         return;
       }
 
-      this.calendarApiService.update(eventId, data).subscribe({
+      const payload = {
+        currentGroupId,   // ⭐補這個
+        createdBy: this.createdBy,      // ⭐建議也補
+        ...data,
+      };
+
+      this.calendarApiService.update(eventId, payload).subscribe({
         next: () => {
           Swal.fire({
             icon: 'success',

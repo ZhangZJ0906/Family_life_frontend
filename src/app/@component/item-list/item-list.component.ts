@@ -156,7 +156,6 @@ export class ItemListComponent {
     this.route.params.subscribe((params) => {
       const groupId = Number(params['groupId']) || 0;
       this.initData(groupId);
-      
     });
   }
 
@@ -169,7 +168,7 @@ export class ItemListComponent {
     this.getUserGroupData(groupId);
   }
 
-  
+
   /*新增物品 */
   openAddDialog() {
     const dialogRef = this.dialog.open(ItemListAddDialogComponent, {
@@ -227,6 +226,7 @@ export class ItemListComponent {
 
       const { _type, ...payload } = result; // 把 _type 拆出來，不傳給後端
       payload.userId=this.currentUserId
+
       //更新
       const apiMap: Record<string, string> = {
         subscription: 'subscription/update',
@@ -726,7 +726,7 @@ export class ItemListComponent {
         // 多筆刪除
         selectedIds.forEach((id) => {
           this.http
-            .deleteApi(this.basicUrl + `subscription/delete?id=${id}`)
+            .deleteApi(this.basicUrl + `subscription/delete?id=${id}&userId=${this.currentUserId}`)
             .subscribe({
               next: (res: any) => {
                 if (res.code !== 200) {
@@ -769,7 +769,7 @@ export class ItemListComponent {
       if (this.isWarrantyMode) {
         selectedIds.forEach((id) => {
           this.http
-            .deleteApi(this.basicUrl + `warranty/delete?id=${id}`)
+            .deleteApi(this.basicUrl + `warranty/delete?id=${id}&userId=${this.currentUserId}`)
             .subscribe({
               next: (res: any) => {
                 if (res.code !== 200) {
@@ -808,7 +808,7 @@ export class ItemListComponent {
       if (this.isMedicineMode) {
         selectedIds.forEach((id) => {
           this.http
-            .deleteApi(this.basicUrl + `medicine/delete?id=${id}`)
+            .deleteApi(this.basicUrl + `medicine/delete?id=${id}&userId=${this.currentUserId}`)
             .subscribe({
               next: (res: any) => {
                 if (res.code !== 200) {
@@ -845,7 +845,7 @@ export class ItemListComponent {
       }
 
       // 一般物品刪除
-      this.http.postApi(this.basicUrl + 'item/delete', selectedIds).subscribe({
+      this.http.postApi(this.basicUrl + `item/delete?userId=${this.currentUserId}`, selectedIds).subscribe({
         next: (res: any) => {
           if (res.code != 200) {
             Swal.fire({
