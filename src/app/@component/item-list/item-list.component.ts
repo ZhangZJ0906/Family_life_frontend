@@ -178,10 +178,6 @@ export class ItemListComponent {
     this.getUserGroupData(groupId);
   }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/ZJ
   /*新增物品 */
   openAddDialog() {
     const dialogRef = this.dialog.open(ItemListAddDialogComponent, {
@@ -238,12 +234,7 @@ export class ItemListComponent {
       if (!result) return;
 
       const { _type, ...payload } = result; // 把 _type 拆出來，不傳給後端
-<<<<<<< HEAD
-      payload.userId=this.currentUserId
-
-=======
       payload.userId = this.currentUserId;
->>>>>>> origin/ZJ
       //更新
       const apiMap: Record<string, string> = {
         subscription: 'subscription/update',
@@ -718,8 +709,13 @@ export class ItemListComponent {
     this.isGlobalSearch = true;
     this.displayedColumns = this.globalSearchColumns;
 
-    this.dataSource.data = this.allData.filter((item) =>
-      JSON.stringify(item).toLowerCase().includes(keyword),
+    this.dataSource.data = this.allData.filter((item) =>{
+          const name =item.name||''
+    return name.toLowerCase().includes(keyword)
+    }
+      // JSON.stringify(item).toLowerCase().includes(keyword),
+
+
     );
 
     this.dataSource.paginator?.firstPage();
