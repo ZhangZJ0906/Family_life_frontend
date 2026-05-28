@@ -4,24 +4,28 @@ import { Router, RouterLink } from '@angular/router';
 import { User } from '../../@models/user.model';
 import { AuthService } from '../../@services/auth.service';
 import { MatIconModule } from '@angular/material/icon';
+import { HttpClientService } from '../../@services/http-client.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule,
-            RouterLink,
-            MatIconModule],
+  imports: [FormsModule, RouterLink, MatIconModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
 export class LoginComponent {
   email = '';
+  checkEmail = '';
   password = '';
   errorMessage = '';
   showPassword: boolean = false;
-
+  isForgotPwd: boolean = false;
+  updatePwd: boolean = false;
+  newPassword = '';
   constructor(
     private readonly authService: AuthService,
     private readonly router: Router,
+    private readonly http: HttpClientService,
   ) {}
 
   signIn(): void {
@@ -55,5 +59,80 @@ export class LoginComponent {
 
   togglePassword(): void {
     this.showPassword = !this.showPassword;
+  }
+  forGotPwd() {
+    this.isForgotPwd = true;
+  }
+  getBackToLogin() {
+    this.isForgotPwd = false;
+  }
+
+  checkEmailFromBackend() {
+    this.http
+      .getApi(this.http.basicUrl + `users/checkEmail?email=${this.checkEmail}`)
+      .subscribe({
+        next: (res: any) => {
+          if (res.code != 200) {
+            Swal.fire({
+              title: '錯誤',
+              icon: 'error',
+              text: res.message || 'server 錯誤',
+            });
+            return;
+          }
+          this.updatePwd = true;
+        },
+        error(err) {
+          Swal.fire({
+            title: '錯誤',
+            icon: 'error',
+            text: err.message || 'server 錯誤',
+          });
+        },
+      });
+  }
+
+  updatePassword() {
+    if (this.newPassword.length < 6) {
+      Swal.fire({
+        title: '錯誤',
+        icon: 'error',
+        text: '密碼至少需要 6 個字元',
+      });
+      return;
+    }
+    const payload = {
+      email: this.checkEmail,
+      password: this.newPassword,
+    };
+    console.log(payload)
+
+    this.http.postApi(this.http.basicUrl+'users/updatePassword', payload).subscribe({
+      next: (res: any) => {
+        if (res.code != 200) {
+          Swal.fire({
+            title: '錯誤',
+            icon: 'error',
+            text: res.message || 'server 錯誤',
+          });
+          return;
+        }
+
+        Swal.fire({
+          title: '成功',
+          icon: 'success',
+        });
+        this.newPassword = '';
+        this.updatePwd = false;
+        this.getBackToLogin();
+      },
+      error(err) {
+        Swal.fire({
+          title: '錯誤',
+          icon: 'error',
+          text: err.message || 'server 錯誤',
+        });
+      },
+    });
   }
 }
