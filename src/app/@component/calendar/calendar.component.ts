@@ -35,7 +35,11 @@ import { ActivatedRoute } from '@angular/router';
     MatFormFieldModule,
     MatSelect,
     MatSelectModule,
+<<<<<<< HEAD
     MatIconModule
+=======
+    MatIconModule,
+>>>>>>> origin/ZJ
   ],
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss',
@@ -108,7 +112,7 @@ export class CalendarComponent {
 
           // 取得網址上的 groupId
           this.routeGroupId = Number(
-            this.route.snapshot.paramMap.get('groupId')
+            this.route.snapshot.paramMap.get('groupId'),
           );
 
           // 如果網址沒有 groupId 就預設私人
@@ -174,12 +178,15 @@ export class CalendarComponent {
      });*/
 
     //2026-05-24 by ZJ 試試看新東西
-    let url = "";
-    console.log("groupid:", groupId)
-    if(groupId == 0){ //看私人
-      url = this.http.basicUrl + `calendar/getUserEventInfo?userId=${userId}&groupId=${groupId}`;
-    }
-    else{ //看特定群組
+    let url = '';
+    console.log('groupid:', groupId);
+    if (groupId == 0) {
+      //看私人
+      url =
+        this.http.basicUrl +
+        `calendar/getUserEventInfo?userId=${userId}&groupId=${groupId}`;
+    } else {
+      //看特定群組
       url = this.http.basicUrl + `calendar/group/${groupId}`;
     }
 
@@ -404,41 +411,77 @@ export class CalendarComponent {
   //   }
 
   createCalendarEvent(dateStr?: string): void {
+    // 後端目前私人活動是 groupId = 0，不是 null
+    const groupId =
+      this.currentGroupId === undefined || this.currentGroupId === null
+        ? 0
+        : Number(this.currentGroupId);
+
+    // 找出目前選到的群組名稱，給 Dialog 顯示唯讀欄位用
+    const selectedGroup = this.userGroupList.find(
+      (group) => Number(group.groupId) === Number(groupId),
+    );
+
+    // groupId = 0 代表私人活動
+    const groupName =
+      groupId === 0 ? '私人活動' : selectedGroup?.groupName || '未選擇群組';
+
     const ref = this.dialog.open(CalendarEventDialogComponent, {
-      width: '480px',
-      data: { mode: 'create', dateStr },
+      width: '760px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      panelClass: 'calendar-event-dialog-panel',
+      autoFocus: false,
+      data: {
+        mode: 'create',
+        dateStr,
+        groupId,
+        groupName,
+      },
     });
 
     ref.afterClosed().subscribe((result) => {
+      // 使用者按取消或關閉 Dialog，不做任何事
+      if (!result) {
+        return;
+      }
+
+      // 後端目前私人活動要吃 groupId = 0
       const payload = {
-        groupId: this.currentGroupId,
+        groupId,
         createdBy: this.createdBy,
         ...result,
       };
-      if (!result) return;
+
+      console.log('createCalendarEvent payload:', payload);
+
       this.calendarApiService.create(payload).subscribe({
         next: (res: any) => {
           if (res.code !== 200) {
             Swal.fire({
               icon: 'error',
               title: '新增失敗',
-              text: res.message,
+              text: res.message || '新增失敗',
             });
             return;
           }
+
           Swal.fire({
             icon: 'success',
             title: '新增成功',
             confirmButtonText: '確認',
           });
-          this.loadCalendarEvents(this.currentGroupId, this.createdBy);
+
+          this.loadCalendarEvents(groupId, this.createdBy);
         },
-        error: (err) =>
+
+        error: (err) => {
           Swal.fire({
             icon: 'error',
             title: '新增失敗',
-            text: err.error?.message,
-          }),
+            text: err.error?.message || '伺服器發生錯誤',
+          });
+        },
       });
     });
   }
@@ -613,13 +656,40 @@ export class CalendarComponent {
   //   }
 
   openUpdateDialog(info: EventClickArg): void {
+    // 後端目前私人活動是 groupId = 0，不是 null
+    const groupId =
+      this.currentGroupId === undefined || this.currentGroupId === null
+        ? 0
+        : Number(this.currentGroupId);
+
+    // 找出目前選到的群組名稱
+    const selectedGroup = this.userGroupList.find(
+      (group) => Number(group.groupId) === Number(groupId),
+    );
+
+    // Dialog 顯示用的群組名稱
+    const groupName =
+      groupId === 0 ? '私人活動' : selectedGroup?.groupName || '未選擇群組';
+
     const ref = this.dialog.open(CalendarEventDialogComponent, {
-      width: '480px',
-      data: { mode: 'update', event: info.event },
+      width: '760px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      panelClass: 'calendar-event-dialog-panel',
+      autoFocus: false,
+      data: {
+        mode: 'update',
+        event: info.event,
+
+        // 傳給 Dialog 顯示唯讀欄位
+        groupId,
+        groupName,
+      },
     });
 
     console.log("GID:: ", info.event);
     ref.afterClosed().subscribe((result) => {
+<<<<<<< HEAD
       if (!result) return;
       const payload = {
         groupId: this.currentGroupId,   // ⭐補這個
@@ -627,29 +697,48 @@ export class CalendarComponent {
         ...result,
       };
 
+=======
+      // 使用者按取消或關閉 Dialog，不做任何事
+      if (!result) {
+        return;
+      }
+
+      const payload = {
+        groupId,
+        createdBy: this.createdBy,
+        ...result,
+      };
+
+      console.log('updateCalendarEvent payload:', payload);
+
+>>>>>>> origin/ZJ
       this.calendarApiService.update(Number(info.event.id), payload).subscribe({
         next: (res: any) => {
           if (res.code !== 200) {
             Swal.fire({
               icon: 'error',
               title: '更新失敗',
-              text: res.message,
+              text: res.message || '更新失敗',
             });
             return;
           }
+
           Swal.fire({
             icon: 'success',
             title: '修改成功',
             confirmButtonText: '確認',
           });
-          this.loadCalendarEvents(this.currentGroupId, this.createdBy);
+
+          this.loadCalendarEvents(groupId, this.createdBy);
         },
-        error: (err) =>
+
+        error: (err) => {
           Swal.fire({
             icon: 'error',
             title: '修改失敗',
-            text: err.error?.message,
-          }),
+            text: err.error?.message || '伺服器發生錯誤',
+          });
+        },
       });
     });
   }
@@ -678,7 +767,6 @@ export class CalendarComponent {
     });
   }
 
-  // 刪除活動
   deleteCalendarEvent(eventId: number, title: string): void {
     Swal.fire({
       icon: 'warning',
@@ -692,24 +780,42 @@ export class CalendarComponent {
         return;
       }
 
-      this.calendarApiService.delete(eventId, this.createdBy, this.currentGroupId).subscribe({
-        next: () => {
-          Swal.fire({
-            icon: 'success',
-            title: '刪除成功',
-            confirmButtonText: '確認',
-          });
+      // 後端目前私人活動是 groupId = 0，不是 null
+      const groupId =
+        this.currentGroupId === undefined || this.currentGroupId === null
+          ? 0
+          : Number(this.currentGroupId);
 
-          this.loadCalendarEvents(this.currentGroupId, this.createdBy);
-        },
-        error: (err) => {
-          Swal.fire({
-            icon: 'error',
-            title: '刪除失敗',
-            text: err.error?.message || '請稍後再試',
-          });
-        },
-      });
+      this.calendarApiService
+        .delete(eventId, this.createdBy, groupId)
+        .subscribe({
+          next: (res: any) => {
+            if (res.code !== 200) {
+              Swal.fire({
+                icon: 'error',
+                title: '刪除失敗',
+                text: res.message || '刪除失敗',
+              });
+              return;
+            }
+
+            Swal.fire({
+              icon: 'success',
+              title: '刪除成功',
+              confirmButtonText: '確認',
+            });
+
+            this.loadCalendarEvents(groupId, this.createdBy);
+          },
+
+          error: (err) => {
+            Swal.fire({
+              icon: 'error',
+              title: '刪除失敗',
+              text: err.error?.message || '請稍後再試',
+            });
+          },
+        });
     });
   }
   // 拖曳活動到其他日期後，更新後端資料
@@ -728,13 +834,15 @@ export class CalendarComponent {
     const newEndTime = info.event.endStr
       ? info.event.endStr.substring(0, 19)
       : null;
-
+    const currentGroupId = this.selectedGroupId ?? 0;
     const data = {
       title: title,
       description: description,
       eventTime: newDateTime,
       endTime: newEndTime,
       notifyBefore: notifyBefore,
+
+      groupId: this.currentGroupId,
     };
 
     //拖曳後日期早於今天，就還原位置

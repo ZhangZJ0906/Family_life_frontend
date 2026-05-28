@@ -38,7 +38,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 export class ExpensesAddComponent {
   basicUrl!: string;
   expenseForm!: FormGroup;
-  currentGroupId!: number | null;
+  currentGroupId!: number ;
   today = new Date();
   categoryMap: LocationAndCategory[] = []; // 分類對照
   userGroups: DropDownGroupList[] = []; // 儲存使用者擁有的群組清單
@@ -136,10 +136,8 @@ export class ExpensesAddComponent {
    * 呼叫後端 API 動態載入物品清單
    */
   getItemList(groupId: number | null, userId: number) {
-    let url = `${this.basicUrl}item/getItems?userId=${userId}`;
-    if (groupId !== null) {
-      url += `&groupId=${groupId}`;
-    }
+    const resolvedGroupId = groupId ?? 0;
+    const url = `${this.basicUrl}item/getItems?userId=${userId}&groupId=${resolvedGroupId}`;
 
     this.http.getApi(url).subscribe({
       next: (res: any) => {

@@ -12,6 +12,7 @@ import { HttpClientService } from './@services/http-client.service';
 export const appConfig: ApplicationConfig = {
 
 
+
   providers: [provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes),provideHttpClient(), HttpClientService],
 
 

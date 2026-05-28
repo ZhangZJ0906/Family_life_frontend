@@ -61,6 +61,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private notifyService: NotifyService,
     private browserNotify: BrowserNotifyService,
+<<<<<<< HEAD
     private socketService: NotificationSocketService,
     private notifySettingService: NotifySettingService //共享userInfo
   ) {
@@ -82,6 +83,10 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
     // console.log("NE: ", this.NotifyByEndDate)
 
+=======
+    private socketService: NotificationSocketService
+  ) {
+>>>>>>> origin/ZJ
     this.user_id = this.authService.currentUser()?.user_id ?? 0;
   }
 
@@ -89,16 +94,28 @@ export class TopbarComponent implements OnInit, OnDestroy {
     // 取得目前登入使用者
     const currentUser = this.authService.currentUser();
 
+<<<<<<< HEAD
+=======
+    this.browserNotify.requestPermission();
+
+>>>>>>> origin/ZJ
     this.socketService.unreadCount$.subscribe(count => {
       this.unreadCount = count;
       this.notifyService.setUnreadCount(count);
 
+<<<<<<< HEAD
       console.log("count: ", count)
 
       if (count > 0 && this.NotifyByEndDate) {
         this.browserNotify.send(
           '家庭系統通知',
           `${this.user_name}目前有 ${count} 則未讀通知`
+=======
+      if (count > 0) {
+        this.browserNotify.send(
+          '家庭系統通知',
+          `你目前有 ${count} 則未讀通知`
+>>>>>>> origin/ZJ
         );
       }
     });

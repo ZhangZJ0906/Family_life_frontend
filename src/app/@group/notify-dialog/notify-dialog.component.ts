@@ -45,6 +45,7 @@ export class NotifyDialogComponent implements OnInit {
     invite: 0,
     group: 0,
     itemlist: 0,
+    expense:0,
     calendar: 0,
     update: 0
   };
@@ -59,13 +60,36 @@ export class NotifyDialogComponent implements OnInit {
     this.user_id = data.userId;
   }
 
+  // filterType: 'all' | 'invite' | 'group' | 'itemlist' | 'expense'| 'update'= 'all';
+
+
+
+  
+
   ngOnInit(): void {
     this.getNotify();
   }
 
-  // ========================
-  // 🔥 API 取得通知
-  // ========================
+
+
+
+
+  getUnreadCountByType(type: string): number {
+
+    const list = this.notifies || [];
+
+    if (type === 'all') {
+      return list.filter(n => Number(n.isRead) !== 1).length;
+    }
+
+    return list.filter(n =>
+      Number(n.isRead) !== 1 && n.type === type
+    ).length;
+
+  }
+
+
+
   getNotify() {
     this.http.get<any>(
       `http://localhost:8080/family_life/get_notify?user_id=${this.user_id}`
@@ -99,6 +123,7 @@ export class NotifyDialogComponent implements OnInit {
     this.unreadMap.group = list.filter(n => n.isRead !== 1 && n.type === 'group').length;
     this.unreadMap.itemlist = list.filter(n => n.isRead !== 1 && n.type === 'itemlist').length;
     this.unreadMap.calendar = list.filter(n => n.isRead !== 1 && n.type === 'calendar').length;
+    this.unreadMap.expense = list.filter(n => n.isRead !== 1 && n.type === 'expense').length;
     this.unreadMap.update = list.filter(n => n.isRead !== 1 && n.type === 'update').length;
   }
 
@@ -284,7 +309,8 @@ export class NotifyDialogComponent implements OnInit {
       return this.notifies.filter(n =>
         n.type === 'group' ||
         n.type === 'itemlist' ||
-        n.type === 'calendar'
+        n.type === 'calendar'||
+        n.type=== 'expense'
       );
     }
 

@@ -210,7 +210,7 @@ button:disabled {
 .item-row {
   min-height: 62px;
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 12px;
   padding: 12px;
@@ -297,12 +297,8 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 
-  .item-row {
-    grid-template-columns: 34px minmax(0, 1fr) auto;
-  }
-
   .icon-button {
-    grid-column: 2 / -1;
+    grid-column: 1 / -1;
     justify-self: start;
   }
 }
