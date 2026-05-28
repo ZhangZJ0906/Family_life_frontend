@@ -30,7 +30,7 @@ export class HomePageComponent implements OnInit {
   // 首頁記帳群組清單
   expenseGroups: { groupId: number; groupName: string }[] = [];
 
-  // 預設私人記帳，畫面用 0，送後端時轉成 null
+  // 預設私人記帳，畫面用 0，送後端時0
   currentGroupId: number = 0;
 
   // 目前年月
@@ -45,7 +45,7 @@ export class HomePageComponent implements OnInit {
   ) {
     this.basicUrl = this.http.basicUrl;
 
-    const raw = localStorage.getItem('family-life-current-user');
+    const raw = sessionStorage.getItem('family-life-current-user');
 
     if (raw) {
       const user = JSON.parse(raw);
@@ -151,9 +151,9 @@ export class HomePageComponent implements OnInit {
 
   // 查詢首頁本月支出
   getHomeMonthlyExpense(): void {
-    // 畫面上的 0 是私人記帳，後端要吃 null，所以不帶 groupId
-    const apiGroupId = this.currentGroupId === 0 ? null : this.currentGroupId;
-
+    // 畫面上的 0 是私人記帳，後端要吃 0，所以不帶 groupId
+    const apiGroupId = this.currentGroupId === 0 ? 0 : this.currentGroupId;
+console.log('查詢首頁支出，groupId:', this.currentUserId );
     let url = `${this.basicUrl}expense/getInfo?userId=${this.currentUserId}`;
 
     if (apiGroupId !== null) {
@@ -166,7 +166,7 @@ export class HomePageComponent implements OnInit {
           this.monthlyExpense = 0;
           return;
         }
-
+console.log('支出列表', res.list);
         const list = res.list ? [...res.list] : [];
 
         // 只加總目前 selectedYear / selectedMonth 的支出
