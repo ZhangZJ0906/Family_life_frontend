@@ -185,6 +185,7 @@ export class ItemListEditDialogComponent implements OnInit {
 
     if (this.isSubscriptionCategory()) {
     payload = {
+      _type: 'subscription',       // ✅
       id: this.item.id,
       groupId: this.item.groupId,
       userId: userId,
@@ -198,6 +199,7 @@ export class ItemListEditDialogComponent implements OnInit {
     };
   } else if (this.isWarrantyCategory()) {
     payload = {
+      _type: 'warranty',           // ✅
       id: this.item.id,
       groupId: this.item.groupId,
       userId: userId,
@@ -213,37 +215,39 @@ export class ItemListEditDialogComponent implements OnInit {
       note: this.item.note,
     };
   } else if (this.isMedicineCategory()) {
-  payload = {
-    id: this.item.id,
-    groupId: this.item.groupId,
-    userId: userId,
-    name: this.item.name,
-    medicineType: this.item.medicineType,
-    quantity: this.item.quantity,
-    unit: this.item.unit,
-    safeQuantity: this.item.safeQuantity ?? 0,
-    purchaseDate: this.formatDate(this.item.purchaseDate),
-    expireDate: this.formatDate(this.item.expireDate),
-    dosage: this.item.dosage,
-    usageMethod: this.item.usageMethod,
-    unitPrice: this.item.unitPrice,
-    location: this.item.location,
-    source: this.item.source,
-    notify: this.item.notify,
-    note: this.item.note,
-  };
-}
-  else {
     payload = {
+      _type: 'medicine',           // ✅
+      id: this.item.id,
+      groupId: this.item.groupId,
+      userId: userId,
+      name: this.item.name,
+      medicineType: this.item.medicineType,
+      quantity: this.item.quantity,
+      unit: this.item.unit,
+      safeQuantity: this.item.safeQuantity ?? 0,
+      purchaseDate: this.formatDate(this.item.purchaseDate),
+      expireDate: this.formatDate(this.item.expireDate),
+      dosage: this.item.dosage,
+      usageMethod: this.item.usageMethod,
+      unitPrice: this.item.unitPrice,
+      location: this.item.location,
+      source: this.item.source,
+      notify: this.item.notify,
+      note: this.item.note,
+    };
+  } else {
+    payload = {
+      _type: 'item',               // ✅
       ...this.item,
       purchaseDate: this.formatDate(this.item.purchaseDate),
       expireDate: this.formatDate(this.item.expireDate),
       price: this.totalPrice,
       safeQuantity: this.item.safeQuantity ?? 0,
     };
-
-    this.dialogRef.close(payload);
   }
+
+  this.dialogRef.close(payload);   
+  
 }
   onCancel(): void {
     this.dialogRef.close();
