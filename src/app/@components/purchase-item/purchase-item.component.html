@@ -48,9 +48,31 @@
         </select>
       </label>
 
-      <button class="primary-button" type="submit" [disabled]="isSaving">
-        {{ isSaving ? '新增中...' : '新增項目' }}
-      </button>
+      <label class="field assignee-field" *ngIf="hasGroup">
+        <span>指派給</span>
+        <select
+          name="assignedUserId"
+          [(ngModel)]="newItem.assignedUserId"
+          [disabled]="isLoadingMembers || members.length === 0"
+        >
+          <option *ngIf="isLoadingMembers" [ngValue]="newItem.assignedUserId">
+            成員載入中...
+          </option>
+          <option *ngFor="let member of members; trackBy: trackByMemberId" [ngValue]="member.user_id">
+            {{ member.user_name }}
+          </option>
+        </select>
+      </label>
+
+      <div class="form-actions">
+        <button class="primary-button" type="submit" [disabled]="isSaving">
+          {{ isSaving ? (isEditing ? '儲存中...' : '新增中...') : (isEditing ? '儲存修改' : '新增項目') }}
+        </button>
+
+        <button class="ghost-button" type="button" *ngIf="isEditing" (click)="cancelEdit()" [disabled]="isSaving">
+          取消
+        </button>
+      </div>
     </form>
 
     <p class="form-error" *ngIf="formError">{{ formError }}</p>
@@ -79,9 +101,14 @@
         <div class="item-content">
           <strong>{{ item.item }}</strong>
           <small>{{ getCategoryName(item.categoryId) }}</small>
+          <small *ngIf="hasGroup">指派給：{{ getMemberName(item.userId) }}</small>
         </div>
 
         <span class="quantity">x {{ item.quantity }}</span>
+
+        <button class="icon-button" type="button" (click)="editItem(item)" aria-label="修改項目">
+          修改
+        </button>
 
         <button class="icon-button" type="button" (click)="deleteItem(item)" aria-label="刪除項目">
           刪除

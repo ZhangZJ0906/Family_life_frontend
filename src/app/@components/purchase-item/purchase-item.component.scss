@@ -102,7 +102,7 @@ h2 {
 
 .add-form {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) 110px 150px auto;
+  grid-template-columns: minmax(220px, 1fr) 100px 140px minmax(150px, 0.7fr) auto;
   align-items: end;
   gap: 12px;
 }
@@ -112,6 +112,18 @@ h2 {
   gap: 7px;
   color: #344258;
   font-weight: 800;
+}
+
+.item-row .assignee-field {
+  width: 150px;
+  gap: 4px;
+  font-size: 0.82rem;
+}
+
+.item-row .assignee-field select {
+  min-height: 34px;
+  padding: 0 8px;
+  font-size: 0.9rem;
 }
 
 input,
@@ -164,6 +176,12 @@ button:disabled {
   padding: 0 12px;
 }
 
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .icon-button {
   min-height: 34px;
   padding: 0 10px;
@@ -210,7 +228,8 @@ button:disabled {
 .item-row {
   min-height: 62px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  /* 改為 4 欄：內容、數量、修改按鈕、刪除按鈕 */
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
   align-items: center;
   gap: 12px;
   padding: 12px;
@@ -218,6 +237,7 @@ button:disabled {
   border-radius: 8px;
   background: #fbfcfe;
 }
+
 
 .item-row.is-checked {
   background: #eef7f1;
