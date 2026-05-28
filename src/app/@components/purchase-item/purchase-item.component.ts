@@ -8,6 +8,7 @@ import { AuthService } from '../../@services/auth.service';
 import { ShoppingListService } from '../../@services/shopping-list.service';
 import { TopbarComponent } from "../../shared/topbar/topbar.component";
 import { LocationAndCategory } from '../../common/interfaceList';
+import { HttpClientService } from '../../@services/http-client.service';
 
 // interface CategoryOption {
 //   id: number;
@@ -48,13 +49,38 @@ export class PurchaseItemComponent implements OnInit {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly authService: AuthService,
-    private readonly shoppingService: ShoppingListService
+    private readonly shoppingService: ShoppingListService,
+    private readonly http: HttpClientService
   ) {}
 
   ngOnInit(): void {
     this.listId = Number(this.route.snapshot.paramMap.get('listId'));
     this.userId = this.authService.currentUser()?.user_id ?? 1;
+    this.loadCategories();
     this.loadItems();
+  }
+
+  loadCategories(): void {
+    this.http.getApi(`${this.http.basicUrl}categories/get`).subscribe({
+      next: (res: any) => {
+        if (res.code !== 200) {
+          return;
+        }
+
+        this.categories = Object.entries(res.categoiesMap || {}).map(([id, name]) => ({
+          id: Number(id),
+          name: name as string
+        }));
+
+        if (this.categories.length > 0 && !this.categories.some((category) => category.id === this.newItem.categoryId)) {
+          this.newItem.categoryId = this.categories[0].id;
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        this.formError = '分類載入失敗，請稍後再試';
+      }
+    });
   }
 
   loadItems(): void {
