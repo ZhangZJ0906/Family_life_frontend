@@ -1,28 +1,17 @@
-/* 整個記帳頁背景 */
+/* =========================================================
+   記帳頁整體背景
+   ========================================================= */
 .container-fluid {
   min-height: 100vh;
   padding: 28px !important;
   background: #f6f7f9;
   box-sizing: border-box;
-}
-
-
-
-.container-fluid h3 {
-  margin: 0;
-  font-size: 32px;
-  font-weight: 900;
   color: #111827;
 }
 
-.container-fluid small {
-  display: block;
-  margin-top: 8px;
-  color: #64748b !important;
-  font-size: 15px;
-}
-
-/* 上方整合區：標題 + 月份 + 統計 */
+/* =========================================================
+   上方區塊：家庭記帳系統 + 月份 + 統計卡片
+   ========================================================= */
 .expense-header-card {
   background: #ffffff;
   border: 1px solid #e5e7eb;
@@ -34,20 +23,21 @@
   min-height: 150px;
 
   display: grid;
-  grid-template-columns: 360px 260px 1fr;
+  grid-template-columns: 360px 360px 1fr;
   align-items: center;
   gap: 28px;
 
   box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
 }
 
-/* 左側標題 */
+/* 左側標題區 */
 .expense-title {
   display: flex;
   align-items: center;
   gap: 14px;
 }
 
+/* 標題 icon */
 .title-icon {
   width: 52px;
   height: 52px;
@@ -60,23 +50,30 @@
   justify-content: center;
 
   font-size: 26px;
+  flex-shrink: 0;
 }
 
-.expense-title h3 {
+/* 標題文字 */
+.expense-title h3,
+.container-fluid h3 {
   margin: 0;
   font-size: 32px;
   font-weight: 900;
   color: #111827;
 }
 
-.expense-title small {
+/* 副標題 */
+.expense-title small,
+.container-fluid small {
   display: block;
   margin-top: 8px;
   color: #64748b !important;
   font-size: 15px;
 }
 
-/* 中間月份切換 */
+/* =========================================================
+   月份切換
+   ========================================================= */
 .month-switch {
   display: flex;
   align-items: center;
@@ -86,14 +83,14 @@
 
 /* 左右箭頭 */
 .month-arrow {
-  width: 46px;
-  height: 46px;
+  width: 46px !important;
+  height: 46px !important;
 
-  border-radius: 14px;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
+  border-radius: 14px !important;
+  border: 1px solid #e5e7eb !important;
+  background: #ffffff !important;
 
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
 
@@ -104,6 +101,7 @@
     box-shadow 0.2s ease;
 }
 
+/* 月份箭頭 icon */
 .month-arrow mat-icon {
   color: #334155;
   font-size: 26px;
@@ -111,19 +109,21 @@
   height: 26px;
 }
 
+/* hover */
 .month-arrow:hover:not(:disabled) {
-  background: #eef4ff;
+  background: #eef4ff !important;
   transform: translateY(-1px);
   box-shadow: 0 10px 22px rgba(37, 99, 235, 0.12);
 }
 
+/* disabled */
 .month-arrow:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-  background: #f3f4f6;
+  background: #f3f4f6 !important;
 }
 
-/* 中間月份顯示卡 */
+/* 月份顯示卡 */
 .month-display {
   min-width: 190px;
   height: 66px;
@@ -140,8 +140,7 @@
   box-shadow: 0 10px 24px rgba(37, 99, 235, 0.08);
 }
 
-
-/* 小標題 */
+/* 目前月份小字 */
 .month-label {
   margin-bottom: 4px;
 
@@ -150,21 +149,24 @@
   font-weight: 700;
 }
 
-/* 年月文字 */
+/* 年月 */
 .month-value {
   color: #1e3a8a;
   font-size: 22px;
   font-weight: 900;
   letter-spacing: 0.5px;
 }
-/* 右側統計卡片 */
+
+/* =========================================================
+   右側統計卡片
+   ========================================================= */
 .summary-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 
-/* 統計卡片共同樣式 */
+/* 統計卡片共用 */
 .summary-card {
   min-height: 96px;
   border-radius: 18px;
@@ -179,24 +181,24 @@
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
 }
 
-/* 本月支出 */
+/* 本月支出卡 */
 .summary-expense {
   background: linear-gradient(135deg, #3b82f6, #2563eb);
 }
 
-/* 當月筆數 */
+/* 當月筆數卡 */
 .summary-count {
   background: linear-gradient(135deg, #1f2937, #111827);
 }
 
-/* 文字區 */
+/* 統計文字區 */
 .summary-info {
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-/* 小標題 */
+/* 統計標題 */
 .summary-card .label {
   color: rgba(255, 255, 255, 0.9);
   font-size: 15px;
@@ -204,7 +206,7 @@
   margin-bottom: 8px;
 }
 
-/* 數值 */
+/* 統計數字 */
 .summary-card .value {
   color: #ffffff;
   font-size: 30px;
@@ -212,7 +214,7 @@
   line-height: 1.2;
 }
 
-/* 右側 icon */
+/* 統計 icon 外框 */
 .summary-icon {
   width: 54px;
   height: 54px;
@@ -235,7 +237,7 @@
   background: rgba(255, 255, 255, 0.14);
 }
 
-/* icon 大小與顏色 */
+/* 統計 icon */
 .summary-icon mat-icon {
   color: #ffffff;
   font-size: 30px;
@@ -243,7 +245,53 @@
   height: 30px;
 }
 
-/* 支出明細大卡片 */
+/* =========================================================
+   支出明細篩選卡片
+   建議 HTML 使用：
+   <section class="expense-filter-card">
+   ========================================================= */
+.expense-filter-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 22px;
+
+  padding: 26px 28px;
+  min-height: 116px;
+  margin-bottom: 20px;
+
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  align-items: center;
+  gap: 24px;
+
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+}
+
+/* 支出明細標題 */
+.expense-list-title {
+  display: flex;
+  align-items: center;
+}
+
+.expense-list-title h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 900;
+  color: #111827;
+}
+
+/* 右側篩選列 */
+.expense-filter-right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* =========================================================
+   如果你 HTML 還是使用 Bootstrap card-header，保留相容樣式
+   ========================================================= */
 .card.shadow-sm {
   border: 1px solid #e5e7eb !important;
   border-radius: 22px !important;
@@ -252,10 +300,9 @@
   background: #ffffff;
 }
 
-/* 支出明細 header */
 .card-header {
-  min-height: 92px;
-  padding: 18px 28px !important;
+  min-height: 116px;
+  padding: 26px 28px !important;
   border-bottom: 1px solid #e5e7eb !important;
   background: #ffffff !important;
 
@@ -266,13 +313,12 @@
 }
 
 .card-header .fw-bold {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 900 !important;
   color: #111827;
   white-space: nowrap;
 }
 
-/* 篩選列 */
 .card-header .d-flex.gap-2 {
   display: flex;
   align-items: center;
@@ -280,32 +326,54 @@
   gap: 14px !important;
 }
 
-/* 篩選欄位 */
+/* =========================================================
+   篩選欄位
+   ========================================================= */
 .filter-field {
   width: 240px;
   margin-bottom: 0;
+  flex-shrink: 0;
 }
 
+/* Angular Material 欄位白底 */
 .filter-field ::ng-deep .mat-mdc-text-field-wrapper {
   background: #ffffff;
   border-radius: 12px;
 }
 
+/* 移除 Material form-field 底部空白 */
 .filter-field ::ng-deep .mat-mdc-form-field-subscript-wrapper {
   display: none;
 }
 
+/* 欄位高度 */
 .filter-field ::ng-deep .mat-mdc-form-field-infix {
   min-height: 50px;
   display: flex;
   align-items: center;
 }
-/* 刪除按鈕 */
+
+/* 刪除已選按鈕 */
+.delete-selected-btn,
 .card-header button[color='warn'] {
   height: 50px;
   border-radius: 12px;
   font-weight: 800;
   box-shadow: none;
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   表格卡片
+   建議 HTML 使用：
+   <section class="table-card">
+   ========================================================= */
+.table-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
 }
 
 /* 表格外層 */
@@ -318,12 +386,12 @@
 /* 表格整體 */
 .big-table {
   width: 100%;
-  min-width: 1050px;
+  min-width: 1180px;
   background: #ffffff;
   table-layout: fixed;
 }
 
-/* 表頭共同樣式 */
+/* 表頭 */
 .big-table th.mat-mdc-header-cell {
   background: #f8fafc;
   color: #111827;
@@ -335,7 +403,7 @@
   vertical-align: middle;
 }
 
-/* 內容共同樣式 */
+/* 表格內容 */
 .big-table td.mat-mdc-cell {
   padding: 22px 14px;
   color: #111827;
@@ -356,49 +424,63 @@ td.mat-column-select {
 /* 日期欄 */
 th.mat-column-expense_date,
 td.mat-column-expense_date {
-  width: 150px;
+  width: 250px;
   text-align: center;
 }
 
 /* 消費名稱 */
 th.mat-column-related_item_name,
 td.mat-column-related_item_name {
-  width: 60px;
+  width: 80px;
   text-align: left;
   font-weight: 800;
-
 }
 
 /* 分類 */
 th.mat-column-category_id,
 td.mat-column-category_id {
-  width: 150px;
+  width: 200px;
   text-align: center;
 }
 
 /* 備註 */
 th.mat-column-note,
 td.mat-column-note {
-  width: 90px;
+  width:100px;
   text-align: left;
 }
 
 /* 金額 */
 th.mat-column-price,
 td.mat-column-price {
-  width: 100px;
+  width: 170px;
   text-align: right;
+  padding-right: 50px !important;
+
+}
+
+/* 消費者 */
+th.mat-column-user,
+td.mat-column-user {
+  width: 190px;
+  text-align: left;
+  padding-left: 100px !important;
+  padding-right: 28px !important;
 }
 
 /* 操作欄 */
 th.mat-column-actions,
 td.mat-column-actions {
-  width: 80px;
+  width: 120px;
   text-align: center;
+  padding-left: 34px !important;
+  padding-right: 28px !important;
 }
 
-/* 消費名稱避免過長破版 */
-td.mat-column-related_item_name {
+/* 避免文字過長破版 */
+td.mat-column-related_item_name,
+td.mat-column-note,
+td.mat-column-user {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -439,7 +521,99 @@ td.mat-column-related_item_name {
   font-weight: 900;
 }
 
-/* 編輯按鈕 */
+/* =========================================================
+   消費者欄位
+   ========================================================= */
+.user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  max-width: 150px;
+  overflow: hidden;
+  white-space: nowrap;
+
+  font-weight: 800;
+  color: #111827;
+}
+
+/* 消費者名稱過長時省略 */
+.user-name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 沒有頭像時的文字頭像 */
+.avatar-sm {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+
+  background: #eef4ff;
+  color: #2563eb;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 12px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+/* 真實頭像 */
+.user-avatar-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* 私人記帳顯示 */
+.private-user {
+  color: #475569;
+}
+
+/* 滑鼠 hover 的使用者資訊卡 */
+.user-hover-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 14px;
+  min-width: 220px;
+
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.18);
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.user-hover-card .card-name {
+  margin: 0;
+  font-weight: 900;
+  color: #111827;
+}
+
+.user-hover-card .card-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.user-hover-card .card-row mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* =========================================================
+   表格互動
+   ========================================================= */
 td button[mat-icon-button] {
   width: 42px;
   height: 42px;
@@ -450,12 +624,13 @@ td button[mat-icon-button]:hover {
   background: #eef4ff;
 }
 
-/* 滑過列 */
 tr.mat-mdc-row:hover {
   background: #f8fafc;
 }
 
-/* 右下角新增支出按鈕：固定在瀏覽器視窗右下角 */
+/* =========================================================
+   右下角新增支出按鈕
+   ========================================================= */
 .expense-add-fab {
   position: fixed !important;
   right: 34px;
@@ -481,23 +656,21 @@ tr.mat-mdc-row:hover {
     box-shadow 0.2s ease;
 }
 
-/* 新增按鈕 icon */
 .expense-add-fab mat-icon {
   font-size: 30px;
   width: 30px;
   height: 30px;
 }
 
-/* hover 效果 */
 .expense-add-fab:hover {
   background: #c7d7ff !important;
   transform: translateY(-2px);
   box-shadow: 0 18px 36px rgba(15, 23, 42, 0.26) !important;
 }
 
-
-
-/* RWD：中等螢幕，標題卡片改成上下排列 */
+/* =========================================================
+   RWD：中等螢幕
+   ========================================================= */
 @media (max-width: 1400px) {
   .expense-header-card {
     grid-template-columns: 1fr;
@@ -511,16 +684,23 @@ tr.mat-mdc-row:hover {
   .summary-row {
     grid-template-columns: 1fr 1fr;
   }
-  .expense-add-fab {
-  position: fixed !important;
-  right: 34px;
-  bottom: 34px;
-  z-index: 9999 !important;
-}
 }
 
-/* RWD：平板以下，篩選列換行 */
+/* =========================================================
+   RWD：平板
+   ========================================================= */
 @media (max-width: 1200px) {
+  .expense-filter-card {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .expense-filter-right {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
   .card-header {
     flex-direction: column;
     align-items: flex-start !important;
@@ -530,10 +710,11 @@ tr.mat-mdc-row:hover {
   .card-header .d-flex.gap-2 {
     width: 100%;
     flex-wrap: wrap;
+    justify-content: flex-start;
   }
 
   .filter-field {
-    width: calc(33.333% - 8px);
+    width: calc(33.333% - 10px);
     min-width: 180px;
   }
 
@@ -543,7 +724,9 @@ tr.mat-mdc-row:hover {
   }
 }
 
-/* RWD：手機 */
+/* =========================================================
+   RWD：手機
+   ========================================================= */
 @media (max-width: 768px) {
   .container-fluid {
     padding: 16px !important;
@@ -575,6 +758,16 @@ tr.mat-mdc-row:hover {
     font-size: 24px;
   }
 
+  .expense-filter-card {
+    padding: 20px;
+    border-radius: 18px;
+  }
+
+  .expense-filter-right {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .card-header {
     padding: 18px !important;
   }
@@ -588,8 +781,8 @@ tr.mat-mdc-row:hover {
     width: 100%;
   }
 
-  th.mat-mdc-header-cell,
-  td.mat-mdc-cell {
+  .big-table th.mat-mdc-header-cell,
+  .big-table td.mat-mdc-cell {
     padding: 16px 14px;
   }
 
@@ -598,4 +791,3 @@ tr.mat-mdc-row:hover {
     bottom: 20px;
   }
 }
-

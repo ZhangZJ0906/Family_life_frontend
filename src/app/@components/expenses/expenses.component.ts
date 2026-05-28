@@ -75,6 +75,7 @@ displayedColumns: string[] = [
   'category_id',
   'note',
   'price',
+  'user',
   'actions',
 ];
   filteredExpense = signal<ExpenseRecord[]>([]);
@@ -368,14 +369,14 @@ displayedColumns: string[] = [
 private getDisplayedColumns(groupId: number): string[] {
   const isGroup = groupId !== 0;
 
-  return [
+   return [
     'select',
     'expense_date',
     'related_item_name',
     'category_id',
     'note',
     'price',
-    ...(isGroup ? ['user'] : []),
+    'user',
     'actions',
   ];
 }
