@@ -232,88 +232,88 @@
         </ng-container>
 
         <!-- 消費者 -->
-        <!-- 私人記帳也保留這一欄，避免切換到群組時欄位跑版 -->
-        <ng-container matColumnDef="user">
-          <th mat-header-cell *matHeaderCellDef>消費者</th>
+<!-- 私人記帳也保留這一欄，避免切換到群組時欄位跑版 -->
+<ng-container matColumnDef="user">
+  <th mat-header-cell *matHeaderCellDef>消費者</th>
 
-          <td mat-cell *matCellDef="let e">
+  <td mat-cell *matCellDef="let e">
 
-            <!-- 私人記帳 -->
-            @if (currentGroupId === 0) {
-              <span class="user-chip private-user">
-                <span class="avatar-sm">私</span>
-                <span class="user-name-text">私人</span>
-              </span>
-            }
+    <!-- 私人記帳 -->
+    @if (currentGroupId === 0) {
+      <span class="user-chip private-user">
+        <span class="avatar-sm">私</span>
+        <span class="user-name-text">私人</span>
+      </span>
+    }
 
-            <!-- 群組記帳 -->
-            @else {
-              <span
-                class="user-chip"
-                cdkOverlayOrigin
-                #origin="cdkOverlayOrigin"
-                (mouseenter)="activeExpenseId = e.id"
-                (mouseleave)="activeExpenseId = null"
-              >
+    <!-- 群組記帳 -->
+    @else {
+      <span
+        class="user-chip"
+        cdkOverlayOrigin
+        #origin="cdkOverlayOrigin"
+        (mouseenter)="activeExpenseId = e.id"
+        (mouseleave)="activeExpenseId = null"
+      >
+        @if (!groupUserInfo[e.userId]?.avatar) {
+          <span class="avatar-sm">
+            {{ groupUserInfo[e.userId]?.userName?.slice(0, 2) || '?' }}
+          </span>
+        } @else {
+          <img
+            [src]="groupUserInfo[e.userId]?.avatar"
+            alt="頭像"
+            class="user-avatar-img"
+          />
+        }
 
-                @if (!groupUserInfo[e.userId]?.avatar) {
-                  <span class="avatar-sm">
-                    {{ groupUserInfo[e.userId]?.userName?.slice(0, 2) || '?' }}
-                  </span>
-                } @else {
-                  <img
-                    [src]="groupUserInfo[e.userId]?.avatar"
-                    alt="頭像"
-                    class="user-avatar-img"
-                  />
-                }
+        <span class="user-name-text">
+          {{ groupUserInfo[e.userId]?.userName || '未知使用者' }}
+        </span>
+      </span>
 
-                <span class="user-name-text">
-                  {{ groupUserInfo[e.userId]?.userName || '未知使用者' }}
-                </span>
+      <!-- 使用者 hover 資訊卡 -->
+      <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="origin"
+        [cdkConnectedOverlayOpen]="activeExpenseId === e.id"
+        [cdkConnectedOverlayPositions]="overlayPositions"
+      >
+        <div
+          class="user-hover-card"
+          (mouseenter)="activeExpenseId = e.id"
+          (mouseleave)="activeExpenseId = null"
+        >
+          @if (!groupUserInfo[e.userId]?.avatar) {
+            <span class="avatar-sm">
+              {{ groupUserInfo[e.userId]?.userName?.slice(0, 2) || '?' }}
+            </span>
+          } @else {
+            <img
+              [src]="groupUserInfo[e.userId]?.avatar"
+              alt="頭像"
+              class="user-avatar-img"
+            />
+          }
 
-              </span>
+          <p class="card-name">
+            {{ groupUserInfo[e.userId]?.userName || '未知使用者' }}
+          </p>
 
-              <!-- 使用者 hover 資訊卡 -->
-              <ng-template
-                cdkConnectedOverlay
-                [cdkConnectedOverlayOrigin]="origin"
-                [cdkConnectedOverlayOpen]="activeExpenseId === e.id"
-                [cdkConnectedOverlayPositions]="overlayPositions"
-              >
-                <div
-                  class="user-hover-card"
-                  (mouseenter)="activeExpenseId = e.id"
-                  (mouseleave)="activeExpenseId = null"
-                >
+          <div class="card-row">
+            <mat-icon>email</mat-icon>
+            {{ groupUserInfo[e.userId]?.email || '未提供 Email' }}
+          </div>
+        </div>
+      </ng-template>
+    }
 
-                  @if (!groupUserInfo[e.userId]?.avatar) {
-                    <span class="avatar-sm">
-                      {{ groupUserInfo[e.userId]?.userName?.slice(0, 2) || '?' }}
-                    </span>
-                  } @else {
-                    <img
-                      [src]="groupUserInfo[e.userId]?.avatar"
-                      alt="頭像"
-                      class="user-avatar-img"
-                    />
-                  }
+  </td>
+</ng-container>
 
-                  <p class="card-name">
-                    {{ groupUserInfo[e.userId]?.userName || '未知使用者' }}
-                  </p>
 
-                  <div class="card-row">
-                    <mat-icon>email</mat-icon>
-                    {{ groupUserInfo[e.userId]?.email || '未提供 Email' }}
-                  </div>
 
-                </div>
-              </ng-template>
-            }
 
-          </td>
-        </ng-container>
 
         <!-- 操作 -->
         <ng-container matColumnDef="actions">

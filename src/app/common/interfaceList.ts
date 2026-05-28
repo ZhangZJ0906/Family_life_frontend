@@ -43,7 +43,7 @@ export interface ExpenseRecord {
 
 export interface GroupUser {
   userId: number;
-  userName: string;
+  userName: string; 
   email: string;
   avatar: string | null;
 }

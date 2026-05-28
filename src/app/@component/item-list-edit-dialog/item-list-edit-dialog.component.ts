@@ -42,6 +42,7 @@ export class ItemListEditDialogComponent implements OnInit {
   // 綁定表單的資料結構
   item: any = {};
   group: any[] = [];
+  today=new Date();
 
   categories: LocationAndCategory[] = [];
   location: LocationAndCategory[] = [];
