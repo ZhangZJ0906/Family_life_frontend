@@ -36,11 +36,11 @@
       </span>
     </button>
 
-    <button [class.active]="filterType === 'group' || filterType === 'itemlist' || filterType === 'calendar'" (click)="filterType = 'group'">
+    <button [class.active]="filterType === 'group' || filterType === 'itemlist' || filterType === 'calendar' || filterType ==='expense'" (click)="filterType = 'group'">
       群組通知
 
-      <span class="tab-badge" *ngIf="(unreadMap.group + unreadMap.itemlist + unreadMap.calendar) > 0">
-        {{ unreadMap.group + unreadMap.itemlist + unreadMap.calendar }}
+      <span class="tab-badge" *ngIf="(unreadMap.group + unreadMap.itemlist + unreadMap.calendar + unreadMap.expense) > 0">
+        {{ unreadMap.group + unreadMap.itemlist + unreadMap.calendar + unreadMap.expense }}
       </span>
     </button>
 
