@@ -39,6 +39,9 @@ export class ExpensesEditComponent {
   categories: LocationAndCategory[] = [];
   today = new Date();
   basicUrl!: string;
+    // 新增：記帳環境唯讀欄位
+  currentGroupId = 0;
+  currentGroupName = '私人記帳';
   constructor(
     private http: HttpClientService,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -48,7 +51,10 @@ export class ExpensesEditComponent {
     this.item = this.data.relatedItem;
     this.record = this.data.record;
     this.basicUrl = this.http.basicUrl;
-    console.log(this.record)
+    console.log(this.record);
+    // 新增：記帳環境唯讀顯示
+  this.currentGroupId = data.currentGroupId ?? 0;
+  this.currentGroupName = data.currentGroupName || '私人記帳';
   }
 
   private formatToBackendDate(dateInput: any): string {

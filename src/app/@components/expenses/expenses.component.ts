@@ -217,36 +217,67 @@ displayedColumns: string[] = [
   }
 
   openEditDialog(record: any) {
-  // 如果這筆支出有關聯物品，就從 itemMap 找出對應物品資料
   const relatedItem =
     record.relatedItemId != null ? this.itemMap[record.relatedItemId] : null;
 
-  const dialogRef = this.dialog.open(ExpensesEditComponent, {
-    // 跟新增支出 Dialog 一樣大小
-    width: '600px',
-    maxWidth: '100vw',
-    maxHeight: '86vh',
+  /*
+    取得這筆資料的群組 id：
+    1. 優先用目前頁面選到的 currentGroupId
+    2. 如果 currentGroupId 沒值，再用 record.groupId
+    3. 都沒有就當私人記帳 0
+  */
+  const dialogGroupId =
+    this.currentGroupId !== null && this.currentGroupId !== undefined
+      ? Number(this.currentGroupId)
+      : Number(record.groupId ?? 0);
 
-    // 不要固定 height，否則容易被壓縮或出現外層捲軸
+  /*
+    取得群組名稱：
+    - groupId = 0：私人記帳
+    - groupId != 0：從 userGroups 找 groupName
+  */
+  const currentGroup = this.userGroups.find(
+    (g: any) => Number(g.groupId) === dialogGroupId
+  );
+
+  const currentGroupName =
+    dialogGroupId === 0
+      ? '私人記帳'
+      : currentGroup?.groupName || '未選擇群組';
+
+  console.log('編輯 Dialog 群組資訊:', {
+    currentGroupId: this.currentGroupId,
+    recordGroupId: record.groupId,
+    dialogGroupId,
+    currentGroupName,
+    userGroups: this.userGroups,
+  });
+
+  const dialogRef = this.dialog.open(ExpensesEditComponent, {
+    width: '600px',
+    maxWidth: '92vw',
+    maxHeight: '86vh',
     panelClass: 'expense-edit-dialog-panel',
     autoFocus: false,
-
     data: {
-      // 深拷貝，避免使用者按取消時直接改到表格原資料
       record: JSON.parse(JSON.stringify(record)),
-
-      // 分類下拉選單
       categoryMap: this.categoryMap,
-
-      // 關聯物品資料
       relatedItem,
+
+      // 傳給編輯 Dialog 顯示唯讀記帳環境
+      currentGroupId: dialogGroupId,
+      currentGroupName: currentGroupName,
     },
   });
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result === true)
-        this.getExpense(this.currentGroupId, this.currentUserId);
-    });
-  }
+
+  dialogRef.afterClosed().subscribe((result) => {
+    if (!result) {
+      return;
+    }
+
+    this.getExpense(this.currentGroupId, this.currentUserId);
+  });
+}
 
   // ─── 刪除 ────────────────────────────────────────────
   isAllSelected() {
