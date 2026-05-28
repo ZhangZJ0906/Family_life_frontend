@@ -161,7 +161,7 @@ export class NotifyDialogComponent {
       n => n.isRead !== 1 && n.type === 'itemlist'
     ).length;
 
-    this.unreadMap.update = this.notifies.filter(
+    this.unreadMap.expense = this.notifies.filter(
     n => n.isRead !== 1 &&
     ( n.type === 'expense')
     ).length;
