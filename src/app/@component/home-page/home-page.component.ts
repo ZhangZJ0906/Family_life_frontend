@@ -1,13 +1,196 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { HttpClientService } from '../../@services/http-client.service';
 
 
 @Component({
   selector: 'app-home-page',
-  imports: [ TopbarComponent],
+  imports: [ TopbarComponent,
+    CommonModule,
+    FormsModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatSelectModule,
+  ],
   templateUrl: './home-page.component.html',
   styleUrls: ['./home-page.component.scss']
 })
-export class HomePageComponent {
+export class HomePageComponent implements OnInit {
 
+  basicUrl = '';
+
+  // 目前登入者
+  currentUserId = 0;
+
+  // 首頁記帳群組清單
+  expenseGroups: { groupId: number; groupName: string }[] = [];
+
+  // 預設私人記帳，畫面用 0，送後端時轉成 null
+  currentGroupId: number = 0;
+
+  // 目前年月
+  selectedYear = new Date().getFullYear();
+  selectedMonth = new Date().getMonth() + 1;
+
+  // 首頁顯示的本月支出
+  monthlyExpense = 0;
+
+  constructor(
+    private http: HttpClientService
+  ) {
+    this.basicUrl = this.http.basicUrl;
+
+    const raw = localStorage.getItem('family-life-current-user');
+
+    if (raw) {
+      const user = JSON.parse(raw);
+      this.currentUserId = user.user_id;
+    }
+  }
+
+  ngOnInit(): void {
+    // 預設先加入私人記帳
+    this.expenseGroups = [
+      {
+        groupId: 0,
+        groupName: '私人記帳'
+      }
+    ];
+
+    // 載入群組
+    this.getExpenseGroups();
+
+    // 一開始先查私人記帳
+    this.getHomeMonthlyExpense();
+  }
+
+  // 取得使用者群組，邏輯跟記帳頁相同
+  getExpenseGroups(): void {
+    this.http.getApi(
+      this.basicUrl + `family_life/getGroupList?user_Id=${this.currentUserId}`
+    ).subscribe({
+      next: (res: any) => {
+        if (res.code !== 200) {
+          return;
+        }
+
+        const groups = Object.entries(res.groupIdList).map(([id, name]) => ({
+          groupId: Number(id),
+          groupName: name as string
+        }));
+
+        // 私人記帳固定放第一個
+        this.expenseGroups = [
+          {
+            groupId: 0,
+            groupName: '私人記帳'
+          },
+          ...groups
+        ];
+
+        // 預設私人記帳
+        this.currentGroupId = 0;
+
+        // 群組載入後再查一次私人記帳
+        this.getHomeMonthlyExpense();
+      },
+      error: (err) => {
+        console.log(err);
+      }
+    });
+  }
+
+  // 切換群組
+  onExpenseGroupChange(groupId: number): void {
+    this.currentGroupId = groupId;
+    this.getHomeMonthlyExpense();
+  }
+
+  // 上一個月
+  prevMonth(): void {
+    if (this.selectedMonth === 1) {
+      this.selectedYear--;
+      this.selectedMonth = 12;
+    } else {
+      this.selectedMonth--;
+    }
+
+    this.getHomeMonthlyExpense();
+  }
+
+  // 下一個月
+  nextMonth(): void {
+    if (this.isCurrentMonth()) {
+      return;
+    }
+
+    if (this.selectedMonth === 12) {
+      this.selectedYear++;
+      this.selectedMonth = 1;
+    } else {
+      this.selectedMonth++;
+    }
+
+    this.getHomeMonthlyExpense();
+  }
+
+  // 是否為目前月份
+  isCurrentMonth(): boolean {
+    const now = new Date();
+
+    return (
+      this.selectedYear === now.getFullYear() &&
+      this.selectedMonth === now.getMonth() + 1
+    );
+  }
+
+  // 查詢首頁本月支出
+  getHomeMonthlyExpense(): void {
+    // 畫面上的 0 是私人記帳，後端要吃 null，所以不帶 groupId
+    const apiGroupId = this.currentGroupId === 0 ? null : this.currentGroupId;
+
+    let url = `${this.basicUrl}expense/getInfo?userId=${this.currentUserId}`;
+
+    if (apiGroupId !== null) {
+      url += `&groupId=${apiGroupId}`;
+    }
+
+    this.http.getApi(url).subscribe({
+      next: (res: any) => {
+        if (res.code !== 200) {
+          this.monthlyExpense = 0;
+          return;
+        }
+
+        const list = res.list ? [...res.list] : [];
+
+        // 只加總目前 selectedYear / selectedMonth 的支出
+        const monthList = list.filter((item: any) => {
+          if (!item.expenseDate) {
+            return false;
+          }
+
+          const [year, month] = item.expenseDate.split('-').map(Number);
+
+          return (
+            year === this.selectedYear &&
+            month === this.selectedMonth
+          );
+        });
+
+        this.monthlyExpense = monthList.reduce((sum: number, item: any) => {
+          return sum + (Number(item.price) || 0);
+        }, 0);
+      },
+      error: (err) => {
+        console.log(err);
+        this.monthlyExpense = 0;
+      }
+    });
+  }
 }

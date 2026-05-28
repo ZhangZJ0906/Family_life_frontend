@@ -1,86 +1,184 @@
-<h2 mat-dialog-title>{{ data.mode === 'create' ? '新增活動' : '修改活動' }}</h2>
-<form #dialogForm="ngForm">
+<div class="event-dialog">
 
-<mat-dialog-content>
-  <div class="dialog-form">
+  <!-- Dialog 標題區 -->
+  <div class="dialog-header">
+    <div class="header-icon">
+      📅
+    </div>
 
-    <!-- 活動名稱（必填） -->
-    <mat-form-field appearance="outline">
-      <mat-label>活動名稱 </mat-label>
-      <input matInput [(ngModel)]="form.title" name="title" required #titleRef="ngModel" placeholder="請輸入活動名稱">
-      @if (titleRef.invalid && titleRef.touched) {
-      <mat-error>活動名稱不可為空</mat-error>
-      }
-    </mat-form-field>
-
-    <!-- 活動描述（選填） -->
-    <mat-form-field appearance="outline">
-      <mat-label>活動描述</mat-label>
-      <input matInput [(ngModel)]="form.description" name="description" placeholder="請輸入活動描述">
-    </mat-form-field>
-
-    <!-- 開始日期（必填） -->
-    <mat-form-field appearance="outline">
-      <mat-label>開始日期 </mat-label>
-      <input matInput [matDatepicker]="startDatePicker" [(ngModel)]="form.eventDate" name="eventDate" required
-        #eventDateRef="ngModel">
-      <mat-datepicker-toggle matIconSuffix [for]="startDatePicker"></mat-datepicker-toggle>
-      <mat-datepicker #startDatePicker></mat-datepicker>
-      @if (eventDateRef.invalid && eventDateRef.touched) {
-      <mat-error>開始日期不可為空</mat-error>
-      }
-    </mat-form-field>
-
-    <!-- 開始時間（必填） -->
-    <mat-form-field appearance="outline">
-      <mat-label>開始時間 </mat-label>
-      <input matInput [matTimepicker]="startTimePicker" [(ngModel)]="form.eventTime" name="eventTime" required
-        #eventTimeRef="ngModel">
-      <mat-timepicker-toggle matIconSuffix [for]="startTimePicker"></mat-timepicker-toggle>
-      <mat-timepicker #startTimePicker></mat-timepicker>
-      @if (eventTimeRef.invalid && eventTimeRef.touched) {
-      <mat-error>開始時間不可為空</mat-error>
-      }
-    </mat-form-field>
-
-    <!-- 結束日期（必填） -->
-    <mat-form-field appearance="outline">
-      <mat-label>結束日期 </mat-label>
-      <input matInput [matDatepicker]="endDatePicker" [(ngModel)]="form.endDate" name="endDate" required
-        #endDateRef="ngModel">
-      <mat-datepicker-toggle matIconSuffix [for]="endDatePicker"></mat-datepicker-toggle>
-      <mat-datepicker #endDatePicker></mat-datepicker>
-      @if (endDateRef.invalid && endDateRef.touched) {
-      <mat-error>結束日期不可為空</mat-error>
-      }
-    </mat-form-field>
-
-    <!-- 結束時間（必填） -->
-    <mat-form-field appearance="outline">
-      <mat-label>結束時間 </mat-label>
-      <input matInput [matTimepicker]="endTimePicker" [(ngModel)]="form.endTime" name="endTime" required
-        #endTimeRef="ngModel">
-      <mat-timepicker-toggle matIconSuffix [for]="endTimePicker"></mat-timepicker-toggle>
-      <mat-timepicker #endTimePicker></mat-timepicker>
-      @if (endTimeRef.invalid && endTimeRef.touched) {
-      <mat-error>結束時間不可為空</mat-error>
-      }
-    </mat-form-field>
-
-    <!-- 提醒時間（必填） -->
-    <mat-form-field appearance="outline">
-      <mat-label>提醒時間（分鐘）</mat-label>
-      <input matInput type="number" [(ngModel)]="form.notifyBefore" name="notifyBefore" required #notifyRef="ngModel"
-        min="0">
-      @if (notifyRef.invalid && notifyRef.touched) {
-      <mat-error>提醒時間不可為空</mat-error>
-      }
-    </mat-form-field>
-
+    <div>
+      <h2>{{ data.mode === 'create' ? '新增活動' : '修改活動' }}</h2>
+      <p>設定家庭行事曆活動時間與提醒</p>
+    </div>
   </div>
-</mat-dialog-content>
-</form>
-<mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()">取消</button>
-  <button mat-flat-button color="primary" (click)="confirm()">確認</button>
-</mat-dialog-actions>
+
+  <form #dialogForm="ngForm">
+
+    <mat-dialog-content class="dialog-content">
+
+      <div class="dialog-form">
+
+     <!-- 所屬群組：唯讀資訊欄 -->
+      <mat-form-field appearance="outline" class="full-width readonly-group-field">
+        <mat-label>所屬群組（唯讀）</mat-label>
+
+        <input
+          matInput
+          [value]="displayGroupName"
+          readonly
+        />
+
+        <span matTextPrefix class="readonly-prefix">👥</span>
+        <span matTextSuffix class="readonly-suffix">🔒</span>
+      </mat-form-field>
+        <!-- 活動名稱 -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>活動名稱</mat-label>
+          <input
+            matInput
+            [(ngModel)]="form.title"
+            name="title"
+            required
+            #titleRef="ngModel"
+            placeholder="請輸入活動名稱"
+          />
+
+          @if (titleRef.invalid && titleRef.touched) {
+            <mat-error>活動名稱不可為空</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- 活動描述 -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>活動描述</mat-label>
+          <textarea
+            matInput
+            rows="3"
+            [(ngModel)]="form.description"
+            name="description"
+            placeholder="請輸入活動描述，例如：家庭聚餐、繳費、回診提醒"
+          ></textarea>
+        </mat-form-field>
+
+        <!-- 開始日期 -->
+        <mat-form-field appearance="outline">
+          <mat-label>開始日期</mat-label>
+          <input
+            matInput
+            [matDatepicker]="startDatePicker"
+            [(ngModel)]="form.eventDate"
+            name="eventDate"
+            required
+            #eventDateRef="ngModel"
+          />
+          <mat-datepicker-toggle matIconSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #startDatePicker></mat-datepicker>
+
+          @if (eventDateRef.invalid && eventDateRef.touched) {
+            <mat-error>開始日期不可為空</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- 開始時間 -->
+        <mat-form-field appearance="outline">
+          <mat-label>開始時間</mat-label>
+          <input
+            matInput
+            [matTimepicker]="startTimePicker"
+            [(ngModel)]="form.eventTime"
+            name="eventTime"
+            required
+            #eventTimeRef="ngModel"
+          />
+          <mat-timepicker-toggle matIconSuffix [for]="startTimePicker"></mat-timepicker-toggle>
+          <mat-timepicker #startTimePicker></mat-timepicker>
+
+          @if (eventTimeRef.invalid && eventTimeRef.touched) {
+            <mat-error>開始時間不可為空</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- 結束日期 -->
+        <mat-form-field appearance="outline">
+          <mat-label>結束日期</mat-label>
+          <input
+            matInput
+            [matDatepicker]="endDatePicker"
+            [(ngModel)]="form.endDate"
+            name="endDate"
+            required
+            #endDateRef="ngModel"
+          />
+          <mat-datepicker-toggle matIconSuffix [for]="endDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #endDatePicker></mat-datepicker>
+
+          @if (endDateRef.invalid && endDateRef.touched) {
+            <mat-error>結束日期不可為空</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- 結束時間 -->
+        <mat-form-field appearance="outline">
+          <mat-label>結束時間</mat-label>
+          <input
+            matInput
+            [matTimepicker]="endTimePicker"
+            [(ngModel)]="form.endTime"
+            name="endTime"
+            required
+            #endTimeRef="ngModel"
+          />
+          <mat-timepicker-toggle matIconSuffix [for]="endTimePicker"></mat-timepicker-toggle>
+          <mat-timepicker #endTimePicker></mat-timepicker>
+
+          @if (endTimeRef.invalid && endTimeRef.touched) {
+            <mat-error>結束時間不可為空</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- 提醒時間 -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>提醒時間（分鐘）</mat-label>
+          <input
+            matInput
+            type="number"
+            [(ngModel)]="form.notifyBefore"
+            name="notifyBefore"
+            required
+            #notifyRef="ngModel"
+            min="0"
+            placeholder="例如：30"
+          />
+
+          @if (notifyRef.invalid && notifyRef.touched) {
+            <mat-error>提醒時間不可為空</mat-error>
+          }
+
+          <mat-hint>例如：30 代表活動開始前 30 分鐘提醒</mat-hint>
+        </mat-form-field>
+
+      </div>
+
+    </mat-dialog-content>
+
+  </form>
+
+  <!-- 底部按鈕 -->
+  <mat-dialog-actions align="end" class="dialog-actions">
+    <button mat-button type="button" class="cancel-btn" (click)="cancel()">
+      取消
+    </button>
+
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      class="confirm-btn"
+      [disabled]="dialogForm.invalid"
+      (click)="confirm()"
+    >
+      確認
+    </button>
+  </mat-dialog-actions>
+
+</div>

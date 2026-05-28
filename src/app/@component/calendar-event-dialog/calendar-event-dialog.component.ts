@@ -41,30 +41,38 @@ export class CalendarEventDialogComponent {
     endTime: null as Date | null,
     notifyBefore: 0,
   };
+  get displayGroupName(): string {
+  return this.data.groupName || '未選擇群組';
+}
   @ViewChild('dialogForm') dialogForm!: NgForm;
 
   constructor(
-    public dialogRef: MatDialogRef<CalendarEventDialogComponent>,
-    @Inject(MAT_DIALOG_DATA)
-    public data: { mode: 'create' | 'update'; dateStr?: string; event?: any },
-  ) {
-    // 如果是修改模式，把舊資料帶進來
-    if (data.mode === 'update' && data.event) {
-      const e = data.event;
-      this.form.title = e.title;
-      this.form.description = e.extendedProps.description || '';
-      this.form.eventDate = new Date(e.startStr);
-      this.form.eventTime = new Date(e.startStr);
-      this.form.endDate = e.endStr ? new Date(e.endStr) : null;
-      this.form.endTime = e.endStr ? new Date(e.endStr) : null;
-      this.form.notifyBefore = e.extendedProps.notifyBefore || 0;
-    }
-
-    if (data.mode === 'create' && data.dateStr) {
-      this.form.eventDate = new Date(data.dateStr);
-      this.form.endDate = new Date(data.dateStr);
-    }
+  public dialogRef: MatDialogRef<CalendarEventDialogComponent>,
+  @Inject(MAT_DIALOG_DATA)
+  public data: {
+    mode: 'create' | 'update';
+    dateStr?: string;
+    event?: any;
+    groupId?: number | null;
+    groupName?: string;
+  },
+) {
+  if (data.mode === 'update' && data.event) {
+    const e = data.event;
+    this.form.title = e.title;
+    this.form.description = e.extendedProps?.description || '';
+    this.form.eventDate = new Date(e.startStr);
+    this.form.eventTime = new Date(e.startStr);
+    this.form.endDate = e.endStr ? new Date(e.endStr) : null;
+    this.form.endTime = e.endStr ? new Date(e.endStr) : null;
+    this.form.notifyBefore = e.extendedProps?.notifyBefore || 0;
   }
+
+  if (data.mode === 'create' && data.dateStr) {
+    this.form.eventDate = new Date(data.dateStr);
+    this.form.endDate = new Date(data.dateStr);
+  }
+}
 
   confirm() {
     // 觸發所有欄位的 touched 狀態，讓錯誤訊息顯示出來

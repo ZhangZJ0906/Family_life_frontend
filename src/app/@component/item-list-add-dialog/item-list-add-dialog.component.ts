@@ -21,7 +21,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { HttpClientService } from '../../@services/http-client.service';
 import Swal from 'sweetalert2';
-import { TopbarComponent } from '../../shared/topbar/topbar.component';
+
 import { AuthService } from '../../@services/auth.service';
 
 @Component({
@@ -41,18 +41,20 @@ import { AuthService } from '../../@services/auth.service';
     MatDatepickerModule,
     MatSlideToggleModule,
 
+
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './item-list-add-dialog.component.html',
   styleUrl: './item-list-add-dialog.component.scss',
 })
 export class ItemListAddDialogComponent implements OnInit {
-  // 初始化對應資料庫欄位的物件
-  groupId: number[] = [1, 2, 3, 4, 5, 6];
+   // 初始化對應資料庫欄位的物件
+  groupId: number | null = null;
   location: LocationAndCategory[] = [];
   categories: LocationAndCategory[] = [];
   minDate: string = ''; // 日期限制
   today = new Date();
+
 
   subscriptionCategoryId = 4; // 依照你的資料庫分類 id 調整，訂閱如果不是 4 就改成正確 id
 
@@ -124,7 +126,7 @@ isMedicineCategory(): boolean {
     private authService: AuthService
   ) {
     this.basicUrl = this.http.basicUrl;
-    this.group = this.data.groups;
+    this.group = this.data?.groups ?? [];
     this.item.created_by_id = this.authService.currentUser()?.user_id ?? 0;
   }
 
@@ -140,7 +142,7 @@ isMedicineCategory(): boolean {
       this.categories.shift();
     }
 
-    if (this.data?.currentGroupId) {
+    if (this.data?.currentGroupId !== undefined && this.data?.currentGroupId !== null) {
       this.item.groupId = this.data.currentGroupId;
     }
 
@@ -165,6 +167,26 @@ isMedicineCategory(): boolean {
         this.item.categoryId = medicineCategory.id;
       }
     }
+
+    this.applyPrefillItem();
+  }
+
+  private applyPrefillItem(): void {
+    const prefill = this.data?.prefillItem;
+
+    if (!prefill) {
+      return;
+    }
+
+    this.item = {
+      ...this.item,
+      groupId: prefill.groupId ?? this.item.groupId,
+      categoryId: prefill.categoryId ?? this.item.categoryId,
+      name: prefill.name ?? this.item.name,
+      quantity: prefill.quantity ?? this.item.quantity,
+      purchaseDate: prefill.purchaseDate ?? this.item.purchaseDate,
+      unit: (prefill.unit ?? this.item.unit) || '個',
+    };
   }
 
   get totalPrice(): number {
@@ -194,7 +216,7 @@ isMedicineCategory(): boolean {
     ...this.item,
     price: this.totalPrice,
     userId: this.item.created_by_id,
-    groupId: this.item.groupId || 0,
+    groupId: this.item.groupId,
     purchaseDate: this.formatDate(this.item.purchaseDate),
     expireDate: this.formatDate(this.item.expireDate),
   };
@@ -235,13 +257,7 @@ isMedicineCategory(): boolean {
         return;
       }
 
-      Swal.fire({
-        title: '成功',
-        text: res.message,
-        icon: 'success',
-      });
-
-      this.dialogRef.close(true);
+      this.createExpenseForItem(payload, res);
     },
     error: (err: any) => {
       Swal.fire({
@@ -251,6 +267,67 @@ isMedicineCategory(): boolean {
       });
     },
   });
+  }
+
+  private createExpenseForItem(itemPayload: any, itemAddRes: any): void {
+    if (!itemPayload.price || itemPayload.price <= 0) {
+      Swal.fire({
+        title: '成功',
+        text: '物品已新增',
+        icon: 'success',
+      });
+      this.dialogRef.close(true);
+      return;
+    }
+
+    const expensePayload = {
+      userId: itemPayload.userId,
+      groupId: itemPayload.groupId ?? 0,
+      categoryId: itemPayload.categoryId,
+      relatedItemId: this.getCreatedItemId(itemAddRes),
+      relatedItemName: itemPayload.name,
+      price: itemPayload.price,
+      note: itemPayload.note || '由物品清單自動建立',
+      expenseDate: itemPayload.purchaseDate,
+    };
+
+    this.http.postApi(this.basicUrl + 'expense/addInfo', expensePayload).subscribe({
+      next: (res: any) => {
+        if (res.code != 200) {
+          Swal.fire({
+            title: '物品已新增，記帳建立失敗',
+            text: res.message || 'Server error',
+            icon: 'warning',
+          });
+          this.dialogRef.close(true);
+          return;
+        }
+
+        Swal.fire({
+          title: '成功',
+          text: '物品與記帳已新增',
+          icon: 'success',
+        });
+        this.dialogRef.close(true);
+      },
+      error: (err: any) => {
+        Swal.fire({
+          title: '物品已新增，記帳建立失敗',
+          text: err.message || 'Server error',
+          icon: 'warning',
+        });
+        this.dialogRef.close(true);
+      },
+    });
+  }
+
+  private getCreatedItemId(res: any): number | null {
+    return res?.itemId ??
+      res?.id ??
+      res?.data?.id ??
+      res?.item?.id ??
+      res?.itemInfo?.id ??
+      null;
   }
 
   // 訂閱的新增流程

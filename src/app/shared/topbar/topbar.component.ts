@@ -10,6 +10,10 @@ import { HttpClient } from '@angular/common/http';
 
 import { MatIcon } from "@angular/material/icon";
 import { AuthService } from '../../@services/auth.service';
+import { NotifyService } from '../../@services/NotifyService';
+import { BrowserNotifyService } from '../../@services/BrowserNotifyService';
+import { NotificationSocketService } from '../../@services/NotificationSocketService';
+
 import { NotifyDialogComponent } from '../../@group/notify-dialog/notify-dialog.component';
 
 @Component({
@@ -44,12 +48,31 @@ export class TopbarComponent implements OnInit, OnDestroy {
   constructor(
     private dialog: MatDialog,
     private http: HttpClient,
-    private authService: AuthService
-  ) {}
+    private authService: AuthService,
+    private notifyService: NotifyService,
+    private browserNotify: BrowserNotifyService,
+    private socketService: NotificationSocketService
+  ) {
+    this.user_id = this.authService.currentUser()?.user_id ?? 0;
+  }
 
   ngOnInit(): void {
     // 取得目前登入使用者
     const currentUser = this.authService.currentUser();
+
+    this.browserNotify.requestPermission();
+
+    this.socketService.unreadCount$.subscribe(count => {
+      this.unreadCount = count;
+      this.notifyService.setUnreadCount(count);
+
+      if (count > 0) {
+        this.browserNotify.send(
+          '家庭系統通知',
+          `你目前有 ${count} 則未讀通知`
+        );
+      }
+    });
 
     // 如果沒有登入資料，先不呼叫後端，避免 user_id=undefined 或 0 出錯
     if (!currentUser || !currentUser.user_id) {
@@ -59,11 +82,12 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
     this.user_id = currentUser.user_id;
 
+    this.getUnreadNotifyCount();
+
+    this.socketService.connect(this.user_id);
+
     // 載入頭像
     this.loadAvatar();
-
-    // 載入未讀通知數量
-    this.getUnreadNotifyCount();
 
     // 監聽頭像更新事件
     window.addEventListener('avatarChanged', this.loadAvatar);
@@ -72,6 +96,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     // 離開頁面時移除監聽
     window.removeEventListener('avatarChanged', this.loadAvatar);
+    this.socketService.disconnect();
   }
 
   // 開關手機版選單
@@ -92,7 +117,6 @@ export class TopbarComponent implements OnInit, OnDestroy {
   // 取得未讀通知數量
   getUnreadNotifyCount(): void {
     if (!this.user_id) {
-      this.unreadCount = 0;
       return;
     }
 
@@ -107,14 +131,16 @@ export class TopbarComponent implements OnInit, OnDestroy {
             isRead: Number(n.isRead),
           }));
 
-          this.unreadCount = notifyList.filter(
-            (n: any) => n.isRead !== 1
-          ).length;
+          const unread = notifyList.filter((n: any) => n.isRead !== 1).length;
+          // 🔥 只更新 service
+          this.unreadCount = unread;
+
+          this.notifyService.setUnreadCount(unread);
         },
 
         error: (err) => {
           console.log(err);
-          this.unreadCount = 0;
+          this.notifyService.setUnreadCount(0);
         },
       });
   }
@@ -135,8 +161,12 @@ export class TopbarComponent implements OnInit, OnDestroy {
     });
 
     // 彈窗關閉後重新讀通知數量
-    dialogRef.afterClosed().subscribe(() => {
-      this.getUnreadNotifyCount();
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.unreadCount !== undefined) {
+        this.unreadCount = result.unreadCount;
+      } else {
+        this.getUnreadNotifyCount();
+      }
     });
   }
 

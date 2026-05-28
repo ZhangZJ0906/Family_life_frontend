@@ -33,7 +33,7 @@ export class CalendarApiService {
     return this.http.put(`${this.baseUrl}/${id}`, data);
   }
 
-  delete(id: number): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/${id}`);
+  delete(id: number, userId: number, groupId: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/${id}/${userId}/${groupId}`);
   }
 }

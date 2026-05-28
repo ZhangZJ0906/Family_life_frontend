@@ -6,6 +6,7 @@ import {
   AddPurchaseItemReq,
   BasicRes,
   CreateListReq,
+  GroupListRes,
   PurchaseItemVo,
   ShoppingList
 } from '../@models/shopping_list.model';
@@ -16,11 +17,17 @@ import {
 export class ShoppingListService {
   private readonly http = inject(HttpClient);
   private readonly shoppingUrl = 'http://localhost:8080/shopping_lists';
+  private readonly groupUrl = 'http://localhost:8080/family_life';
 
-  // 取得目前使用者建立的 shopping lists，用在左側「我的清單」。
   getLists(createrId: number): Observable<ShoppingList[]> {
     return this.http.get<ShoppingList[]>(this.shoppingUrl, {
       params: { createrId }
+    });
+  }
+
+  getUserGroups(userId: number): Observable<GroupListRes> {
+    return this.http.get<GroupListRes>(`${this.groupUrl}/getGroupList`, {
+      params: { user_Id: userId }
     });
   }
 
@@ -28,7 +35,6 @@ export class ShoppingListService {
     return this.http.post<BasicRes>(`${this.shoppingUrl}/create`, req);
   }
 
-  // 後端目前 delete/check 都是 POST + RequestParam，不是 REST DELETE/PUT。
   deleteList(listId: number): Observable<BasicRes> {
     return this.http.post<BasicRes>(
       `${this.shoppingUrl}/delete`,

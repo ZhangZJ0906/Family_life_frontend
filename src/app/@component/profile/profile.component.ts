@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../@services/auth.service';
 import { map } from 'rxjs';
 
+import { CanComponentDeactivate } from '../../@guard/pending-changes.guard';
 
 @Component({
   selector: 'app-profile',
@@ -18,7 +19,7 @@ import { map } from 'rxjs';
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss'
 })
-export class ProfileComponent {
+export class ProfileComponent implements CanComponentDeactivate {
 
   // 使用者名稱
   userName = 'Jack';
@@ -45,6 +46,9 @@ export class ProfileComponent {
 
   //大頭貼
   file: any;
+
+  //切到其它分頁時護衛模式
+  isDirty = false;
 
   constructor(
     private http: HttpClient,
@@ -195,6 +199,9 @@ export class ProfileComponent {
       this.userName = result.value.userName;
       this.email = result.value.email;
 
+      //暫存
+      this.isDirty = true;
+
       Swal.fire({
         icon: 'success',
         title: '修改成功',
@@ -206,7 +213,7 @@ export class ProfileComponent {
 
 // 開啟更換頭像視窗
 openAvatarDialog(): void {
-  Swal.fire({
+ Swal.fire({
     title: '更換頭像',
 
     html: `
@@ -221,39 +228,29 @@ openAvatarDialog(): void {
 
     preConfirm: () => {
       const input = document.getElementById('avatarInput') as HTMLInputElement;
-      this.file = input.files?.[0];
+      const selectedFile = input.files?.[0];
 
-      if (!this.file) {
+      if (!selectedFile) {
         Swal.showValidationMessage('請選擇一張圖片');
         return false;
       }
 
-      return this.file;
+      return selectedFile;
     }
-    }).then((result) => {
-      if (!result.isConfirmed || !result.value) {
-        return;
-      }
+  }).then((result) => {
+    if (!result.isConfirmed || !result.value) {
+      return;
+    }
 
-      this.file = result.value as File;
-    // const reader = new FileReader();
-      this.avatarUrl = URL.createObjectURL(this.file);
+    // 1. 暫存使用者選到的檔案
+    this.file = result.value as File;
 
-  // reader.onload = () => {
-  //   const file = event.target.files[0];
-  //   this.avatarUrl = URL.createObjectURL(file);
+    // 2. 先在畫面上預覽新頭像
+    this.avatarUrl = URL.createObjectURL(this.file);
 
-  //   // 存到 localStorage
-  //   localStorage.setItem('avatarUrl', this.avatarUrl);
-
-  //   // 通知 topbar 重新讀取頭像
-  //   window.dispatchEvent(new Event('avatarChanged'));
-  // }
-
-      window.dispatchEvent(new Event('avatarChanged'));
-    // reader.readAsDataURL(file);
-    });
-
+    //暫存
+    this.isDirty = true;
+  });
 
   }
 
@@ -287,6 +284,7 @@ openAvatarDialog(): void {
       )
     );
 
+    // 有選新頭像時才送 avatar
     if (this.file) {
       formData.append('avatar', this.file);
     }
@@ -295,18 +293,63 @@ openAvatarDialog(): void {
       'http://localhost:8080/users/update_info',
       formData
     ).subscribe({
-
       next: (res: any) => {
-        Swal.fire('已儲存', '', 'success');
+        if (res.code !== 200) {
+          Swal.fire({
+            icon: 'error',
+            title: '儲存失敗',
+            text: res.message || '資料更新失敗'
+          });
+          return;
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: '已儲存',
+          text: '資料已更新',
+          confirmButtonText: '確認'
+        });
+
+        //存進db
+        this.isDirty = false;
+
+        // 清掉暫存檔案，避免下次儲存又重複上傳同一張
+        this.file = null;
+
+        // 重新抓資料庫最新資料
         this.getSelfInfo();
+
+        // 通知 topbar 重新讀取資料庫頭像
+        window.dispatchEvent(new Event('avatarChanged'));
       },
 
       error: (err) => {
-        Swal.fire('失敗', '', 'error');
+        Swal.fire({
+          icon: 'error',
+          title: '失敗',
+          text: err.error?.message || '伺服器發生錯誤'
+        });
+
         console.log(err);
       }
-
     });
-    console.log(payload);
+  }
+
+  canDeactivate(): Promise<boolean> | boolean {
+
+    if (!this.isDirty) {
+      return true;
+    }
+
+    return Swal.fire({
+      title: '尚未儲存',
+      text: '是否離開此頁面？未儲存的資料將會遺失',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: '離開',
+      cancelButtonText: '留在此頁'
+    }).then(result => {
+      return result.isConfirmed;
+    });
   }
 }

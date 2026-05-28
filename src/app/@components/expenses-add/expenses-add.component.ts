@@ -136,8 +136,8 @@ export class ExpensesAddComponent {
    * 呼叫後端 API 動態載入物品清單
    */
   getItemList(groupId: number | null, userId: number) {
-    let url = `${this.basicUrl}item/getItems?userId=${userId}&groupId=${groupId}`;
-
+    const resolvedGroupId = groupId ?? 0;
+    const url = `${this.basicUrl}item/getItems?userId=${userId}&groupId=${resolvedGroupId}`;
 
     this.http.getApi(url).subscribe({
       next: (res: any) => {

@@ -1,123 +1,222 @@
 /* 整個行事曆頁面背景 */
 .calendar-page {
   min-height: 100vh;
-  padding: 32px;
-  background: #f5f6f8;
+  padding: 28px;
+  background: #f6f7f9;
+  color: #111827;
   box-sizing: border-box;
 }
 
-/* 行事曆主要白色卡片 */
-.calendar-card {
+/* 上方標題與操作卡片 */
+.calendar-header-card {
   background: #ffffff;
-  border-radius: 18px;
-  padding: 24px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-}
+  border: 1px solid #e5e7eb;
+  border-radius: 22px;
 
-/* 上方標題列：左邊標題，右邊按鈕 */
-.calendar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  padding: 28px 32px;
   margin-bottom: 24px;
+
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 24px;
+
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
 }
 
-/* 標題文字 */
+/* 左側標題區 */
+.calendar-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* 標題 icon */
+.title-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+
+  background: #eef4ff;
+  color: #2f80ed;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+/* 標題 */
 .calendar-title h2 {
   margin: 0;
-  font-size: 28px;
-  color: #222;
+  font-size: 32px;
+  font-weight: 900;
+  color: #111827;
 }
 
-/* 標題下方說明文字 */
+/* 副標 */
 .calendar-title p {
-  margin: 6px 0 0;
-  color: #777;
-  font-size: 14px;
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 15px;
 }
 
-/* 右上角按鈕群組 */
+/* 右側操作區 */
 .calendar-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: flex-end;
+  gap: 14px;
+}
+
+/* 群組下拉 */
+.calendar-group-select {
+  width: 240px;
+  margin-bottom: 0;
+}
+
+/* 移除 Material 底部預留空間 */
+.calendar-group-select ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+/* Material 下拉欄位外觀 */
+.calendar-group-select ::ng-deep .mat-mdc-text-field-wrapper {
+  height: 58px;
+  background: #ffffff;
+  border-radius: 14px;
+}
+
+/* 讓下拉文字垂直置中 */
+.calendar-group-select ::ng-deep .mat-mdc-form-field-flex {
+  height: 58px;
+  align-items: center;
+}
+
+/* 下拉文字 */
+.calendar-group-select ::ng-deep .mat-mdc-select-value {
+  color: #111827;
+  font-size: 16px;
+  font-weight: 700;
 }
 
 /* 新增活動按鈕 */
 .add-btn {
-  padding: 11px 22px;
+  height: 58px;
+  padding: 0 24px;
+
   border: none;
-  border-radius: 10px;
-  background: #222;
-  color: #fff;
+  border-radius: 14px;
+
+  background: #111827;
+  color: #ffffff;
+
+  font-size: 16px;
+  font-weight: 800;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
   cursor: pointer;
-  font-size: 15px;
-  font-weight: 600;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
 }
 
-/* 新增活動 hover 效果 */
+/* 新增活動 icon */
+.add-btn mat-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+}
+
+/* 新增活動 hover */
 .add-btn:hover {
-  background: #444;
+  background: #1f2937;
 }
 
-/* 返回首頁按鈕 */
-.back-home-btn {
-  padding: 11px 22px;
-  border: 1px solid #dcdfe5;
-  border-radius: 10px;
+/* FullCalendar 外層白色卡片 */
+.calendar-main-card {
   background: #ffffff;
-  color: #333;
-  cursor: pointer;
-  font-size: 15px;
-  font-weight: 600;
+  border: 1px solid #e5e7eb;
+  border-radius: 22px;
+
+  padding: 24px;
+  box-sizing: border-box;
+
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+  overflow: hidden;
 }
 
-/* 返回首頁 hover 效果 */
-.back-home-btn:hover {
-  background: #f1f3f5;
-  color: #2f80ed;
-}
-
-/* FullCalendar 外層 */
+/* FullCalendar 整體 */
 :host ::ng-deep .fc {
-  background: #fff;
-  color: #222;
+  background: #ffffff;
+  color: #111827;
+  font-family: inherit;
 }
 
-/* 上方工具列 */
-:host ::ng-deep .fc-toolbar-title {
-  font-size: 26px;
-  font-weight: 700;
-  color: #111;
+/* FullCalendar 上方 toolbar */
+:host ::ng-deep .fc .fc-toolbar {
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
 }
 
-:host ::ng-deep .fc-button {
+/* 月份標題 */
+:host ::ng-deep .fc .fc-toolbar-title {
+  font-size: 30px;
+  font-weight: 900;
+  color: #111827;
+}
+
+/* FullCalendar 所有按鈕 */
+:host ::ng-deep .fc .fc-button {
+  border: 1px solid #e5e7eb !important;
+  border-radius: 12px !important;
+
   background: #ffffff !important;
-  border: 1px solid #dcdfe5 !important;
-  color: #333 !important;
-  border-radius: 8px !important;
-  padding: 8px 14px !important;
+  color: #334155 !important;
+
+  padding: 10px 16px !important;
+
+  font-weight: 700 !important;
   box-shadow: none !important;
+  text-transform: none !important;
 }
 
-:host ::ng-deep .fc-button:hover {
-  background: #f1f3f5 !important;
+/* FullCalendar 按鈕 hover */
+:host ::ng-deep .fc .fc-button:hover {
+  background: #eef4ff !important;
+  color: #2563eb !important;
 }
 
-:host ::ng-deep .fc-button-active {
-  background: #222 !important;
-  color: #fff !important;
+/* FullCalendar 啟用中的 month / week */
+:host ::ng-deep .fc .fc-button-primary:not(:disabled).fc-button-active {
+  background: #111827 !important;
+  color: #ffffff !important;
+  border-color: #111827 !important;
+}
+
+/* disabled 按鈕 */
+:host ::ng-deep .fc .fc-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 /* 星期列 */
-:host ::ng-deep .fc-col-header-cell {
-  background: #fafafa;
-  padding: 10px 0;
+:host ::ng-deep .fc .fc-col-header-cell {
+  background: #f8fafc;
+  border-color: #edf0f3;
+  padding: 14px 0;
 }
 
-:host ::ng-deep .fc-col-header-cell-cushion {
-  color: #333;
-  font-weight: 700;
+/* 星期文字 */
+:host ::ng-deep .fc .fc-col-header-cell-cushion {
+  color: #111827;
+  font-size: 16px;
+  font-weight: 900;
   text-decoration: none;
 }
 
@@ -127,74 +226,78 @@
   border: 1px solid #edf0f3;
 }
 
-:host ::ng-deep .fc-daygrid-day {
-  background: #fff;
+/* 日期格 */
+:host ::ng-deep .fc .fc-daygrid-day {
+  background: #ffffff;
 }
 
-:host ::ng-deep .fc-day-today {
-  background: #f4f8ff !important;
+/* 日期格 hover */
+:host ::ng-deep .fc .fc-daygrid-day:hover {
+  background: #fbfdff;
 }
 
-:host ::ng-deep .fc-daygrid-day-number {
-  color: #333;
+/* 日期數字 */
+:host ::ng-deep .fc .fc-daygrid-day-number {
+  color: #111827;
+  font-size: 15px;
+  font-weight: 800;
+  padding: 10px;
   text-decoration: none;
-  font-weight: 600;
 }
 
-/* 活動樣式 */
-:host ::ng-deep .fc-event {
+/* 非本月日期 */
+:host ::ng-deep .fc .fc-day-other .fc-daygrid-day-number {
+  color: #c4c4c4;
+}
+
+/* 今天日期背景 */
+:host ::ng-deep .fc .fc-day-today {
   background: #eef4ff !important;
-  border: 1px solid #cfe0ff !important;
-  color: #1f4f9a !important;
-  border-radius: 8px;
-  padding: 3px 6px;
-  font-weight: 600;
 }
 
-:host ::ng-deep .fc-event:hover {
-  background: #dceaff !important;
+/* 今天日期數字 */
+:host ::ng-deep .fc .fc-day-today .fc-daygrid-day-number {
+  color: #2563eb;
+  font-weight: 900;
 }
 
-/* SweetAlert 表單 */
-.swal-form {
-  width: 100%;
-  max-width: 620px;
-  margin: 0 auto;
+/* 月曆格高度 */
+:host ::ng-deep .fc .fc-daygrid-day-frame {
+  min-height: 120px;
 }
 
-.form-row {
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  align-items: center;
-  column-gap: 18px;
-  margin-bottom: 18px;
+/* 一般活動樣式 */
+:host ::ng-deep .fc .fc-event {
+  background: #eef4ff !important;
+  border: 1px solid #dbe6ff !important;
+  color: #2563eb !important;
+
+  border-radius: 10px;
+  padding: 4px 8px;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  cursor: pointer;
 }
 
-.form-row label {
-  text-align: right;
-  font-size: 17px;
-  font-weight: 600;
-  color: #333;
-  white-space: nowrap;
+/* 活動 hover */
+:host ::ng-deep .fc .fc-event:hover {
+  background: #dbeafe !important;
 }
 
-.form-row .swal2-input {
-  width: 100%;
-  margin: 0;
-  box-sizing: border-box;
+/* 一般活動圓點 */
+:host ::ng-deep .fc-daygrid-event-dot {
+  border-color: #5b8def !important;
 }
 
-
-
-
-
-/* 跨天活動：讓內容水平排列，圓點與文字同一行 */
+/* 跨天活動主要內容 */
 :host ::ng-deep .fc-daygrid-block-event .fc-event-main {
   display: flex;
   align-items: center;
 }
 
-/* 跨天活動：自製圓點，大小位置接近單天活動 */
+/* 跨天活動前方圓點 */
 :host ::ng-deep .fc-daygrid-block-event .fc-event-main::before {
   content: "";
   width: 7px;
@@ -206,26 +309,78 @@
   flex-shrink: 0;
 }
 
-/* 跨天活動整體文字顏色 */
+/* 跨天活動文字 */
 :host ::ng-deep .fc-daygrid-block-event,
 :host ::ng-deep .fc-daygrid-block-event .fc-event-main,
-:host ::ng-deep .fc-daygrid-block-event .fc-event-main-frame {
-  color: #1f4f9a !important;
-}
-
-/* 跨天活動時間文字，例如：上午9時 */
-:host ::ng-deep .fc-daygrid-block-event .fc-event-time {
-  color: #1f4f9a !important;
-  font-weight: 700 !important;
-}
-
-/* 跨天活動標題文字，例如：1111、33333 */
+:host ::ng-deep .fc-daygrid-block-event .fc-event-main-frame,
+:host ::ng-deep .fc-daygrid-block-event .fc-event-time,
 :host ::ng-deep .fc-daygrid-block-event .fc-event-title {
   color: #1f4f9a !important;
-  font-weight: 700 !important;
+  font-weight: 800 !important;
 }
 
-/* 一般活動圓點顏色 */
-:host ::ng-deep .fc-daygrid-event-dot {
-  border-color: #5b8def !important;
+/* RWD：平板 */
+@media (max-width: 1100px) {
+  .calendar-header-card {
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+  }
+
+  .calendar-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .calendar-group-select {
+    width: 260px;
+  }
+}
+
+/* RWD：手機 */
+@media (max-width: 768px) {
+  .calendar-page {
+    padding: 16px;
+  }
+
+  .calendar-header-card {
+    padding: 22px;
+    border-radius: 18px;
+  }
+
+  .calendar-title h2 {
+    font-size: 26px;
+  }
+
+  .calendar-title p {
+    font-size: 14px;
+  }
+
+  .calendar-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .calendar-group-select,
+  .add-btn {
+    width: 100%;
+  }
+
+  .calendar-main-card {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  :host ::ng-deep .fc .fc-toolbar {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  :host ::ng-deep .fc .fc-toolbar-title {
+    font-size: 24px;
+  }
+
+  :host ::ng-deep .fc .fc-daygrid-day-frame {
+    min-height: 90px;
+  }
 }

@@ -1,10 +1,11 @@
+<app-topbar></app-topbar>
+
 <main class="shopping-page">
-  <app-topbar></app-topbar>
   <section class="page-heading">
     <div>
       <p class="eyebrow">Shopping Lists</p>
       <h1>購物清單</h1>
-      <p class="subtitle">建立清單後，進入清單內新增與管理購物項目。</p>
+      <p class="subtitle">勾選購買時會先新增到物品清單，儲存成功後才標記為已購買。</p>
     </div>
 
     <div class="actions">
@@ -17,76 +18,207 @@
     </div>
   </section>
 
-  <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
+  @if (errorMessage) {
+    <p class="error-message">{{ errorMessage }}</p>
+  }
 
-  <section class="lists-panel" aria-label="我的購物清單">
+  <section class="lists-panel" aria-label="購物清單列表">
     <div class="panel-header">
       <h2>我的清單</h2>
-      <span>{{ lists.length }} 份</span>
+      <div class="list-filter">
+        <span>{{ filteredLists.length }} 筆</span>
+        <select name="groupFilter" [(ngModel)]="groupFilter" aria-label="群組篩選">
+          <option [ngValue]="'all'">全部群組</option>
+          <option [ngValue]="null">無</option>
+          @for (group of groupOptions; track group.id) {
+            @if (group.id !== null) {
+              <option [ngValue]="group.id">{{ group.name }}</option>
+            }
+          }
+        </select>
+        <select name="statusFilter" [(ngModel)]="statusFilter" aria-label="清單狀態篩選">
+          <option value="unfinished">未完成</option>
+          <option value="completed">已完成</option>
+        </select>
+      </div>
     </div>
 
-    <div class="state-box" *ngIf="isLoading">清單載入中...</div>
+    @if (isLoading) {
+      <div class="state-box">清單載入中...</div>
+    }
 
-    <div class="state-box" *ngIf="!isLoading && lists.length === 0">
-      目前沒有購物清單，先建立一份新的清單。
-    </div>
+    @if (!isLoading && lists.length === 0 && !errorMessage) {
+      <div class="state-box">目前沒有購物清單，請先建立一筆清單。</div>
+    }
 
-    <div class="list-grid" *ngIf="!isLoading && lists.length > 0">
-      <article class="list-card" *ngFor="let list of lists; trackBy: trackByListId">
-        <a class="list-link" [routerLink]="['/purchase-item', list.id]">
-          <strong>{{ list.title }}</strong>
-          <small *ngIf="list.group_id !== null">群組：{{ getGroupName(list.group_id) }}</small>
-        </a>
+    @if (!isLoading && lists.length > 0 && filteredLists.length === 0) {
+      <div class="state-box">沒有符合目前篩選條件的購物清單。</div>
+    }
 
-        <button class="text-button" type="button" (click)="deleteList(list)">
-          刪除
-        </button>
-      </article>
-    </div>
+    @if (!isLoading && filteredLists.length > 0) {
+      <div class="list-grid">
+        @for (list of filteredLists; track list.id) {
+          <article class="list-card" [class.is-completed]="isListCompleted(list.id)">
+            <header class="list-card-header">
+              <div class="list-title">
+                <strong>{{ list.title }}</strong>
+
+              @if (list.group_id !== null) {
+                <small>群組：{{ getGroupName(list.group_id) }}</small>
+              }
+
+              </div>
+
+              <span class="status-badge" [class.completed]="isListCompleted(list.id)">
+                {{ isListCompleted(list.id) ? '完成' : '未完成' }}
+              </span>
+            </header>
+
+            <div class="list-actions">
+              <button class="text-button stats-button" type="button" (click)="openStatsDialog(list)">
+                統計與勾選
+              </button>
+
+              <button class="text-button" type="button" [routerLink]="['/purchase-item', list.id]">
+                編輯
+              </button>
+
+              <button class="text-button delete-button" type="button" (click)="deleteList(list)">
+                刪除
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+    }
   </section>
 </main>
 
-<div class="dialog-backdrop" *ngIf="isDialogOpen" (click)="closeCreateDialog()">
-  <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="create-list-title" (click)="$event.stopPropagation()">
-    <div class="dialog-header">
-      <h2 id="create-list-title">建立購物清單</h2>
-      <button class="icon-button" type="button" aria-label="關閉" (click)="closeCreateDialog()">×</button>
-    </div>
-
-    <form class="dialog-form" (ngSubmit)="createList()">
-      <label class="field">
-        <span>清單名稱</span>
-        <input
-          type="text"
-          name="title"
-          [(ngModel)]="newTitle"
-          placeholder="例如：本週補貨"
-          autocomplete="off"
-          autofocus
-        />
-      </label>
-
-      <label class="field">
-        <span>群組</span>
-        <select name="groupId" [(ngModel)]="selectedGroupId">
-          <option *ngFor="let group of groupOptions" [ngValue]="group.id">
-            {{ group.name }}
-          </option>
-        </select>
-      </label>
-
-      <!-- GROUP_FEATURE: 群組功能加入後，把 groupOptions 改成後端 groups API 的結果即可。 -->
-      <p class="form-hint">沒有群組時選「無」，系統會以 null 建立清單。</p>
-      <p class="form-error" *ngIf="formError">{{ formError }}</p>
-
-      <div class="dialog-actions">
-        <button class="ghost-button" type="button" (click)="closeCreateDialog()" [disabled]="isCreating">
-          取消
-        </button>
-        <button class="primary-button" type="submit" [disabled]="isCreating">
-          {{ isCreating ? '建立中' : '建立並新增項目' }}
-        </button>
+@if (isDialogOpen) {
+  <div class="dialog-backdrop" (click)="closeCreateDialog()">
+    <section
+      class="dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-list-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="dialog-header">
+        <h2 id="create-list-title">建立購物清單</h2>
+        <button class="icon-button" type="button" aria-label="關閉" (click)="closeCreateDialog()">×</button>
       </div>
-    </form>
-  </section>
-</div>
+
+      <form class="dialog-form" (ngSubmit)="createList()">
+        <label class="field">
+          <span>清單名稱</span>
+          <input
+            type="text"
+            name="title"
+            [(ngModel)]="newTitle"
+            placeholder="例如：本週採買"
+            autocomplete="off"
+            autofocus
+          />
+        </label>
+
+        <label class="field">
+          <span>群組</span>
+          <select name="groupId" [(ngModel)]="selectedGroupId">
+            @for (group of groupOptions; track group.id) {
+              <option [ngValue]="group.id">{{ group.name }}</option>
+            }
+          </select>
+        </label>
+
+        @if (formError) {
+          <p class="form-error">{{ formError }}</p>
+        }
+
+        <div class="dialog-actions">
+          <button class="ghost-button" type="button" (click)="closeCreateDialog()" [disabled]="isCreating">
+            取消
+          </button>
+          <button class="primary-button" type="submit" [disabled]="isCreating">
+            {{ isCreating ? '建立中...' : '建立並新增項目' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+}
+
+@if (selectedStatsList) {
+  <div class="dialog-backdrop" (click)="closeStatsDialog()">
+    <section
+      class="dialog stats-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="stats-dialog-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="dialog-header">
+        <div>
+          <h2 id="stats-dialog-title">{{ selectedStatsList.title }}</h2>
+          <p class="dialog-subtitle">
+            {{ isListCompleted(selectedStatsList.id) ? '已完成' : '未完成' }}
+          </p>
+        </div>
+        <button class="icon-button" type="button" aria-label="關閉" (click)="closeStatsDialog()">×</button>
+      </div>
+
+      <section class="summary-grid dialog-summary-grid" aria-label="購物項目統計">
+        <article class="summary-card">
+          <span>全部項目</span>
+          <strong>{{ getTotalCount(selectedStatsList.id) }}</strong>
+        </article>
+
+        <article class="summary-card">
+          <span>尚未購買</span>
+          <strong>{{ getRemainingCount(selectedStatsList.id) }}</strong>
+        </article>
+
+        <article class="summary-card">
+          <span>完成率</span>
+          <strong>{{ getProgressPercent(selectedStatsList.id) }}%</strong>
+        </article>
+      </section>
+
+      <div class="progress-track" aria-hidden="true">
+        <div class="progress-bar" [style.width.%]="getProgressPercent(selectedStatsList.id)"></div>
+      </div>
+
+      @if (loadingItemsByListId[selectedStatsList.id]) {
+        <div class="state-box compact">購物項目載入中...</div>
+      } @else if (getItems(selectedStatsList.id).length === 0) {
+        <div class="state-box compact">這份清單目前沒有項目。</div>
+      } @else {
+        <div class="dialog-item-list">
+          @for (item of getItems(selectedStatsList.id); track item.id) {
+            <article class="item-row" [class.is-checked]="item.check">
+              <label class="check-control">
+                <input
+                  type="checkbox"
+                  [checked]="item.check"
+                  (click)="toggleCheck(selectedStatsList, item, $event)"
+                />
+                <span></span>
+              </label>
+
+              <div class="item-content">
+                <strong>{{ item.item }}</strong>
+                <small>
+                  {{ getCategoryName(item.categoryId) }}
+                  @if (item.checkDate) {
+                    · {{ item.checkDate }}
+                  }
+                </small>
+              </div>
+
+              <span class="quantity">x {{ item.quantity }}</span>
+            </article>
+          }
+        </div>
+      }
+    </section>
+  </div>
+}

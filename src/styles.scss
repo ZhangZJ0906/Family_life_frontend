@@ -3,10 +3,12 @@
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
+
 .notify-dialog-panel .mat-mdc-dialog-container {
   padding: 0 !important;
   border-radius: 10px;
   overflow: hidden;
+}
 .swal-form {
   width: 100%;
 }
@@ -61,5 +63,26 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   margin: 0 !important;
   box-sizing: border-box;
   font-size: 20px;
+
 }
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: #f7fafc;
+}
+
+.calendar-event-dialog-panel .mat-mdc-dialog-container {
+  --mdc-dialog-container-shape: 28px;
+}
+
+.calendar-event-dialog-panel .mdc-dialog__surface {
+  border-radius: 28px !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.18) !important;
 }

@@ -1,12 +1,17 @@
 import { Routes } from '@angular/router';
+
+
+
 import { GroupPageComponent } from './@group/group-page/group-page.component';
+
 import { CalendarComponent } from './@component/calendar/calendar.component';
 import { HomePageComponent } from './@component/home-page/home-page.component';
 import { ProfileComponent } from './@component/profile/profile.component';
-import { TopbarComponent } from './shared/topbar/topbar.component';
+
 import { ItemListComponent } from './@component/item-list/item-list.component';
 import { ExpensesComponent } from './@components/expenses/expenses.component';
 import { authGuard } from './@guard/auth.guard';
+import { pendingChangesGuard } from './@guard/pending-changes.guard';
 
 export const routes: Routes = [
   {
@@ -51,11 +56,32 @@ export const routes: Routes = [
     canActivate: [authGuard], //未登入跳到這頁面會被返回到登入葉面
   },
   {
+
     path: 'purchase-item/:listId',
     loadComponent: () =>
       import('./@components/purchase-item/purchase-item.component').then(
         (m) => m.PurchaseItemComponent,
       ),
+  },
+  {
+    path: '',
+    pathMatch: 'full',
+    redirectTo: 'login',
+    data: { title: '物品清單' },
+  },
+
+
+ {
+    path: 'login',
+    loadComponent: () =>
+      import('./@components/login/login.component').then((m) => m.LoginComponent)
+  },
+  {
+    path: 'shopping-list',
+    loadComponent: () =>
+      import('./@components/shopping-list/shopping-list.component').then(
+        (m) => m.ShoppingListComponent
+      )
   },
   {
     path: 'register',
@@ -67,12 +93,17 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'login',
-    data: { title: '物品清單' },
+    redirectTo: 'login'
   },
 
+  //預設calendar path
   {
     path: 'calendar',
+    redirectTo: 'calendar/full',
+    pathMatch: 'full'
+  },
+  {
+    path: 'calendar/:groupId',
     component: CalendarComponent,
     data: { title: '行事曆' },
     canActivate: [authGuard], //未登入跳到這頁面會被返回到登入葉面
@@ -87,11 +118,12 @@ export const routes: Routes = [
     path: 'profile',
     component: ProfileComponent,
     data: { title: '個人資訊' },
-    canActivate: [authGuard], //未登入跳到這頁面會被返回到登入葉面
+    canActivate: [authGuard, pendingChangesGuard], //未登入跳到這頁面會被返回到登入葉面
+    canDeactivate: [pendingChangesGuard]// 切換頁面如果未儲存就會跳出為儲存警告
   },
   {
     path: '**',
     redirectTo: 'home-page', // 或導向 404 頁面
-    
+
   },
 ];
