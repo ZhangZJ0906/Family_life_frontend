@@ -29,9 +29,9 @@
         <span>{{ filteredLists.length }} 筆</span>
         <select name="groupFilter" [(ngModel)]="groupFilter" aria-label="群組篩選">
           <option [ngValue]="'all'">全部群組</option>
-          <option [ngValue]="null">無</option>
+          <option [ngValue]="0">私人</option>
           @for (group of groupOptions; track group.id) {
-            @if (group.id !== null) {
+            @if (group.id !== 0) {
               <option [ngValue]="group.id">{{ group.name }}</option>
             }
           }
@@ -214,7 +214,7 @@
                     · {{ item.checkDate }}
                   }
                 </small>
-                @if (selectedStatsList.group_id !== null) {
+                @if (selectedStatsList.group_id !== 0) {
                   <small>指派給：{{ getMemberName(selectedStatsList.group_id, item.userId) }}</small>
                 }
               </div>

@@ -226,6 +226,7 @@ export class ItemListComponent {
 
       const { _type, ...payload } = result; // 把 _type 拆出來，不傳給後端
       payload.userId=this.currentUserId
+
       //更新
       const apiMap: Record<string, string> = {
         subscription: 'subscription/update',

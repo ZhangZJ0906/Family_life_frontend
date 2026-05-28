@@ -14,7 +14,7 @@ import { MatDialog } from '@angular/material/dialog';
 
 
 interface GroupOption {
-  id: number | null;
+  id: number | 0;
   name: string;
 }
 
@@ -25,7 +25,7 @@ interface GroupMember {
 }
 
 type StatusFilter = 'unfinished' | 'completed';
-type GroupFilter = number | null | 'all';
+type GroupFilter = number | 0 | 'all';
 
 
 @Component({
@@ -43,7 +43,7 @@ export class ShoppingListComponent implements OnInit {
 
   userId = 1;
   lists: ShoppingList[] = [];
-  groupOptions: GroupOption[] = [{ id: null, name: '無群組' }];
+  groupOptions: GroupOption[] = [];
   loadingItemsByListId: Record<number, boolean> = {};
   statusFilter: StatusFilter = 'unfinished';
   groupFilter: GroupFilter = 'all';
@@ -154,13 +154,13 @@ export class ShoppingListComponent implements OnInit {
           name
         }));
 
-        this.groupOptions = [{ id: null, name: '無群組' }, ...groups];
+        this.groupOptions = [{ id: 0, name: '私人' }, ...groups];
         this.syncUserGroups();
         this.isLoadingGroups = false;
       },
       error: (err) => {
         console.error(err);
-        this.groupOptions = [{ id: null, name: '無群組' }];
+        this.groupOptions = [{ id: 0, name: '私人' }];
         this.syncUserGroups();
         this.isLoadingGroups = false;
       }
@@ -528,7 +528,7 @@ export class ShoppingListComponent implements OnInit {
   private getDialogGroups(groupId: number | null): DropDownGroupList[] {
     const dialogGroups = this.userGroups.length > 0
       ? this.userGroups
-      : [{ groupId: 0, groupName: '無群組' }];
+      : [{ groupId: 0, groupName: '私人' }];
 
     if (groupId === null || dialogGroups.some((group) => group.groupId === groupId)) {
       return dialogGroups;

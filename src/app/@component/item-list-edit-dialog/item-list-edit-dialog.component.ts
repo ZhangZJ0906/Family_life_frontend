@@ -185,6 +185,7 @@ export class ItemListEditDialogComponent implements OnInit {
 
     if (this.isSubscriptionCategory()) {
     payload = {
+      _type: "subscription",
       id: this.item.id,
       groupId: this.item.groupId,
       userId: userId,
@@ -198,6 +199,7 @@ export class ItemListEditDialogComponent implements OnInit {
     };
   } else if (this.isWarrantyCategory()) {
     payload = {
+      _type: "warranty",
       id: this.item.id,
       groupId: this.item.groupId,
       userId: userId,
@@ -214,6 +216,7 @@ export class ItemListEditDialogComponent implements OnInit {
     };
   } else if (this.isMedicineCategory()) {
   payload = {
+    _type: "medicine",
     id: this.item.id,
     groupId: this.item.groupId,
     userId: userId,
