@@ -9,11 +9,11 @@ import { HttpClient } from '@angular/common/http';
 
 
 import { MatIcon } from "@angular/material/icon";
+import { NotifySettingService } from '../../@services/NotifySettingService';
 import { AuthService } from '../../@services/auth.service';
 import { NotifyService } from '../../@services/NotifyService';
 import { BrowserNotifyService } from '../../@services/BrowserNotifyService';
 import { NotificationSocketService } from '../../@services/NotificationSocketService';
-
 
 import { NotifyDialogComponent } from '../../@group/notify-dialog/notify-dialog.component';
 
@@ -38,6 +38,9 @@ export class TopbarComponent implements OnInit, OnDestroy {
   // 目前登入使用者 id
   user_id = 0;
 
+  //使用者名字
+  user_name = "";
+
   // 未讀通知數量，預設 0，避免畫面出現 undefined
   unreadCount = 0;
 
@@ -46,14 +49,39 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
   selected = '';
 
+  //到期通知
+  NotifyByEndDate!: boolean;
+
+  //email通知
+  NotifyByEmail!: boolean;
+
   constructor(
     private dialog: MatDialog,
     private http: HttpClient,
     private authService: AuthService,
     private notifyService: NotifyService,
     private browserNotify: BrowserNotifyService,
-    private socketService: NotificationSocketService
+    private socketService: NotificationSocketService,
+    private notifySettingService: NotifySettingService //共享userInfo
   ) {
+    this.notifySettingService.nameSubject$.subscribe(value => {
+      this.user_name = value;
+    });
+
+    this.notifySettingService.notifyByEndDate$.subscribe(value => {
+      this.NotifyByEndDate = value;
+
+      if(this.NotifyByEndDate == true){
+          this.browserNotify.requestPermission();
+      }
+    });
+
+    this.notifySettingService.notifyByEmail$.subscribe(value => {
+      this.NotifyByEmail = value;
+    });
+
+    // console.log("NE: ", this.NotifyByEndDate)
+
     this.user_id = this.authService.currentUser()?.user_id ?? 0;
   }
 
@@ -61,16 +89,16 @@ export class TopbarComponent implements OnInit, OnDestroy {
     // 取得目前登入使用者
     const currentUser = this.authService.currentUser();
 
-    this.browserNotify.requestPermission();
-
     this.socketService.unreadCount$.subscribe(count => {
       this.unreadCount = count;
       this.notifyService.setUnreadCount(count);
 
-      if (count > 0) {
+      console.log("count: ", count)
+
+      if (count > 0 && this.NotifyByEndDate) {
         this.browserNotify.send(
           '家庭系統通知',
-          `你目前有 ${count} 則未讀通知`
+          `${this.user_name}目前有 ${count} 則未讀通知`
         );
       }
     });
