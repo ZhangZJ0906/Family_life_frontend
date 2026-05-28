@@ -71,6 +71,7 @@ displayedColumns: string[] = [
   'category_id',
   'note',
   'price',
+  'user',
   'actions',
 ];
   filteredExpense = signal<ExpenseRecord[]>([]);
@@ -188,15 +189,24 @@ displayedColumns: string[] = [
 
   // ─── Dialog ─────────────────────────────────────────
   openCreateDialog() {
-    const dialogRef = this.dialog.open(ExpensesAddComponent, {
-      width: '540px',
-      height: '540px',
-      data: {
-        categoryMap: this.categoryMap,
-        groupList: this.userGroups,
-        currentGroupId: this.currentGroupId,
-      },
-    });
+  const dialogRef = this.dialog.open(ExpensesAddComponent, {
+    // 跟物品清單 Dialog 接近的寬度
+    width: '600px',
+    maxWidth: '92vw',
+
+    // 不要太高，內容超過就讓內部滾動
+    maxHeight: '86vh',
+
+    panelClass: 'expense-create-dialog-panel',
+    autoFocus: false,
+
+    data: {
+      categoryMap: this.categoryMap,
+      groupList: this.userGroups,
+      currentGroupId: this.currentGroupId,
+    },
+  });
+
     dialogRef.afterClosed().subscribe((result) => {
       console.log(result)
       if (result === true)
@@ -205,17 +215,31 @@ displayedColumns: string[] = [
   }
 
   openEditDialog(record: any) {
-    const relatedItem =
-      record.relatedItemId != null ? this.itemMap[record.relatedItemId] : null;
-    const dialogRef = this.dialog.open(ExpensesEditComponent, {
-      width: '540px',
-      height: '540px',
-      data: {
-        record: JSON.parse(JSON.stringify(record)),
-        categoryMap: this.categoryMap,
-        relatedItem,
-      },
-    });
+  // 如果這筆支出有關聯物品，就從 itemMap 找出對應物品資料
+  const relatedItem =
+    record.relatedItemId != null ? this.itemMap[record.relatedItemId] : null;
+
+  const dialogRef = this.dialog.open(ExpensesEditComponent, {
+    // 跟新增支出 Dialog 一樣大小
+    width: '600px',
+    maxWidth: '100vw',
+    maxHeight: '86vh',
+
+    // 不要固定 height，否則容易被壓縮或出現外層捲軸
+    panelClass: 'expense-edit-dialog-panel',
+    autoFocus: false,
+
+    data: {
+      // 深拷貝，避免使用者按取消時直接改到表格原資料
+      record: JSON.parse(JSON.stringify(record)),
+
+      // 分類下拉選單
+      categoryMap: this.categoryMap,
+
+      // 關聯物品資料
+      relatedItem,
+    },
+  });
     dialogRef.afterClosed().subscribe((result) => {
       if (result === true)
         this.getExpense(this.currentGroupId, this.currentUserId);
@@ -370,14 +394,14 @@ displayedColumns: string[] = [
 private getDisplayedColumns(groupId: number): string[] {
   const isGroup = groupId !== 0;
 
-  return [
+   return [
     'select',
     'expense_date',
     'related_item_name',
     'category_id',
     'note',
     'price',
-    ...(isGroup ? ['user'] : []),
+    'user',
     'actions',
   ];
 }

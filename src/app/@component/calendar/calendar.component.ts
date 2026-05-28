@@ -823,6 +823,7 @@ export class CalendarComponent {
       notifyBefore: notifyBefore,
 
       groupId: this.currentGroupId,
+      createdBy: this.createdBy,
     };
 
     //拖曳後日期早於今天，就還原位置

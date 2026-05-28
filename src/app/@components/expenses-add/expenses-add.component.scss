@@ -1,0 +1,286 @@
+/* Dialog 外層：縮成跟物品清單 Dialog 接近 */
+.expense-dialog {
+  width: 600px;
+  max-width: 92vw;
+  background: #ffffff;
+  border-radius: 26px;
+  overflow: hidden;
+}
+
+/* 標題區 */
+.dialog-header {
+  padding: 22px 28px 16px;
+  border-bottom: 1px solid #eef0f3;
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* 標題 icon */
+.header-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+
+  background: #eef4ff;
+  color: #3b63f6;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.header-icon mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+}
+
+/* 標題文字 */
+.header-text h2 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 900;
+  color: #1e3a8a;
+}
+
+.header-text p {
+  margin: 5px 0 0;
+  font-size: 14px;
+  color: #64748b;
+}
+
+/* 內容區 */
+.dialog-content {
+  padding: 20px 28px 4px !important;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* 表單兩欄 */
+.expense-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 16px;
+}
+
+/* 橫跨兩欄 */
+.full-width {
+  grid-column: 1 / -1;
+}
+
+/* 記帳環境唯讀欄 */
+.readonly-env {
+  min-height: 58px;
+  border: 1px solid #d7e0ea;
+  border-radius: 14px;
+  background: #f8fafc;
+
+  padding: 0 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 唯讀左側 */
+.env-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 唯讀 icon */
+.env-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: #eef4ff;
+  color: #3b63f6;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.env-icon mat-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+}
+
+/* 小標 */
+.env-label {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 1px;
+}
+
+/* 群組名稱 */
+.env-name {
+  color: #111827;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+/* 唯讀標籤 */
+.env-lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  color: #2f7d4f;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.env-lock mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* Material 欄位 */
+mat-form-field {
+  width: 100%;
+}
+
+/* 欄位外觀 */
+::ng-deep .expense-dialog .mat-mdc-text-field-wrapper {
+  background: #ffffff;
+  border-radius: 12px;
+}
+
+/* 欄位高度：縮小 */
+::ng-deep .expense-dialog .mat-mdc-form-field-infix {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+/* input / textarea 字體 */
+::ng-deep .expense-dialog input.mat-mdc-input-element,
+::ng-deep .expense-dialog textarea.mat-mdc-input-element {
+  font-size: 15px;
+}
+
+/* label 字重 */
+::ng-deep .expense-dialog .mat-mdc-floating-label {
+  font-weight: 700;
+}
+
+/* 錯誤狀態 */
+::ng-deep .expense-dialog .mat-mdc-form-field-error {
+  font-weight: 700;
+}
+
+/* hint 不要太佔空間 */
+::ng-deep .expense-dialog .mat-mdc-form-field-hint {
+  font-size: 12px;
+}
+
+/* 金額前綴 */
+.price-prefix {
+  color: #334155;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+/* textarea */
+textarea {
+  resize: none;
+}
+
+/* 右側空白欄 */
+.empty-block {
+  display: block;
+}
+
+/* 底部按鈕列 */
+.dialog-actions {
+  padding: 14px 28px 22px !important;
+  border-top: 1px solid #eef0f3;
+  gap: 10px;
+}
+
+/* 取消 */
+.cancel-btn {
+  height: 42px;
+  padding: 0 22px;
+  border-radius: 12px;
+  color: #2563eb;
+  font-weight: 800;
+}
+
+/* 儲存 */
+.save-btn {
+  min-width: 108px;
+  height: 42px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 900;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.save-btn mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+/* disabled 狀態 */
+.save-btn:disabled {
+  background: #e5e7eb !important;
+  color: #9ca3af !important;
+}
+
+/* 手機版 */
+@media (max-width: 720px) {
+  .expense-dialog {
+    width: 94vw;
+    border-radius: 22px;
+  }
+
+  .dialog-header {
+    padding: 20px 22px 14px;
+  }
+
+  .header-text h2 {
+    font-size: 24px;
+  }
+
+  .dialog-content {
+    padding: 18px 22px 4px !important;
+    max-height: 64vh;
+  }
+
+  .expense-form {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .full-width {
+    grid-column: auto;
+  }
+
+  .empty-block {
+    display: none;
+  }
+
+  .dialog-actions {
+    padding: 14px 22px 20px !important;
+  }
+
+  .readonly-env {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 12px 14px;
+    gap: 8px;
+  }
+}

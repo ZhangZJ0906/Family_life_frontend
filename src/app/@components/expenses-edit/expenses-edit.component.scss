@@ -1,16 +1,302 @@
-// 確保 Angular Material 的 Form Field 滿寬，才能完美配合 Bootstrap 的 col 寬度
+/* Dialog 外層：跟新增支出 Dialog 一樣大小 */
+.expense-dialog {
+  width: 600px;
+  max-width: 92vw;
+  background: #ffffff;
+  border-radius: 26px;
+  overflow: hidden;
+}
+
+/* 標題區 */
+.dialog-header {
+  padding: 22px 28px 16px;
+  border-bottom: 1px solid #eef0f3;
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* 標題 icon */
+.header-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+
+  background: #eef4ff;
+  color: #3b63f6;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.header-icon mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+}
+
+/* 標題文字 */
+.header-text h2 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 900;
+  color: #1e3a8a;
+}
+
+.header-text p {
+  margin: 5px 0 0;
+  font-size: 14px;
+  color: #64748b;
+}
+
+/* 內容區 */
+.dialog-content {
+  padding: 20px 28px 4px !important;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* 表單兩欄 */
+.expense-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 16px;
+}
+
+/* 橫跨兩欄 */
+.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Material 欄位 */
 mat-form-field {
   width: 100%;
 }
 
-// 移除 Material 預設 dialog actions 的內距，改用 Bootstrap 控制
-.mat-mdc-dialog-actions {
-  padding: 0;
-  min-height: auto;
+/* 欄位外觀 */
+::ng-deep .expense-dialog .mat-mdc-text-field-wrapper {
+  background: #ffffff;
+  border-radius: 12px;
 }
 
-// 針對美化卡片微調
-.card {
-  // 圓角微調
-  border-radius: 4px;
+/* 欄位高度：跟新增支出 Dialog 一樣縮小 */
+::ng-deep .expense-dialog .mat-mdc-form-field-infix {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+/* input / textarea 字體 */
+::ng-deep .expense-dialog input.mat-mdc-input-element,
+::ng-deep .expense-dialog textarea.mat-mdc-input-element {
+  font-size: 15px;
+}
+
+/* label 字重 */
+::ng-deep .expense-dialog .mat-mdc-floating-label {
+  font-weight: 700;
+}
+
+/* 金額前綴 */
+.price-prefix {
+  color: #334155;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+/* textarea */
+textarea {
+  resize: none;
+}
+
+/* 右側空白欄 */
+.empty-block {
+  display: block;
+}
+
+/* 關聯物品卡 */
+.linked-item-card {
+  border: 1px solid #dbe6ff;
+  border-left: 5px solid #3b63f6;
+  border-radius: 16px;
+  background: #f8fafc;
+  overflow: hidden;
+}
+
+/* 關聯標題 */
+.linked-title {
+  padding: 12px 14px;
+  border-bottom: 1px solid #e5e7eb;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: #1e3a8a;
+  font-weight: 900;
+}
+
+.linked-title mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+/* 關聯內容 */
+.linked-body {
+  padding: 14px;
+}
+
+/* 物品名稱 */
+.linked-main h3 {
+  margin: 0 0 6px;
+  font-size: 17px;
+  font-weight: 900;
+  color: #111827;
+}
+
+.linked-main p {
+  margin: 0 0 12px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.linked-main strong {
+  color: #111827;
+}
+
+.linked-main span {
+  margin-left: 8px;
+}
+
+/* 物品資料格 */
+.linked-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.linked-grid div {
+  background: #ffffff;
+  border: 1px solid #edf0f3;
+  border-radius: 12px;
+  padding: 10px 12px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.linked-grid label {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.linked-grid strong {
+  color: #111827;
+  font-size: 14px;
+}
+
+/* 物品備註 */
+.item-note {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+
+  background: #fff7e8;
+  color: #92400e;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  font-size: 13px;
+}
+
+.item-note mat-icon {
+  color: #f59e0b;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* 底部按鈕列 */
+.dialog-actions {
+  padding: 14px 28px 22px !important;
+  border-top: 1px solid #eef0f3;
+  gap: 10px;
+}
+
+/* 取消 */
+.cancel-btn {
+  height: 42px;
+  padding: 0 22px;
+  border-radius: 12px;
+  color: #2563eb;
+  font-weight: 800;
+}
+
+/* 儲存 */
+.save-btn {
+  min-width: 118px;
+  height: 42px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 900;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.save-btn mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+/* 手機版 */
+@media (max-width: 720px) {
+  .expense-dialog {
+    width: 94vw;
+    border-radius: 22px;
+  }
+
+  .dialog-header {
+    padding: 20px 22px 14px;
+  }
+
+  .header-text h2 {
+    font-size: 24px;
+  }
+
+  .dialog-content {
+    padding: 18px 22px 4px !important;
+    max-height: 64vh;
+  }
+
+  .expense-form {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .full-width {
+    grid-column: auto;
+  }
+
+  .empty-block {
+    display: none;
+  }
+
+  .linked-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dialog-actions {
+    padding: 14px 22px 20px !important;
+  }
 }
