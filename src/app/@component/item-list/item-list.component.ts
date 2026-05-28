@@ -709,9 +709,11 @@ export class ItemListComponent {
     this.isGlobalSearch = true;
     this.displayedColumns = this.globalSearchColumns;
 
-    this.dataSource.data = this.allData.filter((item) =>
-      JSON.stringify(item).toLowerCase().includes(keyword),
-    );
+    // ✅ 修正：只比對物品名稱 (name)
+    this.dataSource.data = this.allData.filter((item) => {
+      const name = item.name || '';
+      return name.toLowerCase().includes(keyword);
+    });
 
     this.dataSource.paginator?.firstPage();
   }
