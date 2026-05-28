@@ -156,6 +156,10 @@ export class ItemListComponent {
     this.route.params.subscribe((params) => {
       const groupId = Number(params['groupId']) || 0;
       this.initData(groupId);
+<<<<<<< HEAD
+=======
+      
+>>>>>>> origin/feature-calendar
     });
   }
 
@@ -168,7 +172,7 @@ export class ItemListComponent {
     this.getUserGroupData(groupId);
   }
 
-  /*TODO 缺少   通知功能 */
+  
   /*新增物品 */
   openAddDialog() {
     const dialogRef = this.dialog.open(ItemListAddDialogComponent, {

@@ -288,7 +288,10 @@ export class NotifyDialogComponent implements OnInit {
   goCalendar(n: any) {
     this.router.navigate(['/calendar', n.sendUserId]);
   }
-
+goExpense(n:any){
+  this.dialogRef.close();
+this.router.navigate(['/expenses'], { queryParams: { groupId: n.sendUserId } });
+}
   // ========================
   // 🔥 filter
   // ========================
