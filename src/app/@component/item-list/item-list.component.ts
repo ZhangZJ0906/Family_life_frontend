@@ -4,7 +4,7 @@ import {
   LocationAndCategory,
 } from './../../common/interfaceList';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipListbox, MatChipOption } from '@angular/material/chips';
+import { MatChipListbox, MatChipListboxChange, MatChipOption } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
@@ -51,7 +51,17 @@ import { AuthService } from '../../@services/auth.service';
 })
 export class ItemListComponent {
   readonly dialog = inject(MatDialog);
+  isGlobalSearch = false;
 
+  globalSearchColumns: string[] = [
+    'select',
+    '_typeName',
+    'name',
+    'price',
+    'expireOrEndDate',
+    'status',
+    'actions',
+  ];
   basicUrl!: string;
   selectedCategory = '全部';
   // 存放地點清單
@@ -168,7 +178,10 @@ export class ItemListComponent {
     this.getUserGroupData(groupId);
   }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/ZJ
   /*新增物品 */
   openAddDialog() {
     const dialogRef = this.dialog.open(ItemListAddDialogComponent, {
@@ -225,8 +238,12 @@ export class ItemListComponent {
       if (!result) return;
 
       const { _type, ...payload } = result; // 把 _type 拆出來，不傳給後端
+<<<<<<< HEAD
       payload.userId=this.currentUserId
 
+=======
+      payload.userId = this.currentUserId;
+>>>>>>> origin/ZJ
       //更新
       const apiMap: Record<string, string> = {
         subscription: 'subscription/update',
@@ -565,6 +582,11 @@ export class ItemListComponent {
   // 查詢一般物品資料
   getItemByGroupId(groupId: number): void {
     this.currentGroupId = groupId;
+    // ✅ 切群組時先清空，避免搜尋到舊群組資料
+    this.itemList = [];
+    this.subscriptionList = [];
+    this.warrantyList = [];
+    this.medicineList = [];
     // 切換群組時，如果目前在訂閱模式，就查訂閱
     if (this.isSubscriptionMode) {
       this.getSubscriptionByGroupId(groupId);
@@ -588,8 +610,7 @@ export class ItemListComponent {
       next: (res: any) => {
         this.itemList = res.items || [];
         this.dataSource.data = this.itemList;
-
-        console.log('res: ' + res.categoriesMap);
+        this.loadAllListSilently(groupId);
         // 後端 locationMap 轉成陣列
         this.location = Object.entries(res.locationMap || {}).map(
           ([id, name]) => ({
@@ -626,17 +647,92 @@ export class ItemListComponent {
 
     this.router.navigate(['/itemList', groupId]);
   }
+  private loadAllListSilently(groupId: number): void {
+    this.http
+      .getApi(
+        `${this.basicUrl}subscription/getByGroup?groupId=${groupId}&userId=${this.currentUserId}`,
+      )
+      .subscribe({
+        next: (res: any) => (this.subscriptionList = res.data || []),
+      });
 
+    this.http
+      .getApi(
+        `${this.basicUrl}warranty/getByGroup?groupId=${groupId}&userId=${this.currentUserId}`,
+      )
+      .subscribe({ next: (res: any) => (this.warrantyList = res.data || []) });
+
+    this.http
+      .getApi(
+        `${this.basicUrl}medicine/getByGroup?groupId=${groupId}&userId=${this.currentUserId}`,
+      )
+      .subscribe({ next: (res: any) => (this.medicineList = res.data || []) });
+  }
+  get allData(): any[] {
+    return [
+      ...this.itemList.map((i) => ({
+        ...i,
+        _type: 'item',
+        _typeName: '物品',
+        name: i.name,
+        expireOrEndDate: i.expireDate,
+      })),
+      ...this.subscriptionList.map((s) => ({
+        ...s,
+        _type: 'subscription',
+        _typeName: '訂閱',
+        expireOrEndDate: s.nextBillingDate,
+      })),
+      ...this.warrantyList.map((w) => ({
+        ...w,
+        _type: 'warranty',
+        _typeName: '保固',
+        name: w.productName,
+        expireOrEndDate: w.warrantyEndDate,
+      })),
+      ...this.medicineList.map((m) => ({
+        ...m,
+        _type: 'medicine',
+        _typeName: '藥品',
+        expireOrEndDate: m.expireDate,
+      })),
+    ];
+  }
   // 搜尋功能
   applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+    const keyword = (event.target as HTMLInputElement).value
+      .trim()
+      .toLowerCase();
 
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
+    if (!keyword) {
+      // 清空 → 回到原本模式
+      this.isGlobalSearch = false;
+      this.displayedColumns = this.itemDisplayedColumns;
+      this.dataSource.data = this.itemList;
+      this.dataSource.filter = '';
+      this.dataSource.paginator?.firstPage();
+      return;
     }
-  }
 
+    // 有關鍵字 → 切換全域搜尋模式
+    this.isGlobalSearch = true;
+    this.displayedColumns = this.globalSearchColumns;
+
+    this.dataSource.data = this.allData.filter((item) =>
+      JSON.stringify(item).toLowerCase().includes(keyword),
+    );
+
+    this.dataSource.paginator?.firstPage();
+  }
+  onCategoryChange(event: MatChipListboxChange) {
+    if (event.value == null) {
+      // 取消選取 → 回到全部
+      this.selectedCategory = '全部';
+      this.filterByCategory(0);
+      return;
+    }
+    this.filterByCategory(event.value);
+  }
   // 修改一般物品
   updateItem(data: any) {
     if (!data) {

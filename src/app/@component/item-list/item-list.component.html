@@ -3,25 +3,22 @@
   <app-topbar></app-topbar>
 
   <!-- 上方標題、分類、群組、搜尋區 -->
-<section class="item-header-card">
+  <section class="item-header-card">
 
-  <!-- 左側標題 -->
-  <div class="item-title">
-    <div class="title-row">
-      <div class="title-icon">📦</div>
-      <h2>物品清單</h2>
+    <!-- 左側標題 -->
+    <div class="item-title">
+      <div class="title-row">
+        <div class="title-icon">📦</div>
+        <h2>物品清單</h2>
+      </div>
+      <p>管理家庭物品、庫存與到期提醒</p>
     </div>
-    <p>管理家庭物品、庫存與到期提醒</p>
-  </div>
 
-  <!-- 中間：分類按鈕 -->
-  <div class="header-filter">
-    <mat-chip-listbox aria-label="分類篩選">
-      @for (cat of categories; track cat.id) {
-        <mat-chip-option
-          [value]="cat.id"
-          [selected]="selectedCategory === cat.name"
-          (click)="filterByCategory(cat.id)">
+    <!-- 中間：分類按鈕 -->
+    <div class="header-filter">
+      <mat-chip-listbox aria-label="分類篩選"   (change)="onCategoryChange($event)">
+        @for (cat of categories; track cat.id) {
+        <mat-chip-option [value]="cat.id" [selected]="selectedCategory === cat.name">
 
           <span class="chip-icon">
             @switch (cat.name) {
@@ -37,34 +34,32 @@
 
           {{ cat.name }}
         </mat-chip-option>
-      }
-    </mat-chip-listbox>
-  </div>
-
-  <!-- 右側：群組 + 搜尋 -->
-  <div class="header-right">
-    <mat-form-field appearance="outline" class="group-select">
-      <mat-label>切換群組</mat-label>
-      <mat-select
-        [(value)]="currentGroupId"
-        (selectionChange)="getItemByGroupId($event.value)">
-
-        @for (group of userGroups; track $index) {
-        <mat-option [value]="group.groupId">
-          🏠 {{ group.groupName }}
-        </mat-option>
         }
-      </mat-select>
-    </mat-form-field>
+      </mat-chip-listbox>
+    </div>
 
-    <mat-form-field appearance="outline" class="search-field">
-      <mat-label>搜尋物品</mat-label>
-      <input matInput (keyup)="applyFilter($event)" placeholder="例如：牛奶" #input>
-      <mat-icon matSuffix>search</mat-icon>
-    </mat-form-field>
-  </div>
+    <!-- 右側：群組 + 搜尋 -->
+    <div class="header-right">
+      <mat-form-field appearance="outline" class="group-select">
+        <mat-label>切換群組</mat-label>
+        <mat-select [(value)]="currentGroupId" (selectionChange)="getItemByGroupId($event.value)">
 
-</section>
+          @for (group of userGroups; track $index) {
+          <mat-option [value]="group.groupId">
+            🏠 {{ group.groupName }}
+          </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>搜尋物品</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="例如：牛奶" #input>
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+  </section>
 
   <!-- 表格卡片 -->
   <section class="table-card">
@@ -79,11 +74,21 @@
               [indeterminate]="selection.hasValue() && !isAllSelected()" color="primary">
             </mat-checkbox>
           </th>
-
           <td mat-cell *matCellDef="let row">
             <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
               [checked]="selection.isSelected(row)" color="primary">
             </mat-checkbox>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="_typeName">
+          <th mat-header-cell *matHeaderCellDef>類型</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="badge" [ngClass]="{
+                        'bg-primary':   row._type === 'item',
+                        'bg-success':   row._type === 'subscription',
+                        'bg-warning':   row._type === 'warranty',
+                        'bg-info':      row._type === 'medicine'
+                      }">{{ row._typeName }}</span>
           </td>
         </ng-container>
 
@@ -114,7 +119,12 @@
         </ng-container>
 
 
-
+        <ng-container matColumnDef="expireOrEndDate">
+          <th mat-header-cell *matHeaderCellDef>到期日</th>
+          <td mat-cell *matCellDef="let row" [class.text-danger]="isExpired(row.expireOrEndDate)">
+            {{ row.expireOrEndDate || '--' }}
+          </td>
+        </ng-container>
         <!-- 一般物品 / 訂閱共用：價格 -->
         <ng-container matColumnDef="price">
           <th mat-header-cell *matHeaderCellDef>總價格</th>
@@ -292,10 +302,14 @@
   <div class="fab-container">
 
     <!-- 有勾選資料時顯示刪除按鈕 -->
-    <button mat-fab color="warn" *ngIf="selection.selected.length > 0" (click)="deleteSelectedItems()">
+    @if(selection.selected.length > 0){
+    <button mat-fab color="waen" (click)="deleteSelectedItems()"
+      style="background-color: #e53935 !important; color: #fff !important;">
       <mat-icon>delete</mat-icon>
       <span class="fab-badge">{{ selection.selected.length }}</span>
     </button>
+    }
+
 
     <!-- 新增按鈕 -->
     <button mat-fab color="primary" (click)="openAddDialog()">
