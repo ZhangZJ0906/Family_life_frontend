@@ -156,7 +156,6 @@ export class ItemListComponent {
     this.route.params.subscribe((params) => {
       const groupId = Number(params['groupId']) || 0;
       this.initData(groupId);
-      this.getItemByGroupId(groupId)
     });
   }
 

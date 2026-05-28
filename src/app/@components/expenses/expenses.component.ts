@@ -319,60 +319,8 @@ displayedColumns: string[] = [
             text: res.message,
             icon: 'error',
           });
-<<<<<<< HEAD
-        },
-      });
-  }
-
-  onGroupChange(groupId: number) {
-    this.currentGroupId = groupId;
-    this.selection.clear();
-    this.getExpense(groupId, this.currentUserId);
-  }
-  //根據有沒有group ID 變換顯示 user  資訊
-  private getDisplayedColumns(groupId: number): string[] {
-    const isGroup = groupId !== 0;
-    return [
-      'select',
-      'expense_date',
-      'related_item_name',
-      'category_id',
-      'note',
-      'price',
-      ...(isGroup ? ['user'] : []),
-      'actions',
-    ];
-  }
-  getExpense(groupId: number, userId: number) {
-    let url = `${this.basicUrl}expense/getInfo?userId=${userId}`;
-    if (groupId != null) url += `&groupId=${groupId}`;
-
-    this.http.getApi(url).subscribe({
-      next: (res: any) => {
-
-
-        if (res.code !== 200) {
-          Swal.fire({ title: '錯誤', text: res.message, icon: 'error' });
           return;
         }
-        this.expense = res.list ? [...res.list] : [];
-        this.itemMap = res.itemMap || {};
-        this.groupUserInfo = res.userMap; // 私人肯定沒有
-
-        this.displayedColumns = this.getDisplayedColumns(groupId);
-        this.dataSource.data = this.expense;
-        // 資料進來後觸發月份 filter
-        this.dataSource.filter = JSON.stringify(this.filterValues);
-        this.filteredExpense.set(this.dataSource.filteredData);
-      },
-      error: (err) =>
-        Swal.fire({ title: '錯誤', text: err.message, icon: 'error' }),
-    });
-  }
-=======
-          return;
-        }
->>>>>>> origin/ZJ
 
         // 後端回傳 groupIdList，例如：{ 1: '我的家庭' }
         this.userGroups = Object.entries(res.groupIdList).map(

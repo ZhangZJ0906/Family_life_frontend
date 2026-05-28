@@ -35,11 +35,7 @@ import { ActivatedRoute } from '@angular/router';
     MatFormFieldModule,
     MatSelect,
     MatSelectModule,
-<<<<<<< HEAD
     MatIconModule
-=======
-    MatIconModule,
->>>>>>> origin/ZJ
   ],
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss',
@@ -689,7 +685,6 @@ export class CalendarComponent {
 
     console.log("GID:: ", info.event);
     ref.afterClosed().subscribe((result) => {
-<<<<<<< HEAD
       if (!result) return;
       const payload = {
         groupId: this.currentGroupId,   // ⭐補這個
@@ -697,21 +692,6 @@ export class CalendarComponent {
         ...result,
       };
 
-=======
-      // 使用者按取消或關閉 Dialog，不做任何事
-      if (!result) {
-        return;
-      }
-
-      const payload = {
-        groupId,
-        createdBy: this.createdBy,
-        ...result,
-      };
-
-      console.log('updateCalendarEvent payload:', payload);
-
->>>>>>> origin/ZJ
       this.calendarApiService.update(Number(info.event.id), payload).subscribe({
         next: (res: any) => {
           if (res.code !== 200) {
@@ -879,7 +859,7 @@ export class CalendarComponent {
       }
 
       const payload = {
-        groupId: this.currentGroupId,   // ⭐補這個
+        currentGroupId,   // ⭐補這個
         createdBy: this.createdBy,      // ⭐建議也補
         ...data,
       };

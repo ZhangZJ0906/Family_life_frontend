@@ -21,11 +21,7 @@ export class NotificationSocketService {
 
       reconnectDelay: 5000,
 
-<<<<<<< HEAD
-      debug: (str) => {
-=======
       debug: (str: any) => {
->>>>>>> origin/ZJ
         console.log(str);
       },
 
@@ -33,11 +29,7 @@ export class NotificationSocketService {
 
         console.log('WebSocket connected');
 
-<<<<<<< HEAD
-        this.client.subscribe(`/topic/notify/${userId}`, (message) => {
-=======
         this.client.subscribe(`/topic/notify/${userId}`, (message: any) => {
->>>>>>> origin/ZJ
 
           const body = JSON.parse(message.body);
 
@@ -51,11 +43,7 @@ export class NotificationSocketService {
 
       },
 
-<<<<<<< HEAD
-      onStompError: (frame) => {
-=======
       onStompError: (frame: any) => {
->>>>>>> origin/ZJ
         console.error('Broker error:', frame);
       }
 
