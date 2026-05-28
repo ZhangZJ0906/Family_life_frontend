@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { User } from '../../@models/user.model';
 import { AuthService } from '../../@services/auth.service';
 import { MatIconModule } from '@angular/material/icon';
+import { NotifySettingService } from '../../@services/NotifySettingService';
 
 @Component({
   selector: 'app-login',
@@ -22,6 +23,7 @@ export class LoginComponent {
   constructor(
     private readonly authService: AuthService,
     private readonly router: Router,
+    private notifySettingService: NotifySettingService //共享userInfo
   ) {}
 
   signIn(): void {
@@ -38,12 +40,16 @@ export class LoginComponent {
           password: '',
           avatar: res.avatar ?? '',
           notifyByEndDate: res.notifyByEndDate ?? true,
-          notifyByEmail: res.notifyByEmail ?? true,
+          notifyByEmail: res.notifyByEmail ?? false,
           // created_at: res.created_at ??  '',
           // updated_at: res.updated_at ?? '',
         };
         this.authService.setCurrentUser(payload);
         sessionStorage.setItem('isLogin', 'true');
+        //共享userInfo
+        this.notifySettingService.setName(res.name);
+        this.notifySettingService.setNotifyByEndDate(res.notifyByEndDate);
+        this.notifySettingService.setNotifyByEmail(res.notifyByEmail);
         this.router.navigate(['/home-page']); // 👉 登入成功後導向的頁面，可以自己改路徑。
       },
       error: (err) => {
