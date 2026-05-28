@@ -99,7 +99,6 @@ export class ExpensesComponent {
     const raw = sessionStorage.getItem('family-life-current-user'); // ← localStorage 改 sessionStorage
     this.user = JSON.parse(raw!);
     this.currentUserId = this.user.user_id;
-    // console.log(this.currentUserId)
     this.dataSource.filterPredicate = (data: ExpenseRecord, filter: string) => {
       const f = JSON.parse(filter);
 
@@ -342,7 +341,8 @@ export class ExpensesComponent {
     ];
   }
   getExpense(groupId: number, userId: number) {
-    let url = `${this.basicUrl}expense/getInfo?userId=${userId}&groupId=${groupId}`;
+    let url = `${this.basicUrl}expense/getInfo?userId=${userId}`;
+    if (groupId != null) url += `&groupId=${groupId}`;
 
     this.http.getApi(url).subscribe({
       next: (res: any) => {
