@@ -4,10 +4,14 @@ import {
   LocationAndCategory,
 } from './../../common/interfaceList';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipListbox, MatChipListboxChange, MatChipOption } from '@angular/material/chips';
+import {
+  MatChipListbox,
+  MatChipListboxChange,
+  MatChipOption,
+} from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-
+import { MatSort, MatSortModule } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Component, inject, ViewChild } from '@angular/core';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -45,6 +49,7 @@ import { AuthService } from '../../@services/auth.service';
     MatSelect,
     MatOption,
     TopbarComponent,
+    MatSortModule,
   ],
   templateUrl: './item-list.component.html',
   styleUrl: './item-list.component.scss',
@@ -152,7 +157,7 @@ export class ItemListComponent {
   isSubscriptionMode = false;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
-
+  @ViewChild(MatSort) sort!: MatSort;
   constructor(
     private http: HttpClientService,
     private authService: AuthService,
@@ -171,6 +176,31 @@ export class ItemListComponent {
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
+
+    // 設定排序元件
+    this.dataSource.sort = this.sort;
+
+    // 自定義排序欄位解析
+    this.dataSource.sortingDataAccessor = (item, property) => {
+      switch (property) {
+        // 統合所有在 HTML 有設定 mat-sort-header 的日期欄位名稱
+        case 'expireDate': // 一般物品、藥品
+        case 'expireOrEndDate': // 全域搜尋模式
+        case 'warrantyEndDate': // 保固模式
+        case 'nextBillingDate': // 訂閱模式
+          const dateStr =
+            item.expireDate ||
+            item.expireOrEndDate ||
+            item.warrantyEndDate ||
+            item.nextBillingDate;
+
+          // 如果有日期字串就轉成時間戳記數字做排序，沒有就回傳 0 丟到最後面
+          return dateStr ? new Date(dateStr).getTime() : 0;
+
+        default:
+          return item[property];
+      }
+    };
   }
   initData(groupId: number) {
     this.currentGroupId = groupId;
@@ -178,6 +208,16 @@ export class ItemListComponent {
     this.getUserGroupData(groupId);
   }
 
+  // 新增這個方法，專門用來在更新資料後，重新喚醒排序功能
+  private refreshTableData(newData: any[]) {
+    this.dataSource.data = newData;
+
+    // 使用 setTimeout 確保 Angular 渲染完新表格後，才把 sort 重新掛上去
+    setTimeout(() => {
+      this.dataSource.sort = this.sort;
+      this.dataSource.paginator = this.paginator;
+    });
+  }
   /*新增物品 */
   openAddDialog() {
     const dialogRef = this.dialog.open(ItemListAddDialogComponent, {
@@ -446,11 +486,11 @@ export class ItemListComponent {
     this.displayedColumns = this.itemDisplayedColumns;
 
     if (catId === 0) {
-      this.dataSource.data = this.itemList;
+      this.refreshTableData(this.itemList); // 👈 改這行
     } else {
-      this.dataSource.data = this.itemList.filter(
-        (item: any) => item.categoryId === catId,
-      );
+      this.refreshTableData(
+        this.itemList.filter((item: any) => item.categoryId === catId),
+      ); // 👈 改這行
     }
 
     if (this.dataSource.paginator) {
@@ -480,8 +520,7 @@ export class ItemListComponent {
           }
 
           this.subscriptionList = res.data || [];
-          this.dataSource.data = this.subscriptionList;
-
+          this.refreshTableData(this.subscriptionList);
           if (this.dataSource.paginator) {
             this.dataSource.paginator.firstPage();
           }
@@ -520,7 +559,8 @@ export class ItemListComponent {
           }
 
           this.warrantyList = res.data || [];
-          this.dataSource.data = this.warrantyList;
+
+          this.refreshTableData(this.warrantyList); // 👈 改這行
           this.dataSource.paginator?.firstPage();
         },
         error: (err: any) => {
@@ -555,9 +595,9 @@ export class ItemListComponent {
             });
             return;
           }
-
+console.log(res)
           this.medicineList = res.data || [];
-          this.dataSource.data = this.medicineList;
+          this.refreshTableData(this.medicineList);
           this.dataSource.paginator?.firstPage();
         },
         error: (err: any) => {
@@ -600,7 +640,7 @@ export class ItemListComponent {
     this.http.getApi(url).subscribe({
       next: (res: any) => {
         this.itemList = res.items || [];
-        this.dataSource.data = this.itemList;
+        this.refreshTableData(this.itemList);
         this.loadAllListSilently(groupId);
         // 後端 locationMap 轉成陣列
         this.location = Object.entries(res.locationMap || {}).map(
@@ -702,20 +742,18 @@ export class ItemListComponent {
       this.dataSource.data = this.itemList;
       this.dataSource.filter = '';
       this.dataSource.paginator?.firstPage();
+      this.refreshTableData(this.itemList);
       return;
     }
 
     // 有關鍵字 → 切換全域搜尋模式
     this.isGlobalSearch = true;
     this.displayedColumns = this.globalSearchColumns;
-
-    this.dataSource.data = this.allData.filter((item) =>{
-          const name =item.name||''
-    return name.toLowerCase().includes(keyword)
-    }
-      // JSON.stringify(item).toLowerCase().includes(keyword),
-
-
+    this.refreshTableData(
+      this.allData.filter((item) => {
+        const name = item.name || '';
+        return name.toLowerCase().includes(keyword);
+      }),
     );
 
     this.dataSource.paginator?.firstPage();
@@ -818,7 +856,10 @@ export class ItemListComponent {
         // 多筆刪除
         selectedIds.forEach((id) => {
           this.http
-            .deleteApi(this.basicUrl + `subscription/delete?id=${id}&userId=${this.currentUserId}`)
+            .deleteApi(
+              this.basicUrl +
+                `subscription/delete?id=${id}&userId=${this.currentUserId}`,
+            )
             .subscribe({
               next: (res: any) => {
                 if (res.code !== 200) {
@@ -861,7 +902,10 @@ export class ItemListComponent {
       if (this.isWarrantyMode) {
         selectedIds.forEach((id) => {
           this.http
-            .deleteApi(this.basicUrl + `warranty/delete?id=${id}&userId=${this.currentUserId}`)
+            .deleteApi(
+              this.basicUrl +
+                `warranty/delete?id=${id}&userId=${this.currentUserId}`,
+            )
             .subscribe({
               next: (res: any) => {
                 if (res.code !== 200) {
@@ -900,7 +944,10 @@ export class ItemListComponent {
       if (this.isMedicineMode) {
         selectedIds.forEach((id) => {
           this.http
-            .deleteApi(this.basicUrl + `medicine/delete?id=${id}&userId=${this.currentUserId}`)
+            .deleteApi(
+              this.basicUrl +
+                `medicine/delete?id=${id}&userId=${this.currentUserId}`,
+            )
             .subscribe({
               next: (res: any) => {
                 if (res.code !== 200) {
@@ -937,33 +984,38 @@ export class ItemListComponent {
       }
 
       // 一般物品刪除
-      this.http.postApi(this.basicUrl + `item/delete?userId=${this.currentUserId}`, selectedIds).subscribe({
-        next: (res: any) => {
-          if (res.code != 200) {
+      this.http
+        .postApi(
+          this.basicUrl + `item/delete?userId=${this.currentUserId}`,
+          selectedIds,
+        )
+        .subscribe({
+          next: (res: any) => {
+            if (res.code != 200) {
+              Swal.fire({
+                title: '刪除錯誤',
+                text: res.message || 'Server error',
+                icon: 'error',
+              });
+              return;
+            }
+
+            Swal.fire({
+              title: '刪除成功',
+              icon: 'success',
+            });
+
+            this.selection.clear();
+            this.getItemByGroupId(this.currentGroupId);
+          },
+          error: (err: any) => {
             Swal.fire({
               title: '刪除錯誤',
-              text: res.message || 'Server error',
+              text: err.message || 'Server error',
               icon: 'error',
             });
-            return;
-          }
-
-          Swal.fire({
-            title: '刪除成功',
-            icon: 'success',
-          });
-
-          this.selection.clear();
-          this.getItemByGroupId(this.currentGroupId);
-        },
-        error: (err: any) => {
-          Swal.fire({
-            title: '刪除錯誤',
-            text: err.message || 'Server error',
-            icon: 'error',
-          });
-        },
-      });
+          },
+        });
     });
   }
 
