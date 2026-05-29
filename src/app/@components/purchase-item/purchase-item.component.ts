@@ -28,7 +28,7 @@ export class PurchaseItemComponent implements OnInit {
 
   listId = 0;
   userId = 1;
-  groupId: number | null = null;
+  groupId!: number;
   items: PurchaseItemVo[] = [];
   categories: LocationAndCategory[] = [];
   members: GroupMember[] = [];
@@ -149,7 +149,7 @@ export class PurchaseItemComponent implements OnInit {
     this.shoppingService.getLists(this.userId).subscribe({
       next: (lists) => {
         const currentList = (lists ?? []).find((list: ShoppingList) => list.id === this.listId);
-        this.groupId = currentList?.group_id ?? null;
+        this.groupId = currentList?.group_id ?? 0;
 
         if (this.hasGroup) {
           this.getGroupMember();
@@ -303,7 +303,7 @@ export class PurchaseItemComponent implements OnInit {
       return;
     }
 
-    this.shoppingService.deleteItem(this.listId, item.id).subscribe({
+    this.shoppingService.deleteItem(this.listId, item.id, this.userId, this.groupId).subscribe({
       next: (res) => {
         if (res.code !== 200) {
           this.errorMessage = res.message ?? '刪除購物項目失敗';

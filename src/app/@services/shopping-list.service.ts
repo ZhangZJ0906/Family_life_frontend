@@ -61,11 +61,11 @@ export class ShoppingListService {
     return this.http.post<BasicRes>(`${this.shoppingUrl}/items/update`, req);
   }
 
-  deleteItem(listId: number, itemId: number): Observable<BasicRes> {
+  deleteItem(listId: number, itemId: number, userId: number, groupId: number): Observable<BasicRes> {
     return this.http.post<BasicRes>(
       `${this.shoppingUrl}/items/delete`,
       null,
-      { params: { listId, itemId } }
+      { params: { listId, itemId , userId, groupId} }
     );
   }
 
