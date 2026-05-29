@@ -85,7 +85,7 @@
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>購買日期</mat-label>
 
-          <input matInput [matDatepicker]="purchasePicker" [(ngModel)]="item.purchaseDate" [max]="today" >
+          <input matInput [matDatepicker]="purchasePicker" [(ngModel)]="item.purchaseDate" [max]="today">
 
           <mat-datepicker-toggle matIconSuffix [for]="purchasePicker">
           </mat-datepicker-toggle>
@@ -350,7 +350,8 @@
 
       <mat-dialog-actions align="end" class="p-3 border-top">
         <button mat-button (click)="onCancel()">捨棄變更</button>
-        <button mat-flat-button color="primary" [disabled]="!item.name" (click)="onOkClose(item.userId)" class="px-4">
+        <button mat-flat-button color="primary" [disabled]="!item.name|| !hasChange" (click)="onOkClose(item.userId)"
+          class="px-4">
           確認修改
         </button>
       </mat-dialog-actions>
