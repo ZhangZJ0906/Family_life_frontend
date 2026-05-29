@@ -36,12 +36,8 @@
       </span>
     </button>
 
-<<<<<<< HEAD
     <button [class.active]="filterType === 'group' || filterType === 'itemlist' || filterType === 'calendar' || filterType ==='expense'" (click)="filterType = 'group'">
-=======
-    <button [class.active]="filterType === 'group' || filterType === 'itemlist' || filterType === 'calendar'"
-      (click)="filterType = 'group'">
->>>>>>> origin/feature-calendar
+
       群組通知
 
       <span class="tab-badge" *ngIf="(unreadMap.group + unreadMap.itemlist + unreadMap.calendar + unreadMap.expense) > 0">
