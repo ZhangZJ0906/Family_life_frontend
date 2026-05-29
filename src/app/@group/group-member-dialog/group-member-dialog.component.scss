@@ -63,7 +63,25 @@
 .member-list {
   display: flex;
   flex-direction: column;
+  max-height: 400px; // 你要的最大高度
+  overflow-y: auto;
   gap: 16px;
+  /* Firefox */
+  scrollbar-width: thin;
+
+  /* Chrome / Edge */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #bbb;
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
 
 .member-card {
