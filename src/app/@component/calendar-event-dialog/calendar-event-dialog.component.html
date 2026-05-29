@@ -31,6 +31,30 @@
         <span matTextPrefix class="readonly-prefix">👥</span>
         <span matTextSuffix class="readonly-suffix">🔒</span>
       </mat-form-field>
+
+      <!-- 指派成員：私人活動不顯示 -->
+@if (!isPrivateGroup) {
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>指派成員</mat-label>
+
+    <mat-select
+      [(ngModel)]="form.assignedUserId"
+      name="assignedUserId"
+      required
+      #assignedUserRef="ngModel"
+    >
+      @for (member of members; track getMemberId(member)) {
+        <mat-option [value]="getMemberId(member)">
+          👤 {{ getMemberName(member) }}
+        </mat-option>
+      }
+    </mat-select>
+
+    @if (assignedUserRef.invalid && assignedUserRef.touched) {
+      <mat-error>請選擇指派成員</mat-error>
+    }
+  </mat-form-field>
+}
         <!-- 活動名稱 -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>活動名稱</mat-label>

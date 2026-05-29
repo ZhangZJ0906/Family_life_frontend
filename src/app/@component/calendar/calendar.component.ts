@@ -49,6 +49,7 @@ export class CalendarComponent {
   currentGroupId: number = 0;
   userInfo!: any;
   createdBy!: number;
+  groupMemberList: any[] = [];
 // 滑鼠移到活動時，是否顯示資訊卡
 showEventTooltip = false;
 
@@ -141,6 +142,34 @@ tooltipEvent = {
     this.getUserGroupList(this.createdBy);
   }
 
+  getGroupMembers(groupId: number): void {
+    console.log('Getting members for groupId:', groupId);
+  if (!groupId || groupId === 0) {
+    this.groupMemberList = [];
+    return;
+  }
+
+  this.http
+    .getApi(this.http.basicUrl + `family_life/get_members?group_id=${groupId}`)
+    .subscribe({
+      next: (res: any) => {
+        console.log('Group Members Response:', res);
+        this.groupMemberList = res.groupMembersList ?? [];
+      },
+      error: (err) => {
+        console.error(err);
+        this.groupMemberList = [];
+
+        Swal.fire({
+          icon: 'error',
+          title: '群組成員載入失敗',
+          text: err.error?.message || '請稍後再試',
+          confirmButtonText: '確認',
+        });
+      },
+    });
+}
+
   getUserGroupList(userId: number) {
     this.http
       .getApi(this.http.basicUrl + `family_life/getGroupList?user_Id=${userId}`)
@@ -179,7 +208,7 @@ tooltipEvent = {
 
           this.selectedGroupId = this.routeGroupId;
           this.currentGroupId = this.routeGroupId;
-
+          this.getGroupMembers(this.currentGroupId);
           this.loadCalendarEvents(this.currentGroupId, this.createdBy);
         },
         error: (err) => {
@@ -268,6 +297,7 @@ tooltipEvent = {
             notifyBefore: item.notifyBefore,
             createdBy: item.createdBy,
             groupId: item.groupId,
+            assignedUserId: item.assignedUserId,
           },
         }));
 
@@ -288,8 +318,12 @@ tooltipEvent = {
   }
 
   onGroupChange(event: MatSelectChange) {
-    this.currentGroupId = event.value;
-    this.loadCalendarEvents(this.currentGroupId, this.createdBy);
+     this.currentGroupId = event.value;
+      this.selectedGroupId = event.value;
+
+      this.getGroupMembers(this.currentGroupId);
+
+      this.loadCalendarEvents(this.currentGroupId, this.createdBy);
     this.router.navigate(['/calendar', this.currentGroupId]);
   }
   // 點擊日期時新增活動，日期會帶入使用者點到的日期
@@ -484,64 +518,62 @@ tooltipEvent = {
       groupId === 0 ? '私人活動' : selectedGroup?.groupName || '未選擇群組';
 
     const ref = this.dialog.open(CalendarEventDialogComponent, {
-      width: '760px',
-      maxWidth: '95vw',
-      maxHeight: '90vh',
-      panelClass: 'calendar-event-dialog-panel',
-      autoFocus: false,
-      data: {
-        mode: 'create',
-        dateStr,
-        groupId,
-        groupName,
-      },
-    });
+  width: '760px',
+  maxWidth: '95vw',
+  maxHeight: '90vh',
+  panelClass: 'calendar-event-dialog-panel',
+  autoFocus: false,
+  data: {
+    mode: 'create',
+    dateStr,
+    groupId,
+    groupName,
+    members: this.groupMemberList,
+    currentUserId: this.createdBy,
+  },
+});
 
-    ref.afterClosed().subscribe((result) => {
-      // 使用者按取消或關閉 Dialog，不做任何事
-      if (!result) {
+ref.afterClosed().subscribe((result) => {
+  if (!result) {
+    return;
+  }
+
+  const payload = {
+    groupId,
+    createdBy: this.createdBy,
+    assignedUserId: groupId === 0 ? this.createdBy : result.assignedUserId,
+    ...result,
+  };
+
+  this.calendarApiService.create(payload).subscribe({
+    next: (res: any) => {
+      if (res.code !== 200) {
+        Swal.fire({
+          icon: 'error',
+          title: '新增失敗',
+          text: res.message || '新增失敗',
+        });
         return;
       }
 
-      // 後端目前私人活動要吃 groupId = 0
-      const payload = {
-        groupId,
-        createdBy: this.createdBy,
-        ...result,
-      };
-
-      console.log('createCalendarEvent payload:', payload);
-
-      this.calendarApiService.create(payload).subscribe({
-        next: (res: any) => {
-          if (res.code !== 200) {
-            Swal.fire({
-              icon: 'error',
-              title: '新增失敗',
-              text: res.message || '新增失敗',
-            });
-            return;
-          }
-
-          Swal.fire({
-            icon: 'success',
-            title: '新增成功',
-            confirmButtonText: '確認',
-          });
-
-          this.loadCalendarEvents(groupId, this.createdBy);
-        },
-
-        error: (err) => {
-          Swal.fire({
-            icon: 'error',
-            title: '新增失敗',
-            text: err.error?.message || '伺服器發生錯誤',
-          });
-        },
+      Swal.fire({
+        icon: 'success',
+        title: '新增成功',
+        confirmButtonText: '確認',
       });
-    });
-  }
+
+      this.loadCalendarEvents(groupId, this.createdBy);
+    },
+
+    error: (err) => {
+      Swal.fire({
+        icon: 'error',
+        title: '新增失敗',
+        text: err.error?.message || '伺服器發生錯誤',
+      });
+    },
+  });
+});}
   // 修改活動視窗
   //   openUpdateDialog(info: EventClickArg): void {
   //     const eventId = Number(info.event.id);
@@ -741,6 +773,8 @@ tooltipEvent = {
         // 傳給 Dialog 顯示唯讀欄位
         groupId,
         groupName,
+        members: this.groupMemberList,
+        currentUserId: this.createdBy,
       },
     });
 
@@ -748,9 +782,10 @@ tooltipEvent = {
     ref.afterClosed().subscribe((result) => {
       if (!result) return;
       const payload = {
-        groupId: this.currentGroupId,   // ⭐補這個
-        createdBy: this.createdBy,      // ⭐建議也補
-        ...result,
+         groupId: this.currentGroupId,
+          createdBy: this.createdBy,
+          assignedUserId: groupId === 0 ? this.createdBy : result.assignedUserId,
+          ...result,
       };
 
       this.calendarApiService.update(Number(info.event.id), payload).subscribe({
@@ -878,12 +913,17 @@ tooltipEvent = {
     const currentGroupId = this.selectedGroupId ?? 0;
     const data = {
       title: title,
-      description: description,
-      eventTime: newDateTime,
-      endTime: newEndTime,
-      notifyBefore: notifyBefore,
+  description: description,
+  eventTime: newDateTime,
+  endTime: newEndTime,
+  notifyBefore: notifyBefore,
+  groupId: this.currentGroupId,
 
-      groupId: this.currentGroupId,
+  // 保留原本指派成員
+  assignedUserId:
+    this.currentGroupId === 0
+      ? this.createdBy
+      : info.event.extendedProps['assignedUserId'],
     };
 
     //拖曳後日期早於今天，就還原位置
