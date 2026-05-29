@@ -208,6 +208,7 @@ export class ItemListComponent {
     this.getUserGroupData(groupId);
   }
 
+<<<<<<< HEAD
   // 新增這個方法，專門用來在更新資料後，重新喚醒排序功能
   private refreshTableData(newData: any[]) {
     this.dataSource.data = newData;
@@ -218,6 +219,9 @@ export class ItemListComponent {
       this.dataSource.paginator = this.paginator;
     });
   }
+=======
+
+>>>>>>> origin/LII
   /*新增物品 */
   openAddDialog() {
     const dialogRef = this.dialog.open(ItemListAddDialogComponent, {

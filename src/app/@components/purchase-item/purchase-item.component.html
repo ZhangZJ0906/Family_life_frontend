@@ -115,5 +115,11 @@
         </button>
       </article>
     </div>
+
+    <div class="confirm-actions" *ngIf="!isLoading && items.length > 0">
+      <button class="primary-button" type="button" (click)="confirmItems()" [disabled]="isSaving || isEditing">
+        確認
+      </button>
+    </div>
   </section>
 </main>

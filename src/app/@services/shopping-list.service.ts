@@ -19,9 +19,9 @@ export class ShoppingListService {
   private readonly shoppingUrl = 'http://localhost:8080/shopping_lists';
   private readonly groupUrl = 'http://localhost:8080/family_life';
 
-  getLists(createrId: number): Observable<ShoppingList[]> {
+  getLists(userId: number): Observable<ShoppingList[]> {
     return this.http.get<ShoppingList[]>(this.shoppingUrl, {
-      params: { createrId }
+      params: { userId }
     });
   }
 

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { AddPurchaseItemReq, PurchaseItemVo, ShoppingList } from '../../@models/shopping_list.model';
 import { AuthService } from '../../@services/auth.service';
@@ -50,6 +50,7 @@ export class PurchaseItemComponent implements OnInit {
 
   constructor(
     private readonly route: ActivatedRoute,
+    private readonly router: Router,
     private readonly authService: AuthService,
     private readonly shoppingService: ShoppingListService,
     private readonly http: HttpClientService,
@@ -276,6 +277,10 @@ export class PurchaseItemComponent implements OnInit {
 
   cancelEdit(): void {
     this.resetForm();
+  }
+
+  confirmItems(): void {
+    this.router.navigate(['/shopping-list']);
   }
 
   private resetForm(): void {
