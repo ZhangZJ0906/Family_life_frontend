@@ -23,7 +23,7 @@ import { CalendarEventDialogComponent } from '../calendar-event-dialog/calendar-
 
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
-
+import timeGridPlugin from '@fullcalendar/timegrid';
 @Component({
   selector: 'app-calendar',
   standalone: true,
@@ -35,7 +35,10 @@ import { ActivatedRoute } from '@angular/router';
     MatFormFieldModule,
     MatSelect,
     MatSelectModule,
-    MatIconModule
+    MatIconModule,
+
+
+
   ],
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss',
@@ -51,20 +54,56 @@ export class CalendarComponent {
 
   // FullCalendar 的主要設定
   calendarOptions: CalendarOptions = {
-    plugins: [dayGridPlugin, interactionPlugin],
-    initialView: 'dayGridMonth',
-    locale: 'zh-tw',
-    editable: true, // 開啟拖曳
-    headerToolbar: {
-      left: 'prev,next today',
-      center: 'title',
-      right: 'dayGridMonth,dayGridWeek',
-    },
-    events: [],
-    dateClick: this.handleDateClick.bind(this),
-    eventClick: this.handleEventClick.bind(this),
-    eventDrop: this.handleEventDrop.bind(this), // 拖曳後觸發
-  };
+  plugins: [
+    dayGridPlugin,
+    timeGridPlugin,
+    interactionPlugin
+  ],
+
+  initialView: 'dayGridMonth',
+
+  locale: 'zh-tw',
+
+  headerToolbar: {
+    left: 'prev,next today',
+    center: 'title',
+    right: 'dayGridMonth,timeGridWeek'
+  },
+
+  buttonText: {
+    today: 'today',
+    month: 'month',
+    week: 'week'
+  },
+
+  views: {
+    timeGridWeek: {
+      buttonText: 'week',
+      allDayText: 'all-day'
+    }
+  },
+
+  slotMinTime: '01:00:00',
+  slotMaxTime: '24:00:00',
+  slotDuration: '01:00:00',
+  slotLabelFormat: {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  },
+
+  allDaySlot: true,
+  nowIndicator: true,
+
+  editable: true,
+  selectable: true,
+
+  dateClick: this.handleDateClick.bind(this),
+  eventClick: this.openUpdateDialog.bind(this),
+  eventDrop: this.handleEventDrop.bind(this),
+
+  events: []
+};
 
   constructor(
     private dialog: MatDialog,

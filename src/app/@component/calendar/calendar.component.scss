@@ -319,6 +319,94 @@
   font-weight: 800 !important;
 }
 
+/* ================================
+   timeGridWeek 週檢視樣式
+   ================================ */
+
+/* 週檢視外框 */
+:host ::ng-deep .fc .fc-timeGridWeek-view {
+  background: #ffffff;
+}
+
+/* 週檢視標題列 */
+:host ::ng-deep .fc .fc-timegrid-axis,
+:host ::ng-deep .fc .fc-col-header-cell {
+  background: #ffffff;
+}
+
+/* 星期文字 */
+:host ::ng-deep .fc .fc-timeGridWeek-view .fc-col-header-cell-cushion {
+  color: #111827;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* 左側時間欄 */
+:host ::ng-deep .fc .fc-timegrid-slot-label {
+  color: #374151;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* 時間格線高度 */
+:host ::ng-deep .fc .fc-timegrid-slot {
+  height: 54px;
+}
+
+/* all-day 區塊 */
+:host ::ng-deep .fc .fc-timegrid-axis-cushion,
+:host ::ng-deep .fc .fc-timegrid-axis-frame {
+  color: #374151;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* 今天欄位淡黃色，可接近圖片 */
+:host ::ng-deep .fc .fc-day-today {
+  background: #fff9db !important;
+}
+
+/* 週檢視活動 */
+:host ::ng-deep .fc .fc-timegrid-event {
+  background: #5b8def !important;
+  border: 1px solid #5b8def !important;
+  color: #ffffff !important;
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* 週檢視活動文字 */
+:host ::ng-deep .fc .fc-timegrid-event .fc-event-main {
+  color: #ffffff !important;
+}
+
+/* all-day 活動 */
+:host ::ng-deep .fc .fc-daygrid-event {
+  background: #5b8def !important;
+  border: 1px solid #5b8def !important;
+  color: #ffffff !important;
+  border-radius: 5px;
+  padding: 2px 6px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* 週檢視格線 */
+:host ::ng-deep .fc-theme-standard td,
+:host ::ng-deep .fc-theme-standard th {
+  border-color: #e5e7eb;
+}
+
+/* 上方工具列按鈕保持你的深色風格 */
+:host ::ng-deep .fc .fc-button-primary:not(:disabled).fc-button-active {
+  background: #111827 !important;
+  color: #ffffff !important;
+  border-color: #111827 !important;
+}
+
 /* RWD：平板 */
 @media (max-width: 1100px) {
   .calendar-header-card {
