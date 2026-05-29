@@ -793,6 +793,44 @@ export class ItemListComponent {
       : this.dataSource.data.forEach((row) => this.selection.select(row));
   }
 
+  //快速選取
+  lastSelectedRow: any = null;
+  onRowCheckboxClick(event: MouseEvent, row: any) {
+
+    event.stopPropagation();
+
+    const rows = this.dataSource.filteredData;
+
+    // Shift 區間選取
+    if (event.shiftKey && this.lastSelectedRow) {
+
+      const startIndex = rows.findIndex(
+        r => r.id === this.lastSelectedRow.id
+      );
+
+      const endIndex = rows.findIndex(
+        r => r.id === row.id
+      );
+
+      const [start, end] =
+        startIndex < endIndex
+          ? [startIndex, endIndex]
+          : [endIndex, startIndex];
+
+      for (let i = start; i <= end; i++) {
+        this.selection.select(rows[i]);
+      }
+
+    } else {
+
+      // 一般切換
+      this.selection.toggle(row);
+
+    }
+
+    this.lastSelectedRow = row;
+  }
+
   // 刪除資料
   deleteSelectedItems() {
     const selectedIds = this.selection.selected.map((item) => item.id);
