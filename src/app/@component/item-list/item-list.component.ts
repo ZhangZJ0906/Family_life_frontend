@@ -294,8 +294,11 @@ export class ItemListComponent {
       const refresh =
         refreshMap[_type] ?? (() => this.getItemByGroupId(this.currentGroupId));
 
+      this.showLoading('更新中...');
+
       this.http.postApi(url, payload).subscribe({
         next: (res: any) => {
+          Swal.close();
           if (res.code !== 200) {
             Swal.fire({
               title: '更新錯誤',
@@ -320,8 +323,12 @@ export class ItemListComponent {
 
   // 修改訂閱
   updateSubscription(data: any) {
+    this.showLoading('更新中...');
+
     this.http.postApi(this.basicUrl + 'subscription/update', data).subscribe({
       next: (res: any) => {
+        Swal.close();
+
         if (res.code != 200) {
           Swal.fire({
             title: '更新錯誤',
@@ -387,8 +394,12 @@ export class ItemListComponent {
 
   //修改保固
   updateWarranty(data: any) {
+    this.showLoading('更新中...');
+
     this.http.postApi(this.basicUrl + 'warranty/update', data).subscribe({
       next: (res: any) => {
+        Swal.close();
+
         if (res.code != 200) {
           Swal.fire({
             title: '更新錯誤',
@@ -417,8 +428,12 @@ export class ItemListComponent {
 
   //修改藥品
   updateMedicine(data: any): void {
+    this.showLoading('更新中...');
+
     this.http.postApi(this.basicUrl + 'medicine/update', data).subscribe({
       next: (res: any) => {
+        Swal.close();
+
         if (res.code !== 200) {
           Swal.fire({
             title: '更新錯誤',
@@ -777,9 +792,12 @@ console.log(res)
       });
       return;
     }
+    this.showLoading('更新中...');
 
     this.http.postApi(this.basicUrl + 'item/update', data).subscribe({
       next: (res: any) => {
+        Swal.close();
+
         if (res.code != 200) {
           Swal.fire({
             title: '更新錯誤',
@@ -831,6 +849,44 @@ console.log(res)
       : this.dataSource.data.forEach((row) => this.selection.select(row));
   }
 
+  //快速選取
+  lastSelectedRow: any = null;
+  onRowCheckboxClick(event: MouseEvent, row: any) {
+
+    event.stopPropagation();
+
+    const rows = this.dataSource.filteredData;
+
+    // Shift 區間選取
+    if (event.shiftKey && this.lastSelectedRow) {
+
+      const startIndex = rows.findIndex(
+        r => r.id === this.lastSelectedRow.id
+      );
+
+      const endIndex = rows.findIndex(
+        r => r.id === row.id
+      );
+
+      const [start, end] =
+        startIndex < endIndex
+          ? [startIndex, endIndex]
+          : [endIndex, startIndex];
+
+      for (let i = start; i <= end; i++) {
+        this.selection.select(rows[i]);
+      }
+
+    } else {
+
+      // 一般切換
+      this.selection.toggle(row);
+
+    }
+
+    this.lastSelectedRow = row;
+  }
+
   // 刪除資料
   deleteSelectedItems() {
     const selectedIds = this.selection.selected.map((item) => item.id);
@@ -854,6 +910,8 @@ console.log(res)
       // =========================
       if (this.isSubscriptionMode) {
         // 多筆刪除
+        this.showLoading('刪除中...');
+
         selectedIds.forEach((id) => {
           this.http
             .deleteApi(
@@ -863,6 +921,7 @@ console.log(res)
             .subscribe({
               next: (res: any) => {
                 if (res.code !== 200) {
+                  Swal.close();
                   Swal.fire({
                     title: '刪除失敗',
                     text: res.message || 'Server error',
@@ -908,6 +967,8 @@ console.log(res)
             )
             .subscribe({
               next: (res: any) => {
+                Swal.close();
+
                 if (res.code !== 200) {
                   Swal.fire({
                     title: '刪除失敗',
@@ -950,6 +1011,7 @@ console.log(res)
             )
             .subscribe({
               next: (res: any) => {
+                Swal.close()
                 if (res.code !== 200) {
                   Swal.fire({
                     title: '刪除失敗',
@@ -1052,5 +1114,17 @@ console.log(res)
     }
 
     return `剩餘 ${days} 天`;
+  }
+
+  private showLoading(message: string = '處理中...'): void {
+    Swal.fire({
+      title: message,
+      text: '請稍候',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
   }
 }

@@ -131,7 +131,7 @@ export class NotifyDialogComponent implements OnInit {
   // ========================
   markAsRead(n: any) {
 
-    if (n.isRead === 1) return;
+    if (n.isRead === 1 || n.type === 'invite') return;
 
     this.http.post(
       `http://localhost:8080/family_life/read_notify?notify_id=${n.id}`,
@@ -154,7 +154,7 @@ export class NotifyDialogComponent implements OnInit {
   markAllAsRead() {
 
     const unreadIds = this.notifies
-      .filter(n => n.isRead !== 1)
+      .filter(n => n.isRead !== 1 && n.type !== 'invite')
       .map(n => n.id);
 
     if (!unreadIds.length) return;
@@ -250,12 +250,15 @@ export class NotifyDialogComponent implements OnInit {
   acceptInvite(n: any) {
 
     n.status = 'accepted';
+    n.isRead = 1;
 
     this.http.post(
       `http://localhost:8080/family_life/accept_join_group?user_id=${this.user_id}&group_id=${n.targetGroupId}&notify_id=${n.id}`,
       {}
     ).subscribe({
       next: () => {
+        this.calculateUnread();
+        this.syncBadge();
         Swal.fire('已加入該群組', '', 'success');
       },
       error: () => {
@@ -267,11 +270,16 @@ export class NotifyDialogComponent implements OnInit {
   rejectInvite(n: any) {
 
     n.status = 'rejected';
+    n.isRead = 1;
 
     this.http.post(
       `http://localhost:8080/family_life/reject_join_group?user_id=${this.user_id}&group_id=${n.targetGroupId}&notify_id=${n.id}`,
       {}
     ).subscribe({
+      next: () => {
+        this.calculateUnread();
+        this.syncBadge();
+      },
       error: () => {
         Swal.fire('失敗', '', 'error');
       }

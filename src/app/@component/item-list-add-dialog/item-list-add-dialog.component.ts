@@ -252,8 +252,13 @@ export class ItemListAddDialogComponent implements OnInit {
       return;
     }
 
+    this.showLoading('新增物品中...');
+
     this.http.postApi(this.basicUrl + 'item/add', payload).subscribe({
       next: (res: any) => {
+
+        Swal.close();
+
         if (res.code != 200) {
           Swal.fire({
             title: '錯誤',
@@ -297,10 +302,15 @@ export class ItemListAddDialogComponent implements OnInit {
       expenseDate: itemPayload.purchaseDate,
     };
 
+    this.showLoading('新增物品與記帳中...');
+
     this.http
       .postApi(this.basicUrl + 'expense/addInfo', expensePayload)
       .subscribe({
         next: (res: any) => {
+
+          Swal.close();
+
           if (res.code != 200) {
             Swal.fire({
               title: '物品已新增，記帳建立失敗',
@@ -425,8 +435,11 @@ export class ItemListAddDialogComponent implements OnInit {
       return;
     }
 
+    this.showLoading('新增訂閱中...');
+
     this.http.postApi(this.basicUrl + 'subscription/add', payload).subscribe({
       next: (res: any) => {
+        Swal.close();
         if (res.code != 200) {
           Swal.fire({
             title: '錯誤',
@@ -587,8 +600,12 @@ export class ItemListAddDialogComponent implements OnInit {
       return;
     }
 
+    this.showLoading('新增保固中...');
+
     this.http.postApi(this.basicUrl + 'warranty/add', payload).subscribe({
       next: (res: any) => {
+
+        Swal.close();
         if (res.code != 200) {
           Swal.fire({
             title: '錯誤',
@@ -741,8 +758,11 @@ export class ItemListAddDialogComponent implements OnInit {
       return;
     }
 
+    this.showLoading('新增藥品中...');
+
     this.http.postApi(this.basicUrl + 'medicine/add', payload).subscribe({
       next: (res: any) => {
+        Swal.close();
         if (res.code != 200) {
           Swal.fire('錯誤', res.message || 'Server error', 'error');
           return;
@@ -828,5 +848,17 @@ export class ItemListAddDialogComponent implements OnInit {
     }
 
     return !this.item.expireDate;
+  }
+
+  private showLoading(message: string = '處理中...'): void {
+    Swal.fire({
+      title: message,
+      text: '請稍候',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
   }
 }
