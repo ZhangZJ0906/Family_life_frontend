@@ -116,9 +116,14 @@ export class CalendarEventDialogComponent {
   }
 
   getMemberName(member: any): string {
-    return member.userName || member.name || member.email || `成員 ${member.user_id || member.userId}`;
-  }
-
+  return (
+    member.userName ||
+    member.user_name ||
+    member.name ||
+    member.email ||
+    `成員 ${member.user_id || member.userId}`
+  );
+}
   getMemberId(member: any): number {
     return Number(member.user_id ?? member.userId);
   }
