@@ -351,6 +351,62 @@ export class ItemListAddDialogComponent implements OnInit {
   }
 
   // 訂閱的新增流程
+  // addSubscriptionInfo(): void {
+  //   const payload = {
+  //     groupId: this.item.groupId,
+  //     userId: this.item.created_by_id,
+  //     name: this.item.name,
+  //     price: this.item.unitPrice,
+  //     billingCycle: this.item.billingCycle,
+  //     purchaseDate: this.formatDate(this.item.purchaseDate),
+  //     trialEndDate: this.formatDate(this.item.trialEndDate),
+  //     notify: this.item.notify,
+  //     note: this.item.note,
+  //   };
+
+  //   if (!payload.name?.trim()) {
+  //     this.showError('請輸入訂閱名稱');
+  //     return;
+  //   }
+
+  //   if (payload.price < 0) {
+  //     this.showError('訂閱金額不可小於 0');
+  //     return;
+  //   }
+
+  //   if (!payload.billingCycle) {
+  //     this.showError('請選擇扣款週期');
+  //     return;
+  //   }
+
+  //   this.http.postApi(this.basicUrl + 'subscription/add', payload).subscribe({
+  //     next: (res: any) => {
+  //       if (res.code != 200) {
+  //         Swal.fire({
+  //           title: '錯誤',
+  //           text: res.message || 'Server error',
+  //           icon: 'error',
+  //         });
+  //         return;
+  //       }
+
+  //       Swal.fire({
+  //         title: '成功',
+  //         text: res.message,
+  //         icon: 'success',
+  //       });
+
+  //       this.dialogRef.close(true);
+  //     },
+  //     error: (err: any) => {
+  //       Swal.fire({
+  //         title: '錯誤',
+  //         text: err.message || 'Server error',
+  //         icon: 'error',
+  //       });
+  //     },
+  //   });
+  // }
   addSubscriptionInfo(): void {
     const payload = {
       groupId: this.item.groupId,
@@ -368,11 +424,6 @@ export class ItemListAddDialogComponent implements OnInit {
       this.showError('請輸入訂閱名稱');
       return;
     }
-
-    // if (!payload.groupId) {
-    //   this.showError('請選擇所屬群組'+ payload.groupId);
-    //   return;
-    // }
 
     if (payload.price < 0) {
       this.showError('訂閱金額不可小於 0');
@@ -398,13 +449,52 @@ export class ItemListAddDialogComponent implements OnInit {
           return;
         }
 
-        Swal.fire({
-          title: '成功',
-          text: res.message,
-          icon: 'success',
-        });
+        if (!payload.price || payload.price <= 0) {
+          Swal.fire({ title: '成功', text: res.message, icon: 'success' });
+          this.dialogRef.close(true);
+          return;
+        }
 
-        this.dialogRef.close(true);
+        const expensePayload = {
+          userId: payload.userId,
+          groupId: payload.groupId ?? 0,
+          categoryId: this.item.categoryId,
+          relatedItemId: res?.itemId ?? res?.id ?? res?.data?.id ?? null,
+          relatedItemName: payload.name,
+          price: payload.price,
+          note: payload.note || '由訂閱自動建立',
+          expenseDate: payload.purchaseDate,
+        };
+
+        this.http
+          .postApi(this.basicUrl + 'expense/addInfo', expensePayload)
+          .subscribe({
+            next: (expRes: any) => {
+              if (expRes.code != 200) {
+                Swal.fire({
+                  title: '訂閱已新增，記帳建立失敗',
+                  text: expRes.message || 'Server error',
+                  icon: 'warning',
+                });
+                this.dialogRef.close(true);
+                return;
+              }
+              Swal.fire({
+                title: '成功',
+                text: '訂閱與記帳已新增',
+                icon: 'success',
+              });
+              this.dialogRef.close(true);
+            },
+            error: (err: any) => {
+              Swal.fire({
+                title: '訂閱已新增，記帳建立失敗',
+                text: err.message || 'Server error',
+                icon: 'warning',
+              });
+              this.dialogRef.close(true);
+            },
+          });
       },
       error: (err: any) => {
         Swal.fire({
@@ -415,7 +505,70 @@ export class ItemListAddDialogComponent implements OnInit {
       },
     });
   }
+  // addWarrantyInfo(): void {
+  //   const payload = {
+  //     groupId: this.item.groupId,
+  //     userId: this.item.created_by_id,
+  //     productName: this.item.name,
+  //     brand: this.item.brand,
+  //     model: this.item.model,
+  //     serialNumber: this.item.serialNumber,
+  //     purchaseDate: this.formatDate(this.item.purchaseDate),
+  //     warrantyEndDate: this.formatDate(this.item.warrantyEndDate),
+  //     storeName: this.item.storeName,
+  //     price: this.item.unitPrice,
+  //     notify: this.item.notify,
+  //     note: this.item.note,
+  //   };
 
+  //   if (!payload.productName?.trim()) {
+  //     this.showError('請輸入產品名稱');
+  //     return;
+  //   }
+
+  //   // if (!payload.groupId) {
+  //   //   this.showError('請選擇所屬群組');
+  //   //   return;
+  //   // }
+
+  //   if (!payload.purchaseDate) {
+  //     this.showError('請選擇購買日期');
+  //     return;
+  //   }
+
+  //   if (!payload.warrantyEndDate) {
+  //     this.showError('請選擇保固到期日');
+  //     return;
+  //   }
+
+  //   this.http.postApi(this.basicUrl + 'warranty/add', payload).subscribe({
+  //     next: (res: any) => {
+  //       if (res.code != 200) {
+  //         Swal.fire({
+  //           title: '錯誤',
+  //           text: res.message || 'Server error',
+  //           icon: 'error',
+  //         });
+  //         return;
+  //       }
+
+  //       Swal.fire({
+  //         title: '成功',
+  //         text: res.message,
+  //         icon: 'success',
+  //       });
+
+  //       this.dialogRef.close(true);
+  //     },
+  //     error: (err: any) => {
+  //       Swal.fire({
+  //         title: '錯誤',
+  //         text: err.message || 'Server error',
+  //         icon: 'error',
+  //       });
+  //     },
+  //   });
+  // }
   addWarrantyInfo(): void {
     const payload = {
       groupId: this.item.groupId,
@@ -436,11 +589,6 @@ export class ItemListAddDialogComponent implements OnInit {
       this.showError('請輸入產品名稱');
       return;
     }
-
-    // if (!payload.groupId) {
-    //   this.showError('請選擇所屬群組');
-    //   return;
-    // }
 
     if (!payload.purchaseDate) {
       this.showError('請選擇購買日期');
@@ -467,13 +615,52 @@ export class ItemListAddDialogComponent implements OnInit {
           return;
         }
 
-        Swal.fire({
-          title: '成功',
-          text: res.message,
-          icon: 'success',
-        });
+        if (!payload.price || payload.price <= 0) {
+          Swal.fire({ title: '成功', text: res.message, icon: 'success' });
+          this.dialogRef.close(true);
+          return;
+        }
 
-        this.dialogRef.close(true);
+        const expensePayload = {
+          userId: payload.userId,
+          groupId: payload.groupId ?? 0,
+          categoryId: this.item.categoryId,
+          relatedItemId: res?.itemId ?? res?.id ?? res?.data?.id ?? null,
+          relatedItemName: payload.productName,
+          price: payload.price,
+          note: payload.note || '由保固自動建立',
+          expenseDate: payload.purchaseDate,
+        };
+
+        this.http
+          .postApi(this.basicUrl + 'expense/addInfo', expensePayload)
+          .subscribe({
+            next: (expRes: any) => {
+              if (expRes.code != 200) {
+                Swal.fire({
+                  title: '保固已新增，記帳建立失敗',
+                  text: expRes.message || 'Server error',
+                  icon: 'warning',
+                });
+                this.dialogRef.close(true);
+                return;
+              }
+              Swal.fire({
+                title: '成功',
+                text: '保固與記帳已新增',
+                icon: 'success',
+              });
+              this.dialogRef.close(true);
+            },
+            error: (err: any) => {
+              Swal.fire({
+                title: '保固已新增，記帳建立失敗',
+                text: err.message || 'Server error',
+                icon: 'warning',
+              });
+              this.dialogRef.close(true);
+            },
+          });
       },
       error: (err: any) => {
         Swal.fire({
@@ -484,7 +671,56 @@ export class ItemListAddDialogComponent implements OnInit {
       },
     });
   }
+  // addMedicineInfo(): void {
+  //   const payload = {
+  //     groupId: this.item.groupId,
+  //     userId: this.item.created_by_id,
+  //     name: this.item.name,
+  //     medicineType: this.item.medicineType,
+  //     quantity: this.item.quantity,
+  //     unit: this.item.unit,
+  //     unitPrice: this.item.unitPrice,
+  //     safeQuantity: this.item.safeQuantity,
+  //     purchaseDate: this.formatDate(this.item.purchaseDate),
+  //     expireDate: this.formatDate(this.item.expireDate),
+  //     dosage: this.item.dosage,
+  //     usageMethod: this.item.usageMethod,
+  //     location: this.item.locationId?.toString(),
+  //     source: this.item.source,
+  //     notify: this.item.notify,
+  //     note: this.item.note,
+  //   };
 
+  //   if (!payload.name?.trim()) {
+  //     this.showError('請輸入藥品名稱');
+  //     return;
+  //   }
+
+  //   if (!payload.unit?.trim()) {
+  //     this.showError('請輸入單位');
+  //     return;
+  //   }
+
+  //   if (!payload.expireDate) {
+  //     this.showError('請選擇藥品到期日');
+  //     return;
+  //   }
+
+  //   this.http.postApi(this.basicUrl + 'medicine/add', payload).subscribe({
+  //     next: (res: any) => {
+  //       if (res.code != 200) {
+  //         Swal.fire('錯誤', res.message || 'Server error', 'error');
+  //         return;
+  //       }
+
+  //       Swal.fire('成功', res.message, 'success');
+  //       this.dialogRef.close(true);
+  //     },
+  //     error: (err: any) => {
+  //       Swal.fire('錯誤', err.message || 'Server error', 'error');
+  //     },
+  //   });
+  // }
   addMedicineInfo(): void {
     const payload = {
       groupId: this.item.groupId,
@@ -493,6 +729,8 @@ export class ItemListAddDialogComponent implements OnInit {
       medicineType: this.item.medicineType,
       quantity: this.item.quantity,
       unit: this.item.unit,
+      price: this.item.unitPrice * this.item.quantity, // ✅ 補上這行
+
       unitPrice: this.item.unitPrice,
       safeQuantity: this.item.safeQuantity,
       purchaseDate: this.formatDate(this.item.purchaseDate),
@@ -530,15 +768,54 @@ export class ItemListAddDialogComponent implements OnInit {
           return;
         }
 
-        Swal.fire('成功', res.message, 'success');
-        this.dialogRef.close(true);
+        if (!payload.unitPrice || payload.unitPrice <= 0) {
+          Swal.fire('成功', res.message, 'success');
+          this.dialogRef.close(true);
+          return;
+        }
+
+        const expensePayload = {
+          userId: payload.userId,
+          groupId: payload.groupId ?? 0,
+          categoryId: this.item.categoryId,
+          relatedItemId: res?.itemId ?? res?.id ?? res?.data?.id ?? null,
+          relatedItemName: payload.name,
+          price: payload.price,
+          note: payload.note || '由藥品自動建立',
+          expenseDate: payload.purchaseDate,
+        };
+
+        this.http
+          .postApi(this.basicUrl + 'expense/addInfo', expensePayload)
+          .subscribe({
+            next: (expRes: any) => {
+              if (expRes.code != 200) {
+                Swal.fire(
+                  '藥品已新增，記帳建立失敗',
+                  expRes.message || 'Server error',
+                  'warning',
+                );
+                this.dialogRef.close(true);
+                return;
+              }
+              Swal.fire('成功', '藥品與記帳已新增', 'success');
+              this.dialogRef.close(true);
+            },
+            error: (err: any) => {
+              Swal.fire(
+                '藥品已新增，記帳建立失敗',
+                err.message || 'Server error',
+                'warning',
+              );
+              this.dialogRef.close(true);
+            },
+          });
       },
       error: (err: any) => {
         Swal.fire('錯誤', err.message || 'Server error', 'error');
       },
     });
   }
-
   private formatDate(date: any): string {
     if (!date) return '';
     const d = new Date(date);

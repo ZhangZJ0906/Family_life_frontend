@@ -219,13 +219,6 @@ displayedColumns: string[] = [
   openEditDialog(record: any) {
   const relatedItem =
     record.relatedItemId != null ? this.itemMap[record.relatedItemId] : null;
-
-  /*
-    取得這筆資料的群組 id：
-    1. 優先用目前頁面選到的 currentGroupId
-    2. 如果 currentGroupId 沒值，再用 record.groupId
-    3. 都沒有就當私人記帳 0
-  */
   const dialogGroupId =
     this.currentGroupId !== null && this.currentGroupId !== undefined
       ? Number(this.currentGroupId)
