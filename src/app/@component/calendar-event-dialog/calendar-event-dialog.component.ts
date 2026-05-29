@@ -32,6 +32,9 @@ import Swal from 'sweetalert2';
   providers: [provideNativeDateAdapter()],
 })
 export class CalendarEventDialogComponent {
+
+   // 今天日期，用來限制 datepicker 不能選今天以前
+  today = new Date();
   form = {
     title: '',
     description: '',
@@ -91,6 +94,24 @@ export class CalendarEventDialogComponent {
 
     if (endDateTime && startDateTime > endDateTime) {
       Swal.fire({ icon: 'warning', title: '開始時間不可大於結束時間' });
+      return;
+    }
+
+   // 不能新增或修改到今天以前
+    const startDate = new Date(startDateTime);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const checkStartDate = new Date(startDate);
+    checkStartDate.setHours(0, 0, 0, 0);
+
+    if (checkStartDate < today) {
+      Swal.fire({
+        icon: 'warning',
+        title: '日期不可早於今天',
+        text: '開始日期只能選擇今天或今天之後',
+        confirmButtonText: '確認',
+      });
       return;
     }
 

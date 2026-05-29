@@ -69,6 +69,7 @@
             [(ngModel)]="form.eventDate"
             name="eventDate"
             required
+            [min]="today"
             #eventDateRef="ngModel"
           />
           <mat-datepicker-toggle matIconSuffix [for]="startDatePicker"></mat-datepicker-toggle>

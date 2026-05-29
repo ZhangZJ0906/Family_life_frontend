@@ -49,7 +49,22 @@ export class CalendarComponent {
   currentGroupId: number = 0;
   userInfo!: any;
   createdBy!: number;
+// 滑鼠移到活動時，是否顯示資訊卡
+showEventTooltip = false;
 
+// 資訊卡顯示位置
+tooltipX = 0;
+tooltipY = 0;
+
+// 資訊卡內容
+tooltipEvent = {
+  title: '',
+  description: '',
+  startTime: '',
+  endTime: '',
+  notifyBefore: 0,
+  groupName: '',
+};
   routeGroupId: number = 0;
 
   // FullCalendar 的主要設定
@@ -99,12 +114,19 @@ export class CalendarComponent {
   selectable: true,
 
   dateClick: this.handleDateClick.bind(this),
-  eventClick: this.openUpdateDialog.bind(this),
+
+  // 這裡要改回 handleEventClick
+  // 點擊活動後才會跳 SweetAlert：修改 / 刪除 / 取消
+  eventClick: this.handleEventClick.bind(this),
+
   eventDrop: this.handleEventDrop.bind(this),
+
+  // 滑鼠移到活動上顯示資訊卡
+  eventMouseEnter: this.handleEventMouseEnter.bind(this),
+  eventMouseLeave: this.handleEventMouseLeave.bind(this),
 
   events: []
 };
-
   constructor(
     private dialog: MatDialog,
     private calendarApiService: CalendarApiService,
@@ -930,4 +952,55 @@ export class CalendarComponent {
       });
     });
   }
+
+  // 滑鼠移到活動上時，顯示活動資訊卡
+handleEventMouseEnter(info: any): void {
+  const event = info.event;
+
+  const groupId = event.extendedProps?.groupId ?? this.currentGroupId;
+
+  const group = this.userGroupList.find(
+    (g) => Number(g.groupId) === Number(groupId)
+  );
+
+  const groupName =
+    Number(groupId) === 0
+      ? '私人活動'
+      : group?.groupName || '未選擇群組';
+
+  this.tooltipEvent = {
+    title: event.title || '未命名活動',
+    description: event.extendedProps?.description || '無活動描述',
+    startTime: this.formatTooltipDateTime(event.start),
+    endTime: event.end ? this.formatTooltipDateTime(event.end) : '未設定',
+    notifyBefore: event.extendedProps?.notifyBefore ?? 0,
+    groupName: groupName,
+  };
+
+  // 讓資訊卡出現在滑鼠右下方
+  this.tooltipX = info.jsEvent.clientX + 16;
+  this.tooltipY = info.jsEvent.clientY + 16;
+
+  this.showEventTooltip = true;
+}
+
+// 滑鼠離開活動時，關閉資訊卡
+handleEventMouseLeave(): void {
+  this.showEventTooltip = false;
+}
+
+// 將日期時間格式化成畫面顯示用文字
+formatTooltipDateTime(date: Date | null): string {
+  if (!date) {
+    return '未設定';
+  }
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hour = String(date.getHours()).padStart(2, '0');
+  const minute = String(date.getMinutes()).padStart(2, '0');
+
+  return `${year}-${month}-${day} ${hour}:${minute}`;
+}
 }
