@@ -13,7 +13,7 @@ import { HttpClient } from '@angular/common/http';
 })
 export class InviteDialogComponent {
 
-  userId: string = '';
+  userEmail: string = '';
 
   constructor(
     private dialogRef: MatDialogRef<InviteDialogComponent>,
@@ -48,16 +48,16 @@ export class InviteDialogComponent {
   }
 
   inviteMember() {
-    if(this.userId == ""){
-      Swal.fire("請輸入使用者Id !!!!!");
+    if(this.userEmail == ""){
+      Swal.fire("請輸入使用者Email !!!!!");
     }
     else{
       this.http.post(
         'http://localhost:8080/family_life/invite',
         {
           group_id: Number(this.data.groupId),
-          user_id: Number(this.userId),
           sendUserId: Number(this.data.userId),
+          email: this.userEmail,
           publicInventory: 0
         }
       ).subscribe({
