@@ -31,30 +31,39 @@
         <span matTextPrefix class="readonly-prefix">👥</span>
         <span matTextSuffix class="readonly-suffix">🔒</span>
       </mat-form-field>
+    <!-- 指派成員：私人活動不顯示 -->
+    @if (!isPrivateGroup) {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>指派成員</mat-label>
 
-      <!-- 指派成員：私人活動不顯示 -->
-@if (!isPrivateGroup) {
-  <mat-form-field appearance="outline" class="full-width">
-    <mat-label>指派成員</mat-label>
+        <!--
+          multiple：開啟複選模式
+          [(ngModel)] 要綁定 number[]，所以 TS 裡要使用 form.assignedUserIds
+        -->
+        <mat-select
+          multiple
+          [(ngModel)]="form.assignedUserIds"
+          name="assignedUserIds"
+          required
+          #assignedUserRef="ngModel"
+        >
+          @for (member of members; track getMemberId(member)) {
+            <mat-option [value]="getMemberId(member)">
+              👤 {{ getMemberName(member) }}
+            </mat-option>
+          }
+        </mat-select>
 
-    <mat-select
-      [(ngModel)]="form.assignedUserId"
-      name="assignedUserId"
-      required
-      #assignedUserRef="ngModel"
-    >
-      @for (member of members; track getMemberId(member)) {
-        <mat-option [value]="getMemberId(member)">
-          👤 {{ getMemberName(member) }}
-        </mat-option>
-      }
-    </mat-select>
+        <!-- 顯示已選幾位成員 -->
+        <mat-hint>
+          已選擇 {{ form.assignedUserIds.length }} 位成員
+        </mat-hint>
 
-    @if (assignedUserRef.invalid && assignedUserRef.touched) {
-      <mat-error>請選擇指派成員</mat-error>
+        @if (assignedUserRef.invalid && assignedUserRef.touched) {
+          <mat-error>請至少選擇一位指派成員</mat-error>
+        }
+      </mat-form-field>
     }
-  </mat-form-field>
-}
         <!-- 活動名稱 -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>活動名稱</mat-label>
@@ -132,6 +141,7 @@
             [(ngModel)]="form.endDate"
             name="endDate"
             required
+            [min]="form.eventDate"
             #endDateRef="ngModel"
           />
           <mat-datepicker-toggle matIconSuffix [for]="endDatePicker"></mat-datepicker-toggle>

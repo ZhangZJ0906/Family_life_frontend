@@ -254,6 +254,9 @@ loadCalendarEvents(groupId: number | null, userId: number): void {
           createdBy: item.createdBy,
           groupId: item.groupId,
           assignedUserId: item.assignedUserId,
+
+          // 同一批活動的識別碼
+          eventBatchId: item.eventBatchId,
         },
       }));
 
@@ -341,13 +344,29 @@ ref.afterClosed().subscribe((result) => {
     return;
   }
 
-  const payload = {
-    groupId,
-    createdBy: this.createdBy,
-    assignedUserId: groupId === 0 ? this.createdBy : result.assignedUserId,
-    ...result,
-  };
+const payload = {
+  // 活動所屬群組
+  // groupId = 0 代表私人活動
+  groupId,
 
+  // 建立者 ID
+  createdBy: this.createdBy,
+
+  // Dialog 回傳的活動資料
+  ...result,
+
+  // 多選指派成員
+  // 私人活動：固定指派給自己
+  // 群組活動：使用 Dialog 勾選的 assignedUserIds
+  assignedUserIds: groupId === 0
+    ? [this.createdBy]
+    : result.assignedUserIds,
+
+  // 保留舊欄位，避免後端其他地方還在讀 assignedUserId
+  assignedUserId: groupId === 0
+    ? this.createdBy
+    : result.assignedUserIds?.[0],
+};
   this.calendarApiService.create(payload).subscribe({
     next: (res: any) => {
       if (res.code !== 200) {
@@ -378,7 +397,47 @@ ref.afterClosed().subscribe((result) => {
   });
 });}
 
-  openUpdateDialog(info: EventClickArg): void {
+// 查詢同一批活動目前指派給哪些成員
+getBatchAssignedUserIds(
+  eventBatchId: string,
+  fallbackUserId: number
+): Promise<number[]> {
+  // 沒有批次 ID 時，退回目前這筆活動的 assignedUserId
+  if (!eventBatchId) {
+    return Promise.resolve([fallbackUserId]);
+  }
+
+  const url =
+    this.http.basicUrl +
+    `calendar/batchAssignedUsers?eventBatchId=${eventBatchId}`;
+
+  return new Promise((resolve) => {
+    this.http.getApi(url).subscribe({
+      next: (res: any) => {
+        if (res.code !== 200) {
+          resolve([fallbackUserId]);
+          return;
+        }
+
+        resolve((res.data ?? []).map((id: any) => Number(id)));
+      },
+      error: () => {
+        resolve([fallbackUserId]);
+      },
+    });
+  });
+}
+
+async openUpdateDialog(info: EventClickArg): Promise<void> {
+    const eventBatchId = info.event.extendedProps['eventBatchId'];
+const fallbackAssignedUserId =
+  info.event.extendedProps['assignedUserId'] ?? this.createdBy;
+
+// 先查出同一批活動有哪些成員
+const assignedUserIds = await this.getBatchAssignedUserIds(
+  eventBatchId,
+  fallbackAssignedUserId
+);
     // 後端目前私人活動是 groupId = 0，不是 null
     const groupId =
       this.currentGroupId === undefined || this.currentGroupId === null
@@ -409,6 +468,8 @@ ref.afterClosed().subscribe((result) => {
         groupName,
         members: this.groupMemberList,
         currentUserId: this.createdBy,
+        // 傳給 Dialog，讓 test001 和 qqqq 都會被勾選
+    assignedUserIds,
       },
     });
 
@@ -416,12 +477,28 @@ ref.afterClosed().subscribe((result) => {
     ref.afterClosed().subscribe((result) => {
       if (!result) return;
       const payload = {
-         groupId: this.currentGroupId,
-          createdBy: this.createdBy,
-          assignedUserId: groupId === 0 ? this.createdBy : result.assignedUserId,
-          ...result,
-      };
+  // 目前群組
+  groupId: this.currentGroupId,
 
+  // 修改者 / 建立者
+  createdBy: this.createdBy,
+
+  // 同一批活動識別碼
+  eventBatchId,
+
+  // Dialog 回傳的活動資料
+  ...result,
+
+  // 多選指派成員
+  assignedUserIds: groupId === 0
+    ? [this.createdBy]
+    : result.assignedUserIds,
+
+  // 保留舊欄位，避免後端其他地方還在讀 assignedUserId
+  assignedUserId: groupId === 0
+    ? this.createdBy
+    : result.assignedUserIds?.[0],
+};
       this.calendarApiService.update(Number(info.event.id), payload).subscribe({
         next: (res: any) => {
           if (res.code !== 200) {
@@ -529,103 +606,142 @@ ref.afterClosed().subscribe((result) => {
     });
   }
   // 拖曳活動到其他日期後，更新後端資料
-  handleEventDrop(info: any): void {
-    const eventId = Number(info.event.id);
+async handleEventDrop(info: any): Promise<void> {
+  const eventId = Number(info.event.id);
 
-    const title = info.event.title;
-    const description = info.event.extendedProps['description'] || '';
-    const notifyBefore = info.event.extendedProps['notifyBefore'] || 60;
+  const title = info.event.title;
+  const description = info.event.extendedProps['description'] || '';
+  const notifyBefore = info.event.extendedProps['notifyBefore'] || 60;
 
-    const newDateTime =
-      info.event.startStr.length === 10
-        ? info.event.startStr + 'T09:00:00'
-        : info.event.startStr.substring(0, 19);
+  // 取得同一批活動識別碼
+  // 同一批活動的 test001 / qqqq 會有相同 eventBatchId
+  const eventBatchId = info.event.extendedProps['eventBatchId'];
 
-    const newEndTime = info.event.endStr
-      ? info.event.endStr.substring(0, 19)
-      : null;
+  // 取得目前這筆活動的指派成員
+  const fallbackAssignedUserId =
+    info.event.extendedProps['assignedUserId'] ?? this.createdBy;
 
-    const data = {
-      title: title,
-  description: description,
-  eventTime: newDateTime,
-  endTime: newEndTime,
-  notifyBefore: notifyBefore,
-  groupId: this.currentGroupId,
+  // 先查出同一批活動目前指派給哪些成員
+  // 例如：[1, 2] 代表 test001 和 qqqq
+  const assignedUserIds = await this.getBatchAssignedUserIds(
+    eventBatchId,
+    fallbackAssignedUserId
+  );
 
-  // 保留原本指派成員
-  assignedUserId:
-    this.currentGroupId === 0
-      ? this.createdBy
-      : info.event.extendedProps['assignedUserId'],
-    };
+  // FullCalendar 拖曳後的新開始時間
+  const newDateTime =
+    info.event.startStr.length === 10
+      ? info.event.startStr + 'T09:00:00'
+      : info.event.startStr.substring(0, 19);
 
-    //拖曳後日期早於今天，就還原位置
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+  // FullCalendar 拖曳後的新結束時間
+  const newEndTime = info.event.endStr
+    ? info.event.endStr.substring(0, 19)
+    : null;
 
-    const dropDate = new Date(info.event.start);
-    dropDate.setHours(0, 0, 0, 0);
+  // 拖曳後日期早於今天，就還原位置
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-    if (dropDate < today) {
+  const dropDate = new Date(info.event.start);
+  dropDate.setHours(0, 0, 0, 0);
+
+  if (dropDate < today) {
+    info.revert();
+
+    Swal.fire({
+      icon: 'warning',
+      title: '不可移動到今日之前',
+      text: '行事曆事件不能拖曳到過去日期',
+      confirmButtonText: '確認',
+    });
+
+    return;
+  }
+
+  Swal.fire({
+    icon: 'question',
+    title: '確認移動活動？',
+    text: `是否將「${title}」移動到新的日期？`,
+    showCancelButton: true,
+    confirmButtonText: '確認',
+    cancelButtonText: '取消',
+  }).then((result) => {
+    if (!result.isConfirmed) {
       info.revert();
-
-      Swal.fire({
-        icon: 'warning',
-        title: '不可移動到今日之前',
-        text: '行事曆事件不能拖曳到過去日期',
-        confirmButtonText: '確認',
-      });
-
       return;
     }
 
-    Swal.fire({
-      icon: 'question',
-      title: '確認移動活動？',
-      text: `是否將「${title}」移動到新的日期？`,
-      showCancelButton: true,
-      confirmButtonText: '確認',
-      cancelButtonText: '取消',
-    }).then((result) => {
-      if (!result.isConfirmed) {
-        info.revert(); // 取消就還原位置
-        return;
-      }
+    const payload = {
+      // 活動所屬群組
+      groupId: this.currentGroupId,
 
-      const payload = {
-  createdBy: this.createdBy,
-  ...data,
-};
+      // 修改者
+      createdBy: this.createdBy,
 
-      this.calendarApiService.update(eventId, payload).subscribe({
-        next: () => {
-          Swal.fire({
-            icon: 'success',
-            title: '移動成功',
-            showCancelButton: true,
-            confirmButtonText: '確認',
-            cancelButtonText: '取消',
-          });
+      // 同一批活動識別碼
+      // 後端會用這個同步修改同批活動
+      eventBatchId,
 
-          this.loadCalendarEvents(this.currentGroupId, this.createdBy);
-        },
-        error: (err) => {
-          info.revert(); // 更新失敗也還原
+      // 活動資料
+      title: title,
+      description: description,
+      eventTime: newDateTime,
+      endTime: newEndTime,
+      notifyBefore: notifyBefore,
+
+      // 多選指派成員
+      // 私人活動：固定自己
+      // 群組活動：使用同批活動原本所有成員
+      assignedUserIds:
+        this.currentGroupId === 0
+          ? [this.createdBy]
+          : assignedUserIds,
+
+      // 保留舊欄位，避免後端還有地方讀 assignedUserId
+      assignedUserId:
+        this.currentGroupId === 0
+          ? this.createdBy
+          : assignedUserIds[0],
+    };
+
+    this.calendarApiService.update(eventId, payload).subscribe({
+      next: (res: any) => {
+        if (res.code !== 200) {
+          info.revert();
 
           Swal.fire({
             icon: 'error',
             title: '移動失敗',
-            text: err.error?.message || '請稍後再試',
-            showCancelButton: true,
+            text: res.message || '移動失敗',
             confirmButtonText: '確認',
-            cancelButtonText: '取消',
           });
-        },
-      });
-    });
-  }
 
+          return;
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: '移動成功',
+          confirmButtonText: '確認',
+        });
+
+        this.loadCalendarEvents(this.currentGroupId, this.createdBy);
+      },
+
+      error: (err) => {
+        info.revert();
+
+        Swal.fire({
+          icon: 'error',
+          title: '移動失敗',
+          text: err.error?.message || '請稍後再試',
+          confirmButtonText: '確認',
+        });
+      },
+    });
+  });
+}
   // 滑鼠移到活動上時，顯示活動資訊卡
 handleEventMouseEnter(info: any): void {
   const event = info.event;
