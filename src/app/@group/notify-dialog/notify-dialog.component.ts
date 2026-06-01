@@ -13,6 +13,7 @@ import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 
 import { NotifyService } from '../../@services/NotifyService';
+import { Calendar } from '@fullcalendar/core/index.js';
 
 @Component({
   selector: 'app-notify-dialog',
@@ -39,6 +40,7 @@ export class NotifyDialogComponent implements OnInit {
     | 'itemlist'
     | 'expense'
     | 'calendar'
+    | 'calendar_self'
     | 'update' = 'all';
 
   unreadMap = {
@@ -48,6 +50,7 @@ export class NotifyDialogComponent implements OnInit {
     itemlist: 0,
     expense:0,
     calendar: 0,
+    calendar_self: 0,
     update: 0
   };
 
@@ -114,6 +117,7 @@ export class NotifyDialogComponent implements OnInit {
     this.unreadMap.group = list.filter(n => n.isRead !== 1 && n.type === 'group').length;
     this.unreadMap.itemlist = list.filter(n => n.isRead !== 1 && n.type === 'itemlist').length;
     this.unreadMap.calendar = list.filter(n => n.isRead !== 1 && n.type === 'calendar').length;
+    this.unreadMap.calendar = list.filter(n => n.isRead !== 1 && n.type === 'calendar_self').length;
     this.unreadMap.expense = list.filter(n => n.isRead !== 1 && n.type === 'expense').length;
     this.unreadMap.update = list.filter(n => n.isRead !== 1 && n.type === 'update').length;
   }
@@ -311,8 +315,13 @@ this.router.navigate(['/expenses'], { queryParams: { groupId: n.sendUserId } });
       return this.notifies.filter(n =>
         n.type === 'group' ||
         n.type === 'itemlist' ||
-        n.type === 'calendar'||
         n.type=== 'expense'
+      );
+    }
+
+    if (this.filterType === 'calendar') {
+      return this.notifies.filter(n =>
+        n.type === 'calendar' || n.type === 'calendar_self'
       );
     }
 

@@ -39,9 +39,10 @@ export class ExpensesEditComponent {
   categories: LocationAndCategory[] = [];
   today = new Date();
   basicUrl!: string;
-    // 新增：記帳環境唯讀欄位
+  originalRecord: any;
   currentGroupId = 0;
   currentGroupName = '私人記帳';
+  currentUserId!: number;
   constructor(
     private http: HttpClientService,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -51,10 +52,11 @@ export class ExpensesEditComponent {
     this.item = this.data.relatedItem;
     this.record = this.data.record;
     this.basicUrl = this.http.basicUrl;
-    console.log(this.record);
-    // 新增：記帳環境唯讀顯示
-  this.currentGroupId = data.currentGroupId ?? 0;
-  this.currentGroupName = data.currentGroupName || '私人記帳';
+    this.currentUserId = this.data.currentUserId;
+    this.currentGroupId = data.currentGroupId ?? 0;
+    this.currentGroupName = data.currentGroupName || '私人記帳';
+
+    this.originalRecord = JSON.parse(JSON.stringify(this.record));
   }
 
   private formatToBackendDate(dateInput: any): string {
@@ -78,10 +80,17 @@ export class ExpensesEditComponent {
   onCancel() {
     this.dialogRef.close();
   }
+  get isNotModified(): boolean {
+    // 1. 如果根本沒有原始資料，表示還在載入中
+    if (!this.originalRecord || !this.record) return false;
+
+    // 2. 正確的比對：當兩者字串完全一樣，代表「沒有修改」，回傳 true 讓按鈕 disabled
+    return JSON.stringify(this.record) === JSON.stringify(this.originalRecord);
+  }
   onSave() {
     if (!this.record) return;
     // 1. 先解構複製一份，避免直接污染畫面綁定的 this.record
-    const payload = { ...this.record };
+    const payload = { ...this.record, operationUser: this.currentUserId };
 
     // 2. 核心修正：相容兩種欄位命名，確保一定能抓到日期資料
     const rawDate = payload.expenseDate;
