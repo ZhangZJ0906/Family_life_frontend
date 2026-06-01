@@ -41,22 +41,48 @@
 
   </div>
 
-  <!-- 右邊：群組切換 -->
-  <mat-form-field appearance="outline" class="home-group-select">
-    <mat-label>記帳環境</mat-label>
+ <!-- 右邊：群組切換 -->
+<mat-form-field appearance="outline" class="home-group-select">
+  <mat-label>記帳環境</mat-label>
 
-    <mat-select
-      [(ngModel)]="currentGroupId"
-      (selectionChange)="onExpenseGroupChange($event.value)"
+  <mat-select
+    [(ngModel)]="currentGroupId"
+    (selectionChange)="onExpenseGroupChange($event.value)"
+  >
+    <!-- 下拉關閉時，顯示目前選到的頭像 + 名稱 -->
+    <mat-select-trigger>
+      <div class="home-selected-group" *ngIf="getCurrentExpenseGroup() as group">
+        <img
+          class="home-group-avatar"
+          [src]="group.avatar || 'assets/default-avatar.png'"
+          alt="群組頭像"
+        />
+
+        <span>
+          {{ group.groupName }}
+        </span>
+      </div>
+    </mat-select-trigger>
+
+    <!-- 下拉選項 -->
+    <mat-option
+      *ngFor="let group of expenseGroups"
+      [value]="group.groupId"
     >
-      <mat-option
-        *ngFor="let group of expenseGroups"
-        [value]="group.groupId"
-      >
-        👥 {{ group.groupName }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
+      <div class="home-group-option">
+        <img
+          class="home-group-avatar"
+          [src]="group.avatar || 'assets/default-avatar.png'"
+          alt="群組頭像"
+        />
+
+        <span>
+          {{ group.groupName }}
+        </span>
+      </div>
+    </mat-option>
+  </mat-select>
+</mat-form-field>
 
 </div>
 
