@@ -1,3 +1,4 @@
+import { MatSort } from '@angular/material/sort';
 import {
   DropDownGroupList,
   Item,
@@ -11,7 +12,7 @@ import {
 } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatSort, MatSortModule } from '@angular/material/sort';
+
 import { SelectionModel } from '@angular/cdk/collections';
 import { Component, inject, ViewChild } from '@angular/core';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -55,7 +56,6 @@ export enum TableMode {
     MatSelect,
     MatOption,
     TopbarComponent,
-    MatSortModule,
   ],
   templateUrl: './item-list.component.html',
   styleUrl: './item-list.component.scss',

@@ -19,9 +19,9 @@ export class ShoppingListService {
   private readonly shoppingUrl = 'http://localhost:8080/shopping_lists';
   private readonly groupUrl = 'http://localhost:8080/family_life';
 
-  getLists(createrId: number): Observable<ShoppingList[]> {
+  getLists(userId: number): Observable<ShoppingList[]> {
     return this.http.get<ShoppingList[]>(this.shoppingUrl, {
-      params: { createrId }
+      params: { userId }
     });
   }
 
@@ -61,11 +61,11 @@ export class ShoppingListService {
     return this.http.post<BasicRes>(`${this.shoppingUrl}/items/update`, req);
   }
 
-  deleteItem(listId: number, itemId: number): Observable<BasicRes> {
+  deleteItem(listId: number, itemId: number, userId: number, groupId: number): Observable<BasicRes> {
     return this.http.post<BasicRes>(
       `${this.shoppingUrl}/items/delete`,
       null,
-      { params: { listId, itemId } }
+      { params: { listId, itemId , userId, groupId} }
     );
   }
 

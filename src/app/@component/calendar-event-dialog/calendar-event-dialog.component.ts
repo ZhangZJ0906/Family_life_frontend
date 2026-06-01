@@ -10,11 +10,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatTimepickerModule } from '@angular/material/timepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { provideNativeDateAdapter } from '@angular/material/core';
+import { MatNativeDateModule, provideNativeDateAdapter } from '@angular/material/core';
 import { ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
+import { MatSelectModule } from '@angular/material/select';
 import Swal from 'sweetalert2';
+
 @Component({
   selector: 'app-calendar-event-dialog',
   imports: [
@@ -26,12 +27,16 @@ import Swal from 'sweetalert2';
     MatDatepickerModule,
     MatTimepickerModule,
     MatNativeDateModule,
+    MatSelectModule,
   ],
   templateUrl: './calendar-event-dialog.component.html',
   styleUrl: './calendar-event-dialog.component.scss',
   providers: [provideNativeDateAdapter()],
 })
 export class CalendarEventDialogComponent {
+
+  today = new Date();
+
   form = {
     title: '',
     description: '',
@@ -40,57 +45,157 @@ export class CalendarEventDialogComponent {
     endDate: null as Date | null,
     endTime: null as Date | null,
     notifyBefore: 0,
+
+    // 指派成員清單
+  // 群組活動可以一次選多個成員
+  // 私人活動不用顯示成員欄位，會自動放目前登入者
+  assignedUserIds: [] as number[],
   };
-  get displayGroupName(): string {
-  return this.data.groupName || '未選擇群組';
-}
+
   @ViewChild('dialogForm') dialogForm!: NgForm;
 
   constructor(
-  public dialogRef: MatDialogRef<CalendarEventDialogComponent>,
-  @Inject(MAT_DIALOG_DATA)
-  public data: {
-    mode: 'create' | 'update';
-    dateStr?: string;
-    event?: any;
-    groupId?: number | null;
-    groupName?: string;
-  },
-) {
-  if (data.mode === 'update' && data.event) {
-    const e = data.event;
-    this.form.title = e.title;
-    this.form.description = e.extendedProps?.description || '';
-    this.form.eventDate = new Date(e.startStr);
-    this.form.eventTime = new Date(e.startStr);
-    this.form.endDate = e.endStr ? new Date(e.endStr) : null;
-    this.form.endTime = e.endStr ? new Date(e.endStr) : null;
-    this.form.notifyBefore = e.extendedProps?.notifyBefore || 0;
+    public dialogRef: MatDialogRef<CalendarEventDialogComponent>,
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
+      mode: 'create' | 'update';
+      dateStr?: string;
+      event?: any;
+      groupId?: number | null;
+      groupName?: string;
+
+      // 新增：群組成員與目前登入者
+      members?: any[];
+      currentUserId?: number;
+      // 修改時由父層傳入同批活動的所有指派成員
+  assignedUserIds?: number[];
+    },
+  ) {
+    this.today.setHours(0, 0, 0, 0);
+
+    if (data.mode === 'update' && data.event) {
+      const e = data.event;
+
+      this.form.title = e.title;
+      this.form.description = e.extendedProps?.description || '';
+      this.form.eventDate = new Date(e.startStr);
+      this.form.eventTime = new Date(e.startStr);
+      this.form.endDate = e.endStr ? new Date(e.endStr) : null;
+      this.form.endTime = e.endStr ? new Date(e.endStr) : null;
+      this.form.notifyBefore = e.extendedProps?.notifyBefore || 0;
+
+     // 修改時帶入原本指派成員
+      // 因為 mat-select multiple 綁定的是陣列，所以就算只有一個人也要包成陣列
+      // 修改模式：優先使用父層查到的同批指派成員
+if (data.assignedUserIds && data.assignedUserIds.length > 0) {
+  this.form.assignedUserIds = data.assignedUserIds.map((id) => Number(id));
+} else {
+  // 如果沒有同批資料，才退回單一 assignedUserId
+  const oldAssignedUserId =
+    e.extendedProps?.assignedUserId ??
+    data.currentUserId ??
+    null;
+
+  this.form.assignedUserIds = oldAssignedUserId ? [Number(oldAssignedUserId)] : [];
+}}
+
+    if (data.mode === 'create' && data.dateStr) {
+      this.form.eventDate = new Date(data.dateStr);
+      this.form.endDate = new Date(data.dateStr);
+    }
+
+   // 私人活動不用選成員，直接指派給自己
+    if (this.isPrivateGroup) {
+      this.form.assignedUserIds = data.currentUserId ? [Number(data.currentUserId)] : [];
+    }
+
+    // 群組活動預設不強制選第一個，讓使用者自己勾選
+    // 如果你想預設勾第一個成員，可以打開下面這段
+    /*
+    if (!this.isPrivateGroup && this.form.assignedUserIds.length === 0) {
+      const firstMemberId = this.getMemberId(this.members[0]);
+
+      if (firstMemberId) {
+        this.form.assignedUserIds = [firstMemberId];
+      }
+    }
+    */
   }
 
-  if (data.mode === 'create' && data.dateStr) {
-    this.form.eventDate = new Date(data.dateStr);
-    this.form.endDate = new Date(data.dateStr);
+  get displayGroupName(): string {
+    return this.data.groupName || '未選擇群組';
   }
+
+  get isPrivateGroup(): boolean {
+    return !this.data.groupId || Number(this.data.groupId) === 0;
+  }
+
+  get members(): any[] {
+    return this.data.members || [];
+  }
+
+  getMemberName(member: any): string {
+  return (
+    member.userName ||
+    member.user_name ||
+    member.name ||
+    member.email ||
+    `成員 ${member.user_id || member.userId}`
+  );
 }
+  getMemberId(member: any): number {
+    return Number(member.user_id ?? member.userId);
+  }
 
   confirm() {
-    // 觸發所有欄位的 touched 狀態，讓錯誤訊息顯示出來
     this.dialogForm.form.markAllAsTouched();
 
     if (this.dialogForm.invalid) return;
+
+   // 群組活動一定要至少勾選一位成員
+    if (!this.isPrivateGroup && this.form.assignedUserIds.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: '請選擇指派成員',
+        text: '群組活動至少要指派給一位成員',
+        confirmButtonText: '確認',
+      });
+      return;
+    }
 
     const startDateTime = this.combineDateAndTime(
       this.form.eventDate!,
       this.form.eventTime!,
     );
+
     const endDateTime =
       this.form.endDate && this.form.endTime
         ? this.combineDateAndTime(this.form.endDate, this.form.endTime)
         : null;
 
     if (endDateTime && startDateTime > endDateTime) {
-      Swal.fire({ icon: 'warning', title: '開始時間不可大於結束時間' });
+      Swal.fire({
+        icon: 'warning',
+        title: '開始時間不可大於結束時間',
+        confirmButtonText: '確認',
+      });
+      return;
+    }
+
+    const startDate = new Date(startDateTime);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const checkStartDate = new Date(startDate);
+    checkStartDate.setHours(0, 0, 0, 0);
+
+    if (checkStartDate < today) {
+      Swal.fire({
+        icon: 'warning',
+        title: '日期不可早於今天',
+        text: '開始日期只能選擇今天或今天之後',
+        confirmButtonText: '確認',
+      });
       return;
     }
 
@@ -100,10 +205,11 @@ export class CalendarEventDialogComponent {
       eventTime: startDateTime,
       endTime: endDateTime,
       notifyBefore: this.form.notifyBefore,
-    });
+      // 回傳多位指派成員給父層
+    assignedUserIds: this.form.assignedUserIds,
+        });
   }
 
-  // 日期 + 時間合併成 ISO 字串
   combineDateAndTime(date: Date, time: Date): string {
     const d = new Date(date);
     d.setHours(time.getHours(), time.getMinutes(), 0, 0);

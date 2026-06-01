@@ -248,6 +248,10 @@ export class ShoppingListComponent implements OnInit {
     return this.getTotalCount(listId) - this.getBoughtCount(listId);
   }
 
+  getPurchaseProgressText(listId: number): string {
+    return `${this.getBoughtCount(listId)}/${this.getTotalCount(listId)}`;
+  }
+
   getProgressPercent(listId: number): number {
     const totalCount = this.getTotalCount(listId);
     return totalCount === 0 ? 0 : Math.round((this.getBoughtCount(listId) / totalCount) * 100);
@@ -542,5 +546,6 @@ export class ShoppingListComponent implements OnInit {
       }
     ];
   }
+
 
 }

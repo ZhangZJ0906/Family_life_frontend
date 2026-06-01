@@ -70,7 +70,7 @@
               </div>
 
               <span class="status-badge" [class.completed]="isListCompleted(list.id)">
-                {{ isListCompleted(list.id) ? '完成' : '未完成' }}
+                {{ getPurchaseProgressText(list.id) }}
               </span>
             </header>
 
@@ -80,6 +80,10 @@
               </button>
 
               <button class="text-button" type="button" [routerLink]="['/purchase-item', list.id]">
+                新增
+              </button>
+
+              <button class="text-button" type="button" [routerLink]="['/edit-item', list.id]">
                 編輯
               </button>
 
@@ -160,7 +164,7 @@
         <div>
           <h2 id="stats-dialog-title">{{ selectedStatsList.title }}</h2>
           <p class="dialog-subtitle">
-            {{ isListCompleted(selectedStatsList.id) ? '已完成' : '未完成' }}
+            {{ getPurchaseProgressText(selectedStatsList.id) }}
           </p>
         </div>
         <button class="icon-button" type="button" aria-label="關閉" (click)="closeStatsDialog()">×</button>
