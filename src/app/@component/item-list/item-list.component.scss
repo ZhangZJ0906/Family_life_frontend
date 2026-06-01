@@ -82,10 +82,7 @@
 
 
 
-/* 群組選擇器寬度 */
-.group-select {
-  width: 180px;
-}
+
 /* 整個物品清單頁面，讓導覽列也吃到左右外距 */
 .item-page {
   min-height: 100vh;
@@ -206,20 +203,85 @@
   justify-content: flex-end;
   align-items: center;
   gap: 14px;
-  margin-right: 205px;
+  margin-right: 145px;
   margin-top: 15px;
 }
 
-/* 群組選擇器 */
-.group-select {
-  width: 190px;
+/* 群組選擇器 + 搜尋框：統一大小 */
+.group-select,
+.search-field {
+  width: 200px;
+  height: 72px;
   flex-shrink: 0;
 }
 
-/* 搜尋框 */
-.search-field {
-  width: 200px;
+/* Angular Material 外框高度統一 */
+.group-select ::ng-deep .mat-mdc-text-field-wrapper,
+.search-field ::ng-deep .mat-mdc-text-field-wrapper {
+  height: 72px;
+  background-color: #ffffff;
+  border-radius: 12px;
+}
+
+/* 欄位內容垂直置中 */
+.group-select ::ng-deep .mat-mdc-form-field-infix,
+.search-field ::ng-deep .mat-mdc-form-field-infix {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+}
+
+/* select 觸發區高度 */
+.group-select ::ng-deep .mat-mdc-select-trigger {
+  height: 48px;
+  display: flex;
+  align-items: center;
+}
+
+/* 搜尋 input 字體大小 */
+.search-field input {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* 搜尋 icon 對齊 */
+.search-field mat-icon {
+  font-size: 30px;
+  width: 30px;
+  height: 30px;
+}
+
+/* 群組頭像 */
+.group-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
   flex-shrink: 0;
+
+  background: #eef4ff;
+  border: 1px solid #e5e7eb;
+}
+
+/* 目前選到的群組 */
+.selected-group,
+.group-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* 群組名稱 */
+.selected-group span,
+.group-option span {
+  font-size: 18px;
+  font-weight: 800;
+  color: #111827;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Angular Material 欄位白底 */
@@ -422,6 +484,51 @@ mat-paginator {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* 目前選到的群組 */
+.selected-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* 下拉選項 */
+.group-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* 群組頭像 / 私人頭像 */
+.group-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+
+  background: #eef4ff;
+  border: 1px solid #e5e7eb;
+}
+
+/* 群組名稱 */
+.selected-group span,
+.group-option span {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 讓 mat-option 裡的 div 吃滿寬度 */
+::ng-deep .mat-mdc-option .mdc-list-item__primary-text {
+  width: 100%;
 }
 
 /* 小螢幕排版 */

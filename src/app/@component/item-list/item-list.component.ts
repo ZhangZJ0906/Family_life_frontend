@@ -25,7 +25,7 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { ItemListAddDialogComponent } from '../item-list-add-dialog/item-list-add-dialog.component';
 import { ItemListEditDialogComponent } from '../item-list-edit-dialog/item-list-edit-dialog.component';
-import { MatSelect, MatOption } from '@angular/material/select';
+import { MatSelect, MatOption, MatSelectModule } from '@angular/material/select';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../@services/auth.service';
@@ -53,8 +53,7 @@ export enum TableMode {
     MatInputModule,
     MatChipListbox,
     MatChipOption,
-    MatSelect,
-    MatOption,
+    MatSelectModule,
     TopbarComponent,
   ],
   templateUrl: './item-list.component.html',
@@ -136,6 +135,9 @@ export class ItemListComponent {
   currentGroupId: any = null;
   currentUserId: any;
   lastSelectedRow: any = null;
+  // 目前登入者自己的頭像
+// 私人物品會使用這個頭像
+currentUserAvatar = 'assets/default-avatar.png';
 
   // 統一資料快取（取代四個 xxxList 屬性）
   cachedData: {
@@ -163,6 +165,9 @@ export class ItemListComponent {
   ) {
     this.basicUrl = this.http.basicUrl;
     this.currentUserId = this.authService.currentUser()?.user_id ?? 0;
+    // 目前登入者自己的頭像，私人物品使用
+    this.currentUserAvatar = this.authService.currentUser()?.avatar || 'assets/default-avatar.png';
+
   }
 
   ngOnInit() {
@@ -352,40 +357,56 @@ export class ItemListComponent {
   }
 
   // ─── API：取得群組列表 ────────────────────────────────────
-  getUserGroupData(groupId: any) {
-    this.http
-      .getApi(
-        `${this.basicUrl}family_life/getGroupList?user_Id=${this.currentUserId}`,
-      )
-      .subscribe({
-        next: (res: any) => {
-          if (res.code !== 200) {
-            Swal.fire({
-              title: '拉取群組錯誤',
-              text: res.message || 'server error',
-              icon: 'error',
-            });
-            return;
-          }
-          this.userGroups = Object.entries(res.groupIdList).map(
-            ([id, name]) => ({
-              groupId: Number(id),
-              groupName: name as string,
-            }),
-          );
-          this.userGroups.unshift({ groupId: 0, groupName: '私人物品' });
-          this.getItemByGroupId(groupId);
-        },
-        error: (err) => {
+getUserGroupData(groupId: any) {
+  this.http
+    .getApi(
+      `${this.basicUrl}family_life/get_group_list?user_id=${this.currentUserId}`,
+    )
+    .subscribe({
+      next: (res: any) => {
+        if (!res.groupList) {
           Swal.fire({
             title: '拉取群組錯誤',
-            text: err.message || 'server error',
+            text: res.message || 'server error',
             icon: 'error',
           });
-        },
-      });
-  }
+          return;
+        }
 
+        // 使用 Profile 相同的群組資料格式
+        // groupList 內應該有 groupId、groupName、avatar
+        this.userGroups = res.groupList.map((group: any) => ({
+          groupId: Number(group.groupId),
+          groupName: group.groupName,
+          avatar: group.avatar || 'assets/default-avatar.png',
+        }));
+
+        // 私人物品固定放第一個，頭像用登入者自己的頭像
+        this.userGroups.unshift({
+          groupId: 0,
+          groupName: '私人物品',
+          avatar: this.currentUserAvatar || 'assets/default-avatar.png',
+        });
+
+        this.getItemByGroupId(groupId);
+      },
+
+      error: (err) => {
+        Swal.fire({
+          title: '拉取群組錯誤',
+          text: err.message || 'server error',
+          icon: 'error',
+        });
+      },
+    });
+}
+
+// 取得目前選中的群組資料
+getCurrentGroup() {
+  return this.userGroups.find(
+    (group) => Number(group.groupId) === Number(this.currentGroupId),
+  );
+}
   // ─── API：統一查詢（訂閱 / 保固 / 藥品）────────────────────
   // 取代原本三個獨立的 getXxxByGroupId 方法
   private fetchGroupData(mode: TableMode, groupId: number | null): void {
