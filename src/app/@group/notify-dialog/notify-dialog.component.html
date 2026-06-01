@@ -36,11 +36,19 @@
       </span>
     </button>
 
-    <button [class.active]="filterType === 'group' || filterType === 'itemlist' || filterType === 'calendar' || filterType ==='expense'" (click)="filterType = 'group'">
+     <button [class.active]="filterType === 'group' || filterType === 'itemlist' || filterType ==='expense'" (click)="filterType = 'group'">
       群組通知
 
-      <span class="tab-badge" *ngIf="(unreadMap.group + unreadMap.itemlist + unreadMap.calendar + unreadMap.expense) > 0">
-        {{ unreadMap.group + unreadMap.itemlist + unreadMap.calendar + unreadMap.expense }}
+      <span class="tab-badge" *ngIf="(unreadMap.group + unreadMap.itemlist + unreadMap.expense) > 0">
+        {{ unreadMap.group + unreadMap.itemlist + unreadMap.expense }}
+      </span>
+    </button>
+
+    <button [class.active]="filterType === 'calendar' || filterType === 'calendar_self'" (click)="filterType = 'calendar'">
+      到期通知
+
+      <span class="tab-badge" *ngIf="(unreadMap.calendar + unreadMap.calendar_self) > 0">
+        {{ unreadMap.calendar + unreadMap.calendar_self }}
       </span>
     </button>
 
@@ -129,7 +137,7 @@
         </ng-container>
 
         <!-- calendar -->
-        <ng-container *ngIf="n.type === 'calendar'">
+        <ng-container *ngIf="n.type === 'calendar' || n.type === 'calendar_self'">
 
           <button class="view-btn" (click)="goCalendar(n)">
             查看
