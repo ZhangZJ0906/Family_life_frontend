@@ -21,22 +21,50 @@
     <!-- 右側：群組選擇 + 新增活動 -->
     <div class="calendar-actions">
 
-      <!-- 群組下拉選單 -->
-      <mat-form-field appearance="outline" class="calendar-group-select">
-        <mat-label>選擇群組</mat-label>
+     <mat-form-field appearance="outline" class="calendar-group-select">
+      <mat-label>選擇群組</mat-label>
 
-        <mat-select
-          [(ngModel)]="selectedGroupId"
-          (selectionChange)="onGroupChange($event)"
-        >
-          @for (group of userGroupList; track group.groupId) {
-            <mat-option [value]="group.groupId">
-              👥 {{ group.groupName }}
-            </mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+      <mat-select
+        [(ngModel)]="selectedGroupId"
+        (selectionChange)="onGroupChange($event)"
+      >
+        <!-- 下拉關閉時顯示目前選到的群組頭像與名稱 -->
+        <mat-select-trigger>
+      @for (group of userGroupList; track group.groupId) {
+        @if (isSelectedGroup(group.groupId)) {
+          <div class="calendar-selected-group">
+            <img
+              class="calendar-group-avatar"
+              [src]="group.avatar || 'assets/default-avatar.png'"
+              alt="群組頭像"
+            />
 
+            <span>
+              {{ group.groupName }}
+            </span>
+          </div>
+        }
+      }
+    </mat-select-trigger>
+
+        <!-- 下拉選項 -->
+        @for (group of userGroupList; track group.groupId) {
+          <mat-option [value]="group.groupId">
+            <div class="calendar-group-option">
+              <img
+                class="calendar-group-avatar"
+                [src]="group.avatar || 'assets/default-avatar.png'"
+                alt="群組頭像"
+              />
+
+              <span>
+                {{ group.groupName }}
+              </span>
+            </div>
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
       <!-- 新增活動按鈕 -->
       <button
         type="button"
@@ -55,5 +83,76 @@
   <section class="calendar-main-card">
     <full-calendar [options]="calendarOptions"></full-calendar>
   </section>
+
+  <!-- 滑鼠移到活動上時顯示的資訊卡 -->
+  @if (showEventTooltip) {
+    <div
+      class="event-tooltip"
+      [style.left.px]="tooltipX"
+      [style.top.px]="tooltipY"
+    >
+      <div class="tooltip-header">
+        <div class="tooltip-icon">📅</div>
+
+        <div>
+          <div class="tooltip-title">
+            {{ tooltipEvent.title }}
+          </div>
+
+          <div class="tooltip-group">
+            {{ tooltipEvent.groupName }}
+          </div>
+        </div>
+      </div>
+
+      <div class="tooltip-row">
+        <span>開始時間</span>
+        <strong>{{ tooltipEvent.startTime }}</strong>
+      </div>
+
+      <div class="tooltip-row">
+        <span>結束時間</span>
+        <strong>{{ tooltipEvent.endTime }}</strong>
+      </div>
+
+      <div class="tooltip-row">
+        <span>提醒時間</span>
+        <strong>{{ tooltipEvent.notifyBefore }} 分鐘前</strong>
+      </div>
+
+      <!-- 下方詳細資訊區 -->
+<div class="tooltip-detail-section">
+
+  <!-- 活動描述 -->
+  <div class="tooltip-block">
+    <div class="tooltip-block-title">
+      活動描述
+    </div>
+
+    <div class="tooltip-block-content">
+      {{ tooltipEvent.description }}
+    </div>
+  </div>
+
+  <!-- 指派成員：私人活動不顯示 -->
+  @if (!tooltipEvent.isPrivateGroup) {
+    <div class="tooltip-block">
+      <div class="tooltip-block-title">
+        指派成員
+      </div>
+
+      <div class="tooltip-member-list">
+        @for (name of tooltipEvent.assignedUserNames; track name) {
+          <span class="tooltip-member-chip">
+            👤 {{ name }}
+          </span>
+        }
+      </div>
+    </div>
+  }
+
+</div>
+    </div>
+  }
 
 </div>

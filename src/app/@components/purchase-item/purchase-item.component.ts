@@ -10,6 +10,7 @@ import { TopbarComponent } from "../../shared/topbar/topbar.component";
 import { LocationAndCategory } from '../../common/interfaceList';
 import { HttpClientService } from '../../@services/http-client.service';
 import { HttpClient } from '@angular/common/http';
+<<<<<<< HEAD
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -19,6 +20,9 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import Swal from 'sweetalert2';
 
+=======
+import Swal from 'sweetalert2';
+>>>>>>> origin/main
 
 interface GroupMember {
   user_id: number;
@@ -44,11 +48,15 @@ interface GroupMember {
 })
 export class PurchaseItemComponent implements OnInit {
 
+<<<<<<< HEAD
   private readonly hiddenPurchaseCategoryIds = new Set([4, 6]); //categories_id = 4 & 6 不顯示在購物清單新增項目中
+=======
+  isEditPage = false;//目前路由是否為修改
+>>>>>>> origin/main
 
   listId = 0;
   userId = 1;
-  groupId: number | null = null;
+  groupId!: number;
   items: PurchaseItemVo[] = [];
   categories: LocationAndCategory[] = [];
   members: GroupMember[] = [];
@@ -68,6 +76,9 @@ export class PurchaseItemComponent implements OnInit {
     assignedUserId: 1
   };
 
+  //切到其它分頁時護衛模式
+  isDirty = false;
+
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
@@ -83,7 +94,12 @@ export class PurchaseItemComponent implements OnInit {
     this.newItem.assignedUserId = this.userId;
     this.loadCategories();
     this.loadCurrentList();
-    this.loadItems();
+
+    //目前路由是否為修改
+    this.isEditPage = this.router.url.includes('/edit-item/');
+    if (this.isEditPage) {
+      this.loadItems();
+    }
   }
 
   get hasGroup(): boolean {
@@ -102,6 +118,12 @@ export class PurchaseItemComponent implements OnInit {
     this.http.getApi(`${this.http.basicUrl}categories/get`).subscribe({
       next: (res: any) => {
         if (res.code !== 200) {
+          Swal.fire({
+            icon: 'error',
+            title: '分類載入失敗',
+            text: res.message || '請稍後再試',
+            confirmButtonText: '確認',
+          });
           return;
         }
 
@@ -110,6 +132,7 @@ export class PurchaseItemComponent implements OnInit {
           name: name as string
         }));
 
+<<<<<<< HEAD
         if (this.purchaseCategories.length > 0 && !this.purchaseCategories.some((category) =>
             category.id === this.newItem.categoryId)) {
             this.newItem.categoryId = this.purchaseCategories[0].id;
@@ -119,35 +142,67 @@ export class PurchaseItemComponent implements OnInit {
           console.error(err);
           this.formError = '分類載入失敗，請稍後再試';
         }
-    });
-  }
-
-  loadItems(): void {
-    this.isLoading = true;
-    this.errorMessage = '';
-
-    this.shoppingService.getItems(this.listId).subscribe({
-      next: (res) => {
-        this.items = res ?? [];
-        this.previousAssignedUserByItemId = this.items.reduce<Record<number, number>>((acc, item) => {
-          acc[item.id] = item.userId;
-          return acc;
-        }, {});
-        this.isLoading = false;
+=======
+        if (
+          this.categories.length > 0 &&
+          !this.categories.some((category) => category.id === this.newItem.categoryId)
+        ) {
+          this.newItem.categoryId = this.categories[0].id;
+        }
       },
+
       error: (err) => {
         console.error(err);
-        this.errorMessage = '購物項目載入失敗，請稍後再試';
-        this.isLoading = false;
+
+        this.formError = '分類載入失敗，請稍後再試';
+
+        Swal.fire({
+          icon: 'error',
+          title: '分類載入失敗',
+          text: err.error?.message || '請稍後再試',
+          confirmButtonText: '確認',
+        });
       }
+>>>>>>> origin/main
     });
   }
 
+loadItems(): void {
+  this.isLoading = true;
+  this.errorMessage = '';
+
+  this.shoppingService.getItems(this.listId).subscribe({
+    next: (res) => {
+      this.items = res ?? [];
+
+      this.previousAssignedUserByItemId = this.items.reduce<Record<number, number>>((acc, item) => {
+        acc[item.id] = item.userId;
+        return acc;
+      }, {});
+
+      this.isLoading = false;
+    },
+
+    error: (err) => {
+      console.error(err);
+
+      this.errorMessage = '購物項目載入失敗，請稍後再試';
+      this.isLoading = false;
+
+      Swal.fire({
+        icon: 'error',
+        title: '購物項目載入失敗',
+        text: err.error?.message || '請稍後再試',
+        confirmButtonText: '確認',
+      });
+    }
+  });
+}
   loadCurrentList(): void {
     this.shoppingService.getLists(this.userId).subscribe({
       next: (lists) => {
         const currentList = (lists ?? []).find((list: ShoppingList) => list.id === this.listId);
-        this.groupId = currentList?.group_id ?? null;
+        this.groupId = currentList?.group_id ?? 0;
 
         if (this.hasGroup) {
           this.getGroupMember();
@@ -165,58 +220,54 @@ export class PurchaseItemComponent implements OnInit {
 
     if (!itemName) {
       this.formError = '請輸入項目名稱';
+
+      Swal.fire({
+        icon: 'warning',
+        title: '資料未填完整',
+        text: '請輸入項目名稱',
+        confirmButtonText: '確認',
+      });
+
       return;
     }
 
     if (!Number.isInteger(this.newItem.quantity) || this.newItem.quantity < 1) {
       this.formError = '數量至少為 1';
+
+      Swal.fire({
+        icon: 'warning',
+        title: '數量錯誤',
+        text: '數量至少為 1',
+        confirmButtonText: '確認',
+      });
+
       return;
     }
 
+<<<<<<< HEAD
     if (!this.purchaseCategories.some((category) => category.id === this.newItem.categoryId)) {
       this.formError = '請選擇有效的購物分類';
       return;
     }
 
     const req: AddPurchaseItemReq = {
+=======
+    this.items.push({
+      id: this.editingItemId ?? 0, // 暫時 ID
+>>>>>>> origin/main
       listId: this.listId,
-      createrId: this.userId,
-      purchaseItemVoList: [
-        {
-          id: this.editingItemId ?? 0,
-          listId: this.listId,
-          userId: this.hasGroup ? this.newItem.assignedUserId : this.userId,
-          categoryId: this.newItem.categoryId,
-          item: itemName,
-          quantity: this.newItem.quantity,
-          check: false
-        }
-      ]
-    };
-
-    const request$ = this.isEditing
-      ? this.shoppingService.updateItem(req)
-      : this.shoppingService.addItems(req);
-
-    this.isSaving = true;
-    request$.subscribe({
-      next: (res) => {
-        this.isSaving = false;
-
-        if (res.code !== 200) {
-          this.formError = res.message ?? (this.isEditing ? '修改購物項目失敗' : '新增購物項目失敗');
-          return;
-        }
-
-        this.resetForm();
-        this.loadItems();
-      },
-      error: (err) => {
-        console.error(err);
-        this.formError = err.error?.message ?? (this.isEditing ? '修改購物項目失敗' : '新增購物項目失敗');
-        this.isSaving = false;
-      }
+      userId: this.hasGroup
+        ? this.newItem.assignedUserId
+        : this.userId,
+      categoryId: this.newItem.categoryId,
+      item: itemName,
+      quantity: this.newItem.quantity,
+      check: false
     });
+
+    //暫存
+    this.isDirty = true;
+    this.resetForm();
   }
 
   editItem(item: PurchaseItemVo): void {
@@ -238,6 +289,67 @@ export class PurchaseItemComponent implements OnInit {
   }
 
   confirmItems(): void {
+    const req: AddPurchaseItemReq = {
+      listId: this.listId,
+      createrId: this.userId,
+      purchaseItemVoList: this.items
+    };
+
+    const request$ = this.isEditing
+      ? this.shoppingService.updateItem(req)
+      : this.shoppingService.addItems(req);
+
+    this.isSaving = true;
+
+    request$.subscribe({
+      next: (res) => {
+        this.isSaving = false;
+
+        if (res.code !== 200) {
+          this.formError =
+            res.message ??
+            (this.isEditing ? '修改購物項目失敗' : '新增購物項目失敗');
+
+          Swal.fire({
+            icon: 'error',
+            title: this.isEditing ? '修改失敗' : '新增失敗',
+            text: this.formError,
+            confirmButtonText: '確認',
+          });
+
+          return;
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: this.isEditing ? '修改成功' : '新增成功',
+          text: this.isEditing ? '購物項目已更新' : '購物項目已新增',
+          timer: 1200,
+          showConfirmButton: false,
+        });
+
+        this.isDirty = false;
+        this.resetForm();
+        this.loadItems();
+      },
+
+      error: (err) => {
+        console.error(err);
+
+        this.formError =
+          err.error?.message ??
+          (this.isEditing ? '修改購物項目失敗' : '新增購物項目失敗');
+
+        this.isSaving = false;
+
+        Swal.fire({
+          icon: 'error',
+          title: this.isEditing ? '修改失敗' : '新增失敗',
+          text: this.formError,
+          confirmButtonText: '確認',
+        });
+      }
+    });
     this.router.navigate(['/shopping-list']);
   }
 
@@ -252,25 +364,59 @@ export class PurchaseItemComponent implements OnInit {
   }
 
   deleteItem(item: PurchaseItemVo): void {
-    const confirmed = confirm(`確定刪除「${item.item}」？`);
-
-    if (!confirmed) {
-      return;
-    }
-
-    this.shoppingService.deleteItem(this.listId, item.id).subscribe({
-      next: (res) => {
-        if (res.code !== 200) {
-          this.errorMessage = res.message ?? '刪除購物項目失敗';
-          return;
-        }
-
-        this.items = this.items.filter((current) => current.id !== item.id);
-      },
-      error: (err) => {
-        console.error(err);
-        this.errorMessage = err.error?.message ?? '刪除購物項目失敗';
+    Swal.fire({
+      icon: 'warning',
+      title: '確定刪除？',
+      text: `確定刪除「${item.item}」？`,
+      showCancelButton: true,
+      confirmButtonText: '刪除',
+      cancelButtonText: '取消',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#64748b',
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        return;
       }
+
+      this.shoppingService.deleteItem(this.listId, item.id, this.userId, this.groupId).subscribe({
+        next: (res) => {
+          if (res.code !== 200) {
+            this.errorMessage = res.message ?? '刪除購物項目失敗';
+
+            Swal.fire({
+              icon: 'error',
+              title: '刪除失敗',
+              text: this.errorMessage,
+              confirmButtonText: '確認',
+            });
+
+            return;
+          }
+
+          this.items = this.items.filter((current) => current.id !== item.id);
+
+          Swal.fire({
+            icon: 'success',
+            title: '刪除成功',
+            text: `「${item.item}」已刪除`,
+            timer: 1200,
+            showConfirmButton: false,
+          });
+        },
+
+        error: (err) => {
+          console.error(err);
+
+          this.errorMessage = err.error?.message ?? '刪除購物項目失敗';
+
+          Swal.fire({
+            icon: 'error',
+            title: '刪除失敗',
+            text: this.errorMessage,
+            confirmButtonText: '確認',
+          });
+        }
+      });
     });
   }
 
@@ -287,25 +433,59 @@ export class PurchaseItemComponent implements OnInit {
   }
 
   updateAssignedUser(item: PurchaseItemVo): void {
-    const previousUserId = this.previousAssignedUserByItemId[item.id] ?? item.userId;
+  const previousUserId =
+    this.previousAssignedUserByItemId[item.id] ?? item.userId;
 
-    this.shoppingService.updateAssignedUser(this.listId, item.id, item.userId).subscribe({
+  this.shoppingService
+    .updateAssignedUser(this.listId, item.id, item.userId)
+    .subscribe({
       next: (res) => {
         if (res.code !== 200) {
+          // 更新失敗，還原原本指派成員
           item.userId = previousUserId;
+
           this.errorMessage = res.message ?? '更新指派成員失敗';
+
+          Swal.fire({
+            icon: 'error',
+            title: '更新失敗',
+            text: this.errorMessage,
+            confirmButtonText: '確認',
+          });
+
           return;
         }
 
+        // 更新成功，記錄新的指派成員
         this.previousAssignedUserByItemId[item.id] = item.userId;
+
+        Swal.fire({
+          icon: 'success',
+          title: '更新成功',
+          text: '指派成員已更新',
+          timer: 1000,
+          showConfirmButton: false,
+        });
       },
+
       error: (err) => {
         console.error(err);
+
+        // API 錯誤，還原原本指派成員
         item.userId = previousUserId;
-        this.errorMessage = err.error?.message ?? '更新指派成員失敗';
-      }
+
+        this.errorMessage =
+          err.error?.message ?? '更新指派成員失敗';
+
+        Swal.fire({
+          icon: 'error',
+          title: '更新失敗',
+          text: this.errorMessage,
+          confirmButtonText: '確認',
+        });
+      },
     });
-  }
+}
 
   trackByItemId(_index: number, item: PurchaseItemVo): number {
     return item.id;
@@ -322,11 +502,26 @@ export class PurchaseItemComponent implements OnInit {
     }
 
     this.isLoadingMembers = true;
+
     this.httpclient.get<any>(
       `http://localhost:8080/family_life/get_members?group_id=${this.groupId}`
     ).subscribe({
 
       next: (res) => {
+        if (res.code !== 200) {
+          this.members = [];
+          this.isLoadingMembers = false;
+
+          Swal.fire({
+            icon: 'error',
+            title: '群組成員載入失敗',
+            text: res.message || '請稍後再試',
+            confirmButtonText: '確認',
+          });
+
+          return;
+        }
+
         this.members = res.groupMembersList ?? [];
 
         if (!this.members.some((member) => member.user_id === this.newItem.assignedUserId)) {
@@ -338,17 +533,36 @@ export class PurchaseItemComponent implements OnInit {
 
       error: (err) => {
         console.log(err);
+
         this.members = [];
         this.isLoadingMembers = false;
+
+        Swal.fire({
+          icon: 'error',
+          title: '群組成員載入失敗',
+          text: err.error?.message || '請稍後再試',
+          confirmButtonText: '確認',
+        });
       }
 
     });
-
   }
 
+  canDeactivate(): Promise<boolean> | boolean {
 
+    if (!this.isDirty) {
+      return true;
+    }
 
-
-
-
+    return Swal.fire({
+      title: '尚未儲存',
+      text: '是否離開此頁面？未儲存的資料將會遺失',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: '離開',
+      cancelButtonText: '留在此頁'
+    }).then(result => {
+      return result.isConfirmed;
+    });
+  }
 }

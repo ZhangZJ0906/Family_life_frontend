@@ -1,6 +1,6 @@
-<app-topbar></app-topbar>
-
 <main class="shopping-page">
+  <app-topbar></app-topbar>
+
   <section class="page-heading">
     <div>
       <p class="eyebrow">Shopping Lists</p>
@@ -29,6 +29,7 @@
       <h2>我的清單</h2>
       <div class="list-filter">
         <span>{{ filteredLists.length }} 筆</span>
+<<<<<<< HEAD
 
         <mat-form-field appearance="outline" class="filter-field">
           <mat-label>群組</mat-label>
@@ -39,6 +40,14 @@
               @if (group.id !== null) {
                 <mat-option [value]="group.id">{{ group.name }}</mat-option>
               }
+=======
+        <select name="groupFilter" [(ngModel)]="groupFilter" aria-label="群組篩選">
+          <option [ngValue]="'all'">全部群組</option>
+          <option [ngValue]="0">私人</option>
+          @for (group of groupOptions; track group.id) {
+            @if (group.id !== 0) {
+              <option [ngValue]="group.id">{{ group.name }}</option>
+>>>>>>> origin/main
             }
           </mat-select>
         </mat-form-field>
@@ -89,8 +98,16 @@
                 統計與勾選
               </button>
 
+<<<<<<< HEAD
               <button mat-button type="button" [routerLink]="['/purchase-item', list.id]">
                 <mat-icon>edit</mat-icon>
+=======
+              <button class="text-button" type="button" [routerLink]="['/purchase-item', list.id]">
+                新增
+              </button>
+
+              <button class="text-button" type="button" [routerLink]="['/edit-item', list.id]">
+>>>>>>> origin/main
                 編輯
               </button>
 
@@ -230,7 +247,7 @@
                     · {{ item.checkDate }}
                   }
                 </small>
-                @if (selectedStatsList.group_id !== null) {
+                @if (selectedStatsList.group_id !== 0) {
                   <small>指派給：{{ getMemberName(selectedStatsList.group_id, item.userId) }}</small>
                 }
               </div>

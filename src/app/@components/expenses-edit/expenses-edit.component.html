@@ -17,6 +17,25 @@
 
       <form class="expense-form">
 
+        <!-- 記帳環境：唯讀 -->
+<div class="readonly-env full-width">
+  <div class="env-left">
+    <div class="env-icon">
+      <mat-icon>groups</mat-icon>
+    </div>
+
+    <div>
+      <div class="env-label">記帳環境</div>
+      <div class="env-name">{{ currentGroupName }}</div>
+    </div>
+  </div>
+
+  <div class="env-lock">
+    <mat-icon>lock</mat-icon>
+    <span>唯讀</span>
+  </div>
+</div>
+
         <!-- 消費名稱 -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>消費名稱</mat-label>
@@ -174,6 +193,7 @@
       type="button"
       class="save-btn"
       (click)="onSave()"
+      [disabled]="isNotModified"
     >
       <mat-icon>save</mat-icon>
       儲存修改

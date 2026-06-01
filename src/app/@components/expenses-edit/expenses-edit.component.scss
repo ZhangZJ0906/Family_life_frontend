@@ -66,6 +66,78 @@
   gap: 14px 16px;
 }
 
+/* 記帳環境唯讀欄 */
+.readonly-env {
+  min-height: 58px;
+  border: 1px solid #d7e0ea;
+  border-radius: 14px;
+  background: #f8fafc;
+
+  padding: 0 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 唯讀左側 */
+.env-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 唯讀 icon */
+.env-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: #eef4ff;
+  color: #3b63f6;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.env-icon mat-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+}
+
+/* 小標 */
+.env-label {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 1px;
+}
+
+/* 群組名稱 */
+.env-name {
+  color: #111827;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+/* 唯讀標籤 */
+.env-lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  color: #2f7d4f;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.env-lock mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
 /* 橫跨兩欄 */
 .full-width {
   grid-column: 1 / -1;

@@ -65,7 +65,7 @@
       <div class="money-icon red-icon">↘</div>
       <div>
         <p>總額</p>
-        <h2 class="money-red">-NT$5,655</h2>
+        <h2 class="money-red">NT$ - 5,655</h2>
       </div>
     </div>
 
@@ -73,7 +73,7 @@
       <div class="money-icon green-icon">↗</div>
       <div>
         <p>收入</p>
-        <h2 class="money-green">NT$0</h2>
+        <h2 class="money-green">NT$ 0</h2>
       </div>
     </div>
 
@@ -81,7 +81,7 @@
       <div class="money-icon red-icon">💳</div>
       <div>
         <p>本月支出</p>
-        <h2 class="money-red">NT${{ monthlyExpense | number }}</h2>
+        <h2 class="money-red">NT$ {{ monthlyExpense | number }}</h2>
       </div>
     </div>
   </div>
@@ -95,7 +95,7 @@
       <div class="summary-card">
         <div class="summary-text">
           <span class="card-label">即將到期食材</span>
-          <h2>5</h2>
+          <h2>{{ expiringFoodCount }}</h2>
           <p>7 天內到期</p>
         </div>
         <div class="summary-icon food-icon">🥬</div>
@@ -104,7 +104,7 @@
       <div class="summary-card">
         <div class="summary-text">
           <span class="card-label">藥品提醒</span>
-          <h2>2</h2>
+          <h2>{{ medicineReminderCount }}</h2>
           <p>需要補充</p>
         </div>
         <div class="summary-icon medicine-icon">💊</div>
@@ -113,7 +113,7 @@
       <div class="summary-card">
         <div class="summary-text">
           <span class="card-label">保固到期</span>
-          <h2>1</h2>
+          <h2>{{ warrantyExpiringCount }}</h2>
           <p>本月到期</p>
         </div>
         <div class="summary-icon warranty-icon">🧾</div>
@@ -122,7 +122,7 @@
       <div class="summary-card">
         <div class="summary-text">
           <span class="card-label">訂閱續扣</span>
-          <h2>3</h2>
+          <h2>{{ subscriptionReminderCount }}</h2>
           <p>近期扣款</p>
         </div>
         <div class="summary-icon sub-icon">💳</div>

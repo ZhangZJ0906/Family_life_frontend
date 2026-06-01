@@ -13,6 +13,7 @@ import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 
 import { NotifyService } from '../../@services/NotifyService';
+import { Calendar } from '@fullcalendar/core/index.js';
 
 @Component({
   selector: 'app-notify-dialog',
@@ -39,6 +40,7 @@ export class NotifyDialogComponent implements OnInit {
     | 'itemlist'
     | 'expense'
     | 'calendar'
+    | 'calendar_self'
     | 'update' = 'all';
 
   unreadMap = {
@@ -48,6 +50,7 @@ export class NotifyDialogComponent implements OnInit {
     itemlist: 0,
     expense:0,
     calendar: 0,
+    calendar_self: 0,
     update: 0
   };
 
@@ -114,6 +117,7 @@ export class NotifyDialogComponent implements OnInit {
     this.unreadMap.group = list.filter(n => n.isRead !== 1 && n.type === 'group').length;
     this.unreadMap.itemlist = list.filter(n => n.isRead !== 1 && n.type === 'itemlist').length;
     this.unreadMap.calendar = list.filter(n => n.isRead !== 1 && n.type === 'calendar').length;
+    this.unreadMap.calendar = list.filter(n => n.isRead !== 1 && n.type === 'calendar_self').length;
     this.unreadMap.expense = list.filter(n => n.isRead !== 1 && n.type === 'expense').length;
     this.unreadMap.update = list.filter(n => n.isRead !== 1 && n.type === 'update').length;
   }
@@ -131,7 +135,7 @@ export class NotifyDialogComponent implements OnInit {
   // ========================
   markAsRead(n: any) {
 
-    if (n.isRead === 1) return;
+    if (n.isRead === 1 || n.type === 'invite') return;
 
     this.http.post(
       `http://localhost:8080/family_life/read_notify?notify_id=${n.id}`,
@@ -154,7 +158,7 @@ export class NotifyDialogComponent implements OnInit {
   markAllAsRead() {
 
     const unreadIds = this.notifies
-      .filter(n => n.isRead !== 1)
+      .filter(n => n.isRead !== 1 && n.type !== 'invite')
       .map(n => n.id);
 
     if (!unreadIds.length) return;
@@ -250,12 +254,15 @@ export class NotifyDialogComponent implements OnInit {
   acceptInvite(n: any) {
 
     n.status = 'accepted';
+    n.isRead = 1;
 
     this.http.post(
       `http://localhost:8080/family_life/accept_join_group?user_id=${this.user_id}&group_id=${n.targetGroupId}&notify_id=${n.id}`,
       {}
     ).subscribe({
       next: () => {
+        this.calculateUnread();
+        this.syncBadge();
         Swal.fire('已加入該群組', '', 'success');
       },
       error: () => {
@@ -267,11 +274,16 @@ export class NotifyDialogComponent implements OnInit {
   rejectInvite(n: any) {
 
     n.status = 'rejected';
+    n.isRead = 1;
 
     this.http.post(
       `http://localhost:8080/family_life/reject_join_group?user_id=${this.user_id}&group_id=${n.targetGroupId}&notify_id=${n.id}`,
       {}
     ).subscribe({
+      next: () => {
+        this.calculateUnread();
+        this.syncBadge();
+      },
       error: () => {
         Swal.fire('失敗', '', 'error');
       }
@@ -303,8 +315,13 @@ this.router.navigate(['/expenses'], { queryParams: { groupId: n.sendUserId } });
       return this.notifies.filter(n =>
         n.type === 'group' ||
         n.type === 'itemlist' ||
-        n.type === 'calendar'||
         n.type=== 'expense'
+      );
+    }
+
+    if (this.filterType === 'calendar') {
+      return this.notifies.filter(n =>
+        n.type === 'calendar' || n.type === 'calendar_self'
       );
     }
 

@@ -58,7 +58,7 @@
             </div>
 
             <div class="gid">
-              GID: {{ group.groupId }}
+              GID: {{ group.groupId }}, 由{{group.creater}}建立
             </div>
           </div>
 
@@ -67,7 +67,7 @@
         <!-- 右 -->
         <div class="right">
 
-          <button class="btn chat">群組清單</button>
+          <!-- <button class="btn chat">群組清單</button> -->
 
           <button class="btn member"
             (click)="openMemberDialog(group, user_id)">

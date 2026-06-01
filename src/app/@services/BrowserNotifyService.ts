@@ -23,21 +23,38 @@ export class BrowserNotifyService {
   // ======================
   send(title: string, body: string, url?: string) {
 
-    if (Notification.permission !== 'granted') return;
+    console.log("通知權限:", Notification.permission);
 
-    const notification = new Notification(title, {
-      body,
-      icon: 'assets/logo.png'
-    });
+    if (!('Notification' in window)) {
+      console.log('此瀏覽器不支援通知');
+      return;
+    }
 
-    notification.onclick = () => {
-      window.focus();
+    if (Notification.permission !== 'granted') {
+      console.log('通知權限不是 granted，目前是:', Notification.permission);
+      return;
+    }
 
-      if (url) {
-        window.open(url, '_self'); // SPA 建議用這個
-      }
+    try {
+      const notification = new Notification(title, {
+        body
+      });
 
-      notification.close();
-    };
+      console.log('通知已建立:', notification);
+
+      notification.onclick = () => {
+        window.focus();
+        console.log("click notify, url:", url);
+
+        if (url) {
+          window.open(url, '_self');
+        }
+
+        notification.close();
+      };
+
+    } catch (error) {
+      console.error('建立通知失敗:', error);
+    }
   }
 }

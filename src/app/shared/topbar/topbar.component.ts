@@ -107,6 +107,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
       console.log("count: ", count)
 
       if (count > 0 && this.NotifyByEndDate) {
+        console.log("success ");
         this.browserNotify.send(
           '家庭系統通知',
           `${this.user_name}目前有 ${count} 則未讀通知`
