@@ -53,96 +53,105 @@
     </button>
   </div>
 
-  <div class="notify-item" *ngFor="let n of filteredNotifies()" [class.unread]="n.isRead !== 1" (click)="markAsRead(n)">
+  <div class="notify-list">
 
-    <!-- 未讀紅點 -->
-    <div class="unread-dot" *ngIf="n.isRead !== 1"></div>
-
-    <!-- 頭像 -->
-    <div class="avatar">
-      <img *ngIf="n.avatar" [src]="n.avatar" />
-      <div *ngIf="!n.avatar" class="default-avatar"></div>
+    <!-- 空狀態 -->
+    <div class="empty-state" *ngIf="filteredNotifies().length === 0">
+      <div>📭</div>
+      尚未有通知
     </div>
 
-    <!-- 內容 -->
-    <div class="content-area">
+    <div class="notify-item" *ngFor="let n of filteredNotifies()" [class.unread]="n.isRead !== 1" (click)="markAsRead(n)">
 
-      <div class="top-row">
-        <span class="user-name">
-          {{ n.name ?? 'User_name' }}
-        </span>
+      <!-- 未讀紅點 -->
+      <div class="unread-dot" *ngIf="n.isRead !== 1"></div>
 
-        <span class="time" *ngIf="n.sendDate">
-          {{ n.sendDate | date:'yyyy-MM-dd HH:mm' }}
-        </span>
+      <!-- 頭像 -->
+      <div class="avatar">
+        <img *ngIf="n.avatar" [src]="n.avatar" />
+        <div *ngIf="!n.avatar" class="default-avatar"></div>
       </div>
 
-      <div class="message">
-        {{ n.content }}
+      <!-- 內容 -->
+      <div class="content-area">
+
+        <div class="top-row">
+          <span class="user-name">
+            {{ n.name ?? 'User_name' }}
+          </span>
+
+          <span class="time" *ngIf="n.sendDate">
+            {{ n.sendDate | date:'yyyy-MM-dd HH:mm' }}
+          </span>
+        </div>
+
+        <div class="message">
+          {{ n.content }}
+        </div>
+
       </div>
 
-    </div>
+      <!-- 操作 -->
+      <div class="action-group" (click)="$event.stopPropagation()">
 
-    <!-- 操作 -->
-    <div class="action-group" (click)="$event.stopPropagation()">
+        <!-- invite -->
+        <ng-container *ngIf="n.type === 'invite'">
 
-      <!-- invite -->
-      <ng-container *ngIf="n.type === 'invite'">
+          <ng-container *ngIf="!n.status">
 
-        <ng-container *ngIf="!n.status">
+            <button class="accept-btn" (click)="acceptInvite(n)">
+              接受
+            </button>
 
-          <button class="accept-btn" (click)="acceptInvite(n)">
-            接受
-          </button>
+            <button class="reject-btn" (click)="rejectInvite(n)">
+              拒絕
+            </button>
 
-          <button class="reject-btn" (click)="rejectInvite(n)">
-            拒絕
+          </ng-container>
+
+          <div *ngIf="n.status === 'accepted'" class="status-pill accepted">
+            已加入該群組
+          </div>
+
+          <div *ngIf="n.status === 'rejected'" class="status-pill rejected">
+            已拒絕加入該群組
+          </div>
+
+        </ng-container>
+
+        <!-- itemlist -->
+        <ng-container *ngIf="n.type === 'itemlist'">
+
+          <button class="view-btn" (click)="goItemList(n)">
+            查看
           </button>
 
         </ng-container>
 
-        <div *ngIf="n.status === 'accepted'" class="status-pill accepted">
-          已加入該群組
-        </div>
+        <!-- calendar -->
+        <ng-container *ngIf="n.type === 'calendar'">
 
-        <div *ngIf="n.status === 'rejected'" class="status-pill rejected">
-          已拒絕加入該群組
-        </div>
+          <button class="view-btn" (click)="goCalendar(n)">
+            查看
+          </button>
 
-      </ng-container>
+        </ng-container>
 
-      <!-- itemlist -->
-      <ng-container *ngIf="n.type === 'itemlist'">
+        <!-- expense -->
+        <ng-container *ngIf="n.type === 'expense'">
 
-        <button class="view-btn" (click)="goItemList(n)">
-          查看
+          <button class="view-btn" (click)="goExpense(n)">
+            查看
+          </button>
+
+        </ng-container>
+
+        <button mat-icon-button class="delete-btn" (click)="deleteNotify(n)">
+          <mat-icon>delete</mat-icon>
         </button>
 
-      </ng-container>
-
-      <!-- calendar -->
-      <ng-container *ngIf="n.type === 'calendar'">
-
-        <button class="view-btn" (click)="goCalendar(n)">
-          查看
-        </button>
-
-      </ng-container>
-
-      <!-- expense -->
-      <ng-container *ngIf="n.type === 'expense'">
-
-        <button class="view-btn" (click)="goExpense(n)">
-          查看
-        </button>
-
-      </ng-container>
-
-      <button mat-icon-button class="delete-btn" (click)="deleteNotify(n)">
-        <mat-icon>delete</mat-icon>
-      </button>
+      </div>
 
     </div>
-
   </div>
 </div>
