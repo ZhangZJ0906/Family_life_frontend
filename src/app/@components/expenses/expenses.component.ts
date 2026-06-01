@@ -65,16 +65,16 @@ export class ExpensesComponent {
   selectedYear = signal(new Date().getFullYear());
   selectedMonth = signal(new Date().getMonth() + 1);
 
-displayedColumns: string[] = [
-  'select',
-  'expense_date',
-  'related_item_name',
-  'category_id',
-  'note',
-  'price',
-  'user',
-  'actions',
-];
+  displayedColumns: string[] = [
+    'select',
+    'expense_date',
+    'related_item_name',
+    'category_id',
+    'note',
+    'price',
+    'user',
+    'actions',
+  ];
   filteredExpense = signal<ExpenseRecord[]>([]);
   filterValues = {
     search: '',
@@ -191,86 +191,67 @@ displayedColumns: string[] = [
 
   // ─── Dialog ─────────────────────────────────────────
   openCreateDialog() {
-  const dialogRef = this.dialog.open(ExpensesAddComponent, {
-    // 跟物品清單 Dialog 接近的寬度
-    width: '600px',
-    maxWidth: '92vw',
-
-    // 不要太高，內容超過就讓內部滾動
-    maxHeight: '86vh',
-
-    panelClass: 'expense-create-dialog-panel',
-    autoFocus: false,
-
-    data: {
-      categoryMap: this.categoryMap,
-      groupList: this.userGroups,
-      currentGroupId: this.currentGroupId,
-    },
-  });
-
+    const dialogRef = this.dialog.open(ExpensesAddComponent, {
+      width: '600px',
+      maxWidth: '92vw',
+      maxHeight: '86vh',
+      panelClass: 'expense-create-dialog-panel',
+      autoFocus: false,
+      data: {
+        categoryMap: this.categoryMap,
+        groupList: this.userGroups,
+        currentGroupId: this.currentGroupId,
+      },
+    });
     dialogRef.afterClosed().subscribe((result) => {
-
       if (result === true)
         this.getExpense(this.currentGroupId, this.currentUserId);
     });
   }
 
   openEditDialog(record: any) {
-  const relatedItem =
-    record.relatedItemId != null ? this.itemMap[record.relatedItemId] : null;
-  const dialogGroupId =
-    this.currentGroupId !== null && this.currentGroupId !== undefined
-      ? Number(this.currentGroupId)
-      : Number(record.groupId ?? 0);
+    const relatedItem =
+      record.relatedItemId != null ? this.itemMap[record.relatedItemId] : null;
+    const dialogGroupId =
+      this.currentGroupId !== null && this.currentGroupId !== undefined
+        ? Number(this.currentGroupId)
+        : Number(record.groupId ?? 0);
 
-  /*
+    /*
     取得群組名稱：
     - groupId = 0：私人記帳
     - groupId != 0：從 userGroups 找 groupName
   */
-  const currentGroup = this.userGroups.find(
-    (g: any) => Number(g.groupId) === dialogGroupId
-  );
+    const currentGroup = this.userGroups.find(
+      (g: any) => Number(g.groupId) === dialogGroupId,
+    );
 
-  const currentGroupName =
-    dialogGroupId === 0
-      ? '私人記帳'
-      : currentGroup?.groupName || '未選擇群組';
-
-  console.log('編輯 Dialog 群組資訊:', {
-    currentGroupId: this.currentGroupId,
-    recordGroupId: record.groupId,
-    dialogGroupId,
-    currentGroupName,
-    userGroups: this.userGroups,
-  });
-
-  const dialogRef = this.dialog.open(ExpensesEditComponent, {
-    width: '600px',
-    maxWidth: '92vw',
-    maxHeight: '86vh',
-    panelClass: 'expense-edit-dialog-panel',
-    autoFocus: false,
-    data: {
-      record: JSON.parse(JSON.stringify(record)),
-      categoryMap: this.categoryMap,
-      relatedItem,
-
-      // 傳給編輯 Dialog 顯示唯讀記帳環境
-      currentGroupId: dialogGroupId,
-      currentGroupName: currentGroupName,
-    },
-  });
-
-  dialogRef.afterClosed().subscribe((result) => {
-    if (!result) {
-      return;
-    }
-
-    this.getExpense(this.currentGroupId, this.currentUserId);
-  });
-}
+    const currentGroupName =
+      dialogGroupId === 0
+        ? '私人記帳'
+        : currentGroup?.groupName || '未選擇群組';
+    const dialogRef = this.dialog.open(ExpensesEditComponent, {
+      width: '600px',
+      maxWidth: '92vw',
+      maxHeight: '86vh',
+      panelClass: 'expense-edit-dialog-panel',
+      autoFocus: false,
+      data: {
+        record: JSON.parse(JSON.stringify(record)),
+        categoryMap: this.categoryMap,
+        relatedItem,
+        currentUserId: this.currentUserId,
+        currentGroupId: dialogGroupId,
+        currentGroupName: currentGroupName,
+      },
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (!result) {
+        return;
+      }
+      this.getExpense(this.currentGroupId, this.currentUserId);
+    });
+  }
 
   // ─── 刪除 ────────────────────────────────────────────
   isAllSelected() {
@@ -412,8 +393,6 @@ displayedColumns: string[] = [
     this.getExpense(this.currentGroupId, this.currentUserId);
   }
 
-
-
   getExpense(groupId: number, userId: number) {
     const finalGroupId =
       groupId === undefined || groupId === null ? 0 : Number(groupId);
@@ -460,28 +439,25 @@ displayedColumns: string[] = [
         });
       },
     });
-}
+  }
 
+  // 根據群組判斷要不要顯示「使用者」欄位
+  // 私人記帳 groupId = 0，不顯示 user 欄
+  // 群組記帳 groupId != 0，顯示 user 欄
+  private getDisplayedColumns(groupId: number): string[] {
+    const isGroup = groupId !== 0;
 
-
-// 根據群組判斷要不要顯示「使用者」欄位
-// 私人記帳 groupId = 0，不顯示 user 欄
-// 群組記帳 groupId != 0，顯示 user 欄
-private getDisplayedColumns(groupId: number): string[] {
-  const isGroup = groupId !== 0;
-
-   return [
-    'select',
-    'expense_date',
-    'related_item_name',
-    'category_id',
-    'note',
-    'price',
-    'user',
-    'actions',
-  ];
-}
-
+    return [
+      'select',
+      'expense_date',
+      'related_item_name',
+      'category_id',
+      'note',
+      'price',
+      'user',
+      'actions',
+    ];
+  }
 
   // ─── 篩選 ─────────────────────────────────────────────
   getCategoryName(categoryId: number): string {

@@ -43,7 +43,7 @@ export interface ExpenseRecord {
 
 export interface GroupUser {
   userId: number;
-  userName: string; 
+  userName: string;
   email: string;
   avatar: string | null;
 }
@@ -63,5 +63,8 @@ export interface GroupList {
 export interface DropDownGroupList {
   groupId: number;
   groupName: string;
+
+  // 群組頭像，可有可無
+  avatar?: string;
 }
 /*============================================ */

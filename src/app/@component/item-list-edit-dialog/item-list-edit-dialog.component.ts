@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle'; // 必須有這個
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import {
   MatDialogModule,
   MatDialogRef,
@@ -12,7 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { Item, LocationAndCategory } from '../../common/interfaceList';
+import { LocationAndCategory } from '../../common/interfaceList';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { AuthService } from '../../@services/auth.service';
@@ -37,9 +37,8 @@ import Swal from 'sweetalert2';
   styleUrl: './item-list-edit-dialog.component.scss',
 })
 export class ItemListEditDialogComponent implements OnInit {
-  private readonly specialCategories = ['訂閱', '保固', '藥品']; // 特殊類
+  private readonly specialCategories = ['訂閱', '保固', '藥品'];
 
-  // 綁定表單的資料結構
   item: any = {};
   originalItem: any = {};
 
@@ -49,8 +48,58 @@ export class ItemListEditDialogComponent implements OnInit {
   categories: LocationAndCategory[] = [];
   location: LocationAndCategory[] = [];
 
+  constructor(
+    public dialogRef: MatDialogRef<ItemListEditDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any,
+
+  ) {
+    this.group = this.data.groups ?? [];
+  }
+
+  ngOnInit(): void {
+    if (this.data && this.data.item) {
+      this.item = { ...this.data.item };
+
+      this.location = this.data.locationMap || [];
+      this.categories = this.data.categoriesMap || [];
+      this.categories.shift()
+
+      if (!this.item.categoryId) {
+        let modeCategoryName = '';
+        if (this.data?.isSubscriptionMode) modeCategoryName = '訂閱';
+        else if (this.data?.isWarrantyMode) modeCategoryName = '保固';
+        else if (this.data?.isMedicineMode) modeCategoryName = '藥品';
+
+        if (modeCategoryName) {
+          const found = this.categories.find(
+            (cat) => cat.name === modeCategoryName,
+          );
+          if (found) this.item.categoryId = found.id;
+        }
+      }
+
+      if (this.data?.isWarrantyMode) {
+        this.item.name = this.item.productName;
+      }
+
+      this.item.expireDate = this.formatDate(this.item.expireDate);
+      this.item.purchaseDate = this.formatDate(this.item.purchaseDate);
+      this.item.trialEndDate = this.formatDate(this.item.trialEndDate);
+      this.item.nextBillingDate = this.formatDate(this.item.nextBillingDate);
+      this.item.warrantyEndDate = this.formatDate(this.item.warrantyEndDate);
+      this.originalItem = JSON.parse(JSON.stringify(this.item));
+    }
+  }
+
+  get totalPrice(): number {
+    return (this.item.unitPrice || 0) * (this.item.quantity || 0);
+  }
+
+  get hasChange(): boolean {
+    return JSON.stringify(this.item) !== JSON.stringify(this.originalItem);
+  }
+
   isSubscriptionCategory(): boolean {
-    // 優先用 categoryId 判斷，找不到才 fallback 到 mode 旗標
     if (this.item.categoryId) {
       const selectedCategory = this.categories.find(
         (cat) => Number(cat.id) === Number(this.item.categoryId),
@@ -79,97 +128,97 @@ export class ItemListEditDialogComponent implements OnInit {
     }
     return this.data?.isMedicineMode === true;
   }
+
   get isOriginalSpecial(): boolean {
     return this.specialCategories.includes(this.originalCategoryName);
   }
 
-  constructor(
-    public dialogRef: MatDialogRef<ItemListEditDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any,
-    private authService: AuthService,
-  ) {
-    console.log(this.data);
-    this.group = this.data.groups;
-  }
-
-  ngOnInit(): void {
-    if (this.data && this.data.item) {
-      this.item = { ...this.data.item };
-
-      this.location = this.data.locationMap || [];
-      this.categories = this.data.categoriesMap || [];
-
-      if (!this.item.categoryId) {
-        let modeCategoryName = '';
-        if (this.data?.isSubscriptionMode) modeCategoryName = '訂閱';
-        else if (this.data?.isWarrantyMode) modeCategoryName = '保固';
-        else if (this.data?.isMedicineMode) modeCategoryName = '藥品';
-
-        if (modeCategoryName) {
-          const found = this.categories.find(
-            (cat) => cat.name === modeCategoryName,
-          );
-          if (found) this.item.categoryId = found.id;
-        }
-      }
-      // 保固資料後端欄位是 productName，Dialog 共用 item.name
-      if (this.data?.isWarrantyMode) {
-        this.item.name = this.item.productName;
-      }
-
-      this.item.expireDate = this.formatDate(this.item.expireDate);
-      this.item.purchaseDate = this.formatDate(this.item.purchaseDate);
-      this.item.trialEndDate = this.formatDate(this.item.trialEndDate);
-      this.item.nextBillingDate = this.formatDate(this.item.nextBillingDate);
-      this.item.warrantyEndDate = this.formatDate(this.item.warrantyEndDate);
-      this.originalItem = JSON.parse(JSON.stringify(this.item));
-    }
-  }
-  // 在你的 Component 內，或是物件 model 內
-  get totalPrice(): number {
-    return (this.item.unitPrice || 0) * (this.item.quantity || 0);
-  }
-
-  get hasChange() {
-    return JSON.stringify(this.item) !== JSON.stringify(this.originalItem);
-  }
-  // 日期格式化小工具：統一轉成 HTML date input 可用的 YYYY-MM-DD
-  private formatDate(date: any): string {
-    if (!date) return '';
-
-    // 如果後端回來是 2026-05-18，直接回傳
-    if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      return date;
+  get originalCategoryName(): string {
+    if (this.data?.item?.categoryId) {
+      const original = this.categories.find(
+        (cat) => Number(cat.id) === Number(this.data.item.categoryId),
+      );
+      if (original?.name) return original.name;
     }
 
-    // 如果後端回來是 2026/05/18，轉成 2026-05-18
-    if (typeof date === 'string' && /^\d{4}\/\d{2}\/\d{2}$/.test(date)) {
-      return date.replaceAll('/', '-');
+    if (this.data?.isSubscriptionMode) return '訂閱';
+    if (this.data?.isWarrantyMode) return '保固';
+    if (this.data?.isMedicineMode) return '藥品';
+
+    return '';
+  }
+
+  isCategoryDisabled(cat: LocationAndCategory): boolean {
+    const isOriginalSpecial = this.specialCategories.includes(
+      this.originalCategoryName,
+    );
+
+    if (isOriginalSpecial) {
+      return cat.name !== this.originalCategoryName;
+    } else {
+      return this.specialCategories.includes(cat.name);
+    }
+  }
+
+  /**
+   * ✨ 核心檢查防呆：控管 HTML 確認按鈕的 [disabled] 狀態
+   */
+  isSubmitDisabled(): boolean {
+    // 1. 如果資料完全沒有變更，直接停用
+    if (!this.hasChange) return true;
+
+    // 2. 基本必填欄位檢查
+    if (!this.item.name?.trim()) return true;
+    if (this.item.groupId==null) return true;
+    if (!this.item.categoryId) return true;
+
+    // 3. 依照各種類別分別實施更嚴格的必填驗證
+    if (this.isSubscriptionCategory()) {
+      if (this.item.price === null || this.item.price < 0) return true;
+      if (!this.item.billingCycle) return true;
+      if (!this.item.purchaseDate) return true;
+      if (!this.item.trialEndDate) return true;
+    } else if (this.isWarrantyCategory()) {
+      if (!this.item.purchaseDate) return true;
+      if (!this.item.warrantyEndDate) return true;
+    } else if (this.isMedicineCategory()) {
+      if (this.item.quantity === null || this.item.quantity < 0) return true;
+      if (!this.item.unit?.trim()) return true;
+      if (!this.item.purchaseDate) return true;
+      if (!this.item.expireDate) return true;
+    } else {
+      // 一般物品
+      if (this.item.quantity === null || this.item.quantity < 0) return true;
+      if (!this.item.locationId) return true;
+      if (!this.item.purchaseDate) return true;
+      if (!this.item.expireDate) return true;
     }
 
-    // 如果是 Date 物件或其他日期格式，轉成 YYYY-MM-DD
-    const d = new Date(date);
-    if (isNaN(d.getTime())) return '';
-
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
+    return false;
   }
-  // 訂閱修改時，不需要前端傳 nextBillingDate，後端會用 trialEndDate + billingCycle 自動算
+
+  private showError(msg: string) {
+    Swal.fire({
+      title: '資訊不完整',
+      text: msg,
+      icon: 'warning',
+      confirmButtonColor: '#28a745',
+    });
+  }
+
   onOkClose(userId: number): void {
-    let payload: any;
+    // 防呆雙保險：如果因任何緣故按鈕未鎖定，進入方法時重新校驗
+    if (!this.item.name?.trim()) { this.showError('請輸入物品名稱'); return; }
+    if (this.item.groupId==null) { this.showError('請選擇所屬群組'); return; }
+    if (!this.item.categoryId) { this.showError('請選擇分類'); return; }
+
     const newCat = this.categories.find(
       (cat) => Number(cat.id) === Number(this.item.categoryId),
     );
     const newCatName = newCat?.name || '';
-    const isOriginalSpecial = this.specialCategories.includes(
-      this.originalCategoryName,
-    );
+    const isOriginalSpecial = this.specialCategories.includes(this.originalCategoryName);
     const isNewSpecial = this.specialCategories.includes(newCatName);
 
-    // 特殊類 → 只能是同一個
     if (isOriginalSpecial && newCatName !== this.originalCategoryName) {
       Swal.fire({
         title: '分類不可變更',
@@ -179,7 +228,6 @@ export class ItemListEditDialogComponent implements OnInit {
       return;
     }
 
-    // 一般類 → 不可切換到特殊類
     if (!isOriginalSpecial && isNewSpecial) {
       Swal.fire({
         title: '分類不可變更',
@@ -189,9 +237,16 @@ export class ItemListEditDialogComponent implements OnInit {
       return;
     }
 
+    let payload: any;
+
     if (this.isSubscriptionCategory()) {
+      if (this.item.price === null || this.item.price < 0) { this.showError('請輸入正確的訂閱金額'); return; }
+      if (!this.item.billingCycle) { this.showError('請選擇扣款週期'); return; }
+      if (!this.item.purchaseDate) { this.showError('請選擇購買日期'); return; }
+      if (!this.item.trialEndDate) { this.showError('請選擇試用結束日'); return; }
+
       payload = {
-        _type: 'subscription', // ✅
+        _type: 'subscription',
         id: this.item.id,
         groupId: this.item.groupId,
         userId: userId,
@@ -204,8 +259,11 @@ export class ItemListEditDialogComponent implements OnInit {
         note: this.item.note,
       };
     } else if (this.isWarrantyCategory()) {
+      if (!this.item.purchaseDate) { this.showError('請選擇購買日期'); return; }
+      if (!this.item.warrantyEndDate) { this.showError('請選擇保固到期日'); return; }
+
       payload = {
-        _type: 'warranty', // ✅
+        _type: 'warranty',
         id: this.item.id,
         groupId: this.item.groupId,
         userId: userId,
@@ -221,8 +279,12 @@ export class ItemListEditDialogComponent implements OnInit {
         note: this.item.note,
       };
     } else if (this.isMedicineCategory()) {
+      if (this.item.quantity < 0) { this.showError('數量不能小於 0'); return; }
+      if (!this.item.unit?.trim()) { this.showError('請輸入藥品單位'); return; }
+      if (!this.item.expireDate) { this.showError('請選擇藥品到期日期'); return; }
+
       payload = {
-        _type: 'medicine', // ✅
+        _type: 'medicine',
         id: this.item.id,
         groupId: this.item.groupId,
         userId: userId,
@@ -236,14 +298,19 @@ export class ItemListEditDialogComponent implements OnInit {
         dosage: this.item.dosage,
         usageMethod: this.item.usageMethod,
         unitPrice: this.item.unitPrice,
-        location: this.item.location,
+        location: this.item.locationId ? this.item.locationId.toString() : this.item.location,
         source: this.item.source,
         notify: this.item.notify,
         note: this.item.note,
       };
     } else {
+      if (this.item.quantity < 0) { this.showError('數量不能小於 0'); return; }
+      if (!this.item.locationId) { this.showError('請選擇存放位置'); return; }
+      if (!this.item.purchaseDate) { this.showError('請選擇購買日期'); return; }
+      if (!this.item.expireDate) { this.showError('請選擇到期日期'); return; }
+
       payload = {
-        _type: 'item', // ✅
+        _type: 'item',
         ...this.item,
         purchaseDate: this.formatDate(this.item.purchaseDate),
         expireDate: this.formatDate(this.item.expireDate),
@@ -254,37 +321,29 @@ export class ItemListEditDialogComponent implements OnInit {
 
     this.dialogRef.close(payload);
   }
+
   onCancel(): void {
     this.dialogRef.close();
   }
 
-  get originalCategoryName(): string {
-    if (this.data?.item?.categoryId) {
-      const original = this.categories.find(
-        (cat) => Number(cat.id) === Number(this.data.item.categoryId),
-      );
-      if (original?.name) return original.name;
+  private formatDate(date: any): string {
+    if (!date) return '';
+
+    if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return date;
     }
 
-    // 沒有 categoryId，用 mode 旗標推斷
-    if (this.data?.isSubscriptionMode) return '訂閱';
-    if (this.data?.isWarrantyMode) return '保固';
-    if (this.data?.isMedicineMode) return '藥品';
-
-    return '';
-  }
-
-  isCategoryDisabled(cat: LocationAndCategory): boolean {
-    const isOriginalSpecial = this.specialCategories.includes(
-      this.originalCategoryName,
-    );
-
-    if (isOriginalSpecial) {
-      // 原始是特殊類 → 只能選「同一個」特殊類，其他全禁
-      return cat.name !== this.originalCategoryName;
-    } else {
-      // 原始是一般類 → 特殊類全禁，一般類可換
-      return this.specialCategories.includes(cat.name);
+    if (typeof date === 'string' && /^\d{4}\/\d{2}\/\d{2}$/.test(date)) {
+      return date.replaceAll('/', '-');
     }
+
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '';
+
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
   }
 }
