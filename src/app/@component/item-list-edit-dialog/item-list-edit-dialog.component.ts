@@ -160,7 +160,7 @@ export class ItemListEditDialogComponent implements OnInit {
   }
   get isExpired(): boolean {
     if (!this.item) return false;
-    return this.item.status === '已到期' || this.item.status === '已逾期扣款';
+    return this.item.status === '已到期' || this.item.status === '已逾期扣款' || this.item.status === '已過保';
   }
   /**
    * ✨ 核心檢查防呆：控管 HTML 確認按鈕的 [disabled] 狀態
