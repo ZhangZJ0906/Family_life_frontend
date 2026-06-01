@@ -113,7 +113,7 @@
               開啟到期提醒
             </div>
             <div class="text-muted" style="font-size: 12px;">
-              {{ item.notify ? '系統將在物品過期前3天發送通知' : '目前已暫停此物品的提醒' }}
+              {{ item.notify ? '系統將在物品過期前7天發送通知' : '目前已暫停此物品的提醒' }}
             </div>
           </div>
           <mat-slide-toggle [(ngModel)]="item.notify" color="primary"></mat-slide-toggle>
@@ -189,7 +189,7 @@
         開啟提醒
       </div>
       <div class="text-muted" style="font-size: 12px;">
-        {{ item.notify ? '系統將依照日期發送通知' : '目前已暫停提醒' }}
+        {{ item.notify ? '系統將依照試用結束日前7天內發送通知' : '目前已暫停提醒' }}
       </div>
     </div>
     <mat-slide-toggle [(ngModel)]="item.notify" color="primary"></mat-slide-toggle>
@@ -287,7 +287,7 @@
           開啟保固提醒
         </div>
         <div class="text-muted" style="font-size: 12px;">
-          {{ item.notify ? '系統將在保固到期前發送通知' : '目前已暫停提醒' }}
+          {{ item.notify ? '系統將在保固到期前3天發送通知' : '目前已暫停提醒' }}
         </div>
       </div>
       <mat-slide-toggle [(ngModel)]="item.notify" color="primary"></mat-slide-toggle>
@@ -429,7 +429,7 @@
           開啟藥品到期提醒
         </div>
         <div class="text-muted" style="font-size: 12px;">
-          {{ item.notify ? '系統將在藥品到期前發送通知' : '目前已暫停提醒' }}
+          {{ item.notify ? '系統將在藥品到期前3天內發送通知' : '目前已暫停提醒' }}
         </div>
       </div>
       <mat-slide-toggle [(ngModel)]="item.notify" color="primary"></mat-slide-toggle>
