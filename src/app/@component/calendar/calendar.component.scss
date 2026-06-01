@@ -492,18 +492,99 @@
   text-align: right;
 }
 
-/* 活動描述 */
-.tooltip-desc {
+/* Tooltip 下方詳細資訊區 */
+.tooltip-detail-section {
   margin-top: 10px;
-  padding-top: 10px;
+  padding-top: 12px;
 
   border-top: 1px solid rgba(255, 255, 255, 0.16);
 
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 單一區塊：活動描述、指派成員 */
+.tooltip-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 區塊標題 */
+.tooltip-block-title {
+  color: #cbd5e1;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* 區塊內容 */
+.tooltip-block-content {
   color: #e5e7eb;
   font-size: 13px;
   line-height: 1.5;
-
   word-break: break-word;
+}
+
+/* 指派成員列表 */
+.tooltip-member-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* 指派成員 chip */
+.tooltip-member-chip {
+  padding: 4px 8px;
+
+  border-radius: 999px;
+  background: rgba(91, 141, 239, 0.18);
+  color: #ffffff;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 群組下拉選單寬度 */
+.calendar-group-select {
+  width: 260px;
+}
+
+/* 選到的群組顯示樣式 */
+.calendar-selected-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 下拉選項內的群組樣式 */
+.calendar-group-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 群組頭像，跟 profile 的 group-avatar 類似 */
+.calendar-group-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #eef4ff;
+  border: 1px solid #e5e7eb;
+}
+
+/* 選單文字 */
+.calendar-selected-group span,
+.calendar-group-option span {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
 }
 
 /* RWD：平板 */

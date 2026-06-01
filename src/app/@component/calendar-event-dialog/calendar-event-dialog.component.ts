@@ -36,6 +36,9 @@ import Swal from 'sweetalert2';
 export class CalendarEventDialogComponent {
 
   today = new Date();
+  // 記錄 Dialog 剛開啟時的原始資料
+  // 用來判斷使用者有沒有真的修改內容
+  originalFormJson = '';
 
   form = {
     title: '',
@@ -51,6 +54,74 @@ export class CalendarEventDialogComponent {
   // 私人活動不用顯示成員欄位，會自動放目前登入者
   assignedUserIds: [] as number[],
   };
+
+  // 把 Date 轉成可比較的字串
+  // 不直接 JSON.stringify Date，避免格式不穩定
+  private normalizeFormForCompare() {
+    return {
+      title: this.form.title ?? '',
+      description: this.form.description ?? '',
+      eventDate: this.toDateOnlyString(this.form.eventDate),
+      eventTime: this.toTimeOnlyString(this.form.eventTime),
+      endDate: this.toDateOnlyString(this.form.endDate),
+      endTime: this.toTimeOnlyString(this.form.endTime),
+      notifyBefore: Number(this.form.notifyBefore ?? 0),
+
+      // 排序後比較，避免 [1,2] 和 [2,1] 被當成不同
+      assignedUserIds: [...this.form.assignedUserIds]
+        .map((id) => Number(id))
+        .sort((a, b) => a - b),
+    };
+  }
+
+  // 建立原始表單快照
+  private setOriginalFormSnapshot(): void {
+    this.originalFormJson = JSON.stringify(this.normalizeFormForCompare());
+  }
+
+  // 判斷目前表單是否有修改
+  isFormChanged(): boolean {
+    return (
+      JSON.stringify(this.normalizeFormForCompare()) !== this.originalFormJson
+    );
+  }
+
+  // 日期只取 yyyy-MM-dd
+  private toDateOnlyString(dateInput: Date | null): string {
+    if (!dateInput) {
+      return '';
+    }
+
+    const date = new Date(dateInput);
+
+    if (isNaN(date.getTime())) {
+      return '';
+    }
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  }
+
+  // 時間只取 HH:mm
+  private toTimeOnlyString(dateInput: Date | null): string {
+    if (!dateInput) {
+      return '';
+    }
+
+    const date = new Date(dateInput);
+
+    if (isNaN(date.getTime())) {
+      return '';
+    }
+
+    const hour = String(date.getHours()).padStart(2, '0');
+    const minute = String(date.getMinutes()).padStart(2, '0');
+
+    return `${hour}:${minute}`;
+  }
 
   @ViewChild('dialogForm') dialogForm!: NgForm;
 
@@ -108,6 +179,9 @@ if (data.assignedUserIds && data.assignedUserIds.length > 0) {
     if (this.isPrivateGroup) {
       this.form.assignedUserIds = data.currentUserId ? [Number(data.currentUserId)] : [];
     }
+
+    // 重點：最後才建立初始快照
+  this.setOriginalFormSnapshot();
 
     // 群組活動預設不強制選第一個，讓使用者自己勾選
     // 如果你想預設勾第一個成員，可以打開下面這段

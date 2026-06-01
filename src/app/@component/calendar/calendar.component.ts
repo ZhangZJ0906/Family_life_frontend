@@ -44,6 +44,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
   styleUrl: './calendar.component.scss',
 })
 export class CalendarComponent {
+
   selectedGroupId: any;
   userGroupList: DropDownGroupList[] = [];
   currentGroupId: number = 0;
@@ -65,6 +66,13 @@ tooltipEvent = {
   endTime: '',
   notifyBefore: 0,
   groupName: '',
+
+  // 是否為私人活動
+  // 私人活動不顯示「指派成員」
+  isPrivateGroup: true,
+
+  // 群組活動才顯示
+  assignedUserNames: [] as string[],
 };
   routeGroupId: number = 0;
 
@@ -170,57 +178,76 @@ tooltipEvent = {
     });
 }
 
+// 判斷目前選到的群組
+isSelectedGroup(groupId: number): boolean {
+  return Number(groupId) === Number(this.selectedGroupId);
+}
   getUserGroupList(userId: number) {
-    this.http
-      .getApi(this.http.basicUrl + `family_life/getGroupList?user_Id=${userId}`)
-      .subscribe({
-        next: (res: any) => {
-          if (res.code != 200) {
-            Swal.fire({
-              title: '拉取群組錯誤',
-              text: res.message || 'server error',
-              icon: 'error',
-            });
-            return;
-          }
-          this.userGroupList = res.groupIdList;
-
-          this.userGroupList = Object.entries(res.groupIdList).map(
-            ([id, name]) => ({
-              groupId: Number(id),
-              groupName: name as string,
-            }),
-          );
-          this.userGroupList.unshift({
-            groupId: 0,
-            groupName: '私人活動',
-          });
-
-          // 取得網址上的 groupId
-          this.routeGroupId = Number(
-            this.route.snapshot.paramMap.get('groupId'),
-          );
-
-          // 如果網址沒有 groupId 就預設私人
-          if (!this.routeGroupId && this.routeGroupId !== 0) {
-            this.routeGroupId = 0;
-          }
-
-          this.selectedGroupId = this.routeGroupId;
-          this.currentGroupId = this.routeGroupId;
-          this.getGroupMembers(this.currentGroupId);
-          this.loadCalendarEvents(this.currentGroupId, this.createdBy);
-        },
-        error: (err) => {
+  this.http
+    // 改用 profile 頁相同概念的群組清單 API
+    // 這支 API 需要回傳 groupList，裡面要有 groupId、groupName、avatar
+    .getApi(this.http.basicUrl + `family_life/get_group_list?user_id=${userId}`)
+    .subscribe({
+      next: (res: any) => {
+        if (res.code !== 200 && res.groupList == null) {
           Swal.fire({
             title: '拉取群組錯誤',
-            text: err.message || 'server error',
+            text: res.message || 'server error',
             icon: 'error',
           });
           return;
-        },
-      });
-  }
+        }
+
+        // Profile 頁使用的是 res.groupList
+        // 每個 group 建議包含：
+        // group.groupId
+        // group.groupName
+        // group.avatar
+        const groups = (res.groupList ?? []).map((group: any) => ({
+          groupId: Number(group.groupId),
+          groupName: group.groupName,
+          avatar: group.avatar || 'assets/default-avatar.png',
+        }));
+
+        // 私人活動固定放第一個
+        // 如果你想私人活動顯示使用者頭像，也可以改成 this.userInfo.avatar
+        this.userGroupList = [
+          {
+            groupId: 0,
+            groupName: '私人活動',
+            avatar: this.userInfo?.avatar || 'assets/default-avatar.png',
+          },
+          ...groups,
+        ];
+
+        // 取得網址上的 groupId
+        this.routeGroupId = Number(
+          this.route.snapshot.paramMap.get('groupId'),
+        );
+
+        // 如果網址沒有 groupId 就預設私人活動
+        if (!this.routeGroupId && this.routeGroupId !== 0) {
+          this.routeGroupId = 0;
+        }
+
+        this.selectedGroupId = this.routeGroupId;
+        this.currentGroupId = this.routeGroupId;
+
+        this.getGroupMembers(this.currentGroupId);
+        this.loadCalendarEvents(this.currentGroupId, this.createdBy);
+      },
+
+      error: (err) => {
+        Swal.fire({
+          title: '拉取群組錯誤',
+          text: err.message || 'server error',
+          icon: 'error',
+        });
+      },
+    });
+}
+
+
 // 從後端查詢目前登入者在某個群組中的行事曆事件
 loadCalendarEvents(groupId: number | null, userId: number): void {
   const realGroupId = groupId == null ? 0 : Number(groupId);
@@ -426,6 +453,22 @@ getBatchAssignedUserIds(
       },
     });
   });
+}
+
+// 依照 userId 找出群組成員名稱
+getMemberNameById(userId: number): string {
+  const member = this.groupMemberList.find((m: any) => {
+    const memberId = Number(m.user_id ?? m.userId);
+    return memberId === Number(userId);
+  });
+
+  return (
+    member?.userName ||
+    member?.user_name ||
+    member?.name ||
+    member?.email ||
+    `成員 ${userId}`
+  );
 }
 
 async openUpdateDialog(info: EventClickArg): Promise<void> {
@@ -743,19 +786,45 @@ async handleEventDrop(info: any): Promise<void> {
   });
 }
   // 滑鼠移到活動上時，顯示活動資訊卡
-handleEventMouseEnter(info: any): void {
+async handleEventMouseEnter(info: any): Promise<void> {
   const event = info.event;
 
+  // 取得活動所屬群組
   const groupId = event.extendedProps?.groupId ?? this.currentGroupId;
 
+  // 判斷是否為私人活動
+  const isPrivateGroup = Number(groupId) === 0;
+
+  // 找出群組名稱
   const group = this.userGroupList.find(
     (g) => Number(g.groupId) === Number(groupId)
   );
 
-  const groupName =
-    Number(groupId) === 0
-      ? '私人活動'
-      : group?.groupName || '未選擇群組';
+  const groupName = isPrivateGroup
+    ? '私人活動'
+    : group?.groupName || '未選擇群組';
+
+  // 預設不顯示指派成員
+  let assignedUserNames: string[] = [];
+
+  // 群組活動才查同一批指派成員
+  if (!isPrivateGroup) {
+    const eventBatchId = event.extendedProps?.eventBatchId;
+
+    const fallbackAssignedUserId =
+      event.extendedProps?.assignedUserId ?? this.createdBy;
+
+    // 查同一批活動的 assignedUserIds
+    const assignedUserIds = await this.getBatchAssignedUserIds(
+      eventBatchId,
+      fallbackAssignedUserId
+    );
+
+    // 把 userId 轉成使用者名稱
+    assignedUserNames = assignedUserIds.map((id) =>
+      this.getMemberNameById(Number(id))
+    );
+  }
 
   this.tooltipEvent = {
     title: event.title || '未命名活動',
@@ -763,7 +832,9 @@ handleEventMouseEnter(info: any): void {
     startTime: this.formatTooltipDateTime(event.start),
     endTime: event.end ? this.formatTooltipDateTime(event.end) : '未設定',
     notifyBefore: event.extendedProps?.notifyBefore ?? 0,
-    groupName: groupName,
+    groupName,
+    isPrivateGroup,
+    assignedUserNames,
   };
 
   // 讓資訊卡出現在滑鼠右下方
