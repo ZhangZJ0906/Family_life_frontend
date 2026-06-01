@@ -394,7 +394,7 @@ export class ItemListAddDialogComponent implements OnInit {
     };
 
     if (!payload.productName?.trim())  { this.showError('請輸入產品名稱');  return; }
-    if (!payload.groupId)              { this.showError('請選擇所屬群組');  return; }
+    if (payload.groupId==null)              { this.showError('請選擇所屬群組');  return; }
     if (!payload.purchaseDate)         { this.showError('請選擇購買日期');  return; }
     if (!payload.warrantyEndDate)      { this.showError('請選擇保固到期日'); return; }
 

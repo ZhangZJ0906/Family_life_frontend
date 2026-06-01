@@ -169,7 +169,7 @@ export class ItemListEditDialogComponent implements OnInit {
 
     // 2. 基本必填欄位檢查
     if (!this.item.name?.trim()) return true;
-    if (!this.item.groupId) return true;
+    if (this.item.groupId==null) return true;
     if (!this.item.categoryId) return true;
 
     // 3. 依照各種類別分別實施更嚴格的必填驗證
@@ -209,7 +209,7 @@ export class ItemListEditDialogComponent implements OnInit {
   onOkClose(userId: number): void {
     // 防呆雙保險：如果因任何緣故按鈕未鎖定，進入方法時重新校驗
     if (!this.item.name?.trim()) { this.showError('請輸入物品名稱'); return; }
-    if (!this.item.groupId) { this.showError('請選擇所屬群組'); return; }
+    if (this.item.groupId==null) { this.showError('請選擇所屬群組'); return; }
     if (!this.item.categoryId) { this.showError('請選擇分類'); return; }
 
     const newCat = this.categories.find(
