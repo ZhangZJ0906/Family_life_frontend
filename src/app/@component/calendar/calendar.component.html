@@ -56,4 +56,46 @@
     <full-calendar [options]="calendarOptions"></full-calendar>
   </section>
 
+  <!-- 滑鼠移到活動上時顯示的資訊卡 -->
+  @if (showEventTooltip) {
+    <div
+      class="event-tooltip"
+      [style.left.px]="tooltipX"
+      [style.top.px]="tooltipY"
+    >
+      <div class="tooltip-header">
+        <div class="tooltip-icon">📅</div>
+
+        <div>
+          <div class="tooltip-title">
+            {{ tooltipEvent.title }}
+          </div>
+
+          <div class="tooltip-group">
+            {{ tooltipEvent.groupName }}
+          </div>
+        </div>
+      </div>
+
+      <div class="tooltip-row">
+        <span>開始時間</span>
+        <strong>{{ tooltipEvent.startTime }}</strong>
+      </div>
+
+      <div class="tooltip-row">
+        <span>結束時間</span>
+        <strong>{{ tooltipEvent.endTime }}</strong>
+      </div>
+
+      <div class="tooltip-row">
+        <span>提醒時間</span>
+        <strong>{{ tooltipEvent.notifyBefore }} 分鐘前</strong>
+      </div>
+
+      <div class="tooltip-desc">
+        {{ tooltipEvent.description }}
+      </div>
+    </div>
+  }
+
 </div>
