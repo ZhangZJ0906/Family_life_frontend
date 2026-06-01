@@ -178,6 +178,8 @@ tooltipEvent = {
     });
 }
 
+
+
 // 判斷目前選到的群組
 isSelectedGroup(groupId: number): boolean {
   return Number(groupId) === Number(this.selectedGroupId);
@@ -837,11 +839,10 @@ async handleEventMouseEnter(info: any): Promise<void> {
     assignedUserNames,
   };
 
-  // 讓資訊卡出現在滑鼠右下方
-  this.tooltipX = info.jsEvent.clientX + 16;
-  this.tooltipY = info.jsEvent.clientY + 16;
+// 設定 Tooltip 位置，避免超出畫面
+this.setTooltipPosition(info.jsEvent);
 
-  this.showEventTooltip = true;
+this.showEventTooltip = true;
 }
 
 // 滑鼠離開活動時，關閉資訊卡
@@ -862,5 +863,43 @@ formatTooltipDateTime(date: Date | null): string {
   const minute = String(date.getMinutes()).padStart(2, '0');
 
   return `${year}-${month}-${day} ${hour}:${minute}`;
+}
+
+// 計算 Tooltip 顯示位置，避免超出畫面右邊或下方
+setTooltipPosition(mouseEvent: MouseEvent): void {
+  // Tooltip 寬度要跟 SCSS 的 .event-tooltip width 對應
+  const tooltipWidth = 300;
+
+  // 預估 Tooltip 高度，可依內容調整
+  const tooltipHeight = 260;
+
+  // Tooltip 跟滑鼠的距離
+  const gap = 16;
+
+  let x = mouseEvent.clientX + gap;
+  let y = mouseEvent.clientY + gap;
+
+  // 如果右邊空間不夠，就顯示在滑鼠左邊
+  if (x + tooltipWidth > window.innerWidth - gap) {
+    x = mouseEvent.clientX - tooltipWidth - gap;
+  }
+
+  // 如果下方空間不夠，就往上顯示
+  if (y + tooltipHeight > window.innerHeight - gap) {
+    y = window.innerHeight - tooltipHeight - gap;
+  }
+
+  // 避免超出左邊
+  if (x < gap) {
+    x = gap;
+  }
+
+  // 避免超出上方
+  if (y < gap) {
+    y = gap;
+  }
+
+  this.tooltipX = x;
+  this.tooltipY = y;
 }
 }

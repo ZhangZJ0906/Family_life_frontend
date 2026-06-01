@@ -417,6 +417,8 @@
   z-index: 99999;
 
   width: 300px;
+  max-width: calc(100vw - 32px);
+
   padding: 14px 16px;
 
   background: #111827;
@@ -426,6 +428,10 @@
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.32);
 
   pointer-events: none;
+
+  /* 避免內容把卡片撐爆 */
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 /* 資訊卡上方標題區 */
@@ -531,10 +537,13 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-}
 
+  max-height: 72px;
+  overflow-y: auto;
+}
 /* 指派成員 chip */
 .tooltip-member-chip {
+  max-width: 120px;
   padding: 4px 8px;
 
   border-radius: 999px;
@@ -547,6 +556,10 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 群組下拉選單寬度 */
