@@ -102,47 +102,19 @@ h2 {
 
 .add-form {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) 100px 140px minmax(150px, 0.7fr) auto;
-  align-items: end;
+  grid-template-columns: minmax(220px, 1fr) 110px 150px auto;
+  align-items: start;
   gap: 12px;
 }
 
+.add-form:has(.assignee-field) {
+  grid-template-columns: minmax(220px, 1fr) 110px 150px minmax(150px, 0.7fr) auto;
+}
+
 .field {
-  display: grid;
-  gap: 7px;
+  width: 100%;
   color: #344258;
   font-weight: 800;
-}
-
-.item-row .assignee-field {
-  width: 150px;
-  gap: 4px;
-  font-size: 0.82rem;
-}
-
-.item-row .assignee-field select {
-  min-height: 34px;
-  padding: 0 8px;
-  font-size: 0.9rem;
-}
-
-input,
-select {
-  min-height: 42px;
-  width: 100%;
-  padding: 0 12px;
-  border: 1px solid #c9d3df;
-  border-radius: 6px;
-  background: #ffffff;
-  color: #172033;
-  font: inherit;
-  box-sizing: border-box;
-}
-
-input:focus,
-select:focus {
-  border-color: #4270a8;
-  outline: 3px solid rgba(66, 112, 168, 0.18);
 }
 
 button {
@@ -180,6 +152,9 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-height: 56px;
+  padding-top: 8px;
+  white-space: nowrap;
 }
 
 .icon-button {
@@ -234,7 +209,6 @@ button:disabled {
 .item-row {
   min-height: 62px;
   display: grid;
-  /* 改為 4 欄：內容、數量、修改按鈕、刪除按鈕 */
   grid-template-columns: minmax(0, 1fr) auto auto auto;
   align-items: center;
   gap: 12px;
@@ -244,6 +218,10 @@ button:disabled {
   background: #fbfcfe;
 }
 
+.item-row.mat-mdc-card {
+  display: grid;
+  box-shadow: none;
+}
 
 .item-row.is-checked {
   background: #eef7f1;
@@ -321,6 +299,24 @@ button:disabled {
   .summary-grid,
   .add-form {
     grid-template-columns: 1fr;
+  }
+
+  .add-form:has(.assignee-field) {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    min-height: 0;
+    padding-top: 0;
+  }
+
+  .item-row,
+  .item-row.mat-mdc-card {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .item-row button {
+    justify-self: start;
   }
 
   .icon-button {

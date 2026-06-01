@@ -10,7 +10,17 @@ import { ShoppingListService } from '../../@services/shopping-list.service';
 import { DropDownGroupList, Item, LocationAndCategory } from '../../common/interfaceList';
 import { ItemListAddDialogComponent } from '../../@component/item-list-add-dialog/item-list-add-dialog.component';
 import { HttpClientService } from '../../@services/http-client.service';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatListModule } from '@angular/material/list';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import Swal from 'sweetalert2';
 
 
 interface GroupOption {
@@ -30,7 +40,17 @@ type GroupFilter = number | null | 'all';
 
 @Component({
   selector: 'app-shopping-list',
-  imports: [CommonModule, FormsModule, RouterLink, TopbarComponent],
+  imports: [CommonModule, FormsModule, RouterLink, TopbarComponent,
+    MatButtonModule,
+    MatIconModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatDialogModule,
+    MatCheckboxModule,
+    MatProgressBarModule
+  ],
   templateUrl: './shopping-list.component.html',
   styleUrl: './shopping-list.component.scss'
 })
@@ -50,8 +70,6 @@ export class ShoppingListComponent implements OnInit {
   itemsByListId: Record<number, PurchaseItemVo[]> = {};
   membersByGroupId: Record<number, GroupMember[]> = {};
   loadingMembersByGroupId: Record<number, boolean> = {};
-
-
 
   isLoading = false;
   isCreating = false;

@@ -10,6 +10,15 @@ import { TopbarComponent } from "../../shared/topbar/topbar.component";
 import { LocationAndCategory } from '../../common/interfaceList';
 import { HttpClientService } from '../../@services/http-client.service';
 import { HttpClient } from '@angular/common/http';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatListModule } from '@angular/material/list';
+import { MatIconModule } from '@angular/material/icon';
+import Swal from 'sweetalert2';
+
 
 interface GroupMember {
   user_id: number;
@@ -19,11 +28,23 @@ interface GroupMember {
 
 @Component({
   selector: 'app-purchase-item',
-  imports: [CommonModule, FormsModule, RouterLink, TopbarComponent],
+  imports: [CommonModule, TopbarComponent,
+    FormsModule,
+    RouterLink,
+    MatButtonModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatListModule,
+    MatIconModule,
+  ],
   templateUrl: './purchase-item.component.html',
   styleUrl: './purchase-item.component.scss'
 })
 export class PurchaseItemComponent implements OnInit {
+
+  private readonly hiddenPurchaseCategoryIds = new Set([4, 6]); //categories_id = 4 & 6 不顯示在購物清單新增項目中
 
   listId = 0;
   userId = 1;
@@ -73,6 +94,10 @@ export class PurchaseItemComponent implements OnInit {
     return this.editingItemId !== null;
   }
 
+  get purchaseCategories(): LocationAndCategory[] {
+    return this.categories.filter((category) => !this.hiddenPurchaseCategoryIds.has(category.id));
+  }
+
   loadCategories(): void {
     this.http.getApi(`${this.http.basicUrl}categories/get`).subscribe({
       next: (res: any) => {
@@ -85,14 +110,15 @@ export class PurchaseItemComponent implements OnInit {
           name: name as string
         }));
 
-        if (this.categories.length > 0 && !this.categories.some((category) => category.id === this.newItem.categoryId)) {
-          this.newItem.categoryId = this.categories[0].id;
+        if (this.purchaseCategories.length > 0 && !this.purchaseCategories.some((category) =>
+            category.id === this.newItem.categoryId)) {
+            this.newItem.categoryId = this.purchaseCategories[0].id;
+          }
+        },
+        error: (err) => {
+          console.error(err);
+          this.formError = '分類載入失敗，請稍後再試';
         }
-      },
-      error: (err) => {
-        console.error(err);
-        this.formError = '分類載入失敗，請稍後再試';
-      }
     });
   }
 
@@ -147,6 +173,11 @@ export class PurchaseItemComponent implements OnInit {
       return;
     }
 
+    if (!this.purchaseCategories.some((category) => category.id === this.newItem.categoryId)) {
+      this.formError = '請選擇有效的購物分類';
+      return;
+    }
+
     const req: AddPurchaseItemReq = {
       listId: this.listId,
       createrId: this.userId,
@@ -195,7 +226,9 @@ export class PurchaseItemComponent implements OnInit {
     this.newItem = {
       item: item.item,
       quantity: item.quantity,
-      categoryId: item.categoryId,
+      categoryId: this.hiddenPurchaseCategoryIds.has(item.categoryId)
+        ? this.purchaseCategories[0]?.id ?? this.newItem.categoryId
+        : item.categoryId,
       assignedUserId: this.hasGroup ? item.userId : this.userId
     };
   }

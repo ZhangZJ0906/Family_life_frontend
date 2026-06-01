@@ -1,14 +1,23 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../@services/auth.service';
 import { Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-register',
-  imports: [FormsModule,
+  imports: [CommonModule,
+            FormsModule,
             RouterLink,
-            MatIconModule],
+            MatIconModule,
+            MatButtonModule,
+            MatFormFieldModule,
+            MatInputModule],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss'
 })
@@ -22,17 +31,47 @@ export class RegisterComponent {
   name = '';
   email = '';
   password = '';
+  confirmPassword = '';
   avatar = '';
   is_notify: boolean = true;
 
-  register(): void {
-    if (!this.email || !this.name || !this.password ) {
-      alert('請完整填寫 姓名、Email、密碼');
-      return;
+  get passwordError(): string {
+    if (!this.password) {
+      return '';
     }
 
     if (this.password.length < 6) {
-      alert('密碼至少需要 6 個字元');
+      return '密碼至少需要 6 個字元';
+    }
+
+    return '';
+  }
+
+  get confirmPasswordError(): string {
+    if (!this.confirmPassword) {
+      return '';
+    }
+
+    if (this.password !== this.confirmPassword) {
+      return '兩次輸入的密碼不一致';
+    }
+
+    return '';
+  }
+
+  register(): void {
+    if (!this.email || !this.name || !this.password || !this.confirmPassword) {
+      alert('請完整填寫 姓名、Email、密碼、確認密碼');
+      return;
+    }
+
+    if (this.passwordError) {
+      alert(this.passwordError);
+      return;
+    }
+
+    if (this.password !== this.confirmPassword) {
+      alert('兩次輸入的密碼不一致');
       return;
     }
 
