@@ -62,6 +62,7 @@ export const routes: Routes = [
       import('./@components/purchase-item/purchase-item.component').then(
         (m) => m.PurchaseItemComponent,
       ),
+    canDeactivate: [pendingChangesGuard]// 切換頁面如果未儲存就會跳出為儲存警告
   },
   {
 

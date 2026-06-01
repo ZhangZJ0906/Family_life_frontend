@@ -50,6 +50,9 @@ export class PurchaseItemComponent implements OnInit {
     assignedUserId: 1
   };
 
+  //切到其它分頁時護衛模式
+  isDirty = false;
+
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
@@ -211,6 +214,8 @@ loadItems(): void {
       check: false
     });
 
+    //暫存
+    this.isDirty = true;
     this.resetForm();
   }
 
@@ -270,6 +275,7 @@ loadItems(): void {
           showConfirmButton: false,
         });
 
+        this.isDirty = false;
         this.resetForm();
         this.loadItems();
       },
@@ -437,55 +443,73 @@ loadItems(): void {
   }
 
   getGroupMember() {
-  if (!this.hasGroup) {
-    this.members = [];
-    return;
-  }
+    if (!this.hasGroup) {
+      this.members = [];
+      return;
+    }
 
-  this.isLoadingMembers = true;
+    this.isLoadingMembers = true;
 
-  this.httpclient.get<any>(
-    `http://localhost:8080/family_life/get_members?group_id=${this.groupId}`
-  ).subscribe({
+    this.httpclient.get<any>(
+      `http://localhost:8080/family_life/get_members?group_id=${this.groupId}`
+    ).subscribe({
 
-    next: (res) => {
-      if (res.code !== 200) {
+      next: (res) => {
+        if (res.code !== 200) {
+          this.members = [];
+          this.isLoadingMembers = false;
+
+          Swal.fire({
+            icon: 'error',
+            title: '群組成員載入失敗',
+            text: res.message || '請稍後再試',
+            confirmButtonText: '確認',
+          });
+
+          return;
+        }
+
+        this.members = res.groupMembersList ?? [];
+
+        if (!this.members.some((member) => member.user_id === this.newItem.assignedUserId)) {
+          this.newItem.assignedUserId = this.members[0]?.user_id ?? this.userId;
+        }
+
+        this.isLoadingMembers = false;
+      },
+
+      error: (err) => {
+        console.log(err);
+
         this.members = [];
         this.isLoadingMembers = false;
 
         Swal.fire({
           icon: 'error',
           title: '群組成員載入失敗',
-          text: res.message || '請稍後再試',
+          text: err.error?.message || '請稍後再試',
           confirmButtonText: '確認',
         });
-
-        return;
       }
 
-      this.members = res.groupMembersList ?? [];
+    });
+  }
 
-      if (!this.members.some((member) => member.user_id === this.newItem.assignedUserId)) {
-        this.newItem.assignedUserId = this.members[0]?.user_id ?? this.userId;
-      }
+  canDeactivate(): Promise<boolean> | boolean {
 
-      this.isLoadingMembers = false;
-    },
-
-    error: (err) => {
-      console.log(err);
-
-      this.members = [];
-      this.isLoadingMembers = false;
-
-      Swal.fire({
-        icon: 'error',
-        title: '群組成員載入失敗',
-        text: err.error?.message || '請稍後再試',
-        confirmButtonText: '確認',
-      });
+    if (!this.isDirty) {
+      return true;
     }
 
-  });
-}
+    return Swal.fire({
+      title: '尚未儲存',
+      text: '是否離開此頁面？未儲存的資料將會遺失',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: '離開',
+      cancelButtonText: '留在此頁'
+    }).then(result => {
+      return result.isConfirmed;
+    });
+  }
 }
