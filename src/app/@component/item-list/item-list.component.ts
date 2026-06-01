@@ -227,11 +227,15 @@ export class ItemListComponent {
 
   // Edit Dialog 回傳的 _type → 更新 API 端點對應表
   // 注意：edit-dialog 回傳的是 'item'（不是 'general'），確保 key 一致
-  private readonly updateApiMap: Record<string, string> = {
+  private updateApiMap: Record<string, string> = {
     item: 'item/update',
     subscription: 'subscription/update',
     warranty: 'warranty/update',
     medicine: 'medicine/update',
+    notifyOnly: 'item/updateNotify', // ✅
+    subscriptionNotifyOnly: 'subscription/updateNotify', // ✅
+    warrantyNotifyOnly: 'warranty/updateNotify', // ✅
+    medicineNotifyOnly: 'medicine/updateNotify', // ✅
   };
   private refreshTableData(newData: any[]) {
     this.dataSource.data = newData;
@@ -308,8 +312,6 @@ export class ItemListComponent {
         locationMap: this.location,
         categoriesMap: this.categories,
         groups: this.userGroups,
-        // 同上，由 currentMode 計算
-        // 全域搜尋模式下，dialog 會改用 row.categoryId 判斷分類，三個 boolean 均為 false 沒關係
         isSubscriptionMode: this.currentMode === TableMode.Subscription,
         isWarrantyMode: this.currentMode === TableMode.Warranty,
         isMedicineMode: this.currentMode === TableMode.Medicine,
@@ -321,6 +323,7 @@ export class ItemListComponent {
 
       // edit-dialog 回傳的 _type 為 'item' | 'subscription' | 'warranty' | 'medicine'
       const { _type, ...payload } = result;
+      console.log(_type)
       payload.userId = this.currentUserId;
 
       const url = this.basicUrl + (this.updateApiMap[_type] ?? 'item/update');

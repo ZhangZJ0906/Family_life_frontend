@@ -51,7 +51,6 @@ export class ItemListEditDialogComponent implements OnInit {
   constructor(
     public dialogRef: MatDialogRef<ItemListEditDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-
   ) {
     this.group = this.data.groups ?? [];
   }
@@ -61,8 +60,8 @@ export class ItemListEditDialogComponent implements OnInit {
       this.item = { ...this.data.item };
 
       this.location = this.data.locationMap || [];
-      this.categories = this.data.categoriesMap || [];
-      this.categories.shift()
+      this.categories = [...(this.data.categoriesMap || [])];
+      this.categories.shift();
 
       if (!this.item.categoryId) {
         let modeCategoryName = '';
@@ -159,17 +158,26 @@ export class ItemListEditDialogComponent implements OnInit {
       return this.specialCategories.includes(cat.name);
     }
   }
-
+  get isExpired(): boolean {
+    if (!this.item) return false;
+    return this.item.status === '已到期' || this.item.status === '已逾期扣款';
+  }
   /**
    * ✨ 核心檢查防呆：控管 HTML 確認按鈕的 [disabled] 狀態
    */
   isSubmitDisabled(): boolean {
     // 1. 如果資料完全沒有變更，直接停用
     if (!this.hasChange) return true;
-
+    if (this.isExpired) {
+      return (
+        !this.item.name?.trim() ||
+        this.item.groupId == null ||
+        !this.item.categoryId
+      );
+    }
     // 2. 基本必填欄位檢查
     if (!this.item.name?.trim()) return true;
-    if (this.item.groupId==null) return true;
+    if (this.item.groupId == null) return true;
     if (!this.item.categoryId) return true;
 
     // 3. 依照各種類別分別實施更嚴格的必填驗證
@@ -207,16 +215,41 @@ export class ItemListEditDialogComponent implements OnInit {
   }
 
   onOkClose(userId: number): void {
+    if (this.isExpired) {
+      let notifyType = 'notifyOnly'; // 預設一般物品
+
+      if (this.isSubscriptionCategory()) notifyType = 'subscriptionNotifyOnly';
+      else if (this.isWarrantyCategory()) notifyType = 'warrantyNotifyOnly';
+      else if (this.isMedicineCategory()) notifyType = 'medicineNotifyOnly';
+
+      this.dialogRef.close({
+        _type: notifyType,
+        id: this.item.id,
+        notify: this.item.notify,
+      });
+      return;
+    }
     // 防呆雙保險：如果因任何緣故按鈕未鎖定，進入方法時重新校驗
-    if (!this.item.name?.trim()) { this.showError('請輸入物品名稱'); return; }
-    if (this.item.groupId==null) { this.showError('請選擇所屬群組'); return; }
-    if (!this.item.categoryId) { this.showError('請選擇分類'); return; }
+    if (!this.item.name?.trim()) {
+      this.showError('請輸入物品名稱');
+      return;
+    }
+    if (this.item.groupId == null) {
+      this.showError('請選擇所屬群組');
+      return;
+    }
+    if (!this.item.categoryId) {
+      this.showError('請選擇分類');
+      return;
+    }
 
     const newCat = this.categories.find(
       (cat) => Number(cat.id) === Number(this.item.categoryId),
     );
     const newCatName = newCat?.name || '';
-    const isOriginalSpecial = this.specialCategories.includes(this.originalCategoryName);
+    const isOriginalSpecial = this.specialCategories.includes(
+      this.originalCategoryName,
+    );
     const isNewSpecial = this.specialCategories.includes(newCatName);
 
     if (isOriginalSpecial && newCatName !== this.originalCategoryName) {
@@ -240,10 +273,22 @@ export class ItemListEditDialogComponent implements OnInit {
     let payload: any;
 
     if (this.isSubscriptionCategory()) {
-      if (this.item.price === null || this.item.price < 0) { this.showError('請輸入正確的訂閱金額'); return; }
-      if (!this.item.billingCycle) { this.showError('請選擇扣款週期'); return; }
-      if (!this.item.purchaseDate) { this.showError('請選擇購買日期'); return; }
-      if (!this.item.trialEndDate) { this.showError('請選擇試用結束日'); return; }
+      if (this.item.price === null || this.item.price < 0) {
+        this.showError('請輸入正確的訂閱金額');
+        return;
+      }
+      if (!this.item.billingCycle) {
+        this.showError('請選擇扣款週期');
+        return;
+      }
+      if (!this.item.purchaseDate) {
+        this.showError('請選擇購買日期');
+        return;
+      }
+      if (!this.item.trialEndDate) {
+        this.showError('請選擇試用結束日');
+        return;
+      }
 
       payload = {
         _type: 'subscription',
@@ -259,8 +304,14 @@ export class ItemListEditDialogComponent implements OnInit {
         note: this.item.note,
       };
     } else if (this.isWarrantyCategory()) {
-      if (!this.item.purchaseDate) { this.showError('請選擇購買日期'); return; }
-      if (!this.item.warrantyEndDate) { this.showError('請選擇保固到期日'); return; }
+      if (!this.item.purchaseDate) {
+        this.showError('請選擇購買日期');
+        return;
+      }
+      if (!this.item.warrantyEndDate) {
+        this.showError('請選擇保固到期日');
+        return;
+      }
 
       payload = {
         _type: 'warranty',
@@ -279,9 +330,18 @@ export class ItemListEditDialogComponent implements OnInit {
         note: this.item.note,
       };
     } else if (this.isMedicineCategory()) {
-      if (this.item.quantity < 0) { this.showError('數量不能小於 0'); return; }
-      if (!this.item.unit?.trim()) { this.showError('請輸入藥品單位'); return; }
-      if (!this.item.expireDate) { this.showError('請選擇藥品到期日期'); return; }
+      if (this.item.quantity < 0) {
+        this.showError('數量不能小於 0');
+        return;
+      }
+      if (!this.item.unit?.trim()) {
+        this.showError('請輸入藥品單位');
+        return;
+      }
+      if (!this.item.expireDate) {
+        this.showError('請選擇藥品到期日期');
+        return;
+      }
 
       payload = {
         _type: 'medicine',
@@ -298,16 +358,30 @@ export class ItemListEditDialogComponent implements OnInit {
         dosage: this.item.dosage,
         usageMethod: this.item.usageMethod,
         unitPrice: this.item.unitPrice,
-        location: this.item.locationId ? this.item.locationId.toString() : this.item.location,
+        location: this.item.locationId
+          ? this.item.locationId.toString()
+          : this.item.location,
         source: this.item.source,
         notify: this.item.notify,
         note: this.item.note,
       };
     } else {
-      if (this.item.quantity < 0) { this.showError('數量不能小於 0'); return; }
-      if (!this.item.locationId) { this.showError('請選擇存放位置'); return; }
-      if (!this.item.purchaseDate) { this.showError('請選擇購買日期'); return; }
-      if (!this.item.expireDate) { this.showError('請選擇到期日期'); return; }
+      if (this.item.quantity < 0) {
+        this.showError('數量不能小於 0');
+        return;
+      }
+      if (!this.item.locationId) {
+        this.showError('請選擇存放位置');
+        return;
+      }
+      if (!this.item.purchaseDate) {
+        this.showError('請選擇購買日期');
+        return;
+      }
+      if (!this.item.expireDate) {
+        this.showError('請選擇到期日期');
+        return;
+      }
 
       payload = {
         _type: 'item',
