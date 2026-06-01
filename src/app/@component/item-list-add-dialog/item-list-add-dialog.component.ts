@@ -200,7 +200,7 @@ export class ItemListAddDialogComponent implements OnInit {
   // ✅ 全面補強，四種模式都有完整驗證
   isSubmitDisabled(): boolean {
     if (!this.item.name?.trim())  return true;
-    if (!this.item.groupId)       return true;
+    if (this.item.groupId==null)       return true;
     if (!this.item.categoryId)    return true;
 
     if (this.isSubscriptionCategory()) {

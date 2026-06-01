@@ -192,23 +192,17 @@ export class ExpensesComponent {
   // ─── Dialog ─────────────────────────────────────────
   openCreateDialog() {
     const dialogRef = this.dialog.open(ExpensesAddComponent, {
-      // 跟物品清單 Dialog 接近的寬度
       width: '600px',
       maxWidth: '92vw',
-
-      // 不要太高，內容超過就讓內部滾動
       maxHeight: '86vh',
-
       panelClass: 'expense-create-dialog-panel',
       autoFocus: false,
-
       data: {
         categoryMap: this.categoryMap,
         groupList: this.userGroups,
         currentGroupId: this.currentGroupId,
       },
     });
-
     dialogRef.afterClosed().subscribe((result) => {
       if (result === true)
         this.getExpense(this.currentGroupId, this.currentUserId);
@@ -236,15 +230,6 @@ export class ExpensesComponent {
       dialogGroupId === 0
         ? '私人記帳'
         : currentGroup?.groupName || '未選擇群組';
-
-    console.log('編輯 Dialog 群組資訊:', {
-      currentGroupId: this.currentGroupId,
-      recordGroupId: record.groupId,
-      dialogGroupId,
-      currentGroupName,
-      userGroups: this.userGroups,
-    });
-
     const dialogRef = this.dialog.open(ExpensesEditComponent, {
       width: '600px',
       maxWidth: '92vw',
@@ -256,17 +241,14 @@ export class ExpensesComponent {
         categoryMap: this.categoryMap,
         relatedItem,
         currentUserId: this.currentUserId,
-        // 傳給編輯 Dialog 顯示唯讀記帳環境
         currentGroupId: dialogGroupId,
         currentGroupName: currentGroupName,
       },
     });
-
     dialogRef.afterClosed().subscribe((result) => {
       if (!result) {
         return;
       }
-
       this.getExpense(this.currentGroupId, this.currentUserId);
     });
   }

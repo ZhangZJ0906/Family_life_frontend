@@ -107,9 +107,9 @@ export class ItemListComponent {
     [TableMode.Medicine]: [
       'select',
       'name',
-      'price',
       'medicineType',
       'quantity',
+      'price',
       'expireDate',
       'usageMethod',
       'status',
