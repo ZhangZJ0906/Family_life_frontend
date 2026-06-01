@@ -98,6 +98,7 @@ export class HomePageComponent implements OnInit {
   onExpenseGroupChange(groupId: number): void {
     this.currentGroupId = groupId;
     this.getHomeMonthlyExpense();
+    this.loadAllCategoriesData();
   }
 
   // 上一個月
@@ -293,4 +294,33 @@ export class HomePageComponent implements OnInit {
         },
       });
   }
+
+  get expiringFoodCount(): number {
+  return this.itemsList.filter((item: any) =>
+    item.status === '即將到期'
+  ).length;
+}
+
+get medicineReminderCount(): number {
+  return this.medicineList.filter((item: any) =>
+    item.status === '即將到期' ||
+    item.status === '庫存不足' ||
+    item.status === '已到期'
+  ).length;
+}
+
+get warrantyExpiringCount(): number {
+  return this.warrantyList.filter((item: any) =>
+    item.status === '即將到期' ||
+    item.status === '即將到期'
+  ).length;
+}
+
+get subscriptionReminderCount(): number {
+  return this.subscriptionList.filter((item: any) =>
+    item.status === '即將扣款' ||
+    item.status === '試用即將結束' ||
+    item.status === '已逾期扣款'
+  ).length;
+}
 }
