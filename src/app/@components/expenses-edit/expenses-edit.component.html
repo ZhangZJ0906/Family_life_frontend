@@ -193,6 +193,7 @@
       type="button"
       class="save-btn"
       (click)="onSave()"
+      [disabled]="isNotModified"
     >
       <mat-icon>save</mat-icon>
       儲存修改

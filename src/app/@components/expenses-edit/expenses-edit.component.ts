@@ -39,7 +39,7 @@ export class ExpensesEditComponent {
   categories: LocationAndCategory[] = [];
   today = new Date();
   basicUrl!: string;
-  // 新增：記帳環境唯讀欄位
+  originalRecord: any;
   currentGroupId = 0;
   currentGroupName = '私人記帳';
   currentUserId!: number;
@@ -53,10 +53,10 @@ export class ExpensesEditComponent {
     this.record = this.data.record;
     this.basicUrl = this.http.basicUrl;
     this.currentUserId = this.data.currentUserId;
-    console.log(this.record);
-    // 新增：記帳環境唯讀顯示
     this.currentGroupId = data.currentGroupId ?? 0;
     this.currentGroupName = data.currentGroupName || '私人記帳';
+
+    this.originalRecord = JSON.parse(JSON.stringify(this.record));
   }
 
   private formatToBackendDate(dateInput: any): string {
@@ -79,6 +79,13 @@ export class ExpensesEditComponent {
   }
   onCancel() {
     this.dialogRef.close();
+  }
+  get isNotModified(): boolean {
+    // 1. 如果根本沒有原始資料，表示還在載入中
+    if (!this.originalRecord || !this.record) return false;
+
+    // 2. 正確的比對：當兩者字串完全一樣，代表「沒有修改」，回傳 true 讓按鈕 disabled
+    return JSON.stringify(this.record) === JSON.stringify(this.originalRecord);
   }
   onSave() {
     if (!this.record) return;
