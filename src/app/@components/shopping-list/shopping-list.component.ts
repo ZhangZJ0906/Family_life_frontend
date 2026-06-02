@@ -12,6 +12,8 @@ import { ItemListAddDialogComponent } from '../../@component/item-list-add-dialo
 import { HttpClientService } from '../../@services/http-client.service';
 import { MatDialog } from '@angular/material/dialog';
 
+import Swal from 'sweetalert2';
+
 
 interface GroupOption {
   id: number | 0;
@@ -205,28 +207,44 @@ export class ShoppingListComponent implements OnInit {
     });
   }
 
-  deleteList(list: ShoppingList): void {
-    const confirmed = confirm(`確定刪除「${list.title}」嗎？`);
+ async deleteList(list: ShoppingList): Promise<void> {
+  const result = await Swal.fire({
+    title: `確定刪除「${list.title}」嗎？`,
+    text: '刪除後無法復原',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: '刪除',
+    cancelButtonText: '取消'
+  });
 
-    if (!confirmed) {
-      return;
-    }
+  if (!result.isConfirmed) return;
 
-    this.shoppingService.deleteList(list.id).subscribe({
-      next: (res) => {
-        if (res.code !== 200) {
-          this.errorMessage = res.message ?? '刪除清單失敗';
-          return;
-        }
-
-        this.loadLists();
-      },
-      error: (err) => {
-        console.error(err);
-        this.errorMessage = err.error?.message ?? '刪除清單失敗';
+  this.shoppingService.deleteList(list.id).subscribe({
+    next: (res) => {
+      if (res.code !== 200) {
+        this.errorMessage = res.message ?? '刪除清單失敗';
+        return;
       }
-    });
-  }
+
+      Swal.fire({
+        icon: 'success',
+        title: '已刪除',
+        timer: 1200,
+        showConfirmButton: false
+      });
+
+      this.loadLists();
+    },
+    error: (err) => {
+      console.error(err);
+      Swal.fire({
+        icon: 'error',
+        title: '刪除失敗',
+        text: err.error?.message ?? '刪除清單失敗'
+      });
+    }
+  });
+}
 
   getGroupName(groupId: number | null): string {
     return this.groupOptions.find((group) => group.id === groupId)?.name ?? '未知群組';
@@ -339,11 +357,16 @@ export class ShoppingListComponent implements OnInit {
     return list.id;
   }
 
-  private handleUncheck(list: ShoppingList, item: PurchaseItemVo): void {
-    const confirmed = confirm(`確定取消「${item.item}」的已購買狀態？`);
-    if (!confirmed) {
-      return;
-    }
+  private async handleUncheck(list: ShoppingList, item: PurchaseItemVo): Promise<void> {
+    const result = await Swal.fire({
+      title: `取消「${item.item}」已購買？`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: '確認取消',
+      cancelButtonText: '返回'
+    });
+
+    if (!result.isConfirmed) return;
 
     this.deleteMatchedItemListItem(list, item, () => {
       this.updateShoppingItemCheck(list, item, false);
@@ -390,7 +413,11 @@ export class ShoppingListComponent implements OnInit {
         const matchedItem = this.findMatchedItemListItem(list, item, itemList);
 
         if (!matchedItem) {
-          alert('找不到對應的物品清單項目，未刪除也未取消勾選。');
+          Swal.fire({
+            icon: 'error',
+            title: '找不到對應的物品清單項目',
+            text: '未刪除也未取消勾選'
+          });
           return;
         }
 

@@ -121,9 +121,9 @@ export class NotifyDialogComponent implements OnInit {
     this.unreadMap.group = list.filter(n => n.isRead !== 1 && n.type === 'group').length;
     this.unreadMap.itemlist = list.filter(n => n.isRead !== 1 && n.type === 'itemlist').length;
     this.unreadMap.calendar = list.filter(n => n.isRead !== 1 && n.type === 'calendar').length;
-    this.unreadMap.calendar = list.filter(n => n.isRead !== 1 && n.type === 'calendar_self').length;
+    this.unreadMap.calendar_self = list.filter(n => n.isRead !== 1 && n.type === 'calendar_self').length;
     this.unreadMap.warring = list.filter(n => n.isRead !== 1 && n.type === 'warring').length;
-    this.unreadMap.warring = list.filter(n => n.isRead !== 1 && n.type === 'warring_self').length;
+    this.unreadMap.warring_self = list.filter(n => n.isRead !== 1 && n.type === 'warring_self').length;
     this.unreadMap.expense = list.filter(n => n.isRead !== 1 && n.type === 'expense').length;
     this.unreadMap.update = list.filter(n => n.isRead !== 1 && n.type === 'update').length;
   }

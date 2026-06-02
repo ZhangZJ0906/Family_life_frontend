@@ -136,8 +136,12 @@ export class ItemListComponent {
   currentUserId: any;
   lastSelectedRow: any = null;
   // 目前登入者自己的頭像
-// 私人物品會使用這個頭像
-currentUserAvatar = 'assets/default-avatar.png';
+  // 私人物品會使用這個頭像
+  currentUserAvatar = 'assets/default-avatar.png';
+
+  //上次登入時間
+  lastLoginTime!: Date;
+
 
   // 統一資料快取（取代四個 xxxList 屬性）
   cachedData: {
@@ -202,7 +206,11 @@ currentUserAvatar = 'assets/default-avatar.png';
   initData(groupId: number) {
     this.currentGroupId = groupId;
     if (groupId == null) groupId = 0;
-    this.getUserGroupData(groupId);
+    this.getLoginItemPageTime().then(() => {
+      console.log("login:", this.lastLoginTime);
+
+      this.getUserGroupData(groupId);
+    });
   }
   // 自動根據當前模式回傳欄位（取代可寫的 displayedColumns 屬性）
   get displayedColumns(): string[] {
@@ -525,6 +533,7 @@ getCurrentGroup() {
         .subscribe({
           next: (res: any) => {
             (this.cachedData as Record<string, any[]>)[mode] = res.data || [];
+            console.log("data", res);
           },
         });
     });
@@ -821,6 +830,34 @@ getCurrentGroup() {
     if (days < 0) return `已過期 ${Math.abs(days)} 天`;
     if (days === 0) return '今天到期';
     return `剩餘 ${days} 天`;
+  }
+
+  //抓取上次登入該page時間
+  getLoginItemPageTime(): Promise<void> {
+    return new Promise((resolve) => {
+      this.http
+        .getApi(`${this.basicUrl}item/getLoginItemPageTime?userId=${this.currentUserId}`)
+        .subscribe({
+          next: (res: any) => {
+            this.lastLoginTime = new Date(res);
+            resolve();
+          },
+          error: () => resolve(),
+        });
+    });
+  }
+
+  //判斷是否非私人新物品
+  isNewItem(createdTime: string | Date, createdBy: number): boolean {
+    if (createdBy == this.currentUserId) return false;
+    if (!createdTime || !this.lastLoginTime) return false;
+
+    const created = new Date(createdTime).getTime();
+    const login = this.lastLoginTime.getTime();
+
+    if (isNaN(created)) return false;
+
+    return created > login;
   }
 
   private showLoading(message = '處理中...'): void {
