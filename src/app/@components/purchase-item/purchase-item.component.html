@@ -1,128 +1,149 @@
-<app-topbar></app-topbar>
+<main class="page item-page">
+  <app-topbar></app-topbar>
 
-<main class="page">
   <a class="back-link" routerLink="/shopping-list">返回購物清單</a>
 
-  <section class="page-heading">
-    <div>
-      <p class="eyebrow" *ngIf="!isEditPage">Purchase Items</p>
-      <h1 *ngIf="!isEditPage">新增購物項目</h1>
-
-      <p class="eyebrow" *ngIf="isEditPage">Edit Items</p>
-      <h1 *ngIf="isEditPage">修改項目</h1>
+  <section class="item-header-card purchase-header-card">
+    <div class="item-title">
+      <div class="title-row">
+        <div class="title-icon">🧾</div>
+        @if (!isEditing) {
+          <h2>新增購物項目</h2>
+        } @else {
+          <h2>修改購物項目</h2>
+        }
+      </div>
+      <p>先建立項目清單，確認後一次儲存到購物清單。</p>
     </div>
 
-    <!-- <button class="ghost-button" type="button" (click)="loadItems()" [disabled]="isLoading" *ngIf="!isEditPage">
-      重新整理
-    </button> -->
+    <div class="header-actions">
+      <button mat-stroked-button type="button" (click)="loadItems()" [disabled]="isLoading">
+        <mat-icon>refresh</mat-icon>
+        重新整理
+      </button>
+    </div>
   </section>
 
-  <section class="add-panel" aria-label="新增購物項目">
+  <section class="add-panel table-card" aria-label="新增購物項目">
     <form class="add-form" (ngSubmit)="addItem()">
-      <label class="field item-field">
-        <span>項目名稱</span>
+      <mat-form-field class="field item-field" appearance="outline">
+        <mat-label>項目名稱</mat-label>
         <input
+          matInput
           type="text"
           name="item"
           [(ngModel)]="newItem.item"
           placeholder="例如：牛奶"
           autocomplete="off"
         />
-      </label>
+      </mat-form-field>
 
-      <label class="field quantity-field">
-        <span>數量</span>
+      <mat-form-field class="field quantity-field" appearance="outline">
+        <mat-label>數量</mat-label>
         <input
+          matInput
           type="number"
           name="quantity"
           [(ngModel)]="newItem.quantity"
           min="1"
           step="1"
         />
-      </label>
+      </mat-form-field>
 
-      <label class="field category-field">
-        <span>分類</span>
-        <select name="categoryId" [(ngModel)]="newItem.categoryId">
-          @for(cat of categories; track cat.id){
-            <option [ngValue]="cat.id">{{ cat.name }}</option>
+      <mat-form-field class="field category-field" appearance="outline">
+        <mat-label>分類</mat-label>
+        <mat-select name="categoryId" [(ngModel)]="newItem.categoryId">
+          @for (cat of purchaseCategories; track cat.id) {
+            <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
           }
+        </mat-select>
+      </mat-form-field>
 
-        </select>
-      </label>
-
-      <label class="field assignee-field" *ngIf="hasGroup">
-        <span>指派給</span>
-        <select
-          name="assignedUserId"
-          [(ngModel)]="newItem.assignedUserId"
-          [disabled]="isLoadingMembers || members.length === 0"
-        >
-          <option *ngIf="isLoadingMembers" [ngValue]="newItem.assignedUserId">
-            成員載入中...
-          </option>
-          <option *ngFor="let member of members; trackBy: trackByMemberId" [ngValue]="member.user_id">
-            {{ member.user_name }}
-          </option>
-        </select>
-      </label>
+      @if (hasGroup) {
+        <mat-form-field class="field assignee-field" appearance="outline">
+          <mat-label>指派給</mat-label>
+          <mat-select
+            name="assignedUserId"
+            [(ngModel)]="newItem.assignedUserId"
+            [disabled]="isLoadingMembers || members.length === 0"
+          >
+            @if (isLoadingMembers) {
+              <mat-option [value]="newItem.assignedUserId">成員載入中...</mat-option>
+            }
+            @for (member of members; track member.user_id) {
+              <mat-option [value]="member.user_id">{{ member.user_name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
 
       <div class="form-actions">
-        <button class="primary-button" type="submit" [disabled]="isSaving">
-          {{ isSaving ? (isEditPage ? '儲存中...' : '新增中...') : (isEditPage ? '儲存修改' : '確認新增') }}
+        <button mat-raised-button color="primary" type="submit" [disabled]="isSaving">
+          {{ isSaving ? (isEditing ? '儲存中...' : '新增中...') : (isEditing ? '儲存修改' : '新增項目') }}
         </button>
 
-        <button class="ghost-button" type="button" *ngIf="isEditPage" (click)="cancelEdit()" [disabled]="isSaving">
-          取消
-        </button>
+        @if (isEditing) {
+          <button mat-stroked-button type="button" (click)="cancelEdit()" [disabled]="isSaving">
+            取消
+          </button>
+        }
       </div>
     </form>
 
-    <p class="form-error" *ngIf="formError">{{ formError }}</p>
+    @if (formError) {
+      <p class="form-error">{{ formError }}</p>
+    }
   </section>
 
-  <section class="items-panel" aria-label="購物項目列表">
+  <section class="items-panel table-card" aria-label="購物項目列表">
     <div class="panel-header">
       <h2>項目列表</h2>
-      <!-- <span>{{ items.length }} 筆</span> -->
     </div>
 
-    <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
+    @if (errorMessage) {
+      <p class="error-message">{{ errorMessage }}</p>
+    }
 
-    <div class="state-box" *ngIf="isLoading">項目載入中...</div>
+    @if (isLoading) {
+      <div class="state-box">項目載入中...</div>
+    }
 
-    <div class="state-box" *ngIf="!isLoading && items.length === 0">
-      這份清單目前沒有項目，先新增第一個購物項目。
-    </div>
+    @if (!isLoading && items.length === 0) {
+      <div class="state-box">這份清單目前沒有項目，先新增第一個購物項目。</div>
+    }
 
-    <div class="item-list" *ngIf="!isLoading && items.length > 0">
-      <article
-        class="item-row"
-        *ngFor="let item of items; trackBy: trackByItemId"
-        [class.is-checked]="item.check"
-      >
-        <div class="item-content">
-          <strong>{{ item.item }}</strong>
-          <small>{{ getCategoryName(item.categoryId) }}</small>
-          <small *ngIf="hasGroup">指派給：{{ getMemberName(item.userId) }}</small>
-        </div>
+    @if (!isLoading && items.length > 0) {
+      <div class="item-list">
+        @for (item of items; track item.id) {
+          <mat-card class="item-row" [class.is-checked]="item.check">
+            <div class="item-content">
+              <strong>{{ item.item }}</strong>
+              <small>{{ getCategoryName(item.categoryId) }}</small>
+              @if (hasGroup) {
+                <small>指派給：{{ getMemberName(item.userId) }}</small>
+              }
+            </div>
 
-        <span class="quantity">x {{ item.quantity }}</span>
+            <span class="quantity">x {{ item.quantity }}</span>
 
-        <button class="icon-button" type="button" (click)="editItem(item)" aria-label="修改項目">
-          修改
+            <button mat-button type="button" (click)="editItem(item)" aria-label="修改項目">
+              <mat-icon>edit</mat-icon>
+              修改
+            </button>
+
+            <button mat-button color="warn" type="button" (click)="deleteItem(item)" aria-label="刪除項目">
+              <mat-icon>delete</mat-icon>
+              刪除
+            </button>
+          </mat-card>
+        }
+      </div>
+
+      <div class="confirm-actions">
+        <button mat-raised-button color="primary" type="button" (click)="confirmItems()" [disabled]="isSaving || isEditing">
+          確認
         </button>
-
-        <button class="icon-button" type="button" (click)="deleteItem(item)" aria-label="刪除項目">
-          刪除
-        </button>
-      </article>
-    </div>
-
-    <div class="confirm-actions" *ngIf="!isLoading && items.length > 0">
-      <button class="primary-button" type="button" (click)="confirmItems()" [disabled]="isSaving || isEditing" *ngIf="!isEditPage">
-        送出
-      </button>
-    </div>
+      </div>
+    }
   </section>
 </main>
