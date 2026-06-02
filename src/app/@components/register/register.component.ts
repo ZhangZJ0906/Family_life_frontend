@@ -61,17 +61,32 @@ export class RegisterComponent {
 
   register(): void {
     if (!this.email || !this.name || !this.password || !this.confirmPassword) {
-      alert('請完整填寫 姓名、Email、密碼、確認密碼');
+      Swal.fire({
+        icon: 'warning',
+        title: '資料未填完整',
+        text: '請完整填寫姓名、Email、密碼、確認密碼',
+        confirmButtonText: '確認',
+      });
       return;
     }
 
     if (this.passwordError) {
-      alert(this.passwordError);
+      Swal.fire({
+        icon: 'warning',
+        title: '密碼格式不正確',
+        text: this.passwordError,
+        confirmButtonText: '確認',
+      });
       return;
     }
 
     if (this.password !== this.confirmPassword) {
-      alert('兩次輸入的密碼不一致');
+      Swal.fire({
+        icon: 'warning',
+        title: '確認密碼錯誤',
+        text: '兩次輸入的密碼不一致',
+        confirmButtonText: '確認',
+      });
       return;
     }
 
@@ -86,21 +101,44 @@ export class RegisterComponent {
         console.log('register response:', res);
 
         if (res.code === 200) {
-          alert('註冊成功');
-          this.router.navigate(['/login']);
+          Swal.fire({
+            icon: 'success',
+            title: '註冊成功',
+            text: '請使用新帳號登入',
+            timer: 1200,
+            showConfirmButton: false,
+          }).then(() => {
+            this.router.navigate(['/login']);
+          });
           return;
         }
-        alert(res.message ?? '註冊失敗');
+
+        Swal.fire({
+          icon: 'error',
+          title: '註冊失敗',
+          text: res.message ?? '請稍後再試',
+          confirmButtonText: '確認',
+        });
       },
       error: (err) => {
       console.error(err);
 
       if (err.error?.message === 'PASSWORD_ERROR') {
-        alert('密碼格式不正確，請至少輸入 6 個字元');
+        Swal.fire({
+          icon: 'warning',
+          title: '密碼格式不正確',
+          text: '請至少輸入 6 個字元',
+          confirmButtonText: '確認',
+        });
         return;
       }
 
-      alert(err.error?.message ?? '註冊失敗');
+      Swal.fire({
+        icon: 'error',
+        title: '註冊失敗',
+        text: err.error?.message ?? '請稍後再試',
+        confirmButtonText: '確認',
+      });
     }
     });
   }

@@ -158,6 +158,12 @@ export class ShoppingListComponent implements OnInit {
         console.error(err);
         this.errorMessage = '購物清單載入失敗，請稍後再試';
         this.isLoading = false;
+        Swal.fire({
+          icon: 'error',
+          title: '購物清單載入失敗',
+          text: err.error?.message ?? '請稍後再試',
+          confirmButtonText: '確認',
+        });
       }
     });
   }
@@ -191,6 +197,12 @@ export class ShoppingListComponent implements OnInit {
 
     if (!title) {
       this.formError = '請輸入清單名稱';
+      Swal.fire({
+        icon: 'warning',
+        title: '資料未填完整',
+        text: '請輸入清單名稱',
+        confirmButtonText: '確認',
+      });
       return;
     }
 
@@ -210,39 +222,86 @@ export class ShoppingListComponent implements OnInit {
         if (res.code !== 200) {
           this.formError = res.message ?? '建立清單失敗';
           this.isCreating = false;
+          Swal.fire({
+            icon: 'error',
+            title: '建立失敗',
+            text: this.formError,
+            confirmButtonText: '確認',
+          });
           return;
         }
 
+        Swal.fire({
+          icon: 'success',
+          title: '建立成功',
+          text: '接著新增購物項目',
+          timer: 1000,
+          showConfirmButton: false,
+        });
         this.navigateToNewestList();
       },
       error: (err) => {
         console.error(err);
         this.formError = err.error?.message ?? '建立清單失敗';
         this.isCreating = false;
+        Swal.fire({
+          icon: 'error',
+          title: '建立失敗',
+          text: this.formError,
+          confirmButtonText: '確認',
+        });
       }
     });
   }
 
   deleteList(list: ShoppingList): void {
-    const confirmed = confirm(`確定刪除「${list.title}」嗎？`);
-
-    if (!confirmed) {
-      return;
-    }
-
-    this.shoppingService.deleteList(list.id).subscribe({
-      next: (res) => {
-        if (res.code !== 200) {
-          this.errorMessage = res.message ?? '刪除清單失敗';
-          return;
-        }
-
-        this.loadLists();
-      },
-      error: (err) => {
-        console.error(err);
-        this.errorMessage = err.error?.message ?? '刪除清單失敗';
+    Swal.fire({
+      icon: 'warning',
+      title: '確定刪除？',
+      text: `確定刪除「${list.title}」嗎？`,
+      showCancelButton: true,
+      confirmButtonText: '刪除',
+      cancelButtonText: '取消',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#64748b',
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        return;
       }
+
+      this.shoppingService.deleteList(list.id).subscribe({
+        next: (res) => {
+          if (res.code !== 200) {
+            this.errorMessage = res.message ?? '刪除清單失敗';
+            Swal.fire({
+              icon: 'error',
+              title: '刪除失敗',
+              text: this.errorMessage,
+              confirmButtonText: '確認',
+            });
+            return;
+          }
+
+          Swal.fire({
+            icon: 'success',
+            title: '刪除成功',
+            text: `「${list.title}」已刪除`,
+            timer: 1000,
+            showConfirmButton: false,
+          });
+          this.loadLists();
+        },
+        error: (err) => {
+          console.error(err);
+          this.errorMessage = err.error?.message ?? '刪除清單失敗';
+          Swal.fire({
+            icon: 'error',
+            title: '刪除失敗',
+            text: this.errorMessage,
+            confirmButtonText: '確認',
+          });
+        }
+      });
     });
   }
 
@@ -342,11 +401,12 @@ export class ShoppingListComponent implements OnInit {
   }
 
   getMemberName(groupId: number | null, userId: number): string {
-    if (groupId === null) {
+    if (!groupId) {
       return '';
     }
 
-    return this.membersByGroupId[groupId]?.find((member) => member.user_id === userId)?.user_name ?? `UID: ${userId}`;
+    return this.membersByGroupId[groupId]?.find((
+      member) => member.user_id === userId)?.user_name ?? '';
   }
 
   isLoadingMembers(groupId: number | null): boolean {
@@ -358,13 +418,23 @@ export class ShoppingListComponent implements OnInit {
   }
 
   private handleUncheck(list: ShoppingList, item: PurchaseItemVo): void {
-    const confirmed = confirm(`確定取消「${item.item}」的已購買狀態？`);
-    if (!confirmed) {
-      return;
-    }
+    Swal.fire({
+      icon: 'warning',
+      title: '取消已購買？',
+      text: `確定取消「${item.item}」的已購買狀態？`,
+      showCancelButton: true,
+      confirmButtonText: '確認取消',
+      cancelButtonText: '保留',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#64748b',
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        return;
+      }
 
-    this.deleteMatchedItemListItem(list, item, () => {
-      this.updateShoppingItemCheck(list, item, false);
+      this.deleteMatchedItemListItem(list, item, () => {
+        this.updateShoppingItemCheck(list, item, false);
+      });
     });
   }
 
@@ -381,6 +451,12 @@ export class ShoppingListComponent implements OnInit {
 
     this.shoppingService.updateCheck(list.id, item.id, nextValue, this.userId).subscribe({
       next: () => {
+        Swal.fire({
+          icon: nextValue ? 'success' : 'info',
+          title: nextValue ? '已標記為購買' : '已取消購買狀態',
+          timer: 900,
+          showConfirmButton: false,
+        });
         this.loadItemsForList(list.id);
       },
       error: (err) => {
@@ -389,6 +465,12 @@ export class ShoppingListComponent implements OnInit {
         item.checkDate = previousCheckDate;
         item.checkMan = previousCheckMan;
         this.errorMessage = err.error?.message ?? '更新購買狀態失敗';
+        Swal.fire({
+          icon: 'error',
+          title: '更新失敗',
+          text: this.errorMessage,
+          confirmButtonText: '確認',
+        });
       }
     });
   }
@@ -408,7 +490,12 @@ export class ShoppingListComponent implements OnInit {
         const matchedItem = this.findMatchedItemListItem(list, item, itemList);
 
         if (!matchedItem) {
-          alert('找不到對應的物品清單項目，未刪除也未取消勾選。');
+          Swal.fire({
+            icon: 'warning',
+            title: '找不到對應物品',
+            text: '找不到對應的物品清單項目，未刪除也未取消勾選。',
+            confirmButtonText: '確認',
+          });
           return;
         }
 
@@ -416,6 +503,12 @@ export class ShoppingListComponent implements OnInit {
           next: (deleteRes: any) => {
             if (deleteRes.code !== 200) {
               this.errorMessage = deleteRes.message ?? '刪除物品清單項目失敗';
+              Swal.fire({
+                icon: 'error',
+                title: '刪除失敗',
+                text: this.errorMessage,
+                confirmButtonText: '確認',
+              });
               return;
             }
 
@@ -424,12 +517,24 @@ export class ShoppingListComponent implements OnInit {
           error: (err) => {
             console.error(err);
             this.errorMessage = err.error?.message ?? '刪除物品清單項目失敗';
+            Swal.fire({
+              icon: 'error',
+              title: '刪除失敗',
+              text: this.errorMessage,
+              confirmButtonText: '確認',
+            });
           }
         });
       },
       error: (err) => {
         console.error(err);
         this.errorMessage = err.error?.message ?? '查詢物品清單項目失敗';
+        Swal.fire({
+          icon: 'error',
+          title: '查詢失敗',
+          text: this.errorMessage,
+          confirmButtonText: '確認',
+        });
       }
     });
   }

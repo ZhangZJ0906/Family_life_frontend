@@ -1,28 +1,30 @@
-<app-topbar></app-topbar>
+<main class="page item-page">
+  <app-topbar></app-topbar>
 
-<main class="page">
   <a class="back-link" routerLink="/shopping-list">返回購物清單</a>
 
-  <section class="page-heading">
-    <div>
-      <p class="eyebrow" *ngIf="!isEditPage">Purchase Items</p>
-      <h1 *ngIf="!isEditPage">新增購物項目</h1>
-
-      <p class="eyebrow" *ngIf="isEditPage">Edit Items</p>
-      <h1 *ngIf="isEditPage">修改項目</h1>
+  <section class="item-header-card purchase-header-card">
+    <div class="item-title">
+      <div class="title-row">
+        <div class="title-icon">🧾</div>
+        @if (!isEditing) {
+          <h2>新增購物項目</h2>
+        } @else {
+          <h2>修改購物項目</h2>
+        }
+      </div>
+      <p>先建立項目清單，確認後一次儲存到購物清單。</p>
     </div>
 
-<<<<<<< HEAD
-    <button mat-stroked-button type="button" (click)="loadItems()" [disabled]="isLoading">
-      <mat-icon>refresh</mat-icon>
-=======
-    <!-- <button class="ghost-button" type="button" (click)="loadItems()" [disabled]="isLoading" *ngIf="!isEditPage">
->>>>>>> origin/main
-      重新整理
-    </button> -->
+    <div class="header-actions">
+      <button mat-stroked-button type="button" (click)="loadItems()" [disabled]="isLoading">
+        <mat-icon>refresh</mat-icon>
+        重新整理
+      </button>
+    </div>
   </section>
 
-  <section class="add-panel" aria-label="新增購物項目">
+  <section class="add-panel table-card" aria-label="新增購物項目">
     <form class="add-form" (ngSubmit)="addItem()">
       <mat-form-field class="field item-field" appearance="outline">
         <mat-label>項目名稱</mat-label>
@@ -76,7 +78,6 @@
       }
 
       <div class="form-actions">
-<<<<<<< HEAD
         <button mat-raised-button color="primary" type="submit" [disabled]="isSaving">
           {{ isSaving ? (isEditing ? '儲存中...' : '新增中...') : (isEditing ? '儲存修改' : '新增項目') }}
         </button>
@@ -86,15 +87,6 @@
             取消
           </button>
         }
-=======
-        <button class="primary-button" type="submit" [disabled]="isSaving">
-          {{ isSaving ? (isEditPage ? '儲存中...' : '新增中...') : (isEditPage ? '儲存修改' : '確認新增') }}
-        </button>
-
-        <button class="ghost-button" type="button" *ngIf="isEditPage" (click)="cancelEdit()" [disabled]="isSaving">
-          取消
-        </button>
->>>>>>> origin/main
       </div>
     </form>
 
@@ -103,7 +95,7 @@
     }
   </section>
 
-  <section class="items-panel" aria-label="購物項目列表">
+  <section class="items-panel table-card" aria-label="購物項目列表">
     <div class="panel-header">
       <h2>項目列表</h2>
     </div>
@@ -151,22 +143,7 @@
         <button mat-raised-button color="primary" type="button" (click)="confirmItems()" [disabled]="isSaving || isEditing">
           確認
         </button>
-<<<<<<< HEAD
       </div>
     }
-=======
-
-        <button class="icon-button" type="button" (click)="deleteItem(item)" aria-label="刪除項目">
-          刪除
-        </button>
-      </article>
-    </div>
-
-    <div class="confirm-actions" *ngIf="!isLoading && items.length > 0">
-      <button class="primary-button" type="button" (click)="confirmItems()" [disabled]="isSaving || isEditing" *ngIf="!isEditPage">
-        送出
-      </button>
-    </div>
->>>>>>> origin/main
   </section>
 </main>

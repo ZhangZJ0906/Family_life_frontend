@@ -10,7 +10,6 @@ import { TopbarComponent } from "../../shared/topbar/topbar.component";
 import { LocationAndCategory } from '../../common/interfaceList';
 import { HttpClientService } from '../../@services/http-client.service';
 import { HttpClient } from '@angular/common/http';
-<<<<<<< HEAD
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -20,9 +19,6 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import Swal from 'sweetalert2';
 
-=======
-import Swal from 'sweetalert2';
->>>>>>> origin/main
 
 interface GroupMember {
   user_id: number;
@@ -48,11 +44,8 @@ interface GroupMember {
 })
 export class PurchaseItemComponent implements OnInit {
 
-<<<<<<< HEAD
   private readonly hiddenPurchaseCategoryIds = new Set([4, 6]); //categories_id = 4 & 6 不顯示在購物清單新增項目中
-=======
   isEditPage = false;//目前路由是否為修改
->>>>>>> origin/main
 
   listId = 0;
   userId = 1;
@@ -132,7 +125,6 @@ export class PurchaseItemComponent implements OnInit {
           name: name as string
         }));
 
-<<<<<<< HEAD
         if (this.purchaseCategories.length > 0 && !this.purchaseCategories.some((category) =>
             category.id === this.newItem.categoryId)) {
             this.newItem.categoryId = this.purchaseCategories[0].id;
@@ -142,28 +134,6 @@ export class PurchaseItemComponent implements OnInit {
           console.error(err);
           this.formError = '分類載入失敗，請稍後再試';
         }
-=======
-        if (
-          this.categories.length > 0 &&
-          !this.categories.some((category) => category.id === this.newItem.categoryId)
-        ) {
-          this.newItem.categoryId = this.categories[0].id;
-        }
-      },
-
-      error: (err) => {
-        console.error(err);
-
-        this.formError = '分類載入失敗，請稍後再試';
-
-        Swal.fire({
-          icon: 'error',
-          title: '分類載入失敗',
-          text: err.error?.message || '請稍後再試',
-          confirmButtonText: '確認',
-        });
-      }
->>>>>>> origin/main
     });
   }
 
@@ -244,28 +214,35 @@ loadItems(): void {
       return;
     }
 
-<<<<<<< HEAD
     if (!this.purchaseCategories.some((category) => category.id === this.newItem.categoryId)) {
       this.formError = '請選擇有效的購物分類';
       return;
     }
 
-    const req: AddPurchaseItemReq = {
-=======
-    this.items.push({
-      id: this.editingItemId ?? 0, // 暫時 ID
->>>>>>> origin/main
+    const updatedItem: PurchaseItemVo = {
+      id: this.editingItemId ?? 0,
       listId: this.listId,
-      userId: this.hasGroup
-        ? this.newItem.assignedUserId
-        : this.userId,
+      userId: this.hasGroup ? this.newItem.assignedUserId : this.userId,
       categoryId: this.newItem.categoryId,
       item: itemName,
       quantity: this.newItem.quantity,
-      check: false
-    });
+      check: false,
+    };
 
-    //暫存
+    if (this.isEditing) {
+      const index = this.items.findIndex((item) => item.id === this.editingItemId);
+
+      if (index !== -1) {
+        this.items[index] = {
+          ...this.items[index],
+          ...updatedItem,
+        };
+      }
+    }
+    else {
+      this.items.push(updatedItem);
+    }
+
     this.isDirty = true;
     this.resetForm();
   }
@@ -289,13 +266,31 @@ loadItems(): void {
   }
 
   confirmItems(): void {
+    if (this.items.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: '尚未新增項目',
+        text: '請先新增至少一個購物項目',
+        confirmButtonText: '確認',
+      });
+      return;
+    }
+
     const req: AddPurchaseItemReq = {
       listId: this.listId,
       createrId: this.userId,
-      purchaseItemVoList: this.items
+      purchaseItemVoList: this.items.map((item) => ({
+        id: item.id ?? 0,
+        listId: this.listId,
+        userId: this.hasGroup ? item.userId : this.userId,
+        categoryId: item.categoryId,
+        item: item.item,
+        quantity: item.quantity,
+        check: item.check ?? false,
+      })),
     };
 
-    const request$ = this.isEditing
+    const request$ = this.isEditPage
       ? this.shoppingService.updateItem(req)
       : this.shoppingService.addItems(req);
 
@@ -308,11 +303,11 @@ loadItems(): void {
         if (res.code !== 200) {
           this.formError =
             res.message ??
-            (this.isEditing ? '修改購物項目失敗' : '新增購物項目失敗');
+            (this.isEditPage ? '修改購物項目失敗' : '新增購物項目失敗');
 
           Swal.fire({
             icon: 'error',
-            title: this.isEditing ? '修改失敗' : '新增失敗',
+            title: this.isEditPage ? '修改失敗' : '新增失敗',
             text: this.formError,
             confirmButtonText: '確認',
           });
@@ -322,15 +317,16 @@ loadItems(): void {
 
         Swal.fire({
           icon: 'success',
-          title: this.isEditing ? '修改成功' : '新增成功',
-          text: this.isEditing ? '購物項目已更新' : '購物項目已新增',
+          title: this.isEditPage ? '修改成功' : '新增成功',
+          text: this.isEditPage ? '購物項目已更新' : '購物項目已新增',
           timer: 1200,
           showConfirmButton: false,
+        }).then(() => {
+          this.router.navigate(['/shopping-list']);
         });
 
         this.isDirty = false;
         this.resetForm();
-        this.loadItems();
       },
 
       error: (err) => {
@@ -338,19 +334,18 @@ loadItems(): void {
 
         this.formError =
           err.error?.message ??
-          (this.isEditing ? '修改購物項目失敗' : '新增購物項目失敗');
+          (this.isEditPage ? '修改購物項目失敗' : '新增購物項目失敗');
 
         this.isSaving = false;
 
         Swal.fire({
           icon: 'error',
-          title: this.isEditing ? '修改失敗' : '新增失敗',
+          title: this.isEditPage ? '修改失敗' : '新增失敗',
           text: this.formError,
           confirmButtonText: '確認',
         });
       }
     });
-    this.router.navigate(['/shopping-list']);
   }
 
   private resetForm(): void {
@@ -375,6 +370,20 @@ loadItems(): void {
       cancelButtonColor: '#64748b',
     }).then((result) => {
       if (!result.isConfirmed) {
+        return;
+      }
+
+      if (item.id < 0) {
+        this.items = this.items.filter((current) => current.id !== item.id);
+        this.isDirty = true;
+
+        Swal.fire({
+          icon: 'success',
+          title: '刪除成功',
+          text: `「${item.item}」已從暫存清單移除`,
+          timer: 1000,
+          showConfirmButton: false,
+        });
         return;
       }
 
@@ -418,6 +427,11 @@ loadItems(): void {
         }
       });
     });
+  }
+
+  private getNextTempItemId(): number {
+    const minId = this.items.reduce((min, item) => Math.min(min, item.id), 0);
+    return minId < 0 ? minId - 1 : -1;
   }
 
   getCategoryName(categoryId: number): string {
