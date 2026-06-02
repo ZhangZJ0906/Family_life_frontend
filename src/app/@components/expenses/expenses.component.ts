@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -24,6 +24,8 @@ import { ExpensesEditComponent } from '../expenses-edit/expenses-edit.component'
 import Swal from 'sweetalert2';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
 import { ActivatedRoute } from '@angular/router';
+import { MatSort, MatSortHeader } from '@angular/material/sort';
+import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-expense-tracker',
@@ -42,15 +44,20 @@ import { ActivatedRoute } from '@angular/router';
     MatTableModule,
     MatIconModule,
     TopbarComponent,
+    MatSort,
+    MatSortHeader,
   ],
   templateUrl: './expenses.component.html',
   styleUrl: './expenses.component.scss',
 })
 export class ExpensesComponent {
+  @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   user: any;
   basicUrl!: string;
   groupUserInfo: { [key: number]: GroupUser } = {};
-  userGroups: DropDownGroupList[] = [];
+  userGroups: (DropDownGroupList & { avatar?: string })[] = [];
+  currentUserAvatar = 'assets/default-avatar.png';
   categoryMap: LocationAndCategory[] = [];
   dataSource = new MatTableDataSource<ExpenseRecord>([]);
   selection = new SelectionModel<ExpenseRecord>(true, []);
@@ -105,9 +112,14 @@ export class ExpensesComponent {
     // 取得目前登入者資料
     const raw = sessionStorage.getItem('family-life-current-user');
 
+
+
     if (raw) {
       this.user = JSON.parse(raw);
       this.currentUserId = this.user.user_id;
+
+      // 私人記帳使用登入者自己的頭像
+      this.currentUserAvatar = this.user.avatar || 'assets/default-avatar.png';
 
       this.getLoginExpensePageTime()
     }
@@ -147,6 +159,20 @@ export class ExpensesComponent {
 
     // 再載入群組，載入完成後會自動查私人記帳資料
     this.getUserGroupData();
+  }
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+
+    this.dataSource.sortingDataAccessor = (item: any, property: string) => {
+      switch (property) {
+        case 'price':
+          return item.price != null ? Number(item.price) : 0;
+        default:
+          // 其他欄位維持預設處理方式
+          return item[property];
+      }
+    };
   }
   overlayPositions: ConnectedPosition[] = [
     {
@@ -338,52 +364,64 @@ export class ExpensesComponent {
     });
   }
 
+  // 取得目前選到的群組，用在 mat-select-trigger 顯示頭像與名稱
+getCurrentGroup() {
+  return this.userGroups.find(
+    (group) => Number(group.groupId) === Number(this.currentGroupId),
+  );
+}
+
   getUserGroupData() {
-    this.http
-      .getApi(
-        this.basicUrl +
-          `family_life/getGroupList?user_Id=${this.currentUserId}`,
-      )
-      .subscribe({
-        next: (res: any) => {
-          if (res.code != 200) {
-            Swal.fire({
-              title: '錯誤',
-              text: res.message,
-              icon: 'error',
-            });
-            return;
-          }
-
-          // 後端回傳 groupIdList，例如：{ 1: '我的家庭' }
-          this.userGroups = Object.entries(res.groupIdList).map(
-            ([id, name]) => ({
-              groupId: Number(id),
-              groupName: name as string,
-            }),
-          );
-
-          // 私人記帳固定放第一個
-          this.userGroups.unshift({
-            groupId: 0,
-            groupName: '私人記帳',
-          });
-          const fromNotify = this.route.snapshot.queryParamMap.get('groupId');
-          this.currentGroupId = fromNotify ? Number(fromNotify) : 0;
-          // 查詢記帳資料
-          this.getExpense(this.currentGroupId, this.currentUserId);
-        },
-
-        error: (err) => {
+  this.http
+    .getApi(
+      this.basicUrl +
+        `family_life/get_group_list?user_id=${this.currentUserId}`,
+    )
+    .subscribe({
+      next: (res: any) => {
+        if (!res.groupList) {
           Swal.fire({
             title: '錯誤',
-            text: err.message,
+            text: res.message || '無法取得群組資料',
             icon: 'error',
           });
-        },
-      });
-  }
+          return;
+        }
 
+        // 群組資料，包含 groupId、groupName、avatar
+        const groups = res.groupList.map((group: any) => ({
+          groupId: Number(group.groupId),
+          groupName: group.groupName,
+          avatar: group.avatar || 'assets/default-avatar.png',
+        }));
+
+        // 私人記帳固定放第一個
+        // 私人頭像使用登入者自己的頭像
+        this.userGroups = [
+          {
+            groupId: 0,
+            groupName: '私人記帳',
+            avatar: this.currentUserAvatar || 'assets/default-avatar.png',
+          },
+          ...groups,
+        ];
+
+        const fromNotify = this.route.snapshot.queryParamMap.get('groupId');
+        this.currentGroupId = fromNotify ? Number(fromNotify) : 0;
+
+        // 查詢記帳資料
+        this.getExpense(this.currentGroupId, this.currentUserId);
+      },
+
+      error: (err) => {
+        Swal.fire({
+          title: '錯誤',
+          text: err.message,
+          icon: 'error',
+        });
+      },
+    });
+}
   onGroupChange(groupId: number) {
     // 切換目前群組
     this.currentGroupId = Number(groupId);
@@ -452,7 +490,9 @@ export class ExpensesComponent {
   getLoginExpensePageTime(): Promise<void> {
     return new Promise((resolve) => {
       this.http
-        .getApi(`${this.basicUrl}expense/getLoginExpensePageTime?userId=${this.currentUserId}`)
+        .getApi(
+          `${this.basicUrl}expense/getLoginExpensePageTime?userId=${this.currentUserId}`,
+        )
         .subscribe({
           next: (res: any) => {
             this.lastLoginTime = new Date(res);
