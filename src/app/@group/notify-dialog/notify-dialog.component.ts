@@ -42,6 +42,7 @@ export class NotifyDialogComponent implements OnInit {
     | 'calendar'
     | 'calendar_self'
     | 'warring'
+    | 'warring_self'
     | 'update' = 'all';
 
   unreadMap = {
@@ -53,6 +54,7 @@ export class NotifyDialogComponent implements OnInit {
     calendar: 0,
     calendar_self: 0,
     warring: 0,
+    warring_self: 0,
     update: 0
   };
 
@@ -121,6 +123,7 @@ export class NotifyDialogComponent implements OnInit {
     this.unreadMap.calendar = list.filter(n => n.isRead !== 1 && n.type === 'calendar').length;
     this.unreadMap.calendar = list.filter(n => n.isRead !== 1 && n.type === 'calendar_self').length;
     this.unreadMap.warring = list.filter(n => n.isRead !== 1 && n.type === 'warring').length;
+    this.unreadMap.warring = list.filter(n => n.isRead !== 1 && n.type === 'warring_self').length;
     this.unreadMap.expense = list.filter(n => n.isRead !== 1 && n.type === 'expense').length;
     this.unreadMap.update = list.filter(n => n.isRead !== 1 && n.type === 'update').length;
   }
@@ -324,7 +327,7 @@ this.router.navigate(['/expenses'], { queryParams: { groupId: n.sendUserId } });
 
     if (this.filterType === 'calendar') {
       return this.notifies.filter(n =>
-        n.type === 'calendar' || n.type === 'calendar_self' || n.type === 'warring'
+        n.type === 'calendar' || n.type === 'calendar_self' || n.type === 'warring' || n.type === 'warring_self'
       );
     }
 

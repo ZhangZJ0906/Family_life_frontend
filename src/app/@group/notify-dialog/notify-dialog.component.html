@@ -44,11 +44,12 @@
       </span>
     </button>
 
-    <button [class.active]="filterType === 'calendar' || filterType === 'calendar_self' || filterType === 'warring'" (click)="filterType = 'calendar'">
+    <button [class.active]="filterType === 'calendar' || filterType === 'calendar_self'
+     || filterType === 'warring' || filterType === 'warring_self'" (click)="filterType = 'calendar'">
       到期通知
 
-      <span class="tab-badge" *ngIf="(unreadMap.calendar + unreadMap.calendar_self + unreadMap.warring) > 0">
-        {{ unreadMap.calendar + unreadMap.calendar_self + unreadMap.warring}}
+      <span class="tab-badge" *ngIf="(unreadMap.calendar + unreadMap.calendar_self + unreadMap.warring + unreadMap.warring_self) > 0">
+        {{ unreadMap.calendar + unreadMap.calendar_self + unreadMap.warring + unreadMap.warring_self}}
       </span>
     </button>
 
@@ -137,7 +138,7 @@
         </ng-container>
 
         <!-- calendar -->
-        <ng-container *ngIf="n.type === 'calendar' || n.type === 'calendar_self' || n.type === 'warring'">
+        <ng-container *ngIf="n.type === 'calendar' || n.type === 'calendar_self' || n.type === 'warring' || n.type === 'warring_self'">
 
           <button class="view-btn" (click)="goCalendar(n)">
             查看
