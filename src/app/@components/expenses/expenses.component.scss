@@ -725,19 +725,43 @@ tr.mat-mdc-row:hover {
 }
 
 //新物品
-.name-wrapper {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+.item-name-wrapper {
+  position: relative;
+  display: inline-block;
+
+  padding-top: 10px; // 預留 badge 空間
+}
+
+.item-name {
+  display: inline-block;
 }
 
 .new-badge {
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 10px;
+  position: absolute;
+
+  top: -6px;
+  left: -12px;
+
+  min-width: 20px;
+  height: 20px;
+
+  border-radius: 999px;
+
   background: #ff3b30;
-  color: #fff;
-  font-weight: 600;
+  color: white;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 3px 8px rgba(255, 59, 48, .3);
+}
+
+.mat-mdc-cell {
+  overflow: visible !important;
 }
 
 /* =========================================================

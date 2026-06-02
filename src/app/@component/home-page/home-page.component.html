@@ -8,7 +8,7 @@
 
   <!-- 左邊：標題 -->
   <div class="welcome-text">
-    <h1>早安，Jack</h1>
+    <h1>早安，{{ currentUserName || '使用者' }}</h1>
     <p>今天有 3 件生活事項需要優先處理</p>
   </div>
 
@@ -91,7 +91,7 @@
       <div class="money-icon red-icon">↘</div>
       <div>
         <p>總額</p>
-        <h2 class="money-red">NT$ - 5,655</h2>
+        <h2 class="money-red">NT $ - 5,655</h2>
       </div>
     </div>
 
@@ -99,7 +99,7 @@
       <div class="money-icon green-icon">↗</div>
       <div>
         <p>收入</p>
-        <h2 class="money-green">NT$ 0</h2>
+        <h2 class="money-green">NT $ 0</h2>
       </div>
     </div>
 
@@ -107,7 +107,7 @@
       <div class="money-icon red-icon">💳</div>
       <div>
         <p>本月支出</p>
-        <h2 class="money-red">NT$ {{ monthlyExpense | number }}</h2>
+        <h2 class="money-red">NT $ {{ monthlyExpense | number }}</h2>
       </div>
     </div>
   </div>
@@ -156,34 +156,30 @@
     </section>
 
     <!-- 右邊：今日優先處理 -->
-    <section class="priority-card">
-      <h3>今日優先處理</h3>
+<section class="priority-card">
+  <h3>今日優先處理</h3>
 
-      <div class="task danger">
-        <div>
-          <h4>牛奶即將到期</h4>
-          <p>剩餘 2 天｜冰箱</p>
+  <div class="priority-list">
+    @if (priorityTasks.length > 0) {
+      @for (task of priorityTasks; track task.id) {
+        <div class="task" [ngClass]="task.levelClass">
+          <div>
+            <h4>{{ task.title }}</h4>
+            <p>{{ task.description }}</p>
+          </div>
+
+          <span>{{ task.levelText }}</span>
         </div>
-        <span>高</span>
-      </div>
-
-      <div class="task warning">
-        <div>
-          <h4>感冒藥庫存不足</h4>
-          <p>剩餘 1 盒｜藥品櫃</p>
-        </div>
-        <span>中</span>
-      </div>
-
+      }
+    } @else {
       <div class="task normal">
         <div>
-          <h4>Netflix 即將續扣</h4>
-          <p>明天扣款｜NT$390</p>
+          <h4>目前沒有優先事項</h4>
+          <p>目前群組沒有需要立即處理的生活提醒</p>
         </div>
+
         <span>低</span>
       </div>
-    </section>
-
-  </section>
-
-</div>
+    }
+  </div>
+</section>

@@ -165,6 +165,17 @@
   text-overflow: ellipsis;
 }
 
+//新活動
+:host ::ng-deep .new-tag {
+  background: #ff4d4f !important;
+  color: #fff !important;
+  font-weight: 900;
+  border-radius: 8px;
+  padding: 1px 6px;
+  font-size: 10px;
+  margin-right: 4px;
+}
+
 /* 讓 mat-option 裡面的自訂 div 吃滿寬度 */
 ::ng-deep .mat-mdc-option .mdc-list-item__primary-text {
   width: 100%;

@@ -45,7 +45,7 @@
       <div class="summary-card summary-expense">
         <div class="summary-info">
           <div class="label">本月支出</div>
-          <div class="value">${{ totalExpense() }}</div>
+          <div class="value">NT ${{ totalExpense() }}</div>
         </div>
 
         <div class="summary-icon expense-icon">
@@ -166,7 +166,7 @@
             @if (isNewItem(e.createdAt, e.userId) && !e.seen) {
             <span class="new-badge">NEW</span>
             }
-            {{ e.relatedItemName.length >=8 ? (e.relatedItemName | slice:0:10) + '...' : e.relatedItemName ||'--' }}
+            {{ e.relatedItemName.length >=8 ? (e.relatedItemName | slice:0:8) + '...' : e.relatedItemName ||'--' }}
           </td>
         </ng-container>
 
