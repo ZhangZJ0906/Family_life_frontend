@@ -204,16 +204,16 @@
       取消
     </button>
 
-    <button
-      mat-flat-button
-      color="primary"
-      type="button"
-      class="confirm-btn"
-      [disabled]="dialogForm.invalid"
-      (click)="confirm()"
-    >
-      確認
-    </button>
+   <button
+  mat-flat-button
+  color="primary"
+  type="button"
+  class="confirm-btn"
+  [disabled]="dialogForm.invalid || (data.mode === 'update' && !isFormChanged())"
+  (click)="confirm()"
+>
+  確認
+</button>
   </mat-dialog-actions>
 
 </div>

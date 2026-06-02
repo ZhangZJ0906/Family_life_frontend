@@ -175,6 +175,46 @@
   font-size: 14px;
 }
 
+/* 首頁群組下拉：目前選中的群組 */
+.home-selected-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* 首頁群組下拉：選項 */
+.home-group-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* 群組頭像 / 私人頭像 */
+.home-group-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+
+  background: #eef4ff;
+  border: 1px solid #e5e7eb;
+}
+
+/* 群組名稱文字 */
+.home-selected-group span,
+.home-group-option span {
+  font-size: 17px;
+  font-weight: 700;
+  color: #111827;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* 金額摘要橫向排列 */
 .money-row {
   display: grid;

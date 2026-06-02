@@ -353,6 +353,8 @@ export class ExpensesComponent {
             return;
           }
 
+
+
           // 後端回傳 groupIdList，例如：{ 1: '我的家庭' }
           this.userGroups = Object.entries(res.groupIdList).map(
             ([id, name]) => ({
@@ -360,6 +362,8 @@ export class ExpensesComponent {
               groupName: name as string,
             }),
           );
+
+
 
           // 私人記帳固定放第一個
           this.userGroups.unshift({
