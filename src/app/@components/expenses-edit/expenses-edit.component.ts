@@ -43,6 +43,7 @@ export class ExpensesEditComponent {
   currentGroupId = 0;
   currentGroupName = '私人記帳';
   currentUserId!: number;
+
   constructor(
     private http: HttpClientService,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -77,9 +78,11 @@ export class ExpensesEditComponent {
 
     return `${year}-${month}-${day}`;
   }
+
   onCancel() {
     this.dialogRef.close();
   }
+
   get isNotModified(): boolean {
     // 1. 如果根本沒有原始資料，表示還在載入中
     if (!this.originalRecord || !this.record) return false;
@@ -87,6 +90,7 @@ export class ExpensesEditComponent {
     // 2. 正確的比對：當兩者字串完全一樣，代表「沒有修改」，回傳 true 讓按鈕 disabled
     return JSON.stringify(this.record) === JSON.stringify(this.originalRecord);
   }
+
   onSave() {
     if (!this.record) return;
     // 1. 先解構複製一份，避免直接污染畫面綁定的 this.record
@@ -122,4 +126,5 @@ export class ExpensesEditComponent {
       },
     });
   }
+
 }

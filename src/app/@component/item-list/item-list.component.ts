@@ -136,11 +136,11 @@ export class ItemListComponent {
   currentUserId: any;
   lastSelectedRow: any = null;
   // 目前登入者自己的頭像
-// 私人物品會使用這個頭像
-currentUserAvatar = 'assets/default-avatar.png';
+  // 私人物品會使用這個頭像
+  currentUserAvatar = 'assets/default-avatar.png';
 
-//上次登入時間
-lastLoginTime!: Date;
+  //上次登入時間
+  lastLoginTime!: Date;
 
 
   // 統一資料快取（取代四個 xxxList 屬性）

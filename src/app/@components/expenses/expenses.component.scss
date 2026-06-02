@@ -724,6 +724,22 @@ tr.mat-mdc-row:hover {
   }
 }
 
+//新物品
+.name-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.new-badge {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  background: #ff3b30;
+  color: #fff;
+  font-weight: 600;
+}
+
 /* =========================================================
    RWD：手機
    ========================================================= */

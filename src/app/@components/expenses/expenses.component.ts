@@ -65,6 +65,9 @@ export class ExpensesComponent {
   selectedYear = signal(new Date().getFullYear());
   selectedMonth = signal(new Date().getMonth() + 1);
 
+  //上次登入時間
+  lastLoginTime!: Date;
+
   displayedColumns: string[] = [
     'select',
     'expense_date',
@@ -105,6 +108,8 @@ export class ExpensesComponent {
     if (raw) {
       this.user = JSON.parse(raw);
       this.currentUserId = this.user.user_id;
+
+      this.getLoginExpensePageTime()
     }
     // 設定表格篩選邏輯
     this.dataSource.filterPredicate = (data: ExpenseRecord, filter: string) => {
@@ -441,5 +446,33 @@ export class ExpensesComponent {
       .toLowerCase();
     this.dataSource.filter = JSON.stringify(this.filterValues);
     this.filteredExpense.set(this.dataSource.filteredData);
+  }
+
+  //抓取上次登入該page時間
+  getLoginExpensePageTime(): Promise<void> {
+    return new Promise((resolve) => {
+      this.http
+        .getApi(`${this.basicUrl}expense/getLoginExpensePageTime?userId=${this.currentUserId}`)
+        .subscribe({
+          next: (res: any) => {
+            this.lastLoginTime = new Date(res);
+            resolve();
+          },
+          error: () => resolve(),
+        });
+    });
+  }
+
+  //判斷是否非私人新物品
+  isNewItem(createdTime: string | Date, createdBy: number): boolean {
+    if (createdBy == this.currentUserId) return false;
+    if (!createdTime || !this.lastLoginTime) return false;
+
+    const created = new Date(createdTime).getTime();
+    const login = this.lastLoginTime.getTime();
+
+    if (isNaN(created)) return false;
+
+    return created > login;
   }
 }
