@@ -410,18 +410,32 @@ td.mat-mdc-cell {
 
 //新物品
 .name-wrapper {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  position: relative;
+  display: inline-block;
+  padding-top: 12px; // 避免 badge 壓到文字
 }
 
 .new-badge {
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 10px;
+  position: absolute;
+  top: -8px;
+  left: -18px;
+
+  transform: rotate(-15deg);
+
   background: #ff3b30;
   color: #fff;
-  font-weight: 600;
+
+  padding: 2px 8px;
+  border-radius: 4px;
+
+  font-size: 10px;
+  font-weight: bold;
+
+  box-shadow: 0 2px 4px rgba(0,0,0,.2);
+}
+
+.item-name {
+  display: inline-block;
 }
 
 /* 訂閱：試用中 */

@@ -133,14 +133,15 @@
                   <span class="new-badge">NEW</span>
                 }
               }
-
-              @else if (element.createdBy != null) {
-                @if (isNewItem(element.createdAt, element.createdBy)) {
+              @else if (element.createdById != null) {
+                @if (isNewItem(element.createdAt, element.createdById)) {
                   <span class="new-badge">NEW</span>
                 }
               }
 
-              {{ element.name.length >= 10 ? (element.name | slice:0:10) + '...' : element.name }}
+              <span class="item-name">
+                {{ element.name.length >= 10 ? (element.name | slice:0:10) + '...' : element.name }}
+              </span>
             </span>
           </td>
         </ng-container>

@@ -486,6 +486,8 @@ getCurrentGroup() {
           this.currentMode = TableMode.Item;
           this.refreshTableData(this.cachedData.item);
 
+          console.log("item:", res.items)
+
           // 背景載入其他三種資料，供全域搜尋的 allData 使用
           this.loadAllListSilently(groupId);
 
