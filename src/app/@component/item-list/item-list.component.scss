@@ -203,14 +203,14 @@
   justify-content: flex-end;
   align-items: center;
   gap: 14px;
-  margin-right: 145px;
+  margin-right: 220px;
   margin-top: 15px;
 }
 
 /* 群組選擇器 + 搜尋框：統一大小 */
 .group-select,
 .search-field {
-  width: 200px;
+  width: 180px;
   height: 72px;
   flex-shrink: 0;
 }
@@ -406,6 +406,22 @@ td.mat-mdc-cell {
 .status-low {
   background: #eef4ff;
   color: #2f80ed;
+}
+
+//新物品
+.name-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.new-badge {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  background: #ff3b30;
+  color: #fff;
+  font-weight: 600;
 }
 
 /* 訂閱：試用中 */
