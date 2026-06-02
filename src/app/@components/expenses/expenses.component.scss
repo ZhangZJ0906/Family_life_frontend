@@ -319,6 +319,19 @@
   white-space: nowrap;
 }
 
+.item-name-cell {
+  max-width: 180px;
+}
+
+.item-name-text {
+  display: inline-block;
+  max-width: 130px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
 .card-header .d-flex.gap-2 {
   display: flex;
   align-items: center;
@@ -451,15 +464,19 @@ td.mat-column-note {
   text-align: left;
 }
 
-/* 金額 */
+/* 金額欄位 */
 th.mat-column-price,
 td.mat-column-price {
-  width: 170px;
-  text-align: right;
-  padding-right: 50px !important;
-
+  width: 150px;
+  text-align: right !important;
+  padding-left: 14px !important;
+  padding-right: 28px !important;
 }
 
+/* mat-sort-header 內層也要對齊 */
+:host ::ng-deep th.mat-column-price .mat-sort-header-container {
+  justify-content: flex-end;
+}
 /* 消費者 */
 th.mat-column-user,
 td.mat-column-user {
@@ -496,11 +513,14 @@ td.mat-column-user {
 }
 
 /* 金額文字 */
+td.mat-column-price.price,
 .price {
   color: #d85c5c !important;
   font-weight: 900;
-  text-align: right;
+  text-align: right !important;
+  padding-right: 40px !important;
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 /* 分類 badge */
@@ -818,6 +838,8 @@ tr.mat-mdc-row:hover {
 .mat-mdc-cell {
   overflow: visible !important;
 }
+
+
 
 /* =========================================================
    RWD：手機
