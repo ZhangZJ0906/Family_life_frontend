@@ -106,11 +106,9 @@ export class ExpensesComponent {
       this.user = JSON.parse(raw);
       this.currentUserId = this.user.user_id;
     }
-
     // 設定表格篩選邏輯
     this.dataSource.filterPredicate = (data: ExpenseRecord, filter: string) => {
       const f = JSON.parse(filter);
-
       // 分類篩選
       const matchCategory =
         f.category == null || data.categoryId === f.category;
@@ -216,7 +214,6 @@ export class ExpensesComponent {
       this.currentGroupId !== null && this.currentGroupId !== undefined
         ? Number(this.currentGroupId)
         : Number(record.groupId ?? 0);
-
     /*
     取得群組名稱：
     - groupId = 0：私人記帳
@@ -353,8 +350,6 @@ export class ExpensesComponent {
             return;
           }
 
-
-
           // 後端回傳 groupIdList，例如：{ 1: '我的家庭' }
           this.userGroups = Object.entries(res.groupIdList).map(
             ([id, name]) => ({
@@ -362,8 +357,6 @@ export class ExpensesComponent {
               groupName: name as string,
             }),
           );
-
-
 
           // 私人記帳固定放第一個
           this.userGroups.unshift({
@@ -389,10 +382,8 @@ export class ExpensesComponent {
   onGroupChange(groupId: number) {
     // 切換目前群組
     this.currentGroupId = Number(groupId);
-
     // 清除勾選狀態
     this.selection.clear();
-
     // 重新查詢資料
     this.getExpense(this.currentGroupId, this.currentUserId);
   }
@@ -402,13 +393,8 @@ export class ExpensesComponent {
       groupId === undefined || groupId === null ? 0 : Number(groupId);
 
     const url = `${this.basicUrl}expense/getInfo?userId=${userId}&groupId=${finalGroupId}`;
-
-    console.log('查詢記帳 URL:', url);
-
     this.http.getApi(url).subscribe({
       next: (res: any) => {
-        console.log('記帳查詢回傳:', res);
-
         if (res.code !== 200) {
           Swal.fire({
             title: '錯誤',
@@ -417,17 +403,10 @@ export class ExpensesComponent {
           });
           return;
         }
-
-        const list =
-          res.list || res.expenseList || res.resultList || res.data || [];
-
+        const list = res.list || [];
         this.expense = [...list];
-
         this.itemMap = res.itemMap || {};
         this.groupUserInfo = res.userMap || {};
-
-        this.displayedColumns = this.getDisplayedColumns(finalGroupId);
-
         this.dataSource.data = this.expense;
         this.dataSource.filter = JSON.stringify(this.filterValues);
         this.filteredExpense.set(this.dataSource.filteredData);
@@ -443,24 +422,6 @@ export class ExpensesComponent {
         });
       },
     });
-  }
-
-  // 根據群組判斷要不要顯示「使用者」欄位
-  // 私人記帳 groupId = 0，不顯示 user 欄
-  // 群組記帳 groupId != 0，顯示 user 欄
-  private getDisplayedColumns(groupId: number): string[] {
-    const isGroup = groupId !== 0;
-
-    return [
-      'select',
-      'expense_date',
-      'related_item_name',
-      'category_id',
-      'note',
-      'price',
-      'user',
-      'actions',
-    ];
   }
 
   // ─── 篩選 ─────────────────────────────────────────────
