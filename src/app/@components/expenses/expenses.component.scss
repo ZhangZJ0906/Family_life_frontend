@@ -330,9 +330,10 @@
    篩選欄位
    ========================================================= */
 .filter-field {
-  width: 240px;
+  width: 200px;
   margin-bottom: 0;
   flex-shrink: 0;
+  height: 68px;
 }
 
 /* Angular Material 欄位白底 */
@@ -666,6 +667,60 @@ tr.mat-mdc-row:hover {
   background: #c7d7ff !important;
   transform: translateY(-2px);
   box-shadow: 0 18px 36px rgba(15, 23, 42, 0.26) !important;
+}
+
+/* =========================================================
+   記帳環境：群組頭像下拉
+   ========================================================= */
+
+/* 下拉關閉時目前選到的群組 */
+.expense-selected-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* 下拉選項 */
+.expense-group-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* 私人頭像 / 群組頭像 */
+.expense-group-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+
+  background: #eef4ff;
+  border: 1px solid #e5e7eb;
+}
+
+/* 群組名稱 */
+.expense-selected-group span,
+.expense-group-option span {
+  font-size: 15px;
+  font-weight: 800;
+  color: #111827;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 讓 mat-option 內部自訂 div 吃滿寬度 */
+::ng-deep .mat-mdc-option .mdc-list-item__primary-text {
+  width: 100%;
+}
+
+/* 下拉選項高度，讓頭像不擠 */
+::ng-deep .mat-mdc-option {
+  min-height: 54px !important;
 }
 
 /* =========================================================
