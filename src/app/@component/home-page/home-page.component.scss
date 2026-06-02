@@ -370,6 +370,15 @@
   border-radius: 22px;
   padding: 24px;
   box-sizing: border-box;
+
+  /* 固定高度，超過才會滾動 */
+  height: 400px;
+
+  display: flex;
+  flex-direction: column;
+
+  /* 不讓整張卡片自己滾動，只讓內部清單滾動 */
+  overflow: hidden;
 }
 
 /* 今日優先處理標題 */
@@ -377,6 +386,37 @@
   margin: 0 0 18px;
   font-size: 22px;
   font-weight: 800;
+  flex-shrink: 0;
+}
+
+/* 今日優先處理清單 */
+.priority-list {
+  flex: 1;
+  min-height: 0;
+
+  overflow-y: scroll;
+  overflow-x: hidden;
+
+  padding-right: 8px;
+}
+
+/* 滾輪樣式 */
+.priority-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.priority-list::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 999px;
+}
+
+.priority-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.priority-list::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 /* 優先處理項目 */
@@ -389,6 +429,9 @@
   margin-bottom: 12px;
 }
 
+.task:last-child {
+  margin-bottom: 0;
+}
 /* 優先處理標題 */
 .task h4 {
   margin: 0;
