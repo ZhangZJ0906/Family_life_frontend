@@ -1,4 +1,4 @@
-import { MatSort } from '@angular/material/sort';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 import {
   DropDownGroupList,
   Item,
@@ -25,7 +25,11 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { ItemListAddDialogComponent } from '../item-list-add-dialog/item-list-add-dialog.component';
 import { ItemListEditDialogComponent } from '../item-list-edit-dialog/item-list-edit-dialog.component';
-import { MatSelect, MatOption, MatSelectModule } from '@angular/material/select';
+import {
+  MatSelect,
+  MatOption,
+  MatSelectModule,
+} from '@angular/material/select';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../@services/auth.service';
@@ -54,6 +58,7 @@ export enum TableMode {
     MatChipListbox,
     MatChipOption,
     MatSelectModule,
+    MatSortModule,
     TopbarComponent,
   ],
   templateUrl: './item-list.component.html',
@@ -135,13 +140,11 @@ export class ItemListComponent {
   currentGroupId: any = null;
   currentUserId: any;
   lastSelectedRow: any = null;
-  // 目前登入者自己的頭像
-  // 私人物品會使用這個頭像
-  currentUserAvatar = 'assets/default-avatar.png';
+  currentUserAvatar = 'assets/default-avatar.png';//預設群組投向
+  
 
   //上次登入時間
   lastLoginTime!: Date;
-
 
   // 統一資料快取（取代四個 xxxList 屬性）
   cachedData: {
@@ -170,8 +173,8 @@ export class ItemListComponent {
     this.basicUrl = this.http.basicUrl;
     this.currentUserId = this.authService.currentUser()?.user_id ?? 0;
     // 目前登入者自己的頭像，私人物品使用
-    this.currentUserAvatar = this.authService.currentUser()?.avatar || 'assets/default-avatar.png';
-
+    this.currentUserAvatar =
+      this.authService.currentUser()?.avatar || 'assets/default-avatar.png';
   }
 
   ngOnInit() {
@@ -191,11 +194,16 @@ export class ItemListComponent {
         case 'expireOrEndDate':
         case 'warrantyEndDate':
         case 'nextBillingDate':
+        case 'nextBillingDate':
+        case 'trialEndDate':
+        case 'purchaseDate':
           const dateStr =
             item.expireDate ||
             item.expireOrEndDate ||
             item.warrantyEndDate ||
-            item.nextBillingDate;
+            item.nextBillingDate ||
+            item.trialEndDate ||
+            item.purchaseDate;
           return dateStr ? new Date(dateStr).getTime() : 0;
         default:
           return item[property];
@@ -207,7 +215,7 @@ export class ItemListComponent {
     this.currentGroupId = groupId;
     if (groupId == null) groupId = 0;
     this.getLoginItemPageTime().then(() => {
-      console.log("login:", this.lastLoginTime);
+      console.log('login:', this.lastLoginTime);
 
       this.getUserGroupData(groupId);
     });
@@ -336,7 +344,7 @@ export class ItemListComponent {
 
       // edit-dialog 回傳的 _type 為 'item' | 'subscription' | 'warranty' | 'medicine'
       const { _type, ...payload } = result;
-      console.log(_type)
+      console.log(_type);
       payload.userId = this.currentUserId;
 
       const url = this.basicUrl + (this.updateApiMap[_type] ?? 'item/update');
@@ -368,56 +376,56 @@ export class ItemListComponent {
   }
 
   // ─── API：取得群組列表 ────────────────────────────────────
-getUserGroupData(groupId: any) {
-  this.http
-    .getApi(
-      `${this.basicUrl}family_life/get_group_list?user_id=${this.currentUserId}`,
-    )
-    .subscribe({
-      next: (res: any) => {
-        if (!res.groupList) {
+  getUserGroupData(groupId: any) {
+    this.http
+      .getApi(
+        `${this.basicUrl}family_life/get_group_list?user_id=${this.currentUserId}`,
+      )
+      .subscribe({
+        next: (res: any) => {
+          if (!res.groupList) {
+            Swal.fire({
+              title: '拉取群組錯誤',
+              text: res.message || 'server error',
+              icon: 'error',
+            });
+            return;
+          }
+
+          // 使用 Profile 相同的群組資料格式
+          // groupList 內應該有 groupId、groupName、avatar
+          this.userGroups = res.groupList.map((group: any) => ({
+            groupId: Number(group.groupId),
+            groupName: group.groupName,
+            avatar: group.avatar || 'assets/default-avatar.png',
+          }));
+
+          // 私人物品固定放第一個，頭像用登入者自己的頭像
+          this.userGroups.unshift({
+            groupId: 0,
+            groupName: '私人物品',
+            avatar: this.currentUserAvatar || 'assets/default-avatar.png',
+          });
+
+          this.getItemByGroupId(groupId);
+        },
+
+        error: (err) => {
           Swal.fire({
             title: '拉取群組錯誤',
-            text: res.message || 'server error',
+            text: err.message || 'server error',
             icon: 'error',
           });
-          return;
-        }
+        },
+      });
+  }
 
-        // 使用 Profile 相同的群組資料格式
-        // groupList 內應該有 groupId、groupName、avatar
-        this.userGroups = res.groupList.map((group: any) => ({
-          groupId: Number(group.groupId),
-          groupName: group.groupName,
-          avatar: group.avatar || 'assets/default-avatar.png',
-        }));
-
-        // 私人物品固定放第一個，頭像用登入者自己的頭像
-        this.userGroups.unshift({
-          groupId: 0,
-          groupName: '私人物品',
-          avatar: this.currentUserAvatar || 'assets/default-avatar.png',
-        });
-
-        this.getItemByGroupId(groupId);
-      },
-
-      error: (err) => {
-        Swal.fire({
-          title: '拉取群組錯誤',
-          text: err.message || 'server error',
-          icon: 'error',
-        });
-      },
-    });
-}
-
-// 取得目前選中的群組資料
-getCurrentGroup() {
-  return this.userGroups.find(
-    (group) => Number(group.groupId) === Number(this.currentGroupId),
-  );
-}
+  // 取得目前選中的群組資料
+  getCurrentGroup() {
+    return this.userGroups.find(
+      (group) => Number(group.groupId) === Number(this.currentGroupId),
+    );
+  }
   // ─── API：統一查詢（訂閱 / 保固 / 藥品）────────────────────
   // 取代原本三個獨立的 getXxxByGroupId 方法
   private fetchGroupData(mode: TableMode, groupId: number | null): void {
@@ -533,7 +541,7 @@ getCurrentGroup() {
         .subscribe({
           next: (res: any) => {
             (this.cachedData as Record<string, any[]>)[mode] = res.data || [];
-            console.log("data", res);
+            console.log('data', res);
           },
         });
     });
@@ -836,7 +844,9 @@ getCurrentGroup() {
   getLoginItemPageTime(): Promise<void> {
     return new Promise((resolve) => {
       this.http
-        .getApi(`${this.basicUrl}item/getLoginItemPageTime?userId=${this.currentUserId}`)
+        .getApi(
+          `${this.basicUrl}item/getLoginItemPageTime?userId=${this.currentUserId}`,
+        )
         .subscribe({
           next: (res: any) => {
             this.lastLoginTime = new Date(res);
