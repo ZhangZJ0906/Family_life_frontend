@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -24,6 +24,8 @@ import { ExpensesEditComponent } from '../expenses-edit/expenses-edit.component'
 import Swal from 'sweetalert2';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
 import { ActivatedRoute } from '@angular/router';
+import { MatSort, MatSortHeader } from '@angular/material/sort';
+import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-expense-tracker',
@@ -42,11 +44,15 @@ import { ActivatedRoute } from '@angular/router';
     MatTableModule,
     MatIconModule,
     TopbarComponent,
+    MatSort,
+    MatSortHeader,
   ],
   templateUrl: './expenses.component.html',
   styleUrl: './expenses.component.scss',
 })
 export class ExpensesComponent {
+  @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   user: any;
   basicUrl!: string;
   groupUserInfo: { [key: number]: GroupUser } = {};
@@ -153,6 +159,20 @@ export class ExpensesComponent {
 
     // 再載入群組，載入完成後會自動查私人記帳資料
     this.getUserGroupData();
+  }
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+
+    this.dataSource.sortingDataAccessor = (item: any, property: string) => {
+      switch (property) {
+        case 'price':
+          return item.price != null ? Number(item.price) : 0;
+        default:
+          // 其他欄位維持預設處理方式
+          return item[property];
+      }
+    };
   }
   overlayPositions: ConnectedPosition[] = [
     {
@@ -470,7 +490,9 @@ getCurrentGroup() {
   getLoginExpensePageTime(): Promise<void> {
     return new Promise((resolve) => {
       this.http
-        .getApi(`${this.basicUrl}expense/getLoginExpensePageTime?userId=${this.currentUserId}`)
+        .getApi(
+          `${this.basicUrl}expense/getLoginExpensePageTime?userId=${this.currentUserId}`,
+        )
         .subscribe({
           next: (res: any) => {
             this.lastLoginTime = new Date(res);

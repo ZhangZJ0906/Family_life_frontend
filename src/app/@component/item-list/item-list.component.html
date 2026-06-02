@@ -96,7 +96,7 @@
   <section class="table-card">
     <div class="table-responsive">
 
-      <table mat-table [dataSource]="dataSource" class="w-100" matSort>
+      <table mat-table [dataSource]="dataSource" class="w-100" matSort matSortActive="expireDate" matSortDirection="asc">
 
         <!-- 勾選欄位 -->
         <ng-container matColumnDef="select">
@@ -212,7 +212,7 @@
 
         <!-- 訂閱：試用結束日 -->
         <ng-container matColumnDef="trialEndDate">
-          <th mat-header-cell *matHeaderCellDef>試用結束日</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>試用結束日</th>
           <td mat-cell *matCellDef="let element">
             {{ element.trialEndDate || '無' }}
           </td>
@@ -220,7 +220,7 @@
 
         <!-- 訂閱：下次扣款日 -->
         <ng-container matColumnDef="nextBillingDate">
-          <th mat-header-cell *matHeaderCellDef>下次扣款日</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>下次扣款日</th>
           <td mat-cell *matCellDef="let element">
             {{ element.nextBillingDate || '無' }}
           </td>
@@ -257,13 +257,13 @@
         <ng-container matColumnDef="serialNumber">
           <th mat-header-cell *matHeaderCellDef>序號</th>
           <td mat-cell *matCellDef="let element">
-            {{ element.serialNumber || '無' }}
+            {{ element.serialNumber.length>= 8 ? (element.productName | slice:0:8) + '...' : element.productName || '無' }}
           </td>
         </ng-container>
 
         <!-- 保固：購買日期 -->
         <ng-container matColumnDef="purchaseDate">
-          <th mat-header-cell *matHeaderCellDef>購買日期</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>購買日期</th>
           <td mat-cell *matCellDef="let element">
             {{ element.purchaseDate || '無' }}
           </td>
