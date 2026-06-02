@@ -25,7 +25,10 @@ export class HomePageComponent implements OnInit {
   basicUrl = '';
   currentUserId!: number;
   currentGroupId: number = 0;
-  expenseGroups: { groupId: number; groupName: string }[] = [];
+  expenseGroups: { groupId: number; groupName: string;
+  avatar?: string; }[] = [];
+  // 登入者自己的頭像，私人記帳使用
+currentUserAvatar = 'assets/default-avatar.png';
   // 目前年月
   selectedYear = new Date().getFullYear();
   selectedMonth = new Date().getMonth() + 1;
@@ -37,15 +40,19 @@ export class HomePageComponent implements OnInit {
   warrantyList: any[] = [];
 
   constructor(private http: HttpClientService) {
-    this.basicUrl = this.http.basicUrl;
+     this.basicUrl = this.http.basicUrl;
 
-    const raw = sessionStorage.getItem('family-life-current-user');
+  const raw = sessionStorage.getItem('family-life-current-user');
 
-    if (raw) {
-      const user = JSON.parse(raw);
-      this.currentUserId = user.user_id;
-    }
+  if (raw) {
+    const user = JSON.parse(raw);
+
+    this.currentUserId = user.user_id;
+
+    // 私人記帳使用自己的頭像
+    this.currentUserAvatar = user.avatar || 'assets/default-avatar.png';
   }
+}
 
   ngOnInit(): void {
     // 載入群組
@@ -55,45 +62,71 @@ export class HomePageComponent implements OnInit {
     this.loadAllCategoriesData();
   }
 
-  // 取得使用者群組，邏輯跟記帳頁相同
-  getExpenseGroups(): void {
-    this.http
-      .getApi(
-        this.basicUrl +
-          `family_life/getGroupList?user_Id=${this.currentUserId}`,
-      )
-      .subscribe({
-        next: (res: any) => {
-          if (res.code !== 200) {
-            return;
-          }
+// 取得使用者群組，資料來源改成跟 Profile 一樣
+// 這樣才拿得到 group.avatar
+getExpenseGroups(): void {
+  this.http
+    .getApi(
+      this.basicUrl +
+        `family_life/get_group_list?user_id=${this.currentUserId}`,
+    )
+    .subscribe({
+      next: (res: any) => {
+        // Profile 頁是直接使用 res.groupList
+        // 所以首頁也改用 res.groupList
+        if (!res.groupList) {
+          Swal.fire({
+            icon: 'error',
+            title: '群組載入失敗',
+            text: res.message || '無法取得群組資料',
+          });
+          return;
+        }
 
-          const groups = Object.entries(res.groupIdList).map(([id, name]) => ({
-            groupId: Number(id),
-            groupName: name as string,
-          }));
+        const groups = res.groupList.map((group: any) => ({
+          groupId: Number(group.groupId),
+          groupName: group.groupName,
 
-          // 私人記帳固定放第一個
-          this.expenseGroups = [
-            {
-              groupId: 0,
-              groupName: '私人記帳',
-            },
-            ...groups,
-          ];
+          // 真正的群組頭像
+          // 如果資料庫沒有頭像，才使用預設圖
+          avatar: group.avatar || 'assets/default-avatar.png',
+        }));
 
-          // 預設私人記帳
-          this.currentGroupId = 0;
+        // 私人記帳固定放第一個
+        // 頭像使用登入者自己的頭像
+        this.expenseGroups = [
+          {
+            groupId: 0,
+            groupName: '私人記帳',
+            avatar: this.currentUserAvatar || 'assets/default-avatar.png',
+          },
+          ...groups,
+        ];
 
-          // 群組載入後再查一次私人記帳
-          this.getHomeMonthlyExpense();
-        },
-        error: (err) => {
-          console.log(err);
-        },
-      });
-  }
+        // 預設私人記帳
+        this.currentGroupId = 0;
 
+        // 群組載入後再查一次私人記帳
+        this.getHomeMonthlyExpense();
+      },
+
+      error: (err) => {
+        console.log(err);
+
+        Swal.fire({
+          icon: 'error',
+          title: '群組載入失敗',
+          text: '請確認後端是否啟動',
+        });
+      },
+    });
+}
+// 取得目前選到的群組資料
+getCurrentExpenseGroup() {
+  return this.expenseGroups.find(
+    (group) => Number(group.groupId) === Number(this.currentGroupId),
+  );
+}
   // 切換群組
   onExpenseGroupChange(groupId: number): void {
     this.currentGroupId = groupId;

@@ -41,16 +41,47 @@
     <!-- 右側：群組 + 搜尋 -->
     <div class="header-right">
       <mat-form-field appearance="outline" class="group-select">
-        <mat-label>切換群組</mat-label>
-        <mat-select [(value)]="currentGroupId" (selectionChange)="getItemByGroupId($event.value)">
+  <mat-label>切換群組</mat-label>
 
-          @for (group of userGroups; track $index) {
-          <mat-option [value]="group.groupId">
-            🏠 {{ group.groupName }}
-          </mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+  <mat-select
+    [(value)]="currentGroupId"
+    (selectionChange)="getItemByGroupId($event.value)"
+  >
+    <!-- 下拉關閉時，顯示目前選到的群組頭像 + 名稱 -->
+    <mat-select-trigger>
+      @if (getCurrentGroup(); as group) {
+        <div class="selected-group">
+          <img
+            class="group-avatar"
+            [src]="group.avatar || 'assets/default-avatar.png'"
+            alt="群組頭像"
+          />
+
+          <span>
+            {{ group.groupName }}
+          </span>
+        </div>
+      }
+    </mat-select-trigger>
+
+    <!-- 下拉選項 -->
+    @for (group of userGroups; track group.groupId) {
+      <mat-option [value]="group.groupId">
+        <div class="group-option">
+          <img
+            class="group-avatar"
+            [src]="group.avatar || 'assets/default-avatar.png'"
+            alt="群組頭像"
+          />
+
+          <span>
+            {{ group.groupName }}
+          </span>
+        </div>
+      </mat-option>
+    }
+  </mat-select>
+</mat-form-field>
 
       <mat-form-field appearance="outline" class="search-field">
         <mat-label>搜尋物品</mat-label>
