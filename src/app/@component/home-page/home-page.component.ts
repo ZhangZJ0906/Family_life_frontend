@@ -27,6 +27,8 @@ export class HomePageComponent implements OnInit {
   currentGroupId: number = 0;
   expenseGroups: { groupId: number; groupName: string;
   avatar?: string; }[] = [];
+  // 登入者名稱，首頁問候語使用
+currentUserName = '';
   // 登入者自己的頭像，私人記帳使用
 currentUserAvatar = 'assets/default-avatar.png';
   // 目前年月
@@ -48,6 +50,9 @@ currentUserAvatar = 'assets/default-avatar.png';
     const user = JSON.parse(raw);
 
     this.currentUserId = user.user_id;
+
+     // 首頁顯示登入者名稱
+    this.currentUserName = user.name || '使用者';
 
     // 私人記帳使用自己的頭像
     this.currentUserAvatar = user.avatar || 'assets/default-avatar.png';
