@@ -80,57 +80,38 @@
     <!-- 右側篩選列 -->
     <div class="expense-filter-right">
 
-      <!-- 刪除已選 -->
-      @if (selection.selected.length > 0) {
-      <button mat-raised-button color="warn" type="button" class="delete-selected-btn" (click)="deleteById()">
-        <mat-icon>delete</mat-icon>
-        刪除已選 {{ selection.selected.length }} 筆
-      </button>
-      }
+      <!-- 記帳環境 -->
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>記帳環境</mat-label>
 
-     <!-- 記帳環境 -->
-<mat-form-field appearance="outline" class="filter-field">
-  <mat-label>記帳環境</mat-label>
+        <mat-select [value]="currentGroupId" (selectionChange)="onGroupChange($event.value)">
+          <!-- 下拉關閉時，顯示目前選到的頭像 + 名稱 -->
+          <mat-select-trigger>
+            @if (getCurrentGroup(); as group) {
+            <div class="expense-selected-group">
+              <img class="expense-group-avatar" [src]="group.avatar || 'assets/default-avatar.png'" alt="群組頭像" />
 
-  <mat-select
-    [value]="currentGroupId"
-    (selectionChange)="onGroupChange($event.value)"
-  >
-    <!-- 下拉關閉時，顯示目前選到的頭像 + 名稱 -->
-    <mat-select-trigger>
-      @if (getCurrentGroup(); as group) {
-        <div class="expense-selected-group">
-          <img
-            class="expense-group-avatar"
-            [src]="group.avatar || 'assets/default-avatar.png'"
-            alt="群組頭像"
-          />
+              <span>
+                {{ group.groupName }}
+              </span>
+            </div>
+            }
+          </mat-select-trigger>
 
-          <span>
-            {{ group.groupName }}
-          </span>
-        </div>
-      }
-    </mat-select-trigger>
+          <!-- 下拉選項 -->
+          @for (g of userGroups; track g.groupId) {
+          <mat-option [value]="g.groupId">
+            <div class="expense-group-option">
+              <img class="expense-group-avatar" [src]="g.avatar || 'assets/default-avatar.png'" alt="群組頭像" />
 
-    <!-- 下拉選項 -->
-    @for (g of userGroups; track g.groupId) {
-      <mat-option [value]="g.groupId">
-        <div class="expense-group-option">
-          <img
-            class="expense-group-avatar"
-            [src]="g.avatar || 'assets/default-avatar.png'"
-            alt="群組頭像"
-          />
-
-          <span>
-            {{ g.groupName }}
-          </span>
-        </div>
-      </mat-option>
-    }
-  </mat-select>
-</mat-form-field>
+              <span>
+                {{ g.groupName }}
+              </span>
+            </div>
+          </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
 
       <!-- 分類 -->
       <mat-form-field appearance="outline" class="filter-field">
@@ -197,7 +178,8 @@
             @if (isNewItem(e.createdAt, e.userId) && !e.seen) {
             <span class="new-badge">NEW</span>
             }
-{{ e.relatedItemName ? (e.relatedItemName.length > 8 ? (e.relatedItemName | slice:0:8) + '...' : e.relatedItemName) : '--' }}          </td>
+            {{ e.relatedItemName.length >=8 ? (e.relatedItemName | slice:0:8) + '...' : e.relatedItemName ||'--' }}
+          </td>
         </ng-container>
 
         <!-- 分類 -->
@@ -312,9 +294,21 @@
 
   </section>
 
+  <div class="fab-container">
+
+  @if (selection.selected.length > 0) {
+  <button mat-fab color="warn" type="button" style="background-color: #e53935 !important; color: #fff !important;"
+    (click)="deleteById()">
+    <mat-icon>delete</mat-icon>
+    <span class="fab-badge">{{ selection.selected.length }}</span>
+  </button>
+  }
+  
   <!-- 固定在畫面右下角的新增支出按鈕 -->
-  <button mat-fab type="button" class="expense-add-fab" (click)="openCreateDialog()" title="新增支出">
+  <button mat-fab type="button" class=".expense-fab-btn" (click)="openCreateDialog()" title="新增支出">
     <mat-icon>add</mat-icon>
   </button>
+  </div>
+
 
 </div>

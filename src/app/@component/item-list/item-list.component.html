@@ -354,7 +354,7 @@
 
     <!-- 有勾選資料時顯示刪除按鈕 -->
     @if(selection.selected.length > 0){
-    <button mat-fab color="waen" (click)="deleteSelectedItems()"
+    <button mat-fab color="warn" (click)="deleteSelectedItems()"
       style="background-color: #e53935 !important; color: #fff !important;">
       <mat-icon>delete</mat-icon>
       <span class="fab-badge">{{ selection.selected.length }}</span>
