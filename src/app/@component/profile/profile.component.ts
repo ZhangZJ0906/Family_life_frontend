@@ -29,7 +29,7 @@ export class ProfileComponent implements CanComponentDeactivate {
   email = 'jack@example.com';
 
   // 頭像預設文字
-  avatarText = 'J';
+  avatarText = 'U';
 
   // 頭像圖片，空值代表用文字頭像
   avatarUrl = '';
