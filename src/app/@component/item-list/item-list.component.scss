@@ -157,12 +157,12 @@
 /* 中間分類按鈕區 */
 .header-filter {
   min-width: 0;
-  width: 100%;
+  width: 120%;
 
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 50px;
+  margin-right: 45px;
 }
 
 /* 分類按鈕強制同一行 */
@@ -180,7 +180,7 @@
 
   white-space: nowrap;
   padding-bottom: 0;
-  margin-left: 230px; /* 調整左右邊距，讓第一個和最後一個按鈕不會被裁切 */
+  margin-left: 215px; /* 調整左右邊距，讓第一個和最後一個按鈕不會被裁切 */
   scrollbar-width: none;
 }
 
