@@ -51,91 +51,110 @@ export class CalendarComponent {
   userInfo!: any;
   createdBy!: number;
   groupMemberList: any[] = [];
-// 滑鼠移到活動時，是否顯示資訊卡
-showEventTooltip = false;
+  // 滑鼠移到活動時，是否顯示資訊卡
+  showEventTooltip = false;
 
-// 資訊卡顯示位置
-tooltipX = 0;
-tooltipY = 0;
+  // 資訊卡顯示位置
+  tooltipX = 0;
+  tooltipY = 0;
 
-// 資訊卡內容
-tooltipEvent = {
-  title: '',
-  description: '',
-  startTime: '',
-  endTime: '',
-  notifyBefore: 0,
-  groupName: '',
+  //上次登入時間
+  lastLoginTime!: Date;
 
-  // 是否為私人活動
-  // 私人活動不顯示「指派成員」
-  isPrivateGroup: true,
+  // 資訊卡內容
+  tooltipEvent = {
+    title: '',
+    description: '',
+    startTime: '',
+    endTime: '',
+    notifyBefore: 0,
+    groupName: '',
 
-  // 群組活動才顯示
-  assignedUserNames: [] as string[],
-};
+    // 是否為私人活動
+    // 私人活動不顯示「指派成員」
+    isPrivateGroup: true,
+
+    // 群組活動才顯示
+    assignedUserNames: [] as string[],
+  };
   routeGroupId: number = 0;
 
   // FullCalendar 的主要設定
   calendarOptions: CalendarOptions = {
-  plugins: [
-    dayGridPlugin,
-    timeGridPlugin,
-    interactionPlugin
-  ],
+    plugins: [
+      dayGridPlugin,
+      timeGridPlugin,
+      interactionPlugin
+    ],
 
-  initialView: 'dayGridMonth',
+    initialView: 'dayGridMonth',
 
-  locale: 'zh-tw',
+    locale: 'zh-tw',
 
-  headerToolbar: {
-    left: 'prev,next today',
-    center: 'title',
-    right: 'dayGridMonth,timeGridWeek'
-  },
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek'
+    },
 
-  buttonText: {
-    today: 'today',
-    month: 'month',
-    week: 'week'
-  },
+    buttonText: {
+      today: 'today',
+      month: 'month',
+      week: 'week'
+    },
 
-  views: {
-    timeGridWeek: {
-      buttonText: 'week',
-      allDayText: 'all-day'
-    }
-  },
+    views: {
+      timeGridWeek: {
+        buttonText: 'week',
+        allDayText: 'all-day'
+      }
+    },
 
-  slotMinTime: '01:00:00',
-  slotMaxTime: '24:00:00',
-  slotDuration: '01:00:00',
-  slotLabelFormat: {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  },
+    slotMinTime: '01:00:00',
+    slotMaxTime: '24:00:00',
+    slotDuration: '01:00:00',
+    slotLabelFormat: {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    },
 
-  allDaySlot: true,
-  nowIndicator: true,
+    allDaySlot: true,
+    nowIndicator: true,
 
-  editable: true,
-  selectable: true,
+    editable: true,
+    selectable: true,
 
-  dateClick: this.handleDateClick.bind(this),
+    dateClick: this.handleDateClick.bind(this),
 
-  // 這裡要改回 handleEventClick
-  // 點擊活動後才會跳 SweetAlert：修改 / 刪除 / 取消
-  eventClick: this.handleEventClick.bind(this),
+    // 這裡要改回 handleEventClick
+    // 點擊活動後才會跳 SweetAlert：修改 / 刪除 / 取消
+    eventClick: this.handleEventClick.bind(this),
 
-  eventDrop: this.handleEventDrop.bind(this),
+    eventDrop: this.handleEventDrop.bind(this),
 
-  // 滑鼠移到活動上顯示資訊卡
-  eventMouseEnter: this.handleEventMouseEnter.bind(this),
-  eventMouseLeave: this.handleEventMouseLeave.bind(this),
+    // 滑鼠移到活動上顯示資訊卡
+    eventMouseEnter: this.handleEventMouseEnter.bind(this),
+    eventMouseLeave: this.handleEventMouseLeave.bind(this),
 
-  events: []
-};
+    //判斷新事件
+    eventContent: (arg) => {
+      const isNew = this.isNewItem(
+          arg.event.extendedProps['createdTime'],
+          arg.event.extendedProps['createdBy']
+        );
+
+      return {
+        html: `
+          ${isNew ? '<span class="new-tag">NEW</span>' : ''}
+          ${arg.event.title}
+        `
+      };
+    },
+
+    events: []
+  };
+
   constructor(
     private dialog: MatDialog,
     private calendarApiService: CalendarApiService,
@@ -150,33 +169,39 @@ tooltipEvent = {
     this.getUserGroupList(this.createdBy);
   }
 
-  getGroupMembers(groupId: number): void {
-    console.log('Getting members for groupId:', groupId);
-  if (!groupId || groupId === 0) {
-    this.groupMemberList = [];
-    return;
+  ngOnInit() {
+    const now = new Date();
+    this.getLoginCalendarPageTime();
+    sessionStorage.setItem('calendar-last-view', now.toISOString());
   }
 
-  this.http
-    .getApi(this.http.basicUrl + `family_life/get_members?group_id=${groupId}`)
-    .subscribe({
-      next: (res: any) => {
-        console.log('Group Members Response:', res);
-        this.groupMemberList = res.groupMembersList ?? [];
-      },
-      error: (err) => {
-        console.error(err);
-        this.groupMemberList = [];
+  getGroupMembers(groupId: number): void {
+    console.log('Getting members for groupId:', groupId);
+    if (!groupId || groupId === 0) {
+      this.groupMemberList = [];
+      return;
+    }
 
-        Swal.fire({
-          icon: 'error',
-          title: '群組成員載入失敗',
-          text: err.error?.message || '請稍後再試',
-          confirmButtonText: '確認',
-        });
-      },
-    });
-}
+    this.http
+      .getApi(this.http.basicUrl + `family_life/get_members?group_id=${groupId}`)
+      .subscribe({
+        next: (res: any) => {
+          console.log('Group Members Response:', res);
+          this.groupMemberList = res.groupMembersList ?? [];
+        },
+        error: (err) => {
+          console.error(err);
+          this.groupMemberList = [];
+
+          Swal.fire({
+            icon: 'error',
+            title: '群組成員載入失敗',
+            text: err.error?.message || '請稍後再試',
+            confirmButtonText: '確認',
+          });
+        },
+      });
+  }
 
 
 
@@ -251,7 +276,7 @@ isSelectedGroup(groupId: number): boolean {
 
 
 // 從後端查詢目前登入者在某個群組中的行事曆事件
-loadCalendarEvents(groupId: number | null, userId: number): void {
+async loadCalendarEvents(groupId: number | null, userId: number): Promise<void>  {
   const realGroupId = groupId == null ? 0 : Number(groupId);
 
   // 重點：
@@ -283,9 +308,11 @@ loadCalendarEvents(groupId: number | null, userId: number): void {
           createdBy: item.createdBy,
           groupId: item.groupId,
           assignedUserId: item.assignedUserId,
+          createdTime: item.createdAt,
 
           // 同一批活動的識別碼
           eventBatchId: item.eventBatchId,
+
         },
       }));
 
@@ -902,4 +929,35 @@ setTooltipPosition(mouseEvent: MouseEvent): void {
   this.tooltipX = x;
   this.tooltipY = y;
 }
+  //抓取上次登入該page時間
+  getLoginCalendarPageTime(): Promise<void> {
+    return new Promise((resolve) => {
+      this.http
+        .getApi(this.http.basicUrl + `calendar/getLoginCalendarPageTime?userId=${this.createdBy}`)
+        .subscribe({
+          next: (res: any) => {
+            this.lastLoginTime = new Date(res);
+            resolve();
+          },
+          error: () => resolve(),
+        });
+    });
+  }
+
+  //判斷是否非私人新物品
+  isNewItem(createdTime: string | Date, createdBy: number): boolean {
+    if (createdBy == this.createdBy) return false;
+    if (!createdTime || !this.lastLoginTime) return false;
+
+    console.log("ct", createdTime)
+    console.log("login", this.lastLoginTime)
+
+    const created = new Date(createdTime).getTime();
+    const login = this.lastLoginTime.getTime();
+
+
+    if (isNaN(created)) return false;
+
+    return created > login;
+  }
 }
