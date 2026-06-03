@@ -22,7 +22,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import Swal from 'sweetalert2';
 
-import Swal from 'sweetalert2';
+
 
 
 interface GroupOption {
@@ -256,46 +256,6 @@ export class ShoppingListComponent implements OnInit {
     });
   }
 
-<<<<<<< HEAD
- async deleteList(list: ShoppingList): Promise<void> {
-  const result = await Swal.fire({
-    title: `確定刪除「${list.title}」嗎？`,
-    text: '刪除後無法復原',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: '刪除',
-    cancelButtonText: '取消'
-  });
-
-  if (!result.isConfirmed) return;
-
-  this.shoppingService.deleteList(list.id).subscribe({
-    next: (res) => {
-      if (res.code !== 200) {
-        this.errorMessage = res.message ?? '刪除清單失敗';
-        return;
-      }
-
-      Swal.fire({
-        icon: 'success',
-        title: '已刪除',
-        timer: 1200,
-        showConfirmButton: false
-      });
-
-      this.loadLists();
-    },
-    error: (err) => {
-      console.error(err);
-      Swal.fire({
-        icon: 'error',
-        title: '刪除失敗',
-        text: err.error?.message ?? '刪除清單失敗'
-      });
-    }
-  });
-}
-=======
   deleteList(list: ShoppingList): void {
     Swal.fire({
       icon: 'warning',
@@ -346,7 +306,6 @@ export class ShoppingListComponent implements OnInit {
       });
     });
   }
->>>>>>> origin/LII
 
   getGroupName(groupId: number | null): string {
     return this.groupOptions.find((group) => group.id === groupId)?.name ?? '未知群組';
@@ -460,18 +419,6 @@ export class ShoppingListComponent implements OnInit {
     return list.id;
   }
 
-<<<<<<< HEAD
-  private async handleUncheck(list: ShoppingList, item: PurchaseItemVo): Promise<void> {
-    const result = await Swal.fire({
-      title: `取消「${item.item}」已購買？`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: '確認取消',
-      cancelButtonText: '返回'
-    });
-
-    if (!result.isConfirmed) return;
-=======
   private handleUncheck(list: ShoppingList, item: PurchaseItemVo): void {
     Swal.fire({
       icon: 'warning',
@@ -486,7 +433,6 @@ export class ShoppingListComponent implements OnInit {
       if (!result.isConfirmed) {
         return;
       }
->>>>>>> origin/LII
 
       this.deleteMatchedItemListItem(list, item, () => {
         this.updateShoppingItemCheck(list, item, false);
@@ -547,16 +493,10 @@ export class ShoppingListComponent implements OnInit {
 
         if (!matchedItem) {
           Swal.fire({
-<<<<<<< HEAD
-            icon: 'error',
-            title: '找不到對應的物品清單項目',
-            text: '未刪除也未取消勾選'
-=======
             icon: 'warning',
             title: '找不到對應物品',
             text: '找不到對應的物品清單項目，未刪除也未取消勾選。',
             confirmButtonText: '確認',
->>>>>>> origin/LII
           });
           return;
         }
