@@ -18,7 +18,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatCheckboxChange, MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import Swal from 'sweetalert2';
 
@@ -338,8 +338,11 @@ export class ShoppingListComponent implements OnInit {
     return this.getTotalCount(listId) > 0 && this.getRemainingCount(listId) === 0;
   }
 
-  toggleCheck(list: ShoppingList, item: PurchaseItemVo, event?: Event): void {
-    event?.preventDefault();
+  toggleCheck(list: ShoppingList, item: PurchaseItemVo, event?: MatCheckboxChange): void {
+    // Checkbox reflects the saved state only. The dialog must complete successfully first.
+    if (event) {
+      event.source.checked = item.check;
+    }
 
     if (item.check) {
       this.handleUncheck(list, item);
@@ -367,7 +370,7 @@ export class ShoppingListComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
+      if (result === true) {
         this.updateShoppingItemCheck(list, item, true);
       }
     });
