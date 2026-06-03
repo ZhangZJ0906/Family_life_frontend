@@ -77,8 +77,8 @@
         }
       </mat-form-field>
 
-      <!-- 支出金額 -->
-      <mat-form-field appearance="outline">
+     <!-- 支出金額 -->
+      <mat-form-field appearance="outline" class="price-field">
         <mat-label>支出金額</mat-label>
 
         <span matPrefix class="price-prefix">$&nbsp;</span>
@@ -134,27 +134,26 @@
   </mat-dialog-content>
 
   <!-- 底部按鈕 -->
-  <mat-dialog-actions align="end" class="dialog-actions">
-    <button
-      mat-button
-      type="button"
-      class="cancel-btn"
-      (click)="onCancel()"
-    >
-      取消
-    </button>
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button
+    mat-button
+    type="button"
+    class="cancel-btn"
+    (click)="onCancel()"
+  >
+    取消
+  </button>
 
-    <button
-      mat-flat-button
-      type="button"
-      color="primary"
-      class="save-btn"
-      [disabled]="expenseForm.invalid"
-      (click)="onSave()"
-    >
-      <mat-icon>save</mat-icon>
-      儲存
-    </button>
-  </mat-dialog-actions>
+  <button
+    mat-flat-button
+    type="button"
+    class="save-btn"
+    [disabled]="expenseForm.invalid"
+    (click)="onSave()"
+  >
+
+    儲存
+  </button>
+</mat-dialog-actions>
 
 </div>

@@ -68,21 +68,20 @@
           <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
 
-        <!-- 支出金額 -->
-        <mat-form-field appearance="outline">
-          <mat-label>支出金額</mat-label>
+       <!-- 支出金額 -->
+      <mat-form-field appearance="outline" class="price-field">
+        <mat-label>支出金額</mat-label>
 
-          <span matPrefix class="price-prefix">$&nbsp;</span>
+        <span matPrefix class="price-prefix">$&nbsp;</span>
 
-          <input
-            matInput
-            type="number"
-            [(ngModel)]="record.price"
-            name="price"
-            placeholder="請輸入金額"
-          />
-        </mat-form-field>
-
+        <input
+          matInput
+          type="number"
+          [(ngModel)]="record.price"
+          name="price"
+          placeholder="請輸入金額"
+        />
+      </mat-form-field>
         <!-- 支出分類 -->
         <mat-form-field appearance="outline">
           <mat-label>支出分類</mat-label>
@@ -189,13 +188,12 @@
 
     <button
       mat-flat-button
-      color="primary"
       type="button"
       class="save-btn"
       (click)="onSave()"
       [disabled]="isNotModified"
     >
-      <mat-icon>save</mat-icon>
+
       儲存修改
     </button>
   </mat-dialog-actions>
