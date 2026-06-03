@@ -7,7 +7,7 @@
         <div class="title-icon">🛒</div>
         <h2>購物清單</h2>
       </div>
-      <p class="subtitle">勾選購買時會先新增到物品清單，儲存成功後才標記為已購買。</p>
+      <!-- <p class="subtitle">勾選購買時會先新增到物品清單，儲存成功後才標記為已購買。</p> -->
     </div>
 
     <div class="header-actions">
@@ -220,7 +220,7 @@
             <mat-card class="item-row" [class.is-checked]="item.check">
               <mat-checkbox
                 [checked]="item.check"
-                (click)="toggleCheck(selectedStatsList, item, $event)"
+                (change)="toggleCheck(selectedStatsList, item, $event)"
                 aria-label="切換購買狀態"
               ></mat-checkbox>
 
