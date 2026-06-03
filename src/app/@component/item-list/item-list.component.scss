@@ -52,14 +52,15 @@
   background-color: rgba(63, 81, 181, 0.05) !important;
 }
 
-/* 右下角按鈕容器 */
+/* 右下角浮動按鈕 */
 .fab-container {
   position: fixed;
-  bottom: 30px;
-  right: 30px;
+  right: 32px;
+  bottom: 96px;
+
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 14px;
   z-index: 1000;
 }
 
@@ -161,6 +162,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-right: 50px;
 }
 
 /* 分類按鈕強制同一行 */
@@ -178,7 +180,7 @@
 
   white-space: nowrap;
   padding-bottom: 0;
-
+  margin-left: 230px; /* 調整左右邊距，讓第一個和最後一個按鈕不會被裁切 */
   scrollbar-width: none;
 }
 
@@ -203,7 +205,7 @@
   justify-content: flex-end;
   align-items: center;
   gap: 14px;
-  margin-right: 220px;
+  margin-right: 50px;
   margin-top: 15px;
 }
 
@@ -489,16 +491,7 @@ mat-paginator {
   background: #ffffff;
 }
 
-/* 右下角按鈕容器 */
-.fab-container {
-  position: fixed;
-  right: 32px;
-  bottom: 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  z-index: 1000;
-}
+
 
 /* 刪除數量標籤 */
 .fab-badge {
@@ -556,10 +549,80 @@ mat-paginator {
   text-overflow: ellipsis;
 }
 
-.custom-paginator{
+/* 分頁外層 */
+.custom-paginator {
   border-top: 1px solid #e5e7eb;
   background: #ffffff;
-  margin-right: 70px;
+
+  min-height: 64px;
+  padding: 10px 110px 10px 26px;
+  border-radius: 0 0 22px 22px;
+}
+
+/* 讓分頁內容靠右 */
+::ng-deep .custom-paginator .mat-mdc-paginator-container {
+  justify-content: flex-end;
+  min-height: 52px;
+  gap: 14px;
+}
+
+/* Items per page 文字 */
+::ng-deep .custom-paginator .mat-mdc-paginator-page-size-label {
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* 每頁筆數下拉 */
+::ng-deep .custom-paginator .mat-mdc-paginator-page-size-select {
+  width: 86px;
+}
+
+/* 下拉框外觀 */
+::ng-deep .custom-paginator .mat-mdc-text-field-wrapper {
+  height: 42px;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+/* 下拉框文字置中 */
+::ng-deep .custom-paginator .mat-mdc-form-field-infix {
+  min-height: 42px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+/* 目前筆數範圍，例如 1 - 4 of 4 */
+::ng-deep .custom-paginator .mat-mdc-paginator-range-label {
+  color: #111827;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 12px;
+}
+
+/* 左右切換按鈕 */
+::ng-deep .custom-paginator .mat-mdc-icon-button {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  color: #475569;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+/* hover 效果 */
+::ng-deep .custom-paginator .mat-mdc-icon-button:hover {
+  background: #eef3ff;
+  transform: translateY(-1px);
+}
+
+/* disabled 狀態 */
+::ng-deep .custom-paginator .mat-mdc-icon-button[disabled] {
+  color: #cbd5e1;
+  background: transparent;
+  transform: none;
 }
 
 /* 讓 mat-option 裡的 div 吃滿寬度 */
@@ -607,5 +670,14 @@ mat-paginator {
   .group-select,
   .search-field {
     width: 100%;
+  }
+
+   .custom-paginator {
+    padding-right: 90px;
+  }
+
+  .fab-container {
+    right: 20px;
+    bottom: 86px;
   }
 }

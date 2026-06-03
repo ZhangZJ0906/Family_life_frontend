@@ -6,40 +6,30 @@
 
     <app-topbar></app-topbar>
 
-    <!-- Search -->
-    <div class="search-box">
-      <!-- 左側搜尋 -->
-      <div class="search-left">
-        <input type="text" placeholder="搜尋群組..." [(ngModel)]="keyword">
+    <div class="group-toolbar">
+  <div class="group-toolbar-title">
+    <h2>我的群組</h2>
+    <p>管理家庭群組、成員與邀請</p>
+  </div>
 
-        <button
-          class="search-btn"
-          (click)="searchGroups()"
-        >
-          🔍
-        </button>
+  <div class="search-box">
+    <div class="search-left">
+      <input type="text" placeholder="搜尋群組..." [(ngModel)]="keyword">
 
-      </div>
-
-      <!-- 右側功能按鈕 -->
-      <div class="search-actions">
-
-        <button
-          class="add-btn"
-          (click)="openCreateDialog()"
-        >
-          ＋
-        </button>
-
-        <button
-          class="join-btn"
-          (click)="joinGroupDialog()"
-        >
-          <mat-icon>group_add</mat-icon>
-        </button>
-
-      </div>
+      <button class="search-btn" (click)="searchGroups()">
+        🔍
+      </button>
     </div>
+
+    <div class="search-actions">
+      <button class="add-btn" (click)="openCreateDialog()">＋</button>
+
+      <button class="join-btn" (click)="joinGroupDialog()">
+        <mat-icon>group_add</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>
 
     <!-- Group Cards -->
     <div class="card-list">
