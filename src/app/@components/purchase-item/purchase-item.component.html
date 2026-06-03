@@ -1,19 +1,23 @@
 <main class="page item-page">
   <app-topbar></app-topbar>
 
-  <a class="back-link" routerLink="/shopping-list">返回購物清單</a>
+  <a class="back-link" routerLink='/shopping-list'>返回購物清單</a>
 
   <section class="item-header-card purchase-header-card">
     <div class="item-title">
       <div class="title-row">
         <div class="title-icon">🧾</div>
-        @if (!isEditing) {
+        @if (!isEditPage) {
           <h2>新增購物項目</h2>
         } @else {
           <h2>修改購物項目</h2>
         }
       </div>
-      <p>先建立項目清單，確認後一次儲存到購物清單。</p>
+      @if (!isEditPage) {
+        <p>先建立項目清單，確認後一次儲存到購物清單。</p>
+      } @else {
+        <p>可以臨時調整清單內容</p>
+      }
     </div>
 
     <div class="header-actions">
@@ -82,7 +86,11 @@
           {{ isSaving ? (isEditing ? '儲存中...' : '新增中...') : (isEditing ? '儲存修改' : '新增項目') }}
         </button>
 
-        @if (isEditing) {
+        <!-- <button mat-raised-button color="primary" type="submit" (click) = "confirmItems()" *ngIf="isEditPage" [disabled]="isSaving">
+          {{ isSaving ? (isEditing ? '儲存中...' : '新增中...') : (isEditing ? '儲存修改' : '新增項目') }}
+        </button> -->
+
+        @if (isEditPage) {
           <button mat-stroked-button type="button" (click)="cancelEdit()" [disabled]="isSaving">
             取消
           </button>
@@ -140,8 +148,12 @@
       </div>
 
       <div class="confirm-actions">
-        <button mat-raised-button color="primary" type="button" (click)="confirmItems()" [disabled]="isSaving || isEditing">
-          確認
+        <button mat-raised-button color="primary" type="button" *ngIf="!isEditPage" (click)="confirmItems()" [disabled]="isSaving || isEditing">
+          確認送出
+        </button>
+
+        <button mat-raised-button color="primary" type="button" *ngIf="isEditPage" (click)="confirmItems()" [disabled]="isSaving || isEditing">
+          確認修改
         </button>
       </div>
     }

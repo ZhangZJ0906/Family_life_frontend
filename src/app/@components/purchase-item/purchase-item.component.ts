@@ -311,6 +311,8 @@ export class PurchaseItemComponent implements OnInit {
       })),
     };
 
+    console.log("req", req)
+
     const request$ = this.isEditPage
       ? this.shoppingService.updateItem(req)
       : this.shoppingService.addItems(req);
@@ -375,7 +377,7 @@ export class PurchaseItemComponent implements OnInit {
       item: '',
       quantity: 1,
       categoryId: this.newItem.categoryId,
-      assignedUserId: this.hasGroup ? this.newItem.assignedUserId : this.userId,
+      assignedUserId: this.hasGroup ? this.newItem.assignedUserId : this.userId
     };
   }
 

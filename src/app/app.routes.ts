@@ -14,125 +14,95 @@ import { authGuard } from './@guard/auth.guard';
 import { pendingChangesGuard } from './@guard/pending-changes.guard';
 
 export const routes: Routes = [
-  {
-    path: 'itemList',
-    redirectTo: 'itemList/全部',
-    pathMatch: 'full'
-  },
-  {
-    path: 'itemList/:groupId',
-    component: ItemListComponent,
-    title: '我的物品清單',
-    canActivate: [authGuard], //未登入跳到這頁面會被返回到登入葉面
-  },
-  {
-    path: 'expenses',
-    component: ExpensesComponent,
-    data: { title: '記帳' },
-    canActivate: [authGuard], //未登入跳到這頁面會被返回到登入葉面
-  },
-  {
-    path: 'group',
-    component: GroupPageComponent,
-    title: '我的群組',
-    canActivate: [authGuard], //未登入跳到這頁面會被返回到登入葉面
-  },
+  // 1️⃣ default
+  { path: '', pathMatch: 'full', redirectTo: 'login' },
+
+  // 2️⃣ auth pages
   {
     path: 'login',
-    title: '登入',
     loadComponent: () =>
-      import('./@components/login/login.component').then(
-        (m) => m.LoginComponent,
-      ),
-    data: { title: '登入' },
-  },
-  {
-    path: 'shopping-list',
-    loadComponent: () =>
-      import('./@components/shopping-list/shopping-list.component').then(
-        (m) => m.ShoppingListComponent,
-      ),
-    data: { title: '購物清單' },
-    canActivate: [authGuard], //未登入跳到這頁面會被返回到登入葉面
-  },
-  {
-
-    path: 'purchase-item/:listId',
-    loadComponent: () =>
-      import('./@components/purchase-item/purchase-item.component').then(
-        (m) => m.PurchaseItemComponent,
-      ),
-    canDeactivate: [pendingChangesGuard]// 切換頁面如果未儲存就會跳出為儲存警告
-  },
-  {
-
-    path: 'edit-item/:listId',
-    loadComponent: () =>
-      import('./@components/purchase-item/purchase-item.component').then(
-        (m) => m.PurchaseItemComponent,
-      ),
-  },
-  {
-    path: '',
-    pathMatch: 'full',
-    redirectTo: 'login',
-    data: { title: '物品清單' },
-  },
-
-
- {
-    path: 'login',
-    loadComponent: () =>
-      import('./@components/login/login.component').then((m) => m.LoginComponent)
-  },
-  {
-    path: 'shopping-list',
-    loadComponent: () =>
-      import('./@components/shopping-list/shopping-list.component').then(
-        (m) => m.ShoppingListComponent
-      )
+      import('./@components/login/login.component').then(m => m.LoginComponent),
   },
   {
     path: 'register',
     loadComponent: () =>
-      import('./@components/register/register.component').then(
-        (m) => m.RegisterComponent,
-      ),
-  },
-  {
-    path: '',
-    pathMatch: 'full',
-    redirectTo: 'login'
+      import('./@components/register/register.component').then(m => m.RegisterComponent),
   },
 
-  //預設calendar path
-  {
-    path: 'calendar',
-    redirectTo: 'calendar/full',
-    pathMatch: 'full'
-  },
-  {
-    path: 'calendar/:groupId',
-    component: CalendarComponent,
-    data: { title: '行事曆' },
-    canActivate: [authGuard], //未登入跳到這頁面會被返回到登入葉面
-  },
+  // 3️⃣ main pages
   {
     path: 'home-page',
     component: HomePageComponent,
-    data: { title: '首頁' },
-    canActivate: [authGuard], //未登入跳到這頁面會被返回到登入葉面
+    canActivate: [authGuard],
   },
   {
     path: 'profile',
     component: ProfileComponent,
-    data: { title: '個人資訊' },
-    canActivate: [authGuard, pendingChangesGuard], //未登入跳到這頁面會被返回到登入葉面
-    canDeactivate: [pendingChangesGuard]// 切換頁面如果未儲存就會跳出為儲存警告
+    canActivate: [authGuard, pendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
+  },
+
+  // 4️⃣ shopping / items
+  {
+    path: 'shopping-list',
+    loadComponent: () =>
+      import('./@components/shopping-list/shopping-list.component')
+        .then(m => m.ShoppingListComponent),
+    canActivate: [authGuard],
   },
   {
-    path: '**',
-    redirectTo: 'home-page', // 或導向 404 頁面
+    path: 'purchase-item/:listId',
+    loadComponent: () =>
+      import('./@components/purchase-item/purchase-item.component')
+        .then(m => m.PurchaseItemComponent),
+    canDeactivate: [pendingChangesGuard],
+  },
+  {
+    path: 'edit-item/:listId',
+    loadComponent: () =>
+      import('./@components/purchase-item/purchase-item.component')
+        .then(m => m.PurchaseItemComponent),
+  },
 
+  // 5️⃣ item list
+  {
+    path: 'itemList',
+    redirectTo: 'itemList/全部',
+    pathMatch: 'full',
+  },
+  {
+    path: 'itemList/:groupId',
+    component: ItemListComponent,
+    canActivate: [authGuard],
+  },
+
+  // 6️⃣ calendar
+  {
+    path: 'calendar',
+    redirectTo: 'calendar/full',
+    pathMatch: 'full',
+  },
+  {
+    path: 'calendar/:groupId',
+    component: CalendarComponent,
+    canActivate: [authGuard],
+  },
+
+  // 7️⃣ others
+  {
+    path: 'expenses',
+    component: ExpensesComponent,
+    canActivate: [authGuard],
+  },
+  {
+    path: 'group',
+    component: GroupPageComponent,
+    canActivate: [authGuard],
+  },
+
+  // 8️⃣ fallback（最後一定要）
+  {
+    path: '**',
+    redirectTo: 'home-page',
   },
 ];
