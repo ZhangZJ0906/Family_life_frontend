@@ -13,15 +13,11 @@
           <h2>修改購物項目</h2>
         }
       </div>
-<<<<<<< HEAD
       @if (!isEditPage) {
         <p>先建立項目清單，確認後一次儲存到購物清單。</p>
       } @else {
         <p>可以臨時調整清單內容</p>
       }
-=======
-      <!-- <p>先建立項目清單，確認後一次儲存到購物清單。</p> -->
->>>>>>> origin/LII
     </div>
 
     <div class="header-actions">
@@ -86,13 +82,13 @@
       }
 
       <div class="form-actions">
-        <button mat-raised-button color="primary" type="submit" *ngIf="!isEditPage" [disabled]="isSaving">
+        <button mat-raised-button color="primary" type="submit" [disabled]="isSaving">
           {{ isSaving ? (isEditing ? '儲存中...' : '新增中...') : (isEditing ? '儲存修改' : '新增項目') }}
         </button>
 
-        <button mat-raised-button color="primary" type="submit" (click) = "confirmItems()" *ngIf="isEditPage" [disabled]="isSaving">
+        <!-- <button mat-raised-button color="primary" type="submit" (click) = "confirmItems()" *ngIf="isEditPage" [disabled]="isSaving">
           {{ isSaving ? (isEditing ? '儲存中...' : '新增中...') : (isEditing ? '儲存修改' : '新增項目') }}
-        </button>
+        </button> -->
 
         @if (isEditPage) {
           <button mat-stroked-button type="button" (click)="cancelEdit()" [disabled]="isSaving">
@@ -156,9 +152,9 @@
           確認送出
         </button>
 
-        <!-- <button mat-raised-button color="primary" type="button" *ngIf="isEditPage" (click)="confirmItems()" [disabled]="isSaving || isEditing">
+        <button mat-raised-button color="primary" type="button" *ngIf="isEditPage" (click)="confirmItems()" [disabled]="isSaving || isEditing">
           確認修改
-        </button> -->
+        </button>
       </div>
     }
   </section>
