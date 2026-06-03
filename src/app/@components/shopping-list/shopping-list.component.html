@@ -1,18 +1,22 @@
-<main class="shopping-page">
+<main class="shopping-page item-page">
   <app-topbar></app-topbar>
 
-  <section class="page-heading">
-    <div>
-      <p class="eyebrow">Shopping Lists</p>
-      <h1>購物清單</h1>
+  <section class="item-header-card shopping-header-card">
+    <div class="item-title">
+      <div class="title-row">
+        <div class="title-icon">🛒</div>
+        <h2>購物清單</h2>
+      </div>
       <p class="subtitle">勾選購買時會先新增到物品清單，儲存成功後才標記為已購買。</p>
     </div>
 
-    <div class="actions">
-      <button class="ghost-button" type="button" (click)="loadLists()" [disabled]="isLoading">
+    <div class="header-actions">
+      <button mat-stroked-button type="button" (click)="loadLists()" [disabled]="isLoading">
+        <mat-icon>refresh</mat-icon>
         重新整理
       </button>
-      <button class="primary-button" type="button" (click)="openCreateDialog()">
+      <button mat-raised-button color="primary" type="button" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon>
         建立清單
       </button>
     </div>
@@ -22,24 +26,32 @@
     <p class="error-message">{{ errorMessage }}</p>
   }
 
-  <section class="lists-panel" aria-label="購物清單列表">
+  <section class="lists-panel table-card" aria-label="購物清單列表">
     <div class="panel-header">
       <h2>我的清單</h2>
       <div class="list-filter">
         <span>{{ filteredLists.length }} 筆</span>
-        <select name="groupFilter" [(ngModel)]="groupFilter" aria-label="群組篩選">
-          <option [ngValue]="'all'">全部群組</option>
-          <option [ngValue]="0">私人</option>
-          @for (group of groupOptions; track group.id) {
-            @if (group.id !== 0) {
-              <option [ngValue]="group.id">{{ group.name }}</option>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>群組</mat-label>
+          <mat-select name="groupFilter" [(ngModel)]="groupFilter" aria-label="群組篩選">
+            <mat-option [value]="'all'">全部群組</mat-option>
+            <mat-option [value]="null">無</mat-option>
+            @for (group of groupOptions; track group.id) {
+              @if (group.id !== null) {
+                <mat-option [value]="group.id">{{ group.name }}</mat-option>
+              }
             }
-          }
-        </select>
-        <select name="statusFilter" [(ngModel)]="statusFilter" aria-label="清單狀態篩選">
-          <option value="unfinished">未完成</option>
-          <option value="completed">已完成</option>
-        </select>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>狀態</mat-label>
+          <mat-select name="statusFilter" [(ngModel)]="statusFilter" aria-label="清單狀態篩選">
+            <mat-option value="unfinished">未完成</mat-option>
+            <mat-option value="completed">已完成</mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
     </div>
 
@@ -58,40 +70,38 @@
     @if (!isLoading && filteredLists.length > 0) {
       <div class="list-grid">
         @for (list of filteredLists; track list.id) {
-          <article class="list-card" [class.is-completed]="isListCompleted(list.id)">
+          <mat-card class="list-card" [class.is-completed]="isListCompleted(list.id)">
             <header class="list-card-header">
               <div class="list-title">
                 <strong>{{ list.title }}</strong>
 
-              @if (list.group_id !== null) {
-                <small>群組：{{ getGroupName(list.group_id) }}</small>
-              }
-
+                @if (list.group_id !== null) {
+                  <small>群組：{{ getGroupName(list.group_id) }}</small>
+                }
               </div>
 
-              <span class="status-badge" [class.completed]="isListCompleted(list.id)">
+              <span class="status-badge" [class.completed]="isListCompleted(list.id)" title="以購買/總數">
                 {{ getPurchaseProgressText(list.id) }}
               </span>
             </header>
 
             <div class="list-actions">
-              <button class="text-button stats-button" type="button" (click)="openStatsDialog(list)">
+              <button mat-button type="button" class="stats-button" (click)="openStatsDialog(list)">
+                <mat-icon>checklist</mat-icon>
                 統計與勾選
               </button>
 
-              <button class="text-button" type="button" [routerLink]="['/purchase-item', list.id]">
-                新增
-              </button>
-
-              <button class="text-button" type="button" [routerLink]="['/edit-item', list.id]">
+              <button mat-button type="button" [routerLink]="['/purchase-item', list.id]">
+                <mat-icon>edit</mat-icon>
                 編輯
               </button>
 
-              <button class="text-button delete-button" type="button" (click)="deleteList(list)">
+              <button mat-button color="warn" type="button" class="delete-button" (click)="deleteList(list)">
+                <mat-icon>delete</mat-icon>
                 刪除
               </button>
             </div>
-          </article>
+          </mat-card>
         }
       </div>
     }
@@ -109,13 +119,16 @@
     >
       <div class="dialog-header">
         <h2 id="create-list-title">建立購物清單</h2>
-        <button class="icon-button" type="button" aria-label="關閉" (click)="closeCreateDialog()">×</button>
+        <button mat-icon-button type="button" aria-label="關閉" (click)="closeCreateDialog()">
+          <mat-icon>close</mat-icon>
+        </button>
       </div>
 
       <form class="dialog-form" (ngSubmit)="createList()">
-        <label class="field">
-          <span>清單名稱</span>
+        <mat-form-field appearance="outline" class="field">
+          <mat-label>清單名稱</mat-label>
           <input
+            matInput
             type="text"
             name="title"
             [(ngModel)]="newTitle"
@@ -123,26 +136,26 @@
             autocomplete="off"
             autofocus
           />
-        </label>
+        </mat-form-field>
 
-        <label class="field">
-          <span>群組</span>
-          <select name="groupId" [(ngModel)]="selectedGroupId">
+        <mat-form-field appearance="outline" class="field">
+          <mat-label>群組</mat-label>
+          <mat-select name="groupId" [(ngModel)]="selectedGroupId">
             @for (group of groupOptions; track group.id) {
-              <option [ngValue]="group.id">{{ group.name }}</option>
+              <mat-option [value]="group.id">{{ group.name }}</mat-option>
             }
-          </select>
-        </label>
+          </mat-select>
+        </mat-form-field>
 
         @if (formError) {
           <p class="form-error">{{ formError }}</p>
         }
 
         <div class="dialog-actions">
-          <button class="ghost-button" type="button" (click)="closeCreateDialog()" [disabled]="isCreating">
+          <button mat-stroked-button type="button" (click)="closeCreateDialog()" [disabled]="isCreating">
             取消
           </button>
-          <button class="primary-button" type="submit" [disabled]="isCreating">
+          <button mat-raised-button color="primary" type="submit" [disabled]="isCreating">
             {{ isCreating ? '建立中...' : '建立並新增項目' }}
           </button>
         </div>
@@ -167,29 +180,33 @@
             {{ getPurchaseProgressText(selectedStatsList.id) }}
           </p>
         </div>
-        <button class="icon-button" type="button" aria-label="關閉" (click)="closeStatsDialog()">×</button>
+        <button mat-icon-button type="button" aria-label="關閉" (click)="closeStatsDialog()">
+          <mat-icon>close</mat-icon>
+        </button>
       </div>
 
       <section class="summary-grid dialog-summary-grid" aria-label="購物項目統計">
-        <article class="summary-card">
+        <mat-card class="summary-card">
           <span>全部項目</span>
           <strong>{{ getTotalCount(selectedStatsList.id) }}</strong>
-        </article>
+        </mat-card>
 
-        <article class="summary-card">
+        <mat-card class="summary-card">
           <span>尚未購買</span>
           <strong>{{ getRemainingCount(selectedStatsList.id) }}</strong>
-        </article>
+        </mat-card>
 
-        <article class="summary-card">
+        <mat-card class="summary-card">
           <span>完成率</span>
           <strong>{{ getProgressPercent(selectedStatsList.id) }}%</strong>
-        </article>
+        </mat-card>
       </section>
 
-      <div class="progress-track" aria-hidden="true">
-        <div class="progress-bar" [style.width.%]="getProgressPercent(selectedStatsList.id)"></div>
-      </div>
+      <mat-progress-bar
+        mode="determinate"
+        [value]="getProgressPercent(selectedStatsList.id)"
+        aria-label="購物清單完成率"
+      ></mat-progress-bar>
 
       @if (loadingItemsByListId[selectedStatsList.id]) {
         <div class="state-box compact">購物項目載入中...</div>
@@ -200,15 +217,12 @@
       } @else {
         <div class="dialog-item-list">
           @for (item of getItems(selectedStatsList.id); track item.id) {
-            <article class="item-row" [class.is-checked]="item.check">
-              <label class="check-control">
-                <input
-                  type="checkbox"
-                  [checked]="item.check"
-                  (click)="toggleCheck(selectedStatsList, item, $event)"
-                />
-                <span></span>
-              </label>
+            <mat-card class="item-row" [class.is-checked]="item.check">
+              <mat-checkbox
+                [checked]="item.check"
+                (click)="toggleCheck(selectedStatsList, item, $event)"
+                aria-label="切換購買狀態"
+              ></mat-checkbox>
 
               <div class="item-content">
                 <strong>{{ item.item }}</strong>
@@ -218,13 +232,13 @@
                     · {{ item.checkDate }}
                   }
                 </small>
-                @if (selectedStatsList.group_id !== 0) {
+                @if (selectedStatsList.group_id) {
                   <small>指派給：{{ getMemberName(selectedStatsList.group_id, item.userId) }}</small>
                 }
               </div>
 
               <span class="quantity">x {{ item.quantity }}</span>
-            </article>
+            </mat-card>
           }
         </div>
       }

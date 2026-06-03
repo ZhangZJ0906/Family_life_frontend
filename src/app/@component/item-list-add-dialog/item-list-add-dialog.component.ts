@@ -36,7 +36,6 @@ import { AuthService } from '../../@services/auth.service';
     MatDialogTitle,
     MatDialogContent,
     MatDialogActions,
-    MatDialogClose,
     MatDatepickerModule,
     MatSlideToggleModule,
   ],

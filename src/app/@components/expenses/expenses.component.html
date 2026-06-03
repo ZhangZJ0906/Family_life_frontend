@@ -88,18 +88,49 @@
       </button>
       }
 
-      <!-- 記帳環境 -->
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>記帳環境</mat-label>
+     <!-- 記帳環境 -->
+<mat-form-field appearance="outline" class="filter-field">
+  <mat-label>記帳環境</mat-label>
 
-        <mat-select [value]="currentGroupId" (selectionChange)="onGroupChange($event.value)">
-          @for (g of userGroups; track g.groupId) {
-          <mat-option [value]="g.groupId">
-            👥 {{ g.groupName }}
-          </mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+  <mat-select
+    [value]="currentGroupId"
+    (selectionChange)="onGroupChange($event.value)"
+  >
+    <!-- 下拉關閉時，顯示目前選到的頭像 + 名稱 -->
+    <mat-select-trigger>
+      @if (getCurrentGroup(); as group) {
+        <div class="expense-selected-group">
+          <img
+            class="expense-group-avatar"
+            [src]="group.avatar || 'assets/default-avatar.png'"
+            alt="群組頭像"
+          />
+
+          <span>
+            {{ group.groupName }}
+          </span>
+        </div>
+      }
+    </mat-select-trigger>
+
+    <!-- 下拉選項 -->
+    @for (g of userGroups; track g.groupId) {
+      <mat-option [value]="g.groupId">
+        <div class="expense-group-option">
+          <img
+            class="expense-group-avatar"
+            [src]="g.avatar || 'assets/default-avatar.png'"
+            alt="群組頭像"
+          />
+
+          <span>
+            {{ g.groupName }}
+          </span>
+        </div>
+      </mat-option>
+    }
+  </mat-select>
+</mat-form-field>
 
       <!-- 分類 -->
       <mat-form-field appearance="outline" class="filter-field">

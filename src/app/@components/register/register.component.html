@@ -1,5 +1,4 @@
 <section class="auth-page">
-  <!-- 左側圖片區 -->
   <div class="brand-section">
     <img
       class="auth-hero-img"
@@ -8,7 +7,6 @@
     />
   </div>
 
-  <!-- 右側註冊表單 -->
   <form class="auth-card register-card" (ngSubmit)="register()">
     <div class="form-icon register-icon">
       <mat-icon>person_add</mat-icon>
@@ -17,49 +15,74 @@
     <h1>註冊</h1>
     <p class="subtitle">建立帳號，開始管理您的生活！</p>
 
-    <label class="form-label">
-      姓名
-      <div class="input-box">
-        <mat-icon>person</mat-icon>
-        <input
-          type="text"
-          name="name"
-          [(ngModel)]="name"
-          placeholder="請輸入姓名"
-          required
-        />
-      </div>
-    </label>
+    <mat-form-field class="auth-field" appearance="outline">
+      <mat-label>帳號</mat-label>
+      <mat-icon matPrefix>person</mat-icon>
+      <input
+        matInput
+        type="text"
+        name="name"
+        [(ngModel)]="name"
+        placeholder="請輸入姓名"
+        required
+      />
+    </mat-form-field>
 
-    <label class="form-label">
-      Email
-      <div class="input-box">
-        <mat-icon>mail</mat-icon>
-        <input
-          type="email"
-          name="email"
-          [(ngModel)]="email"
-          placeholder="請輸入 Email"
-          required
-        />
-      </div>
-    </label>
+    <mat-form-field class="auth-field" appearance="outline">
+      <mat-label>Email</mat-label>
+      <mat-icon matPrefix>mail</mat-icon>
+      <input
+        matInput
+        type="email"
+        name="email"
+        [(ngModel)]="email"
+        placeholder="請輸入 Email"
+        required
+      />
+    </mat-form-field>
 
-    <label class="form-label">
-      密碼
-      <div class="input-box">
-        <mat-icon>lock</mat-icon>
-        <input
-          type="password"
-          name="password"
-          [(ngModel)]="password"
-          placeholder="請輸入密碼"
-          required
-        />
-      </div>
-    </label>
+    <mat-form-field class="auth-field" appearance="outline">
+      <mat-label>密碼</mat-label>
+      <mat-icon matPrefix>lock</mat-icon>
+      <input
+        matInput
+        type="password"
+        name="password"
+        [(ngModel)]="password"
+        placeholder="請輸入密碼"
+        minlength="6"
+        required
+      />
+      @if (passwordError) {
+        <mat-error>{{ passwordError }}</mat-error>
+      }
+    </mat-form-field>
 
-    <button type="submit" class="register-btn">註冊</button>
+    <mat-form-field class="auth-field" appearance="outline">
+      <mat-label>確認密碼</mat-label>
+      <mat-icon matPrefix>lock_reset</mat-icon>
+      <input
+        matInput
+        type="password"
+        name="confirmPassword"
+        [(ngModel)]="confirmPassword"
+        placeholder="請再次輸入密碼"
+        required
+      />
+      @if (confirmPasswordError) {
+        <mat-error>{{ confirmPasswordError }}</mat-error>
+      }
+    </mat-form-field>
+
+    <button
+      mat-raised-button
+      color="primary"
+      type="submit"
+      class="register-btn"
+      [disabled]="!!passwordError || !!confirmPasswordError"
+    >
+      註冊
+    </button>
 
     <p class="switch-text">
       已有帳號？
