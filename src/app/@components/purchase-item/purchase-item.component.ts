@@ -290,6 +290,8 @@ loadItems(): void {
       })),
     };
 
+    console.log("req", req)
+
     const request$ = this.isEditPage
       ? this.shoppingService.updateItem(req)
       : this.shoppingService.addItems(req);

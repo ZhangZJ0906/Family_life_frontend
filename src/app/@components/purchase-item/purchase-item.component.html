@@ -86,7 +86,11 @@
           {{ isSaving ? (isEditing ? '儲存中...' : '新增中...') : (isEditing ? '儲存修改' : '新增項目') }}
         </button>
 
-        @if (isEditing) {
+        <!-- <button mat-raised-button color="primary" type="submit" (click) = "confirmItems()" *ngIf="isEditPage" [disabled]="isSaving">
+          {{ isSaving ? (isEditing ? '儲存中...' : '新增中...') : (isEditing ? '儲存修改' : '新增項目') }}
+        </button> -->
+
+        @if (isEditPage) {
           <button mat-stroked-button type="button" (click)="cancelEdit()" [disabled]="isSaving">
             取消
           </button>
@@ -144,8 +148,12 @@
       </div>
 
       <div class="confirm-actions">
-        <button mat-raised-button color="primary" type="button" (click)="confirmItems()" [disabled]="isSaving || isEditing">
-          確認
+        <button mat-raised-button color="primary" type="button" *ngIf="!isEditPage" (click)="confirmItems()" [disabled]="isSaving || isEditing">
+          確認送出
+        </button>
+
+        <button mat-raised-button color="primary" type="button" *ngIf="isEditPage" (click)="confirmItems()" [disabled]="isSaving || isEditing">
+          確認修改
         </button>
       </div>
     }
