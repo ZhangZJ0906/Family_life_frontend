@@ -556,6 +556,12 @@ mat-paginator {
   text-overflow: ellipsis;
 }
 
+.custom-paginator{
+  border-top: 1px solid #e5e7eb;
+  background: #ffffff;
+  margin-right: 70px;
+}
+
 /* 讓 mat-option 裡的 div 吃滿寬度 */
 ::ng-deep .mat-mdc-option .mdc-list-item__primary-text {
   width: 100%;
