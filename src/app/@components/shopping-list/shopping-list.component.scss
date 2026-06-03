@@ -53,6 +53,77 @@
   font-size: 24px;
 }
 
+.group-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+/* 群組下拉：選到的內容 */
+.group-select-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  min-width: 0;
+}
+
+/* 群組下拉：選項內容 */
+.group-option-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  width: 100%;
+  min-width: 0;
+}
+
+/* 群組頭像 */
+.group-select-avatar,
+.group-avatar {
+  width: 32px;
+  height: 32px;
+
+  border-radius: 50%;
+  object-fit: cover;
+
+  background: #eef3ff;
+  border: 1px solid #e5e7eb;
+
+  flex-shrink: 0;
+}
+
+/* 群組名稱 */
+.group-select-trigger span,
+.group-option-row span {
+  font-size: 15px;
+  font-weight: 800;
+  color: #111827;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 讓 mat-option 裡面的內容可以完整撐開 */
+::ng-deep .mat-mdc-option .mdc-list-item__primary-text {
+  width: 100%;
+}
+
+/* 讓群組下拉高度跟其他篩選欄位一致 */
+.group-filter-field {
+  min-width: 170px;
+}
+
+/* 如果下拉框裡圖片被壓到，可以補這段 */
+::ng-deep .group-filter-field .mat-mdc-select-value {
+  display: flex;
+  align-items: center;
+}
+
 .title-row h2 {
   margin: 0;
   font-size: 30px;
@@ -111,8 +182,62 @@
   flex-wrap: wrap;
 }
 
+/* 篩選欄位：群組、狀態統一寬高 */
 .filter-field {
-  width: 150px;
+  width: 180px;
+  height: 64px;
+}
+
+/* 狀態可以稍微短一點，但高度一樣 */
+.status-filter-field {
+  width: 170px;
+}
+
+/* 群組有頭像，寬度稍微大一點 */
+.group-filter-field {
+  width: 210px;
+  min-width: 210px;
+}
+
+/* 統一 Material outline 欄位高度 */
+::ng-deep .list-filter .mat-mdc-text-field-wrapper {
+  height: 56px;
+  display: flex;
+  align-items: center;
+}
+
+/* 統一 mat-select 內層高度 */
+::ng-deep .list-filter .mat-mdc-form-field-infix {
+  min-height: 56px;
+  padding-top: 14px !important;
+  padding-bottom: 8px !important;
+  display: flex;
+  align-items: center;
+}
+
+/* 群組 trigger 置中 */
+.group-select-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 32px;
+  min-width: 0;
+}
+
+/* 群組頭像不要撐高整個欄位 */
+.group-select-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* 下拉箭頭垂直置中 */
+::ng-deep .list-filter .mat-mdc-select-arrow-wrapper {
+  height: 56px;
+  display: flex;
+  align-items: center;
 }
 
 .list-grid {
@@ -120,6 +245,7 @@
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   align-items: start;
   gap: 16px;
+
 }
 
 .list-card {
