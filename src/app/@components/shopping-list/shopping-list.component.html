@@ -74,8 +74,11 @@
             <header class="list-card-header">
               <div class="list-title">
                 <strong>{{ list.title }}</strong>
+                @if (list.group_id == 0) {
+                  <small>私人清單</small>
+                }
 
-                @if (list.group_id !== null) {
+                @if (list.group_id !== 0) {
                   <small>群組：{{ getGroupName(list.group_id) }}</small>
                 }
               </div>
@@ -92,6 +95,11 @@
               </button>
 
               <button mat-button type="button" [routerLink]="['/purchase-item', list.id]">
+                <mat-icon>add</mat-icon>
+                新增
+              </button>
+
+              <button mat-button type="button" [routerLink]="['/edit-item', list.id]">
                 <mat-icon>edit</mat-icon>
                 編輯
               </button>

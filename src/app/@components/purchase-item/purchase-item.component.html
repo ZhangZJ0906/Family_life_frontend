@@ -1,19 +1,23 @@
 <main class="page item-page">
   <app-topbar></app-topbar>
 
-  <a class="back-link" routerLink="/shopping-list">返回購物清單</a>
+  <a class="back-link" routerLink='/shopping-list'>返回購物清單</a>
 
   <section class="item-header-card purchase-header-card">
     <div class="item-title">
       <div class="title-row">
         <div class="title-icon">🧾</div>
-        @if (!isEditing) {
+        @if (!isEditPage) {
           <h2>新增購物項目</h2>
         } @else {
           <h2>修改購物項目</h2>
         }
       </div>
-      <p>先建立項目清單，確認後一次儲存到購物清單。</p>
+      @if (!isEditPage) {
+        <p>先建立項目清單，確認後一次儲存到購物清單。</p>
+      } @else {
+        <p>可以臨時調整清單內容</p>
+      }
     </div>
 
     <div class="header-actions">

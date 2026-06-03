@@ -185,22 +185,12 @@ loadItems(): void {
   }
 
   addItem(): void {
-  const itemName = this.newItem.item.trim();
-  this.formError = '';
+    const itemName = this.newItem.item.trim();
+    this.formError = '';
 
-  if (!itemName) {
-    this.formError = '請輸入項目名稱';
+    if (!itemName) {
+      this.formError = '請輸入項目名稱';
 
-<<<<<<< HEAD
-    Swal.fire({
-      icon: 'warning',
-      title: '資料未填完整',
-      text: '請輸入項目名稱',
-      confirmButtonText: '確認',
-    });
-
-    return;
-=======
       Swal.fire({
         icon: 'warning',
         title: '資料未填完整',
@@ -255,54 +245,9 @@ loadItems(): void {
 
     this.isDirty = true;
     this.resetForm();
->>>>>>> origin/LII
   }
-
-  if (!Number.isInteger(this.newItem.quantity) || this.newItem.quantity < 1) {
-    this.formError = '數量至少為 1';
-
-    Swal.fire({
-      icon: 'warning',
-      title: '數量錯誤',
-      text: '數量至少為 1',
-      confirmButtonText: '確認',
-    });
-
-    return;
-  }
-
-  const updatedItem: PurchaseItemVo = {
-    id: this.editingItemId ?? 0,
-    listId: this.listId,
-    userId: this.hasGroup ? this.newItem.assignedUserId : this.userId,
-    categoryId: this.newItem.categoryId,
-    item: itemName,
-    quantity: this.newItem.quantity,
-    check: false,
-  };
-
-  if (this.isEditing) {
-    const index = this.items.findIndex((item) => item.id === this.editingItemId);
-
-    if (index !== -1) {
-      this.items[index] = {
-        ...this.items[index],
-        ...updatedItem,
-      };
-    }
-  } else {
-    this.items.push(updatedItem);
-  }
-
-  this.isDirty = true;
-  this.resetForm();
-}
 
   editItem(item: PurchaseItemVo): void {
-<<<<<<< HEAD
-  this.formError = '';
-  this.errorMessage = '';
-=======
     this.formError = '';
     this.errorMessage = '';
     this.editingItemId = item.id;
@@ -315,52 +260,12 @@ loadItems(): void {
       assignedUserId: this.hasGroup ? item.userId : this.userId
     };
   }
->>>>>>> origin/LII
 
-  // 有值時，isEditing 會自動變 true
-  this.editingItemId = item.id;
-
-  this.newItem = {
-    item: item.item,
-    quantity: item.quantity,
-    categoryId: item.categoryId,
-    assignedUserId: this.hasGroup ? item.userId : this.userId,
-  };
-}
   cancelEdit(): void {
     this.resetForm();
   }
 
   confirmItems(): void {
-<<<<<<< HEAD
-  if (this.items.length === 0) {
-    Swal.fire({
-      icon: 'warning',
-      title: '沒有可儲存的項目',
-      text: '請先新增或修改項目',
-      confirmButtonText: '確認',
-    });
-    return;
-  }
-
-  const req: AddPurchaseItemReq = {
-    listId: this.listId,
-    createrId: this.userId,
-    purchaseItemVoList: this.items.map((item) => ({
-      id: item.id ?? 0,
-      listId: this.listId,
-      userId: this.hasGroup ? item.userId : this.userId,
-      categoryId: item.categoryId,
-      item: item.item,
-      quantity: item.quantity,
-      check: item.check ?? false,
-    })),
-  };
-
-  const request$ = this.isEditPage
-    ? this.shoppingService.updateItem(req)
-    : this.shoppingService.addItems(req);
-=======
     if (this.items.length === 0) {
       Swal.fire({
         icon: 'warning',
@@ -388,25 +293,13 @@ loadItems(): void {
     const request$ = this.isEditPage
       ? this.shoppingService.updateItem(req)
       : this.shoppingService.addItems(req);
->>>>>>> origin/LII
 
-  this.isSaving = true;
+    this.isSaving = true;
 
-  request$.subscribe({
-    next: (res) => {
-      this.isSaving = false;
+    request$.subscribe({
+      next: (res) => {
+        this.isSaving = false;
 
-<<<<<<< HEAD
-      if (res.code !== 200) {
-        this.formError = res.message ?? '儲存購物項目失敗';
-
-        Swal.fire({
-          icon: 'error',
-          title: '儲存失敗',
-          text: this.formError,
-          confirmButtonText: '確認',
-        });
-=======
         if (res.code !== 200) {
           this.formError =
             res.message ??
@@ -454,52 +347,16 @@ loadItems(): void {
       }
     });
   }
->>>>>>> origin/LII
 
-        return;
-      }
-
-      Swal.fire({
-        icon: 'success',
-        title: '儲存成功',
-        timer: 1200,
-        showConfirmButton: false,
-      });
-
-      this.isDirty = false;
-      this.router.navigate(['/shopping-list']);
-    },
-
-    error: (err) => {
-      console.error(err);
-
-      this.formError = err.error?.message ?? '儲存購物項目失敗';
-      this.isSaving = false;
-
-      Swal.fire({
-        icon: 'error',
-        title: '儲存失敗',
-        text: this.formError,
-        confirmButtonText: '確認',
-      });
-    },
-  });
-}
   private resetForm(): void {
-  // 清掉後，isEditing 會自動變 false
-  this.editingItemId = null;
-
-  this.newItem = {
-    item: '',
-    quantity: 1,
-    categoryId: this.categories[0]?.id ?? 0,
-    assignedUserId: this.hasGroup
-      ? this.members[0]?.user_id ?? this.userId
-      : this.userId,
-  };
-
-  this.formError = '';
-}
+    this.editingItemId = null;
+    this.newItem = {
+      item: '',
+      quantity: 1,
+      categoryId: this.newItem.categoryId,
+      assignedUserId: this.hasGroup ? this.newItem.assignedUserId : this.userId
+    };
+  }
 
   deleteItem(item: PurchaseItemVo): void {
     Swal.fire({
