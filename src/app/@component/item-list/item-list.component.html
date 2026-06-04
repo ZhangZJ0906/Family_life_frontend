@@ -96,7 +96,12 @@
   <section class="table-card">
     <div class="table-responsive">
 
-      <table mat-table [dataSource]="dataSource" class="w-100" matSort matSortActive="expireDate" matSortDirection="asc">
+      <!-- 🔥 loading overlay -->
+      <div class="loading-overlay" *ngIf="isLoading">
+        ⏳ 載入中...
+      </div>
+
+      <table mat-table [dataSource]="dataSource" class="w-100" matSort matSortActive="expireDate" matSortDirection="asc" [class.loading]="isLoading">
 
         <!-- 勾選欄位 -->
         <ng-container matColumnDef="select">
@@ -230,10 +235,15 @@
         <ng-container matColumnDef="productName">
           <th mat-header-cell *matHeaderCellDef>產品名稱</th>
           <td mat-cell *matCellDef="let element" title="{{element.productName}}">
-            @if (isNewItem(element.createdAt, element.userId) && !element.seen) {
-              <span class="new-badge">NEW</span>
-            }
-            {{ element.productName.length>= 10 ? (element.productName | slice:0:10) + '...' : element.productName }}
+            <span class="name-wrapper">
+              @if (isNewItem(element.createdAt, element.userId) && !element.seen) {
+                <span class="new-badge">NEW</span>
+              }
+
+              <span class="item-name">
+                {{ element.productName.length>= 10 ? (element.productName | slice:0:10) + '...' : element.productName }}
+              </span>
+            </span>
           </td>
         </ng-container>
 

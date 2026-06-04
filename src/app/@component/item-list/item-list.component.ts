@@ -141,7 +141,8 @@ export class ItemListComponent {
   currentUserId: any;
   lastSelectedRow: any = null;
   currentUserAvatar = 'assets/default-avatar.png';//預設群組投向
-  
+
+  isLoading = true;
 
   //上次登入時間
   lastLoginTime!: Date;
@@ -466,6 +467,8 @@ export class ItemListComponent {
 
   // ─── API：查詢一般物品（邏輯特殊，單獨保留）──────────────────
   getItemByGroupId(groupId: number): void {
+
+    this.isLoading = true; // 🔥 開啟 table loading
     this.currentGroupId = groupId;
     // 切換群組時先清空快取，避免讀到舊群組資料
     this.cachedData = {
@@ -514,8 +517,11 @@ export class ItemListComponent {
           ];
           this.selectedCategory = '全部';
           this.dataSource.paginator?.firstPage();
+
+          this.isLoading = false; // 🔥 關閉
         },
         error: (err: any) => {
+          this.isLoading = false; // 🔥 一定要關
           Swal.fire({
             title: '錯誤',
             text: err.message || 'Server error',

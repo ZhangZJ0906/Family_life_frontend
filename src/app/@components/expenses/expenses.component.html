@@ -175,10 +175,16 @@
         <ng-container matColumnDef="related_item_name">
           <th mat-header-cell *matHeaderCellDef>消費名稱</th>
           <td mat-cell *matCellDef="let e" title="{{e.relatedItemName}}">
-            @if (isNewItem(e.createdAt, e.userId) && !e.seen) {
-            <span class="new-badge">NEW</span>
-            }
-            {{ e.relatedItemName.length >=8 ? (e.relatedItemName | slice:0:8) + '...' : e.relatedItemName ||'--' }}
+            <span class="item-name-wrapper">
+              @if (isNewItem(e.createdAt, e.userId) && !e.seen) {
+              <span class="new-badge">NEW</span>
+              }
+
+              <span class="item-name">
+                {{ e.relatedItemName.length >=8 ? (e.relatedItemName | slice:0:8) + '...' : e.relatedItemName ||'--' }}
+              </span>
+            </span>
+
           </td>
         </ng-container>
 
@@ -303,7 +309,7 @@
     <span class="fab-badge">{{ selection.selected.length }}</span>
   </button>
   }
-  
+
   <!-- 固定在畫面右下角的新增支出按鈕 -->
   <button mat-fab type="button" class=".expense-fab-btn" (click)="openCreateDialog()" title="新增支出">
     <mat-icon>add</mat-icon>
