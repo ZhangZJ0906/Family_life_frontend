@@ -51,6 +51,8 @@ export class ProfileComponent implements CanComponentDeactivate {
   //切到其它分頁時護衛模式
   isDirty = false;
 
+  isLoading = false;
+
   constructor(
     private http: HttpClient,
     private authService: AuthService,
@@ -98,6 +100,8 @@ export class ProfileComponent implements CanComponentDeactivate {
 
   getGroup() {
 
+    this.isLoading = true;
+
     this.user_id = this.authService.currentUser()?.user_id ?? 0;
 
     console.log("userId: " + this.user_id);
@@ -114,10 +118,13 @@ export class ProfileComponent implements CanComponentDeactivate {
           this.publicInventoryObj[group.groupId] = !!res.publicInventory[index];
         });
 
+        this.isLoading = false;
+
         console.log("list001:", this.publicInventoryObj[22]);
       },
 
       error: (err) => {
+        this.isLoading = false;
         console.log(err);
       }
 
@@ -299,12 +306,21 @@ openAvatarDialog(): void {
       formData.append('avatar', this.file);
     }
 
+    Swal.fire({
+      title: '儲存中...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     this.http.post(
       'http://localhost:8080/users/update_info',
       formData
     ).subscribe({
       next: (res: any) => {
         if (res.code !== 200) {
+          Swal.close()
           Swal.fire({
             icon: 'error',
             title: '儲存失敗',
@@ -339,6 +355,7 @@ openAvatarDialog(): void {
       },
 
       error: (err) => {
+        Swal.close()
         Swal.fire({
           icon: 'error',
           title: '失敗',

@@ -103,6 +103,44 @@
   display: flex;
   flex-direction: column;
 }
+//loading
+.table-skeleton {
+  padding: 10px;
+}
+
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.cell {
+  height: 14px;
+  background: #e0e0e0;
+  border-radius: 6px;
+  animation: pulse 1.2s infinite;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.text {
+  width: 180px;
+}
+
+.text.short {
+  width: 100px;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
 
 /* 通知設定：橫跨頭像 + 基本資料 */
 .notify-card {

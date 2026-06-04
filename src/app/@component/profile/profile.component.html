@@ -47,51 +47,64 @@
           <h3>群組狀態</h3>
       </div>
 
+      <!-- LOADING TABLE -->
+      <div *ngIf="isLoading" class="table-skeleton">
 
+        <div class="row skeleton-row" *ngFor="let i of [1,2,3,4,5]">
+          <div class="cell avatar"></div>
+          <div class="cell text"></div>
+          <div class="cell text short"></div>
+        </div>
 
-      <div class="group-list">
-        <details class="group-accordion" *ngFor="let group of groups" open>
-          <summary>
-            <div class="group-summary-left">
-              <img class="group-avatar" [src]="group.avatar || 'assets/default-avatar.png'">
+      </div>
 
-              <span class="group-name">
-                {{ truncateName(group.groupName) }}
+      <!-- REAL TABLE -->
+      <div *ngIf="!isLoading">
+
+        <!-- <div class="group-list"> -->
+          <details class="group-accordion" *ngFor="let group of groups" open>
+            <summary>
+              <div class="group-summary-left">
+                <img class="group-avatar" [src]="group.avatar || 'assets/default-avatar.png'">
+
+                <span class="group-name">
+                  {{ truncateName(group.groupName) }}
+                </span>
+              </div>
+
+              <!-- 右側：文字 + switch -->
+            <!-- <div class="group-share-setting">
+              <span class="group-share-text">
+                顯示個人清單給該群組
               </span>
+
+              <label class="switch">
+                <input
+                  type="checkbox"
+                  name="publicInventory{{group.groupId}}"
+                  [(ngModel)]="publicInventoryObj[group.groupId]"
+                  (change)="isDirty = true"
+                >
+                <span class="slider"></span>
+              </label>
+            </div> -->
+          </summary>
+            <div class="group-detail">
+              <div class="invite-row">
+                <p>邀請碼 : {{ group.inviteCode }}</p>
+
+                <button
+                  class="copy-btn"
+                  (click)="copyInviteCode(group)"
+                >
+                  複製
+                </button>
+              </div>
+
             </div>
+          </details>
 
-            <!-- 右側：文字 + switch -->
-          <!-- <div class="group-share-setting">
-            <span class="group-share-text">
-              顯示個人清單給該群組
-            </span>
-
-            <label class="switch">
-              <input
-                type="checkbox"
-                name="publicInventory{{group.groupId}}"
-                [(ngModel)]="publicInventoryObj[group.groupId]"
-                (change)="isDirty = true"
-              >
-              <span class="slider"></span>
-            </label>
-          </div> -->
-        </summary>
-          <div class="group-detail">
-            <div class="invite-row">
-              <p>邀請碼 : {{ group.inviteCode }}</p>
-
-              <button
-                class="copy-btn"
-                (click)="copyInviteCode(group)"
-              >
-                複製
-              </button>
-            </div>
-
-          </div>
-        </details>
-
+        <!-- </div> -->
       </div>
     </div>
 
