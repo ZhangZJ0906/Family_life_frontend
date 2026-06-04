@@ -103,9 +103,7 @@
   margin-bottom: 20px;
 
   display: grid;
-
-  /* 不要寫死 760px / 520px，避免 100% 時爆版 */
-  grid-template-columns: 280px minmax(0, 1fr) auto;
+  grid-template-columns: 300px minmax(0, 1fr) 430px;
 
   align-items: center;
   gap: 24px;
@@ -165,8 +163,8 @@
   align-items: center;
   justify-content: center;
 
-  /* 移除原本會推爆版面的 margin */
   margin: 0;
+  overflow: hidden;
 }
 
 /* 分類按鈕可水平滾動，不推擠右邊群組 */
@@ -176,7 +174,7 @@
   align-items: center;
   gap: 8px;
 
-  width: 100%;
+  width: max-content;
   max-width: 100%;
 
   overflow-x: auto;
@@ -184,12 +182,11 @@
 
   white-space: nowrap;
   padding-bottom: 2px;
-
-  /* 移除原本 margin-left: 215px */
-  margin: 0;
+  margin: 0 auto;
 
   scrollbar-width: none;
 }
+
 
 .header-filter mat-chip-listbox::-webkit-scrollbar {
   display: none;
@@ -213,25 +210,19 @@
   align-items: center;
   gap: 14px;
 
-  /* 移除原本 margin-right: 50px */
   margin: 0;
-
-  flex-shrink: 0;
+  min-width: 0;
 }
 
-/* 群組選擇器 + 搜尋框：固定合理寬度，不超出去 */
-.group-select {
-  width: 220px;
-  height: 72px;
-  flex-shrink: 0;
-}
 
+/* 群組選擇器 + 搜尋框 */
+.group-select,
 .search-field {
-  width: 220px;
+  width: 180px;
   height: 72px;
   flex-shrink: 0;
+  margin: 0;
 }
-
 /* Angular Material 外框高度統一 */
 .group-select ::ng-deep .mat-mdc-text-field-wrapper,
 .search-field ::ng-deep .mat-mdc-text-field-wrapper {
@@ -646,23 +637,37 @@ mat-paginator {
 }
 
 /* 小螢幕排版 */
-@media (max-width: 1200px) {
-  .item-header-card {
+@media (max-width: 1400px) {
+   .item-header-card {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 18px;
   }
 
   .header-filter {
     justify-content: flex-start;
   }
 
-  .header-right {
-    width: 100%;
-    justify-content: space-between;
-  }
+
+
 
   .group-select {
     width: 220px;
+  }
+
+  .header-filter mat-chip-listbox {
+    margin: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .header-right {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .group-select,
+  .search-field {
+    width: 210px;
   }
 
 
