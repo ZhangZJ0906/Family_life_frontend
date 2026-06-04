@@ -44,6 +44,8 @@ export class GroupPageComponent{
 
   unreadCount!: number;
 
+  isLoading = true;
+
   constructor(
     private dialog: MatDialog,
     private http: HttpClient,
@@ -87,6 +89,8 @@ export class GroupPageComponent{
 
     // const user_id = 1;
 
+    this.isLoading = true;
+
     this.http.get<any>(
       `http://localhost:8080/family_life/get_group_list?user_id=${this.user_id}`
     ).subscribe({
@@ -99,11 +103,13 @@ export class GroupPageComponent{
         // 預設全部顯示
         this.filteredGroups = this.groups;
 
+        this.isLoading = false;
         console.log(res.groupList);
       },
 
       error: (err) => {
         console.log(err);
+        this.isLoading = false;
       }
 
     });
@@ -529,4 +535,6 @@ export class GroupPageComponent{
     });
 
   }
+
+
 }
