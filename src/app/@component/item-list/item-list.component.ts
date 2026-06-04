@@ -81,6 +81,7 @@ export class ItemListComponent {
       'price',
       'expireDate',
       'status',
+      'avatar',
       'notify',
       'actions',
     ],
@@ -92,6 +93,7 @@ export class ItemListComponent {
       'trialEndDate',
       'nextBillingDate',
       'status',
+      'avatar',
       'notify',
       'actions',
     ],
@@ -105,6 +107,7 @@ export class ItemListComponent {
       'purchaseDate',
       'warrantyEndDate',
       'status',
+      'avatar',
       'notify',
       'actions',
     ],
@@ -117,6 +120,7 @@ export class ItemListComponent {
       'expireDate',
       'usageMethod',
       'status',
+      'avatar',
       'notify',
       'actions',
     ],
@@ -127,6 +131,7 @@ export class ItemListComponent {
       'price',
       'expireOrEndDate',
       'status',
+      'avatar',
       'actions',
     ],
   };
@@ -140,8 +145,7 @@ export class ItemListComponent {
   currentGroupId: any = null;
   currentUserId: any;
   lastSelectedRow: any = null;
-  currentUserAvatar = 'assets/default-avatar.png';//預設群組投向
-  
+  currentUserAvatar = 'assets/default-avatar.png'; //預設群組投向
 
   //上次登入時間
   lastLoginTime!: Date;
@@ -343,14 +347,28 @@ export class ItemListComponent {
       if (!result) return;
 
       // edit-dialog 回傳的 _type 為 'item' | 'subscription' | 'warranty' | 'medicine'
-      const { _type, ...payload } = result;
+      const { _type, selectedFile, ...payload } = result;
       console.log(_type);
       payload.userId = this.currentUserId;
 
       const url = this.basicUrl + (this.updateApiMap[_type] ?? 'item/update');
       this.showLoading('更新中...');
+      const formData = new FormData();
 
-      this.http.postApi(url, payload).subscribe({
+      // 將原本的 JSON payload 封裝成 Blob 並宣告為 application/json
+      const jsonBlob = new Blob([JSON.stringify(payload)], {
+        type: 'application/json',
+      });
+
+      // 注意：這裡的 key 名稱（'req'）要跟後端 @RequestBody / @RequestPart 接收的變數名稱一致！
+      formData.append('req', jsonBlob);
+
+      // 如果有選擇新圖片，才塞入 FormData
+      if (selectedFile) {
+        // 名稱對應後端的 @RequestPart(value = "avatar")
+        formData.append('avatar', selectedFile);
+      }
+      this.http.postApi(url, formData).subscribe({
         next: (res: any) => {
           Swal.close();
           if (res.code !== 200) {
@@ -494,7 +512,7 @@ export class ItemListComponent {
           this.currentMode = TableMode.Item;
           this.refreshTableData(this.cachedData.item);
 
-          console.log("item:", res.items)
+          console.log('item:', res.items);
 
           // 背景載入其他三種資料，供全域搜尋的 allData 使用
           this.loadAllListSilently(groupId);
@@ -880,5 +898,27 @@ export class ItemListComponent {
       allowEscapeKey: false,
       didOpen: () => Swal.showLoading(),
     });
+  }
+  //圖片顯示
+  getItemAvatar(element: any): string {
+    // 1. 如果資料庫根本沒圖片，直接給前端預設圖
+    if (!element.avatar || element.avatar.trim() === '') {
+      return 'assets/default-avatar.png';
+    }
+
+    // 2. 如果是 Base64 或是已經包含 http 的完整網址，直接回傳
+    if (
+      element.avatar.startsWith('data:') ||
+      element.avatar.startsWith('http')
+    ) {
+      return element.avatar;
+    }
+
+    // 3. 📌 關鍵修正：使用 encodeURIComponent 處理含有中文與空格的檔名
+    // 這樣 "1780583651502_螢幕擷取畫面 2026-05-31 111911.png"
+    // 就會被正確轉換為瀏覽器看得懂的網址，不會再破圖或閃爍了！
+    const safeAvatar = encodeURIComponent(element.avatar.trim());
+
+    return `${this.basicUrl}uploads/${safeAvatar}`;
   }
 }

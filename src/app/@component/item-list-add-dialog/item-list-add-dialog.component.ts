@@ -49,30 +49,6 @@ export class ItemListAddDialogComponent implements OnInit {
   minDate: string = '';
   today = new Date();
 
-  isSubscriptionCategory(): boolean {
-    return (
-      this.categories.find(
-        (cat) => Number(cat.id) === Number(this.item.categoryId),
-      )?.name === '訂閱'
-    );
-  }
-
-  isWarrantyCategory(): boolean {
-    return (
-      this.categories.find(
-        (cat) => Number(cat.id) === Number(this.item.categoryId),
-      )?.name === '保固'
-    );
-  }
-
-  isMedicineCategory(): boolean {
-    return (
-      this.categories.find(
-        (cat) => Number(cat.id) === Number(this.item.categoryId),
-      )?.name === '藥品'
-    );
-  }
-
   item: {
     created_by_id: number;
     groupId: number;
@@ -131,7 +107,7 @@ export class ItemListAddDialogComponent implements OnInit {
 
   basicUrl!: string;
   group: any[] = [];
-
+  selectedFile: File | null = null; // 儲存選取的圖片檔案
   constructor(
     public dialogRef: MatDialogRef<ItemListAddDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -176,7 +152,29 @@ export class ItemListAddDialogComponent implements OnInit {
 
     this.applyPrefillItem();
   }
+  isSubscriptionCategory(): boolean {
+    return (
+      this.categories.find(
+        (cat) => Number(cat.id) === Number(this.item.categoryId),
+      )?.name === '訂閱'
+    );
+  }
 
+  isWarrantyCategory(): boolean {
+    return (
+      this.categories.find(
+        (cat) => Number(cat.id) === Number(this.item.categoryId),
+      )?.name === '保固'
+    );
+  }
+
+  isMedicineCategory(): boolean {
+    return (
+      this.categories.find(
+        (cat) => Number(cat.id) === Number(this.item.categoryId),
+      )?.name === '藥品'
+    );
+  }
   private applyPrefillItem(): void {
     const prefill = this.data?.prefillItem;
     if (!prefill) return;
@@ -195,7 +193,13 @@ export class ItemListAddDialogComponent implements OnInit {
   get totalPrice(): number {
     return (this.item.unitPrice || 0) * (this.item.quantity || 0);
   }
-
+  // 新增圖片當使用者選擇檔案時觸發的事件方法
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+    }
+  }
   // ✅ 全面補強，四種模式都有完整驗證
   isSubmitDisabled(): boolean {
     if (!this.item.name?.trim()) return true;
@@ -225,7 +229,7 @@ export class ItemListAddDialogComponent implements OnInit {
     }
 
     // 一般物品
-    if(!this.item.quantity)return true;
+    if (!this.item.quantity) return true;
     if (!this.item.locationId) return true;
     if (!this.item.purchaseDate) return true;
     if (!this.item.expireDate) return true;
@@ -280,8 +284,19 @@ export class ItemListAddDialogComponent implements OnInit {
     }
 
     this.showLoading('新增物品中...');
+    const formData = new FormData();
 
-    this.http.postApi(this.basicUrl + 'item/add', payload).subscribe({
+    // 1. 將純 JSON 轉為 Blob 並指定 type 為 application/json 傳給後端的 @RequestPart("req")
+    const jsonBlob = new Blob([JSON.stringify(payload)], {
+      type: 'application/json',
+    });
+    formData.append('req', jsonBlob);
+
+    // 2. 如果有選檔案，封裝給後端的 @RequestPart("avatar")
+    if (this.selectedFile) {
+      formData.append('avatar', this.selectedFile);
+    }
+    this.http.postApi(this.basicUrl + 'item/add', formData).subscribe({
       next: (res: any) => {
         Swal.close();
         if (res.code != 200) {
@@ -402,7 +417,20 @@ export class ItemListAddDialogComponent implements OnInit {
     }
 
     this.showLoading('新增訂閱中...');
-    this.http.postApi(this.basicUrl + 'subscription/add', payload).subscribe({
+    //圖片加資料
+    const formData = new FormData();
+
+    // 1. 將純 JSON 轉為 Blob 並指定 type 為 application/json 傳給後端的 @RequestPart("req")
+    const jsonBlob = new Blob([JSON.stringify(payload)], {
+      type: 'application/json',
+    });
+    formData.append('req', jsonBlob);
+
+    // 2. 如果有選檔案，封裝給後端的 @RequestPart("avatar")
+    if (this.selectedFile) {
+      formData.append('avatar', this.selectedFile);
+    }
+    this.http.postApi(this.basicUrl + 'subscription/add', formData).subscribe({
       next: (res: any) => {
         Swal.close();
         if (res.code != 200) {
@@ -503,8 +531,19 @@ export class ItemListAddDialogComponent implements OnInit {
     }
 
     this.showLoading('新增保固中...');
+   const formData = new FormData();
 
-    this.http.postApi(this.basicUrl + 'warranty/add', payload).subscribe({
+    // 1. 將純 JSON 轉為 Blob 並指定 type 為 application/json 傳給後端的 @RequestPart("req")
+    const jsonBlob = new Blob([JSON.stringify(payload)], {
+      type: 'application/json',
+    });
+    formData.append('req', jsonBlob);
+
+    // 2. 如果有選檔案，封裝給後端的 @RequestPart("avatar")
+    if (this.selectedFile) {
+      formData.append('avatar', this.selectedFile);
+    }
+    this.http.postApi(this.basicUrl + 'warranty/add', formData).subscribe({
       next: (res: any) => {
         Swal.close();
         if (res.code != 200) {
@@ -572,7 +611,7 @@ export class ItemListAddDialogComponent implements OnInit {
       userId: this.item.created_by_id,
       name: this.item.name,
       medicineType: this.item.medicineType,
-      quantity: this.item.quantity||0,
+      quantity: this.item.quantity || 0,
       unit: this.item.unit,
       price: (this.item.unitPrice || 0) * (this.item.quantity || 0),
       unitPrice: this.item.unitPrice,
@@ -613,8 +652,20 @@ export class ItemListAddDialogComponent implements OnInit {
       return;
     }
     this.showLoading('新增藥品中...');
+    const formData = new FormData();
 
-    this.http.postApi(this.basicUrl + 'medicine/add', payload).subscribe({
+    // 1. 將純 JSON 轉為 Blob 並指定 type 為 application/json 傳給後端的 @RequestPart("req")
+    const jsonBlob = new Blob([JSON.stringify(payload)], {
+      type: 'application/json',
+    });
+    formData.append('req', jsonBlob);
+
+    // 2. 如果有選檔案，封裝給後端的 @RequestPart("avatar")
+    if (this.selectedFile) {
+      formData.append('avatar', this.selectedFile);
+    }
+
+    this.http.postApi(this.basicUrl + 'medicine/add', formData).subscribe({
       next: (res: any) => {
         Swal.close();
         if (res.code != 200) {

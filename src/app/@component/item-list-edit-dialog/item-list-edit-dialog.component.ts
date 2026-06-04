@@ -15,7 +15,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { LocationAndCategory } from '../../common/interfaceList';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
-import { AuthService } from '../../@services/auth.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -47,7 +46,8 @@ export class ItemListEditDialogComponent implements OnInit {
 
   categories: LocationAndCategory[] = [];
   location: LocationAndCategory[] = [];
-
+selectedFile: File | null = null;
+imagePreview: string | null = null;
   constructor(
     public dialogRef: MatDialogRef<ItemListEditDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -87,6 +87,9 @@ export class ItemListEditDialogComponent implements OnInit {
       this.item.nextBillingDate = this.formatDate(this.item.nextBillingDate);
       this.item.warrantyEndDate = this.formatDate(this.item.warrantyEndDate);
       this.originalItem = JSON.parse(JSON.stringify(this.item));
+      if (this.item && this.item.avatar) {
+      this.imagePreview = this.item.avatar;
+    }
     }
   }
 
@@ -166,12 +169,26 @@ export class ItemListEditDialogComponent implements OnInit {
       this.item.status === '已過保'
     );
   }
+
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+
+      // 使用 FileReader 產生 Base64 供前端預覽
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.imagePreview = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
   /**
    * ✨ 核心檢查防呆：控管 HTML 確認按鈕的 [disabled] 狀態
    */
   isSubmitDisabled(): boolean {
     // 1. 如果資料完全沒有變更，直接停用
-    if (!this.hasChange) return true;
+    if (!this.hasChange&& !this.selectedFile) return true;
     if (this.isExpired) {
       return (
         !this.item.name?.trim() ||
@@ -306,6 +323,8 @@ export class ItemListEditDialogComponent implements OnInit {
         trialEndDate: this.formatDate(this.item.trialEndDate),
         notify: this.item.notify,
         note: this.item.note,
+        selectedFile: this.selectedFile
+
       };
     } else if (this.isWarrantyCategory()) {
       if (!this.item.purchaseDate) {
@@ -332,6 +351,8 @@ export class ItemListEditDialogComponent implements OnInit {
         price: this.item.price || 0,
         notify: this.item.notify,
         note: this.item.note,
+        selectedFile: this.selectedFile
+
       };
     } else if (this.isMedicineCategory()) {
       if (this.item.quantity < 0) {
@@ -368,6 +389,8 @@ export class ItemListEditDialogComponent implements OnInit {
         source: this.item.source,
         notify: this.item.notify,
         note: this.item.note,
+        selectedFile: this.selectedFile
+
       };
     } else {
       if (this.item.quantity < 0) {
@@ -394,6 +417,7 @@ export class ItemListEditDialogComponent implements OnInit {
         expireDate: this.formatDate(this.item.expireDate),
         price: this.totalPrice,
         safeQuantity: this.item.safeQuantity ?? 0,
+        selectedFile: this.selectedFile
       };
     }
 
