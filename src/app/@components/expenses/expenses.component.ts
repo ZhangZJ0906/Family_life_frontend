@@ -234,7 +234,7 @@ export class ExpensesComponent {
     });
     dialogRef.afterClosed().subscribe((result) => {
       if (result === true)
-        this.getExpense(this.currentGroupId, this.currentUserId);
+        this.getExpense(this.currentGroupId, this.currentUserId, true);
     });
   }
 
@@ -277,7 +277,7 @@ export class ExpensesComponent {
       if (!result) {
         return;
       }
-      this.getExpense(this.currentGroupId, this.currentUserId);
+      this.getExpense(this.currentGroupId, this.currentUserId, true);
     });
   }
 
@@ -329,7 +329,7 @@ export class ExpensesComponent {
               showConfirmButton: false,
             });
             this.selection.clear();
-            this.getExpense(this.currentGroupId, this.currentUserId);
+            this.getExpense(this.currentGroupId, this.currentUserId, true);
           },
           error: (err) =>
             Swal.fire({ title: '刪除錯誤', text: err.message, icon: 'error' }),
@@ -372,6 +372,7 @@ getCurrentGroup() {
 }
 
   getUserGroupData() {
+    this.showLoading('載入資料中...');
   this.http
     .getApi(
       this.basicUrl +
@@ -410,7 +411,7 @@ getCurrentGroup() {
         this.currentGroupId = fromNotify ? Number(fromNotify) : 0;
 
         // 查詢記帳資料
-        this.getExpense(this.currentGroupId, this.currentUserId);
+        this.getExpense(this.currentGroupId, this.currentUserId, false);
       },
 
       error: (err) => {
@@ -428,16 +429,20 @@ getCurrentGroup() {
     // 清除勾選狀態
     this.selection.clear();
     // 重新查詢資料
-    this.getExpense(this.currentGroupId, this.currentUserId);
+    this.getExpense(this.currentGroupId, this.currentUserId, true);
   }
 
-  getExpense(groupId: number, userId: number) {
+  getExpense(groupId: number, userId: number, showLoader: boolean = true) {
+    if (showLoader) {
+      this.showLoading('載入記帳資料...');
+    }
     const finalGroupId =
       groupId === undefined || groupId === null ? 0 : Number(groupId);
 
     const url = `${this.basicUrl}expense/getInfo?userId=${userId}&groupId=${finalGroupId}`;
     this.http.getApi(url).subscribe({
       next: (res: any) => {
+        Swal.close();
         if (res.code !== 200) {
           Swal.fire({
             title: '錯誤',
@@ -456,6 +461,7 @@ getCurrentGroup() {
       },
 
       error: (err) => {
+        Swal.close();
         console.log('記帳查詢錯誤:', err);
 
         Swal.fire({
@@ -514,5 +520,15 @@ getCurrentGroup() {
     if (isNaN(created)) return false;
 
     return created > login;
+  }
+
+  private showLoading(message = '載入中...'): void {
+    Swal.fire({
+      title: message,
+      text: '請稍候',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => Swal.showLoading(),
+    });
   }
 }
