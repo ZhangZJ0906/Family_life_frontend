@@ -64,7 +64,7 @@
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>單價</mat-label>
           <!-- ✅ placeholder 取代預設 0 -->
-          <input matInput type="number" required [(ngModel)]="item.unitPrice" min="0" placeholder="例如：30">
+          <input matInput type="number" required [(ngModel)]="item.unitPrice" min="0" placeholder="例如：30" class="text-primary fw-bold">
           <span matPrefix>$&nbsp;</span>
         </mat-form-field>
       </div>
@@ -401,7 +401,7 @@
           <input matInput [(ngModel)]="item.source" placeholder="藥局/診所/醫院">
         </mat-form-field>
       </div>
-      
+
       <div class="col-6">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>劑量</mat-label>
