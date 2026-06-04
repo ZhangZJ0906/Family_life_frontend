@@ -118,7 +118,7 @@
         </div>
 
         <label class="switch">
-          <input type="checkbox" [(ngModel)]="emailNotify" (change)="isDirty = true">
+          <input type="checkbox" [(ngModel)]="emailNotify" (change)="isDirty = true" (click)="VerifyEmailExist()">
           <span class="slider"></span>
         </label>
       </div>

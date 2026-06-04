@@ -34,49 +34,63 @@
     <!-- Group Cards -->
     <div class="card-list">
 
-      <div class="group-card" *ngFor="let group of pagedGroups">
+      <!-- 🔥 loading -->
+      <div class="loading-state" *ngIf="isLoading">
+        ⏳ 載入中...
+      </div>
 
-        <!-- 左 -->
-        <div class="left">
+      <!-- 🔥 empty -->
+      <div class="loading-state" *ngIf="!isLoading && pagedGroups.length === 0">
+        📭 沒有群組資料
+      </div>
 
-          <img class="avatar"
-               [src]="group.avatar || 'assets/default-avatar.png'">
+      <ng-container *ngIf="!isLoading">
 
-          <div class="info">
-            <div class="name">
-              {{ truncateName(group.groupName) }}
+        <div class="group-card" *ngFor="let group of pagedGroups">
+
+          <!-- 左 -->
+          <div class="left">
+
+            <img class="avatar"
+                [src]="group.avatar || 'assets/default-avatar.png'">
+
+            <div class="info">
+              <div class="name">
+                {{ truncateName(group.groupName) }}
+              </div>
+
+              <div class="gid">
+                GID: {{ group.groupId }}, 由{{group.creater}}建立
+              </div>
             </div>
 
-            <div class="gid">
-              GID: {{ group.groupId }}, 由{{group.creater}}建立
-            </div>
+          </div>
+
+          <!-- 右 -->
+          <div class="right">
+
+            <!-- <button class="btn chat">群組清單</button> -->
+
+            <button class="btn member"
+              (click)="openMemberDialog(group, user_id)">
+              成員
+            </button>
+
+            <button class="btn edit"
+              (click)="openUpdateDialog(group, user_id)">
+              修改
+            </button>
+
+            <button class="btn danger"
+              (click)="deleteGroup(group.groupId)">
+              解散
+            </button>
+
           </div>
 
         </div>
 
-        <!-- 右 -->
-        <div class="right">
-
-          <!-- <button class="btn chat">群組清單</button> -->
-
-          <button class="btn member"
-            (click)="openMemberDialog(group, user_id)">
-            成員
-          </button>
-
-          <button class="btn edit"
-            (click)="openUpdateDialog(group, user_id)">
-            修改
-          </button>
-
-          <button class="btn danger"
-            (click)="deleteGroup(group.groupId)">
-            解散
-          </button>
-
-        </div>
-
-      </div>
+      </ng-container>
 
     </div>
 

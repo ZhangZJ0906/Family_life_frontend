@@ -64,11 +64,18 @@
 
   <div class="notify-list">
 
+    <!-- 🔥 loading state -->
+    <div class="empty-state" *ngIf="isLoading">
+      <div>⏳</div>
+      載入中...
+    </div>
+
     <!-- 空狀態 -->
-    <div class="empty-state" *ngIf="filteredNotifies().length === 0">
+    <div class="empty-state" *ngIf="!isLoading && filteredNotifies().length === 0">
       <div>📭</div>
       尚未有通知
     </div>
+
 
     <div class="notify-item" *ngFor="let n of filteredNotifies()" [class.unread]="n.isRead !== 1" (click)="markAsRead(n)">
 
