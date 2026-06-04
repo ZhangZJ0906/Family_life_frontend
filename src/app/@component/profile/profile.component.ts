@@ -367,4 +367,15 @@ openAvatarDialog(): void {
       return result.isConfirmed;
     });
   }
+
+  VerifyEmailExist(){
+    Swal.fire({
+      title: '驗證中...',
+      text: '正在確認 Email 資訊',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  }
 }
