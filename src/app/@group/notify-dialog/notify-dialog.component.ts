@@ -58,6 +58,8 @@ export class NotifyDialogComponent implements OnInit {
     update: 0
   };
 
+  isLoading = true;
+
   constructor(
     public dialogRef: MatDialogRef<NotifyDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -89,6 +91,7 @@ export class NotifyDialogComponent implements OnInit {
 
 
   getNotify() {
+    this.isLoading = true;
     this.http.get<any>(
       `http://localhost:8080/family_life/get_notify?user_id=${this.user_id}`
     ).subscribe({
@@ -101,6 +104,8 @@ export class NotifyDialogComponent implements OnInit {
 
         this.calculateUnread();
         this.syncBadge();
+
+        this.isLoading = false;
 
       },
       error: (err) => {
@@ -143,11 +148,15 @@ export class NotifyDialogComponent implements OnInit {
 
     if (n.isRead === 1 || n.type === 'invite') return;
 
+    this.showLoading('標記已讀中...');
+
     this.http.post(
       `http://localhost:8080/family_life/read_notify?notify_id=${n.id}`,
       {}
     ).subscribe({
       next: () => {
+
+        this.closeLoading();
 
         n.isRead = 1;
 
@@ -168,12 +177,15 @@ export class NotifyDialogComponent implements OnInit {
       .map(n => n.id);
 
     if (!unreadIds.length) return;
+    this.showLoading('全部標記已讀中...');
+
 
     this.http.post(
       'http://localhost:8080/family_life/read_all_notify',
       { ids: unreadIds }
     ).subscribe({
       next: () => {
+        this.closeLoading();
 
         this.notifies.forEach(n => n.isRead = 1);
 
@@ -194,12 +206,15 @@ export class NotifyDialogComponent implements OnInit {
       .map(n => n.id);
 
     if (!ids.length) return;
+    this.showLoading('刪除中...');
 
     this.http.post(
       'http://localhost:8080/family_life/delete_all_isReadNotify',
       { ids }
     ).subscribe({
       next: () => {
+
+        this.closeLoading();
 
         this.notifies = this.notifies.filter(n => n.isRead !== 1);
 
@@ -345,5 +360,20 @@ this.router.navigate(['/expenses'], { queryParams: { groupId: n.sendUserId } });
     this.dialogRef.close({
       unreadCount: unread
     });
+  }
+
+  //loading中....
+  private showLoading(message = '處理中...') {
+    Swal.fire({
+      title: message,
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  }
+
+  private closeLoading() {
+    Swal.close();
   }
 }
