@@ -210,12 +210,21 @@ isSelectedGroup(groupId: number): boolean {
   return Number(groupId) === Number(this.selectedGroupId);
 }
   getUserGroupList(userId: number) {
+    // 👉 開 loading
+    Swal.fire({
+      title: '載入群組中...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
   this.http
     // 改用 profile 頁相同概念的群組清單 API
     // 這支 API 需要回傳 groupList，裡面要有 groupId、groupName、avatar
     .getApi(this.http.basicUrl + `family_life/get_group_list?user_id=${userId}`)
     .subscribe({
       next: (res: any) => {
+        Swal.close();
         if (res.code !== 200 && res.groupList == null) {
           Swal.fire({
             title: '拉取群組錯誤',
@@ -265,6 +274,7 @@ isSelectedGroup(groupId: number): boolean {
       },
 
       error: (err) => {
+        Swal.close();
         Swal.fire({
           title: '拉取群組錯誤',
           text: err.message || 'server error',
@@ -279,6 +289,15 @@ isSelectedGroup(groupId: number): boolean {
 async loadCalendarEvents(groupId: number | null, userId: number): Promise<void>  {
   const realGroupId = groupId == null ? 0 : Number(groupId);
 
+  // 👉 開 loading
+  Swal.fire({
+    title: '載入行事曆中...',
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
   // 重點：
   // 不要打 calendar/group/1
   // 因為後端目前沒有 @GetMapping("/group/{groupId}")
@@ -288,6 +307,8 @@ async loadCalendarEvents(groupId: number | null, userId: number): Promise<void> 
 
   this.http.getApi(url).subscribe({
     next: (res: any) => {
+      Swal.close(); // ✅ 關掉 loading
+
       if (res.code !== 200) {
         Swal.fire({
           icon: 'error',
@@ -323,6 +344,8 @@ async loadCalendarEvents(groupId: number | null, userId: number): Promise<void> 
     },
 
     error: (err) => {
+      Swal.close(); // ❗記得錯誤也要關
+
       Swal.fire({
         icon: 'error',
         title: '查詢行事曆失敗',
@@ -423,8 +446,16 @@ const payload = {
     ? this.createdBy
     : result.assignedUserIds?.[0],
 };
+  Swal.fire({
+    title: '新增中...',
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
   this.calendarApiService.create(payload).subscribe({
     next: (res: any) => {
+      Swal.close();
       if (res.code !== 200) {
         Swal.fire({
           icon: 'error',
@@ -444,6 +475,7 @@ const payload = {
     },
 
     error: (err) => {
+      Swal.close()
       Swal.fire({
         icon: 'error',
         title: '新增失敗',
@@ -571,9 +603,17 @@ const assignedUserIds = await this.getBatchAssignedUserIds(
     ? this.createdBy
     : result.assignedUserIds?.[0],
 };
+  Swal.fire({
+    title: '更新行事曆中...',
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
       this.calendarApiService.update(Number(info.event.id), payload).subscribe({
         next: (res: any) => {
           if (res.code !== 200) {
+            Swal.close()
             Swal.fire({
               icon: 'error',
               title: '更新失敗',
@@ -592,6 +632,7 @@ const assignedUserIds = await this.getBatchAssignedUserIds(
         },
 
         error: (err) => {
+          Swal.close()
           Swal.fire({
             icon: 'error',
             title: '修改失敗',
@@ -645,10 +686,19 @@ const assignedUserIds = await this.getBatchAssignedUserIds(
           ? 0
           : Number(this.currentGroupId);
 
+      Swal.fire({
+        title: '刪除中...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
       this.calendarApiService
         .delete(eventId, this.createdBy, groupId)
         .subscribe({
           next: (res: any) => {
+            Swal.close();
             if (res.code !== 200) {
               Swal.fire({
                 icon: 'error',

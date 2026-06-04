@@ -309,6 +309,8 @@ export class ExpensesComponent {
       confirmButtonText: '是的，刪除！',
       cancelButtonText: '取消',
     }).then((result) => {
+      this.showLoading('刪除中...');
+
       if (!result.isConfirmed) return;
       this.http
         .postApi(this.basicUrl + 'expense/deleteInfo', payLoad)
@@ -373,7 +375,7 @@ getCurrentGroup() {
 
   getUserGroupData() {
     this.showLoading('載入資料中...');
-  this.http
+    this.http
     .getApi(
       this.basicUrl +
         `family_life/get_group_list?user_id=${this.currentUserId}`,

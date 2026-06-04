@@ -40,6 +40,9 @@ export class GroupMemberDialogComponent {
   members: any[] = [];
   invited_members: any[] = [];
 
+  isLoadingMembers = false;
+  isLoadingInvited = false;
+
   selectedTab: 'members' | 'waiting' = 'members';
 
   ngOnInit(): void {
@@ -48,6 +51,7 @@ export class GroupMemberDialogComponent {
   }
 
   getGroupMember() {
+    this.isLoadingMembers = true;
 
     const group_id = this.data.group.groupId;
 
@@ -61,10 +65,16 @@ export class GroupMemberDialogComponent {
         this.members = res.groupMembersList;
 
         console.log(res.groupMembersList);
+        this.isLoadingMembers = false;
       },
 
       error: (err) => {
         console.log(err);
+        this.isLoadingMembers = false;
+        Swal.fire({
+          icon: 'error',
+          title: '載入成員失敗'
+        });
       }
 
     });
@@ -73,6 +83,7 @@ export class GroupMemberDialogComponent {
 
   getInvitedMemembers(){
     const group_id = this.data.group.groupId;
+    this.isLoadingInvited = true;
 
     this.http.get<any>(
       `http://localhost:8080/family_life/get_invited_members?group_id=${group_id}`
@@ -82,12 +93,14 @@ export class GroupMemberDialogComponent {
         // console.log(group_id);
         // console.log(this.data.userId);
         this.invited_members = res.invitedMembersList;
+        this.isLoadingInvited = false;
 
         console.log(res);
       },
 
       error: (err) => {
         console.log(err);
+        this.isLoadingInvited = false;
       }
 
     });
