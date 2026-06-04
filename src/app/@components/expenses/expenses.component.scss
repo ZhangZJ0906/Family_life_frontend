@@ -839,8 +839,59 @@ tr.mat-mdc-row:hover {
   overflow: visible !important;
 }
 
+/* 右下角按鈕容器 (同步 itemList 垂直排列與間距) */
+.fab-container {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  z-index: 1000;
+}
 
+/* 刪除按鈕上的數字標籤 (同步 itemList 的圓圈與黑底白字樣式) */
+.fab-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #222;
+  color: white;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+}
+.expense-fab-btn {
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 18px !important; /* 創造出好看的圓角方形 */
 
+  background: #dbe6ff !important;
+  color: #1d4ed8 !important;
+
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.22) !important;
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+
+  mat-icon {
+    font-size: 30px;
+    width: 30px;
+    height: 30px;
+  }
+
+  &:hover {
+    background: #c7d7ff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.26) !important;
+  }
+}
 /* =========================================================
    RWD：手機
    ========================================================= */

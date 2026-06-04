@@ -52,14 +52,15 @@
   background-color: rgba(63, 81, 181, 0.05) !important;
 }
 
-/* 右下角按鈕容器 */
+/* 右下角浮動按鈕 */
 .fab-container {
   position: fixed;
-  bottom: 30px;
-  right: 30px;
+  right: 32px;
+  bottom: 96px;
+
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 14px;
   z-index: 1000;
 }
 
@@ -103,11 +104,13 @@
 
   display: grid;
 
-  /* 左側標題 / 中間分類 / 右側群組+搜尋 */
-  grid-template-columns: 300px minmax(760px, 1fr) 520px;
+  /* 不要寫死 760px / 520px，避免 100% 時爆版 */
+  grid-template-columns: 280px minmax(0, 1fr) auto;
 
   align-items: center;
   gap: 24px;
+
+  overflow: hidden;
 }
 
 /* 左側標題 */
@@ -161,9 +164,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+
+  /* 移除原本會推爆版面的 margin */
+  margin: 0;
 }
 
-/* 分類按鈕強制同一行 */
+/* 分類按鈕可水平滾動，不推擠右邊群組 */
 .header-filter mat-chip-listbox {
   display: flex;
   flex-wrap: nowrap;
@@ -177,7 +183,10 @@
   overflow-y: hidden;
 
   white-space: nowrap;
-  padding-bottom: 0;
+  padding-bottom: 2px;
+
+  /* 移除原本 margin-left: 215px */
+  margin: 0;
 
   scrollbar-width: none;
 }
@@ -203,14 +212,22 @@
   justify-content: flex-end;
   align-items: center;
   gap: 14px;
-  margin-right: 220px;
-  margin-top: 15px;
+
+  /* 移除原本 margin-right: 50px */
+  margin: 0;
+
+  flex-shrink: 0;
 }
 
-/* 群組選擇器 + 搜尋框：統一大小 */
-.group-select,
+/* 群組選擇器 + 搜尋框：固定合理寬度，不超出去 */
+.group-select {
+  width: 220px;
+  height: 72px;
+  flex-shrink: 0;
+}
+
 .search-field {
-  width: 180px;
+  width: 220px;
   height: 72px;
   flex-shrink: 0;
 }
@@ -489,16 +506,7 @@ mat-paginator {
   background: #ffffff;
 }
 
-/* 右下角按鈕容器 */
-.fab-container {
-  position: fixed;
-  right: 32px;
-  bottom: 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  z-index: 1000;
-}
+
 
 /* 刪除數量標籤 */
 .fab-badge {
@@ -556,6 +564,82 @@ mat-paginator {
   text-overflow: ellipsis;
 }
 
+/* 分頁外層 */
+.custom-paginator {
+  border-top: 1px solid #e5e7eb;
+  background: #ffffff;
+
+  min-height: 64px;
+  padding: 10px 110px 10px 26px;
+  border-radius: 0 0 22px 22px;
+}
+
+/* 讓分頁內容靠右 */
+::ng-deep .custom-paginator .mat-mdc-paginator-container {
+  justify-content: flex-end;
+  min-height: 52px;
+  gap: 14px;
+}
+
+/* Items per page 文字 */
+::ng-deep .custom-paginator .mat-mdc-paginator-page-size-label {
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* 每頁筆數下拉 */
+::ng-deep .custom-paginator .mat-mdc-paginator-page-size-select {
+  width: 86px;
+}
+
+/* 下拉框外觀 */
+::ng-deep .custom-paginator .mat-mdc-text-field-wrapper {
+  height: 42px;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+/* 下拉框文字置中 */
+::ng-deep .custom-paginator .mat-mdc-form-field-infix {
+  min-height: 42px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+/* 目前筆數範圍，例如 1 - 4 of 4 */
+::ng-deep .custom-paginator .mat-mdc-paginator-range-label {
+  color: #111827;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 12px;
+}
+
+/* 左右切換按鈕 */
+::ng-deep .custom-paginator .mat-mdc-icon-button {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  color: #475569;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+/* hover 效果 */
+::ng-deep .custom-paginator .mat-mdc-icon-button:hover {
+  background: #eef3ff;
+  transform: translateY(-1px);
+}
+
+/* disabled 狀態 */
+::ng-deep .custom-paginator .mat-mdc-icon-button[disabled] {
+  color: #cbd5e1;
+  background: transparent;
+  transform: none;
+}
+
 /* 讓 mat-option 裡的 div 吃滿寬度 */
 ::ng-deep .mat-mdc-option .mdc-list-item__primary-text {
   width: 100%;
@@ -602,4 +686,38 @@ mat-paginator {
   .search-field {
     width: 100%;
   }
+
+   .custom-paginator {
+    padding-right: 90px;
+  }
+
+  .fab-container {
+    right: 20px;
+    bottom: 86px;
+  }
+}
+
+//loading
+
+.table-responsive {
+  position: relative;
+  min-height: 200px;
+}
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: rgba(255,255,255,0.7);
+  font-size: 16px;
+  color: #666;
+  z-index: 10;
+}
+
+table.loading {
+  filter: blur(1px);
+  pointer-events: none;
 }
