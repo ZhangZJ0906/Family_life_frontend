@@ -140,8 +140,7 @@ export class ItemListComponent {
   currentGroupId: any = null;
   currentUserId: any;
   lastSelectedRow: any = null;
-  currentUserAvatar = 'assets/default-avatar.png';//預設群組投向
-  
+  currentUserAvatar = 'assets/default-avatar.png'; //預設群組投向
 
   //上次登入時間
   lastLoginTime!: Date;
@@ -341,16 +340,23 @@ export class ItemListComponent {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (!result) return;
+      const formData = new FormData();
 
       // edit-dialog 回傳的 _type 為 'item' | 'subscription' | 'warranty' | 'medicine'
-      const { _type, ...payload } = result;
-      console.log(_type);
+      const { _type, selectedFile, ...payload } = result;
+
       payload.userId = this.currentUserId;
 
       const url = this.basicUrl + (this.updateApiMap[_type] ?? 'item/update');
       this.showLoading('更新中...');
-
-      this.http.postApi(url, payload).subscribe({
+      const jsonBlob = new Blob([JSON.stringify(payload)], {
+        type: 'application/json',
+      });
+      formData.append('req', jsonBlob);
+      if (selectedFile) {
+        formData.append('avatar', selectedFile);
+      }
+      this.http.postApi(url, formData).subscribe({
         next: (res: any) => {
           Swal.close();
           if (res.code !== 200) {
@@ -494,7 +500,7 @@ export class ItemListComponent {
           this.currentMode = TableMode.Item;
           this.refreshTableData(this.cachedData.item);
 
-          console.log("item:", res.items)
+          console.log('item:', res.items);
 
           // 背景載入其他三種資料，供全域搜尋的 allData 使用
           this.loadAllListSilently(groupId);

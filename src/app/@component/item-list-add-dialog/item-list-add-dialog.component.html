@@ -3,7 +3,11 @@
 <mat-dialog-content>
   <div class="container-fluid pt-2">
     <div class="row g-3">
-
+      <!-- 圖片 -->
+      <div class="file-upload-section" style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; font-weight: bold;">上傳物品圖片</label>
+        <input type="file" accept="image/*" (change)="onFileSelected($event)" class="form-control" />
+      </div>
       <!-- 物品名稱 -->
       <div class="col-12">
         <mat-form-field appearance="outline" class="w-100">
@@ -64,7 +68,8 @@
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>單價</mat-label>
           <!-- ✅ placeholder 取代預設 0 -->
-          <input matInput type="number" required [(ngModel)]="item.unitPrice" min="0" placeholder="例如：30" class="text-primary fw-bold">
+          <input matInput type="number" required [(ngModel)]="item.unitPrice" min="0" placeholder="例如：30"
+            class="text-primary fw-bold">
           <span matPrefix>$&nbsp;</span>
         </mat-form-field>
       </div>

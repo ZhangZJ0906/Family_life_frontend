@@ -48,6 +48,7 @@ export class ItemListAddDialogComponent implements OnInit {
   categories: LocationAndCategory[] = [];
   minDate: string = '';
   today = new Date();
+  selectedFile: File | null = null; //圖片
 
   isSubscriptionCategory(): boolean {
     return (
@@ -195,7 +196,13 @@ export class ItemListAddDialogComponent implements OnInit {
   get totalPrice(): number {
     return (this.item.unitPrice || 0) * (this.item.quantity || 0);
   }
-
+  //選圖片
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+    }
+  }
   // ✅ 全面補強，四種模式都有完整驗證
   isSubmitDisabled(): boolean {
     if (!this.item.name?.trim()) return true;
@@ -225,7 +232,7 @@ export class ItemListAddDialogComponent implements OnInit {
     }
 
     // 一般物品
-    if(!this.item.quantity)return true;
+    if (!this.item.quantity) return true;
     if (!this.item.locationId) return true;
     if (!this.item.purchaseDate) return true;
     if (!this.item.expireDate) return true;
@@ -280,8 +287,15 @@ export class ItemListAddDialogComponent implements OnInit {
     }
 
     this.showLoading('新增物品中...');
-
-    this.http.postApi(this.basicUrl + 'item/add', payload).subscribe({
+    const formData = new FormData();
+    const jsonBlob = new Blob([JSON.stringify(payload)], {
+      type: 'application/json',
+    });
+    formData.append('req', jsonBlob);
+    if (this.selectedFile) {
+      formData.append('avatar', this.selectedFile);
+    }
+    this.http.postApi(this.basicUrl + 'item/add', formData).subscribe({
       next: (res: any) => {
         Swal.close();
         if (res.code != 200) {
@@ -572,7 +586,7 @@ export class ItemListAddDialogComponent implements OnInit {
       userId: this.item.created_by_id,
       name: this.item.name,
       medicineType: this.item.medicineType,
-      quantity: this.item.quantity||0,
+      quantity: this.item.quantity || 0,
       unit: this.item.unit,
       price: (this.item.unitPrice || 0) * (this.item.quantity || 0),
       unitPrice: this.item.unitPrice,
