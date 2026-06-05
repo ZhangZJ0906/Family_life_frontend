@@ -468,6 +468,10 @@ openAvatarDialog(): void {
               Swal.fire('驗證成功', '', 'success');
               this.emailNotify = true;
             }
+            else{
+              Swal.fire('驗證失敗', '', 'error');
+              this.emailNotify = false;
+            }
           },
 
           error: () => {
