@@ -18,6 +18,7 @@ import { BrowserNotifyService } from '../../@services/BrowserNotifyService';
 import { NotificationSocketService } from '../../@services/NotificationSocketService';
 
 import { NotifyDialogComponent } from '../../@group/notify-dialog/notify-dialog.component';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-topbar',
@@ -157,7 +158,20 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
   // 登出
   logout(): void {
-    this.authService.logout();
+    Swal.fire({
+      title: '確認登出',
+      text: '確定要登出嗎？',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: '登出',
+      cancelButtonText: '取消'
+    }).then((result) => {
+
+      if (result.isConfirmed) {
+        this.authService.logout();
+      }
+
+    });
   }
 
   // 取得未讀通知數量
