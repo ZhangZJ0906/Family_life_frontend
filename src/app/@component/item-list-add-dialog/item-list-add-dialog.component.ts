@@ -108,7 +108,7 @@ export class ItemListAddDialogComponent implements OnInit {
 
   basicUrl!: string;
   group: any[] = [];
-  
+
   constructor(
     public dialogRef: MatDialogRef<ItemListAddDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -261,6 +261,10 @@ export class ItemListAddDialogComponent implements OnInit {
 
     if (!payload.name?.trim()) {
       this.showError('請輸入物品名稱');
+      return;
+    }
+    if (!payload.unitPrice) {
+      this.showError('單價不能為0');
       return;
     }
     if (!payload.categoryId) {
@@ -631,7 +635,11 @@ export class ItemListAddDialogComponent implements OnInit {
       this.showError('請輸入藥品名稱');
       return;
     }
-    if (!payload.unitPrice || payload.quantity <= 0) {
+    if (!payload.unitPrice) {
+      this.showError('藥品價格不能是0');
+      return;
+    }
+    if (payload.quantity <= 0) {
       this.showError('請輸入藥品數量');
       return;
     }
