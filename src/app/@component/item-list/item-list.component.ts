@@ -449,6 +449,8 @@ export class ItemListComponent {
   // ─── API：統一查詢（訂閱 / 保固 / 藥品）────────────────────
   // 取代原本三個獨立的 getXxxByGroupId 方法
   private fetchGroupData(mode: TableMode, groupId: number | null): void {
+    this.isLoading = true; // ✅ 開啟 loading
+
     const endpoint = this.fetchEndpointMap[mode];
     if (!endpoint) return;
 
@@ -460,6 +462,7 @@ export class ItemListComponent {
       )
       .subscribe({
         next: (res: any) => {
+          this.isLoading = false; // ✅ 關閉 loading
           if (res.code !== 200) {
             Swal.fire({
               title: '查詢失敗',
@@ -475,6 +478,8 @@ export class ItemListComponent {
           this.dataSource.paginator?.firstPage();
         },
         error: (err: any) => {
+
+          this.isLoading = false; // ✅ 發生錯誤也要關
           Swal.fire({
             title: '錯誤',
             text: err.message || 'Server error',
