@@ -169,6 +169,13 @@ export class ItemListComponent {
   selection = new SelectionModel<any>(true, []);
   dataSource = new MatTableDataSource<any>([]);
 
+  // 圖片預覽狀態
+imagePreviewVisible = false;
+previewImageUrl = '';
+previewImageTitle = '';
+previewScale = 1;
+previewRotate = 0;
+
   constructor(
     private http: HttpClientService,
     private authService: AuthService,
@@ -937,4 +944,78 @@ export class ItemListComponent {
 
     return `${this.basicUrl}uploads/${safeFileName}`;
   }
+
+  // 開啟圖片預覽
+openImagePreview(element: any, event: MouseEvent): void {
+  event.stopPropagation();
+
+  if (!element || !element.avatar || element.avatar.trim() === '') {
+    return;
+  }
+
+  this.previewImageUrl = this.getItemAvatar(element);
+  this.previewImageTitle =
+    element.name ||
+    element.productName ||
+    element.title ||
+    '物品圖片';
+
+  this.previewScale = 1;
+  this.previewRotate = 0;
+  this.imagePreviewVisible = true;
+}
+
+// 關閉圖片預覽
+closeImagePreview(): void {
+  this.imagePreviewVisible = false;
+  this.previewImageUrl = '';
+  this.previewImageTitle = '';
+  this.previewScale = 1;
+  this.previewRotate = 0;
+}
+
+// 放大
+zoomIn(): void {
+  if (this.previewScale >= 3) {
+    return;
+  }
+
+  this.previewScale = Number((this.previewScale + 0.2).toFixed(1));
+}
+
+// 縮小
+zoomOut(): void {
+  if (this.previewScale <= 0.4) {
+    return;
+  }
+
+  this.previewScale = Number((this.previewScale - 0.2).toFixed(1));
+}
+
+// 向左旋轉
+rotateLeft(): void {
+  this.previewRotate -= 90;
+}
+
+// 向右旋轉
+rotateRight(): void {
+  this.previewRotate += 90;
+}
+
+// 重置
+resetPreview(): void {
+  this.previewScale = 1;
+  this.previewRotate = 0;
+}
+
+// 滑鼠滾輪放大縮小
+onPreviewWheel(event: WheelEvent): void {
+  event.preventDefault();
+
+  if (event.deltaY < 0) {
+    this.zoomIn();
+  } else {
+    this.zoomOut();
+  }
+}
 }

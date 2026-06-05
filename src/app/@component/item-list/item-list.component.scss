@@ -662,6 +662,233 @@ mat-paginator {
   width: 100%;
 }
 
+/* 圖片欄位 */
+.avatar-column {
+  width: 76px;
+  text-align: center;
+}
+
+/* Ant Design Upload 類似外層 */
+.avatar-preview-box {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+  cursor: pointer;
+
+  border: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+/* 表格內圓形圖片 */
+.item-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* hover 遮罩 */
+.avatar-mask {
+  position: absolute;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(15, 23, 42, 0.55);
+  opacity: 0;
+
+  transition: opacity 0.2s ease;
+}
+
+/* 滑鼠移到圖片才顯示檢視 icon */
+.avatar-preview-box:hover .avatar-mask {
+  opacity: 1;
+}
+
+/* 檢視按鈕 */
+.avatar-action-btn {
+  width: 32px;
+  height: 32px;
+
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+.avatar-action-btn mat-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+}
+
+.avatar-action-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* 沒有圖片時 */
+.item-avatar-empty {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e5e7eb;
+}
+
+.item-avatar-empty mat-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+}
+
+/* 圖片預覽背景 */
+.image-preview-backdrop {
+  position: fixed;
+  inset: 0;
+
+  z-index: 3000;
+
+  background: rgba(0, 0, 0, 0.76);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+/* 預覽面板 */
+.image-preview-panel {
+  position: relative;
+
+  width: min(900px, 90vw);
+  height: min(760px, 84vh);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 關閉按鈕 */
+.preview-close-btn {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+
+  width: 44px;
+  height: 44px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  z-index: 2;
+}
+
+.preview-close-btn:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+/* 圖片顯示區 */
+.image-preview-stage {
+  width: 100%;
+  height: 100%;
+
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 大圖 */
+.preview-main-img {
+  max-width: 100%;
+  max-height: 100%;
+
+  object-fit: contain;
+
+  transition: transform 0.2s ease;
+  transform-origin: center center;
+
+  user-select: none;
+}
+
+/* 下方工具列 */
+.preview-toolbar {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 14px;
+  border-radius: 999px;
+
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(8px);
+}
+
+.preview-toolbar button {
+  width: 42px;
+  height: 42px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+.preview-toolbar button:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.preview-toolbar mat-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+}
+
 /* 小螢幕排版 */
 @media (max-width: 1400px) {
    .item-header-card {
@@ -697,6 +924,8 @@ mat-paginator {
   }
 
 
+
+
 }
 
 @media (max-width: 768px) {
@@ -726,4 +955,7 @@ mat-paginator {
     right: 20px;
     bottom: 86px;
   }
+
+
+
 }
