@@ -50,30 +50,6 @@ export class ItemListAddDialogComponent implements OnInit {
   today = new Date();
   selectedFile: File | null = null; //圖片
 
-  isSubscriptionCategory(): boolean {
-    return (
-      this.categories.find(
-        (cat) => Number(cat.id) === Number(this.item.categoryId),
-      )?.name === '訂閱'
-    );
-  }
-
-  isWarrantyCategory(): boolean {
-    return (
-      this.categories.find(
-        (cat) => Number(cat.id) === Number(this.item.categoryId),
-      )?.name === '保固'
-    );
-  }
-
-  isMedicineCategory(): boolean {
-    return (
-      this.categories.find(
-        (cat) => Number(cat.id) === Number(this.item.categoryId),
-      )?.name === '藥品'
-    );
-  }
-
   item: {
     created_by_id: number;
     groupId: number;
@@ -132,7 +108,7 @@ export class ItemListAddDialogComponent implements OnInit {
 
   basicUrl!: string;
   group: any[] = [];
-
+  
   constructor(
     public dialogRef: MatDialogRef<ItemListAddDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -177,7 +153,29 @@ export class ItemListAddDialogComponent implements OnInit {
 
     this.applyPrefillItem();
   }
+  isSubscriptionCategory(): boolean {
+    return (
+      this.categories.find(
+        (cat) => Number(cat.id) === Number(this.item.categoryId),
+      )?.name === '訂閱'
+    );
+  }
 
+  isWarrantyCategory(): boolean {
+    return (
+      this.categories.find(
+        (cat) => Number(cat.id) === Number(this.item.categoryId),
+      )?.name === '保固'
+    );
+  }
+
+  isMedicineCategory(): boolean {
+    return (
+      this.categories.find(
+        (cat) => Number(cat.id) === Number(this.item.categoryId),
+      )?.name === '藥品'
+    );
+  }
   private applyPrefillItem(): void {
     const prefill = this.data?.prefillItem;
     if (!prefill) return;
@@ -288,10 +286,14 @@ export class ItemListAddDialogComponent implements OnInit {
 
     this.showLoading('新增物品中...');
     const formData = new FormData();
+
+    // 1. 將純 JSON 轉為 Blob 並指定 type 為 application/json 傳給後端的 @RequestPart("req")
     const jsonBlob = new Blob([JSON.stringify(payload)], {
       type: 'application/json',
     });
     formData.append('req', jsonBlob);
+
+    // 2. 如果有選檔案，封裝給後端的 @RequestPart("avatar")
     if (this.selectedFile) {
       formData.append('avatar', this.selectedFile);
     }
@@ -416,7 +418,20 @@ export class ItemListAddDialogComponent implements OnInit {
     }
 
     this.showLoading('新增訂閱中...');
-    this.http.postApi(this.basicUrl + 'subscription/add', payload).subscribe({
+    //圖片加資料
+    const formData = new FormData();
+
+    // 1. 將純 JSON 轉為 Blob 並指定 type 為 application/json 傳給後端的 @RequestPart("req")
+    const jsonBlob = new Blob([JSON.stringify(payload)], {
+      type: 'application/json',
+    });
+    formData.append('req', jsonBlob);
+
+    // 2. 如果有選檔案，封裝給後端的 @RequestPart("avatar")
+    if (this.selectedFile) {
+      formData.append('avatar', this.selectedFile);
+    }
+    this.http.postApi(this.basicUrl + 'subscription/add', formData).subscribe({
       next: (res: any) => {
         Swal.close();
         if (res.code != 200) {
@@ -517,8 +532,19 @@ export class ItemListAddDialogComponent implements OnInit {
     }
 
     this.showLoading('新增保固中...');
+   const formData = new FormData();
 
-    this.http.postApi(this.basicUrl + 'warranty/add', payload).subscribe({
+    // 1. 將純 JSON 轉為 Blob 並指定 type 為 application/json 傳給後端的 @RequestPart("req")
+    const jsonBlob = new Blob([JSON.stringify(payload)], {
+      type: 'application/json',
+    });
+    formData.append('req', jsonBlob);
+
+    // 2. 如果有選檔案，封裝給後端的 @RequestPart("avatar")
+    if (this.selectedFile) {
+      formData.append('avatar', this.selectedFile);
+    }
+    this.http.postApi(this.basicUrl + 'warranty/add', formData).subscribe({
       next: (res: any) => {
         Swal.close();
         if (res.code != 200) {
@@ -627,8 +653,20 @@ export class ItemListAddDialogComponent implements OnInit {
       return;
     }
     this.showLoading('新增藥品中...');
+    const formData = new FormData();
 
-    this.http.postApi(this.basicUrl + 'medicine/add', payload).subscribe({
+    // 1. 將純 JSON 轉為 Blob 並指定 type 為 application/json 傳給後端的 @RequestPart("req")
+    const jsonBlob = new Blob([JSON.stringify(payload)], {
+      type: 'application/json',
+    });
+    formData.append('req', jsonBlob);
+
+    // 2. 如果有選檔案，封裝給後端的 @RequestPart("avatar")
+    if (this.selectedFile) {
+      formData.append('avatar', this.selectedFile);
+    }
+
+    this.http.postApi(this.basicUrl + 'medicine/add', formData).subscribe({
       next: (res: any) => {
         Swal.close();
         if (res.code != 200) {
