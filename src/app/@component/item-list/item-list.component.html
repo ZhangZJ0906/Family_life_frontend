@@ -1,10 +1,8 @@
 <div class="item-page">
-
   <app-topbar></app-topbar>
 
   <!-- 上方標題、分類、群組、搜尋區 -->
   <section class="item-header-card">
-
     <!-- 左側標題 -->
     <div class="item-title">
       <div class="title-row">
@@ -16,24 +14,41 @@
 
     <!-- 中間：分類按鈕 -->
     <div class="header-filter">
-      <mat-chip-listbox aria-label="分類篩選"   (change)="onCategoryChange($event)">
+      <mat-chip-listbox
+        aria-label="分類篩選"
+        (change)="onCategoryChange($event)"
+      >
         @for (cat of categories; track cat.id) {
-        <mat-chip-option [value]="cat.id" [selected]="selectedCategory === cat.name">
+          <mat-chip-option
+            [value]="cat.id"
+            [selected]="selectedCategory === cat.name"
+          >
+            <span class="chip-icon">
+              @switch (cat.name) {
+                @case ("食品") {
+                  🥬
+                }
+                @case ("藥品") {
+                  💊
+                }
+                @case ("日用品") {
+                  🧴
+                }
+                @case ("訂閱") {
+                  💳
+                }
+                @case ("清潔用品") {
+                  🧽
+                }
+                @case ("保固") {
+                  🛡️
+                }
+                @default {}
+              }
+            </span>
 
-          <span class="chip-icon">
-            @switch (cat.name) {
-            @case ('食品') { 🥬 }
-            @case ('藥品') { 💊 }
-            @case ('日用品') { 🧴 }
-            @case ('訂閱') { 💳 }
-            @case ('清潔用品') { 🧽 }
-            @case ('保固') { 🛡️ }
-            @default { }
-            }
-          </span>
-
-          {{ cat.name }}
-        </mat-chip-option>
+            {{ cat.name }}
+          </mat-chip-option>
         }
       </mat-chip-listbox>
     </div>
@@ -41,55 +56,59 @@
     <!-- 右側：群組 + 搜尋 -->
     <div class="header-right">
       <mat-form-field appearance="outline" class="group-select">
-  <mat-label>切換群組</mat-label>
+        <mat-label>切換群組</mat-label>
 
-  <mat-select
-    [(value)]="currentGroupId"
-    (selectionChange)="getItemByGroupId($event.value)"
-  >
-    <!-- 下拉關閉時，顯示目前選到的群組頭像 + 名稱 -->
-    <mat-select-trigger>
-      @if (getCurrentGroup(); as group) {
-        <div class="selected-group">
-          <img
-            class="group-avatar"
-            [src]="group.avatar || 'assets/default-avatar.png'"
-            alt="群組頭像"
-          />
+        <mat-select
+          [(value)]="currentGroupId"
+          (selectionChange)="getItemByGroupId($event.value)"
+        >
+          <!-- 下拉關閉時，顯示目前選到的群組頭像 + 名稱 -->
+          <mat-select-trigger>
+            @if (getCurrentGroup(); as group) {
+              <div class="selected-group">
+                <img
+                  class="group-avatar"
+                  [src]="group.avatar || 'assets/default-avatar.png'"
+                  alt="群組頭像"
+                />
 
-          <span>
-            {{ group.groupName }}
-          </span>
-        </div>
-      }
-    </mat-select-trigger>
+                <span>
+                  {{ group.groupName }}
+                </span>
+              </div>
+            }
+          </mat-select-trigger>
 
-    <!-- 下拉選項 -->
-    @for (group of userGroups; track group.groupId) {
-      <mat-option [value]="group.groupId">
-        <div class="group-option">
-          <img
-            class="group-avatar"
-            [src]="group.avatar || 'assets/default-avatar.png'"
-            alt="群組頭像"
-          />
+          <!-- 下拉選項 -->
+          @for (group of userGroups; track group.groupId) {
+            <mat-option [value]="group.groupId">
+              <div class="group-option">
+                <img
+                  class="group-avatar"
+                  [src]="group.avatar || 'assets/default-avatar.png'"
+                  alt="群組頭像"
+                />
 
-          <span>
-            {{ group.groupName }}
-          </span>
-        </div>
-      </mat-option>
-    }
-  </mat-select>
-</mat-form-field>
+                <span>
+                  {{ group.groupName }}
+                </span>
+              </div>
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
 
       <mat-form-field appearance="outline" class="search-field">
         <mat-label>搜尋物品</mat-label>
-        <input matInput (keyup)="applyFilter($event)" placeholder="例如：牛奶" #input>
+        <input
+          matInput
+          (keyup)="applyFilter($event)"
+          placeholder="例如：牛奶"
+          #input
+        />
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
     </div>
-
   </section>
 
   <!-- 表格卡片 -->
@@ -106,46 +125,61 @@
         <!-- 勾選欄位 -->
         <ng-container matColumnDef="select">
           <th mat-header-cell *matHeaderCellDef>
-            <mat-checkbox (change)="$event ? masterToggle() : null" [checked]="selection.hasValue() && isAllSelected()"
-              [indeterminate]="selection.hasValue() && !isAllSelected()" color="primary">
+            <mat-checkbox
+              (change)="$event ? masterToggle() : null"
+              [checked]="selection.hasValue() && isAllSelected()"
+              [indeterminate]="selection.hasValue() && !isAllSelected()"
+              color="primary"
+            >
             </mat-checkbox>
           </th>
           <!-- shift快速選取部分 -->
           <td mat-cell *matCellDef="let row">
-            <mat-checkbox (click)="onRowCheckboxClick($event, row)" [checked]="selection.isSelected(row)" color="primary">
+            <mat-checkbox
+              (click)="onRowCheckboxClick($event, row)"
+              [checked]="selection.isSelected(row)"
+              color="primary"
+            >
             </mat-checkbox>
           </td>
         </ng-container>
         <ng-container matColumnDef="_typeName">
           <th mat-header-cell *matHeaderCellDef>類型</th>
           <td mat-cell *matCellDef="let row">
-            <span class="badge" [ngClass]="{
-                        'bg-primary':   row._type === 'item',
-                        'bg-success':   row._type === 'subscription',
-                        'bg-warning':   row._type === 'warranty',
-                        'bg-info':      row._type === 'medicine'
-                      }">{{ row._typeName }}</span>
+            <span
+              class="badge"
+              [ngClass]="{
+                'bg-primary': row._type === 'item',
+                'bg-success': row._type === 'subscription',
+                'bg-warning': row._type === 'warranty',
+                'bg-info': row._type === 'medicine',
+              }"
+              >{{ row._typeName }}</span
+            >
           </td>
         </ng-container>
 
         <!-- 名稱欄位，一般物品與訂閱共用 -->
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef>物品名稱</th>
-          <td mat-cell *matCellDef="let element" title="{{element.name}}">
-             <span class="name-wrapper">
+          <td mat-cell *matCellDef="let element" title="{{ element.name }}">
+            <span class="name-wrapper">
               @if (element.userId != null) {
                 @if (isNewItem(element.createdAt, element.userId)) {
                   <span class="new-badge">NEW</span>
                 }
-              }
-              @else if (element.createdById != null) {
+              } @else if (element.createdById != null) {
                 @if (isNewItem(element.createdAt, element.createdById)) {
                   <span class="new-badge">NEW</span>
                 }
               }
 
               <span class="item-name">
-                {{ element.name.length >= 10 ? (element.name | slice:0:10) + '...' : element.name }}
+                {{
+                  element.name.length >= 10
+                    ? (element.name | slice: 0 : 10) + "..."
+                    : element.name
+                }}
               </span>
             </span>
           </td>
@@ -169,11 +203,14 @@
           </td>
         </ng-container>
 
-
         <ng-container matColumnDef="expireOrEndDate">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>到期日</th>
-          <td mat-cell *matCellDef="let row" [class.text-danger]="isExpired(row.expireOrEndDate)">
-            {{ row.expireOrEndDate || '--' }}
+          <td
+            mat-cell
+            *matCellDef="let row"
+            [class.text-danger]="isExpired(row.expireOrEndDate)"
+          >
+            {{ row.expireOrEndDate || "--" }}
           </td>
         </ng-container>
         <!-- 一般物品 / 訂閱共用：價格 -->
@@ -198,12 +235,35 @@
         <ng-container matColumnDef="notify">
           <th mat-header-cell *matHeaderCellDef class="text-center">提醒</th>
           <td mat-cell *matCellDef="let element" class="text-center">
-            <mat-icon class="notify-icon" [color]="element.notify ? 'primary' : 'disabled'">
-              {{ element.notify ? 'notifications_active' : 'notifications_off' }}
+            <mat-icon
+              class="notify-icon"
+              [color]="element.notify ? 'primary' : 'disabled'"
+            >
+              {{
+                element.notify ? "notifications_active" : "notifications_off"
+              }}
             </mat-icon>
           </td>
         </ng-container>
 
+<ng-container matColumnDef="avatar">
+  <th mat-header-cell *matHeaderCellDef style="width: 60px; text-align: center;">圖片</th>
+  <td mat-cell *matCellDef="let element" style="text-align: center;">
+    @if (element.avatar && element.avatar.trim() !== '') {
+      <img
+        [src]="getItemAvatar(element)"
+        alt="Item Avatar"
+        style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; vertical-align: middle;"
+        class="border"
+      />
+    } @else {
+      <div class="d-inline-flex align-items-center justify-content-center rounded-circle border bg-light text-secondary"
+           style="width: 40px; height: 40px; vertical-align: middle;">
+        <mat-icon style="font-size: 20px; width: 20px; height: 20px;">inventory_2</mat-icon>
+      </div>
+    }
+  </td>
+</ng-container>
 
         <!-- 訂閱：扣款週期 -->
         <ng-container matColumnDef="billingCycle">
@@ -219,7 +279,7 @@
         <ng-container matColumnDef="trialEndDate">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>試用結束日</th>
           <td mat-cell *matCellDef="let element">
-            {{ element.trialEndDate || '無' }}
+            {{ element.trialEndDate || "無" }}
           </td>
         </ng-container>
 
@@ -227,23 +287,28 @@
         <ng-container matColumnDef="nextBillingDate">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>下次扣款日</th>
           <td mat-cell *matCellDef="let element">
-            {{ element.nextBillingDate || '無' }}
+            {{ element.nextBillingDate || "無" }}
           </td>
         </ng-container>
 
         <!-- 保固：產品名稱 -->
         <ng-container matColumnDef="productName">
           <th mat-header-cell *matHeaderCellDef>產品名稱</th>
-          <td mat-cell *matCellDef="let element" title="{{element.productName}}">
-            <span class="name-wrapper">
-              @if (isNewItem(element.createdAt, element.userId) && !element.seen) {
-                <span class="new-badge">NEW</span>
-              }
-
-              <span class="item-name">
-                {{ element.productName.length>= 10 ? (element.productName | slice:0:10) + '...' : element.productName }}
-              </span>
-            </span>
+          <td
+            mat-cell
+            *matCellDef="let element"
+            title="{{ element.productName }}"
+          >
+            @if (
+              isNewItem(element.createdAt, element.userId) && !element.seen
+            ) {
+              <span class="new-badge">NEW</span>
+            }
+            {{
+              element.productName.length >= 10
+                ? (element.productName | slice: 0 : 10) + "..."
+                : element.productName
+            }}
           </td>
         </ng-container>
 
@@ -251,7 +316,7 @@
         <ng-container matColumnDef="brand">
           <th mat-header-cell *matHeaderCellDef>品牌</th>
           <td mat-cell *matCellDef="let element">
-            {{ element.brand || '無' }}
+            {{ element.brand || "無" }}
           </td>
         </ng-container>
 
@@ -259,7 +324,7 @@
         <ng-container matColumnDef="model">
           <th mat-header-cell *matHeaderCellDef>型號</th>
           <td mat-cell *matCellDef="let element">
-            {{ element.model || '無' }}
+            {{ element.model || "無" }}
           </td>
         </ng-container>
 
@@ -267,7 +332,11 @@
         <ng-container matColumnDef="serialNumber">
           <th mat-header-cell *matHeaderCellDef>序號</th>
           <td mat-cell *matCellDef="let element">
-            {{ element.serialNumber.length>= 8 ? (element.productName | slice:0:8) + '...' : element.productName || '無' }}
+            {{
+              element.serialNumber.length >= 8
+                ? (element.productName | slice: 0 : 8) + "..."
+                : element.productName || "無"
+            }}
           </td>
         </ng-container>
 
@@ -275,7 +344,7 @@
         <ng-container matColumnDef="purchaseDate">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>購買日期</th>
           <td mat-cell *matCellDef="let element">
-            {{ element.purchaseDate || '無' }}
+            {{ element.purchaseDate || "無" }}
           </td>
         </ng-container>
 
@@ -283,7 +352,7 @@
         <ng-container matColumnDef="warrantyEndDate">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>保固到期日</th>
           <td mat-cell *matCellDef="let element">
-            {{ element.warrantyEndDate || '無' }}
+            {{ element.warrantyEndDate || "無" }}
           </td>
         </ng-container>
 
@@ -291,7 +360,7 @@
         <ng-container matColumnDef="medicineType">
           <th mat-header-cell *matHeaderCellDef>藥品類型</th>
           <td mat-cell *matCellDef="let element">
-            {{ element.medicineType || '無' }}
+            {{ element.medicineType || "無" }}
           </td>
         </ng-container>
 
@@ -299,7 +368,7 @@
         <ng-container matColumnDef="usageMethod">
           <th mat-header-cell *matHeaderCellDef>用法</th>
           <td mat-cell *matCellDef="let element">
-            {{ element.usageMethod || '無' }}
+            {{ element.usageMethod || "無" }}
           </td>
         </ng-container>
 
@@ -308,18 +377,26 @@
           <th mat-header-cell *matHeaderCellDef>狀態</th>
 
           <td mat-cell *matCellDef="let element">
-            <span class="status-badge" [class.status-normal]="element.status === '正常'"
-              [class.status-expired]="element.status === '已到期'" [class.status-soon]="element.status === '即將到期'"
-              [class.status-low]="element.status === '庫存不足'" [class.status-trial]="element.status === '試用中'"
-              [class.status-warning]="element.status === '試用即將結束' || element.status === '即將扣款'"
-              [class.status-danger]="element.status === '已逾期扣款'">
-              {{ element.status || '正常' }}
+            <span
+              class="status-badge"
+              [class.status-normal]="element.status === '正常'"
+              [class.status-expired]="element.status === '已到期'"
+              [class.status-soon]="element.status === '即將到期'"
+              [class.status-low]="element.status === '庫存不足'"
+              [class.status-trial]="element.status === '試用中'"
+              [class.status-warning]="
+                element.status === '試用即將結束' ||
+                element.status === '即將扣款'
+              "
+              [class.status-danger]="element.status === '已逾期扣款'"
+            >
+              {{ element.status || "正常" }}
             </span>
 
             @if (element.remindMessage) {
-            <p class="remind-text">
-              {{ element.remindMessage }}
-            </p>
+              <p class="remind-text">
+                {{ element.remindMessage }}
+              </p>
             }
           </td>
         </ng-container>
@@ -336,9 +413,12 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
 
         <!-- 表身 -->
-        <tr mat-row *matRowDef="let row; columns: displayedColumns" class="element-row"
-          [class.selected-row]="selection.isSelected(row)">
-        </tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: displayedColumns"
+          class="element-row"
+          [class.selected-row]="selection.isSelected(row)"
+        ></tr>
         <!-- (click)="openEditDialog(row)" -->
 
         <!-- 沒資料 -->
@@ -348,35 +428,35 @@
             <p>沒有找到符合的資料 "{{ input.value }}"</p>
           </td>
         </tr>
-
       </table>
-
     </div>
 
     <!-- 分頁 -->
-<mat-paginator
-  [pageSizeOptions]="[10, 20]"
-  showFirstLastButtons
-  class="custom-paginator">
-</mat-paginator>
-  <!-- 右下角浮動按鈕 -->
-  <div class="fab-container">
+    <mat-paginator
+      [pageSizeOptions]="[10, 20]"
+      showFirstLastButtons
+      class="custom-paginator"
+    >
+    </mat-paginator>
+    <!-- 右下角浮動按鈕 -->
+    <div class="fab-container">
+      <!-- 有勾選資料時顯示刪除按鈕 -->
+      @if (selection.selected.length > 0) {
+        <button
+          mat-fab
+          color="warn"
+          (click)="deleteSelectedItems()"
+          style="background-color: #e53935 !important; color: #fff !important"
+        >
+          <mat-icon>delete</mat-icon>
+          <span class="fab-badge">{{ selection.selected.length }}</span>
+        </button>
+      }
 
-    <!-- 有勾選資料時顯示刪除按鈕 -->
-    @if(selection.selected.length > 0){
-    <button mat-fab color="warn" (click)="deleteSelectedItems()"
-      style="background-color: #e53935 !important; color: #fff !important;">
-      <mat-icon>delete</mat-icon>
-      <span class="fab-badge">{{ selection.selected.length }}</span>
-    </button>
-    }
-
-
-    <!-- 新增按鈕 -->
-    <button mat-fab color="primary" (click)="openAddDialog()">
-      <mat-icon>add</mat-icon>
-    </button>
-
-  </div>
-
-
+      <!-- 新增按鈕 -->
+      <button mat-fab color="primary" (click)="openAddDialog()">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+  </section>
+</div>

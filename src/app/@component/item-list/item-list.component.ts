@@ -81,6 +81,7 @@ export class ItemListComponent {
       'price',
       'expireDate',
       'status',
+      'avatar',
       'notify',
       'actions',
     ],
@@ -92,6 +93,7 @@ export class ItemListComponent {
       'trialEndDate',
       'nextBillingDate',
       'status',
+      'avatar',
       'notify',
       'actions',
     ],
@@ -105,6 +107,7 @@ export class ItemListComponent {
       'purchaseDate',
       'warrantyEndDate',
       'status',
+      'avatar',
       'notify',
       'actions',
     ],
@@ -117,6 +120,7 @@ export class ItemListComponent {
       'expireDate',
       'usageMethod',
       'status',
+      'avatar',
       'notify',
       'actions',
     ],
@@ -127,6 +131,7 @@ export class ItemListComponent {
       'price',
       'expireOrEndDate',
       'status',
+      'avatar',
       'actions',
     ],
   };
@@ -342,16 +347,30 @@ export class ItemListComponent {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (!result) return;
+      const formData = new FormData();
 
       // edit-dialog 回傳的 _type 為 'item' | 'subscription' | 'warranty' | 'medicine'
-      const { _type, ...payload } = result;
-      console.log(_type);
+      const { _type, selectedFile, ...payload } = result;
       payload.userId = this.currentUserId;
 
       const url = this.basicUrl + (this.updateApiMap[_type] ?? 'item/update');
       this.showLoading('更新中...');
 
-      this.http.postApi(url, payload).subscribe({
+      // 將原本的 JSON payload 封裝成 Blob 並宣告為 application/json
+      const jsonBlob = new Blob([JSON.stringify(payload)], {
+        type: 'application/json',
+      });
+
+      // 注意：這裡的 key 名稱（'req'）要跟後端 @RequestBody / @RequestPart 接收的變數名稱一致！
+      formData.append('req', jsonBlob);
+
+      // 如果有選擇新圖片，才塞入 FormData
+      if (selectedFile) {
+        // 名稱對應後端的 @RequestPart(value = "avatar")
+        formData.append('avatar', selectedFile);
+      }
+      console.log(formData);
+      this.http.postApi(url, formData).subscribe({
         next: (res: any) => {
           Swal.close();
           if (res.code !== 200) {
@@ -497,8 +516,6 @@ export class ItemListComponent {
           this.currentMode = TableMode.Item;
           this.refreshTableData(this.cachedData.item);
 
-          console.log("item:", res.items)
-
           // 背景載入其他三種資料，供全域搜尋的 allData 使用
           this.loadAllListSilently(groupId);
 
@@ -534,7 +551,7 @@ export class ItemListComponent {
   }
 
   // 背景靜默載入訂閱 / 保固 / 藥品資料（供全域搜尋使用）
-  private loadAllListSilently(groupId: number): void {
+  private loadAllListSilently(groupId: number) {
     const modes = [
       TableMode.Subscription,
       TableMode.Warranty,
@@ -549,7 +566,6 @@ export class ItemListComponent {
         .subscribe({
           next: (res: any) => {
             (this.cachedData as Record<string, any[]>)[mode] = res.data || [];
-            console.log('data', res);
           },
         });
     });
@@ -886,5 +902,34 @@ export class ItemListComponent {
       allowEscapeKey: false,
       didOpen: () => Swal.showLoading(),
     });
+  }
+  //圖片顯示
+  getItemAvatar(element: any): string {
+    // 1. 防呆：如果 element 沒傳入或根本沒有圖片欄位
+    if (!element || !element.avatar || element.avatar.trim() === '') {
+      return 'assets/default-avatar.png';
+    }
+
+    const avatarStr = element.avatar.trim();
+
+    // 2. 如果已經是 Base64 或是完整的 http 網址，直接回傳（不可進行全字串 encodeURIComponent）
+    if (
+      avatarStr.startsWith('data:') ||
+      avatarStr.startsWith('http://') ||
+      avatarStr.startsWith('https://')
+    ) {
+      return avatarStr;
+    }
+
+    // 3. 如果後端給的路徑已經包含了 "uploads/"，先把它拿掉，避免重複疊加
+    let fileName = avatarStr;
+    if (fileName.startsWith('uploads/')) {
+      fileName = fileName.replace('uploads/', '');
+    }
+
+    // 4. 只針對「純檔名」部分進行 URL 編碼，防止中文與空白破圖
+    const safeFileName = encodeURIComponent(fileName);
+
+    return `${this.basicUrl}uploads/${safeFileName}`;
   }
 }

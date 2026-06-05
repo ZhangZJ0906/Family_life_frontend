@@ -13,186 +13,154 @@
   </div>
 
   @if (record) {
-    <mat-dialog-content class="dialog-content">
+  <mat-dialog-content class="dialog-content">
 
-      <form class="expense-form">
+    <form class="expense-form">
 
-        <!-- 記帳環境：唯讀 -->
-<div class="readonly-env full-width">
-  <div class="env-left">
-    <div class="env-icon">
-      <mat-icon>groups</mat-icon>
-    </div>
+      <!-- 記帳環境：唯讀 -->
+      <div class="readonly-env full-width">
+        <div class="env-left">
+          <div class="env-icon">
+            <mat-icon>groups</mat-icon>
+          </div>
 
-    <div>
-      <div class="env-label">記帳環境</div>
-      <div class="env-name">{{ currentGroupName }}</div>
-    </div>
-  </div>
+          <div>
+            <div class="env-label">記帳環境</div>
+            <div class="env-name">{{ currentGroupName }}</div>
+          </div>
+        </div>
 
-  <div class="env-lock">
-    <mat-icon>lock</mat-icon>
-    <span>唯讀</span>
-  </div>
-</div>
+        <div class="env-lock">
+          <mat-icon>lock</mat-icon>
+          <span>唯讀</span>
+        </div>
+      </div>
+      <!-- 圖片 -->
+      <div class="file-upload-section" style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; font-weight: bold;">上傳物品圖片</label>
+        <input type="file" accept="image/*" (change)="onFileSelected($event)" class="form-control" />
+      </div>
+      <!-- 消費名稱 -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>消費名稱</mat-label>
 
-        <!-- 消費名稱 -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>消費名稱</mat-label>
+        <input matInput [(ngModel)]="record.relatedItemName" name="related_item_name" placeholder="例如：午餐排骨飯、牛奶、藥品補貨" />
+      </mat-form-field>
 
-          <input
-            matInput
-            [(ngModel)]="record.relatedItemName"
-            name="related_item_name"
-            placeholder="例如：午餐排骨飯、牛奶、藥品補貨"
-          />
-        </mat-form-field>
+      <!-- 消費日期 -->
+      <mat-form-field appearance="outline">
+        <mat-label>消費日期</mat-label>
 
-        <!-- 消費日期 -->
-        <mat-form-field appearance="outline">
-          <mat-label>消費日期</mat-label>
+        <input matInput [matDatepicker]="picker" [(ngModel)]="record.expenseDate" name="expense_date" [max]="today" />
 
-          <input
-            matInput
-            [matDatepicker]="picker"
-            [(ngModel)]="record.expenseDate"
-            name="expense_date"
-            [max]="today"
-          />
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
 
-          <mat-datepicker-toggle
-            matIconSuffix
-            [for]="picker"
-          ></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
 
-          <mat-datepicker #picker></mat-datepicker>
-        </mat-form-field>
-
-       <!-- 支出金額 -->
+      <!-- 支出金額 -->
       <mat-form-field appearance="outline" class="price-field">
         <mat-label>支出金額</mat-label>
 
         <span matPrefix class="price-prefix">$&nbsp;</span>
 
-        <input
-          matInput
-          type="number"
-          [(ngModel)]="record.price"
-          name="price"
-          placeholder="請輸入金額"
-        />
+        <input matInput type="number" [(ngModel)]="record.price" name="price" placeholder="請輸入金額" />
       </mat-form-field>
-        <!-- 支出分類 -->
-        <mat-form-field appearance="outline">
-          <mat-label>支出分類</mat-label>
+      <!-- 支出分類 -->
+      <mat-form-field appearance="outline">
+        <mat-label>支出分類</mat-label>
 
-          <mat-select [(ngModel)]="record.categoryId" name="categoryId">
-            @for (cat of categories; track cat.id) {
-              <mat-option [value]="cat.id">
-                {{ cat.name }}
-              </mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+        <mat-select [(ngModel)]="record.categoryId" name="categoryId">
+          @for (cat of categories; track cat.id) {
+          <mat-option [value]="cat.id">
+            {{ cat.name }}
+          </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
 
-        <!-- 空白欄，讓分類不要拉太寬 -->
-        <div class="empty-block"></div>
+      <!-- 空白欄，讓分類不要拉太寬 -->
+      <div class="empty-block"></div>
 
-        <!-- 備註 -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>備註（選填）</mat-label>
+      <!-- 備註 -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>備註（選填）</mat-label>
 
-          <textarea
-            matInput
-            rows="3"
-            [(ngModel)]="record.note"
-            name="note"
-            placeholder="例如：由物品清單自動建立、家庭採買、臨時支出..."
-          ></textarea>
-        </mat-form-field>
+        <textarea matInput rows="3" [(ngModel)]="record.note" name="note"
+          placeholder="例如：由物品清單自動建立、家庭採買、臨時支出..."></textarea>
+      </mat-form-field>
 
-        <!-- 關聯庫存項目 -->
-        @if (item) {
-          <section class="linked-item-card full-width">
+      <!-- 關聯庫存項目 -->
+      @if (item) {
+      <section class="linked-item-card full-width">
 
-            <div class="linked-title">
-              <mat-icon>link</mat-icon>
-              <span>關聯庫存項目</span>
+        <div class="linked-title">
+          <mat-icon>link</mat-icon>
+          <span>關聯庫存項目</span>
+        </div>
+
+        <div class="linked-body">
+          <div class="linked-main">
+            <h3>{{ item.name }}</h3>
+
+            <p>
+              目前庫存：
+              <strong>{{ item.quantity }}</strong>
+              {{ item.unit }}
+
+              <span>
+                安全庫存：{{ item.safeQuantity }}
+              </span>
+            </p>
+          </div>
+
+          <div class="linked-grid">
+            <div>
+              <label>物品單價</label>
+              <strong>${{ item.unit_price }}</strong>
             </div>
 
-            <div class="linked-body">
-              <div class="linked-main">
-                <h3>{{ item.name }}</h3>
-
-                <p>
-                  目前庫存：
-                  <strong>{{ item.quantity }}</strong>
-                  {{ item.unit }}
-
-                  <span>
-                    安全庫存：{{ item.safeQuantity }}
-                  </span>
-                </p>
-              </div>
-
-              <div class="linked-grid">
-                <div>
-                  <label>物品單價</label>
-                  <strong>${{ item.unit_price }}</strong>
-                </div>
-
-                <div>
-                  <label>物品總價</label>
-                  <strong>${{ item.price }}</strong>
-                </div>
-
-                <div>
-                  <label>購買日期</label>
-                  <strong>{{ item.purchaseDate }}</strong>
-                </div>
-
-                <div>
-                  <label>有效日期</label>
-                  <strong>{{ item.expireDate }}</strong>
-                </div>
-              </div>
-
-              @if (item.note) {
-                <div class="item-note">
-                  <mat-icon>info</mat-icon>
-                  <span>
-                    <strong>物品備註：</strong>{{ item.note }}
-                  </span>
-                </div>
-              }
+            <div>
+              <label>物品總價</label>
+              <strong>${{ item.price }}</strong>
             </div>
 
-          </section>
-        }
+            <div>
+              <label>購買日期</label>
+              <strong>{{ item.purchaseDate }}</strong>
+            </div>
 
-      </form>
+            <div>
+              <label>有效日期</label>
+              <strong>{{ item.expireDate }}</strong>
+            </div>
+          </div>
 
-    </mat-dialog-content>
+          @if (item.note) {
+          <div class="item-note">
+            <mat-icon>info</mat-icon>
+            <span>
+              <strong>物品備註：</strong>{{ item.note }}
+            </span>
+          </div>
+          }
+        </div>
+
+      </section>
+      }
+
+    </form>
+
+  </mat-dialog-content>
   }
 
   <!-- 底部按鈕 -->
   <mat-dialog-actions align="end" class="dialog-actions">
-    <button
-      mat-button
-      type="button"
-      class="cancel-btn"
-      (click)="onCancel()"
-    >
+    <button mat-button type="button" class="cancel-btn" (click)="onCancel()">
       取消
     </button>
 
-    <button
-      mat-flat-button
-      type="button"
-      class="save-btn"
-      (click)="onSave()"
-      [disabled]="isNotModified"
-    >
+    <button mat-flat-button type="button" class="save-btn" (click)="onSave()" [disabled]="isNotModified">
 
       儲存修改
     </button>

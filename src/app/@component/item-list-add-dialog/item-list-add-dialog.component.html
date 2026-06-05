@@ -3,12 +3,21 @@
 <mat-dialog-content>
   <div class="container-fluid pt-2">
     <div class="row g-3">
-
+      <!-- 圖片 -->
+      <div class="file-upload-section" style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; font-weight: bold;">上傳物品圖片</label>
+        <input type="file" accept="image/*" (change)="onFileSelected($event)" class="form-control" />
+      </div>
       <!-- 物品名稱 -->
       <div class="col-12">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>物品名稱</mat-label>
-          <input matInput [(ngModel)]="item.name" required placeholder="例如：全脂牛奶">
+          <input
+            matInput
+            [(ngModel)]="item.name"
+            required
+            placeholder="例如：全脂牛奶"
+          />
         </mat-form-field>
       </div>
 
@@ -18,7 +27,7 @@
           <mat-label>所屬群組</mat-label>
           <mat-select required [(ngModel)]="item.groupId">
             @for (g of group; track $index) {
-            <mat-option [value]="g.groupId">{{ g.groupName }}</mat-option>
+              <mat-option [value]="g.groupId">{{ g.groupName }}</mat-option>
             }
           </mat-select>
         </mat-form-field>
@@ -30,421 +39,685 @@
           <mat-label>分類</mat-label>
           <mat-select required [(ngModel)]="item.categoryId">
             @for (cat of categories; track cat.id) {
-            <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
+              <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
             }
           </mat-select>
         </mat-form-field>
       </div>
 
       <!-- ==================== 一般物品區塊 ==================== -->
-      @if (!isSubscriptionCategory() && !isWarrantyCategory() && !isMedicineCategory()) {
-
-      <div class="col-4">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>數量</mat-label>
-          <!-- ✅ 加 placeholder，初始值改 null 後不會顯示 0 -->
-          <input matInput type="number" required [(ngModel)]="item.quantity" min="0" placeholder="例如：1">
-        </mat-form-field>
-      </div>
-
-      <div class="col-4">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>單位</mat-label>
-          <mat-select required [(ngModel)]="item.unit">
-            <mat-option value="個">個</mat-option>
-            <mat-option value="瓶">瓶</mat-option>
-            <mat-option value="罐">罐</mat-option>
-            <mat-option value="支">支</mat-option>
-            <mat-option value="尾">尾</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      <div class="col-4">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>單價</mat-label>
-          <!-- ✅ placeholder 取代預設 0 -->
-          <input matInput type="number" required [(ngModel)]="item.unitPrice" min="0" placeholder="例如：30" class="text-primary fw-bold">
-          <span matPrefix>$&nbsp;</span>
-        </mat-form-field>
-      </div>
-
-      <div class="col-12">
-        <mat-form-field appearance="outline" class="w-100" color="accent">
-          <mat-label class="text-primary">總價（自動計算）</mat-label>
-          <input matInput type="number" [ngModel]="totalPrice" readonly name="totalPrice" class="text-primary fw-bold">
-          <span matPrefix>$&nbsp;</span>
-          <mat-hint align="end">計算公式：{{ item.unitPrice || 0 }} × {{ item.quantity || 0 }}</mat-hint>
-        </mat-form-field>
-      </div>
-
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>安全庫存量</mat-label>
-          <!-- ✅ placeholder 取代預設 0 -->
-          <input matInput type="number" required [(ngModel)]="item.safeQuantity" min="0" placeholder="例如：1">
-          <mat-hint>低於此數量時顯示「庫存不足」</mat-hint>
-        </mat-form-field>
-      </div>
-
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>存放地點</mat-label>
-          <mat-select required [(ngModel)]="item.locationId">
-            @for (loc of location; track $index) {
-            <mat-option [value]="loc.id">{{ loc.name }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>購買日期</mat-label>
-          <input matInput [matDatepicker]="purchasePicker" required [(ngModel)]="item.purchaseDate" [max]="today">
-          <mat-datepicker-toggle matIconSuffix [for]="purchasePicker"></mat-datepicker-toggle>
-          <mat-datepicker #purchasePicker></mat-datepicker>
-        </mat-form-field>
-      </div>
-
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>到期日期</mat-label>
-          <input matInput [matDatepicker]="expirePicker" required [(ngModel)]="item.expireDate" [min]="minDate">
-          <mat-datepicker-toggle matIconSuffix [for]="expirePicker"></mat-datepicker-toggle>
-          <mat-datepicker #expirePicker></mat-datepicker>
-          <mat-hint>過期前系統會自動發送通知</mat-hint>
-        </mat-form-field>
-      </div>
-
-      <div class="col-12 mt-2">
-        <div class="d-flex align-items-center justify-content-between p-3 rounded-3 bg-light border">
-          <div>
-            <div class="fw-bold mb-0" [class.text-primary]="item.notify" style="font-size: 14px;">
-              開啟到期提醒
-            </div>
-            <div class="text-muted" style="font-size: 12px;">
-              {{ item.notify ? '系統將在物品過期前7天發送通知' : '目前已暫停此物品的提醒' }}
-            </div>
-          </div>
-          <mat-slide-toggle [(ngModel)]="item.notify" color="primary"></mat-slide-toggle>
+      @if (
+        !isSubscriptionCategory() &&
+        !isWarrantyCategory() &&
+        !isMedicineCategory()
+      ) {
+        <div class="col-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>數量</mat-label>
+            <!-- ✅ 加 placeholder，初始值改 null 後不會顯示 0 -->
+            <input
+              matInput
+              type="number"
+              required
+              [(ngModel)]="item.quantity"
+              min="0"
+              placeholder="例如：1"
+            />
+          </mat-form-field>
         </div>
-      </div>
 
-      <div class="col-12">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>備註事項</mat-label>
-          <textarea cdkTextareaAutosize cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5" matInput rows="3"
-            [(ngModel)]="item.note" placeholder="可以記錄購買地點、口感或保存提醒...">
+        <div class="col-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>單位</mat-label>
+            <mat-select required [(ngModel)]="item.unit">
+              <mat-option value="個">個</mat-option>
+              <mat-option value="瓶">瓶</mat-option>
+              <mat-option value="罐">罐</mat-option>
+              <mat-option value="支">支</mat-option>
+              <mat-option value="尾">尾</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>單價</mat-label>
+            <!-- ✅ placeholder 取代預設 0 -->
+            <input
+              matInput
+              type="number"
+              required
+              [(ngModel)]="item.unitPrice"
+              min="0"
+              placeholder="例如：30"
+              class="text-primary fw-bold"
+            />
+            <span matPrefix>$&nbsp;</span>
+          </mat-form-field>
+        </div>
+
+        <div class="col-12">
+          <mat-form-field appearance="outline" class="w-100" color="accent">
+            <mat-label class="text-primary">總價（自動計算）</mat-label>
+            <input
+              matInput
+              type="number"
+              [ngModel]="totalPrice"
+              readonly
+              name="totalPrice"
+              class="text-primary fw-bold"
+            />
+            <span matPrefix>$&nbsp;</span>
+            <mat-hint align="end"
+              >計算公式：{{ item.unitPrice || 0 }} ×
+              {{ item.quantity || 0 }}</mat-hint
+            >
+          </mat-form-field>
+        </div>
+
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>安全庫存量</mat-label>
+            <!-- ✅ placeholder 取代預設 0 -->
+            <input
+              matInput
+              type="number"
+              required
+              [(ngModel)]="item.safeQuantity"
+              min="0"
+              placeholder="例如：1"
+            />
+            <mat-hint>低於此數量時顯示「庫存不足」</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>存放地點</mat-label>
+            <mat-select required [(ngModel)]="item.locationId">
+              @for (loc of location; track $index) {
+                <mat-option [value]="loc.id">{{ loc.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>購買日期</mat-label>
+            <input
+              matInput
+              [matDatepicker]="purchasePicker"
+              required
+              [(ngModel)]="item.purchaseDate"
+              [max]="today"
+            />
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="purchasePicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #purchasePicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>到期日期</mat-label>
+            <input
+              matInput
+              [matDatepicker]="expirePicker"
+              required
+              [(ngModel)]="item.expireDate"
+              [min]="minDate"
+            />
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="expirePicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #expirePicker></mat-datepicker>
+            <mat-hint>過期前系統會自動發送通知</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <div class="col-12 mt-2">
+          <div
+            class="d-flex align-items-center justify-content-between p-3 rounded-3 bg-light border"
+          >
+            <div>
+              <div
+                class="fw-bold mb-0"
+                [class.text-primary]="item.notify"
+                style="font-size: 14px"
+              >
+                開啟到期提醒
+              </div>
+              <div class="text-muted" style="font-size: 12px">
+                {{
+                  item.notify
+                    ? "系統將在物品過期前7天發送通知"
+                    : "目前已暫停此物品的提醒"
+                }}
+              </div>
+            </div>
+            <mat-slide-toggle
+              [(ngModel)]="item.notify"
+              color="primary"
+            ></mat-slide-toggle>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>備註事項</mat-label>
+            <textarea
+              cdkTextareaAutosize
+              cdkAutosizeMinRows="1"
+              cdkAutosizeMaxRows="5"
+              matInput
+              rows="3"
+              [(ngModel)]="item.note"
+              placeholder="可以記錄購買地點、口感或保存提醒..."
+            >
             </textarea>
-        </mat-form-field>
-      </div>
+          </mat-form-field>
+        </div>
 
-      <mat-dialog-actions align="end" class="p-3">
-        <button mat-button (click)="onNoClick()">取消</button>
-        <!-- ✅ 統一改用 isSubmitDisabled() -->
-        <button mat-raised-button color="primary" [disabled]="isSubmitDisabled()" (click)="addItemInfo()">
-          確認新增
-        </button>
-      </mat-dialog-actions>
+        <mat-dialog-actions align="end" class="p-3">
+          <button mat-button (click)="onNoClick()">取消</button>
+          <!-- ✅ 統一改用 isSubmitDisabled() -->
+          <button
+            mat-raised-button
+            color="primary"
+            [disabled]="isSubmitDisabled()"
+            (click)="addItemInfo()"
+          >
+            確認新增
+          </button>
+        </mat-dialog-actions>
       }
 
       <!-- ==================== 訂閱類別區塊 ==================== -->
       @if (isSubscriptionCategory()) {
-
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>訂閱金額</mat-label>
-          <!-- ✅ placeholder 取代預設 0 -->
-          <input matInput type="number" required [(ngModel)]="item.unitPrice" min="0" placeholder="例如：299">
-          <span matPrefix>$&nbsp;</span>
-        </mat-form-field>
-      </div>
-
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>扣款週期</mat-label>
-          <mat-select required [(ngModel)]="item.billingCycle">
-            <mat-option value="每月">每月</mat-option>
-            <mat-option value="每季">每季</mat-option>
-            <mat-option value="每半年">每半年</mat-option>
-            <mat-option value="每年">每年</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>購買日期</mat-label>
-          <input matInput [matDatepicker]="subPurchasePicker" required [(ngModel)]="item.purchaseDate" [max]="today">
-          <mat-datepicker-toggle matIconSuffix [for]="subPurchasePicker"></mat-datepicker-toggle>
-          <mat-datepicker #subPurchasePicker></mat-datepicker>
-        </mat-form-field>
-      </div>
-
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>試用結束日</mat-label>
-          <input matInput [matDatepicker]="trialPicker" required [(ngModel)]="item.trialEndDate" [min]="today">
-          <mat-datepicker-toggle matIconSuffix [for]="trialPicker"></mat-datepicker-toggle>
-          <mat-datepicker #trialPicker></mat-datepicker>
-        </mat-form-field>
-      </div>
-
-      <div class="col-12">
-        <div class="subscription-hint">
-          下次扣款日將由後端依照「試用結束日 + 扣款週期」自動計算
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>訂閱金額</mat-label>
+            <!-- ✅ placeholder 取代預設 0 -->
+            <input
+              matInput
+              type="number"
+              required
+              [(ngModel)]="item.unitPrice"
+              min="0"
+              placeholder="例如：299"
+            />
+            <span matPrefix>$&nbsp;</span>
+          </mat-form-field>
         </div>
-      </div>
 
-      <div class="col-12 mt-2">
-        <div class="d-flex align-items-center justify-content-between p-3 rounded-3 bg-light border">
-          <div>
-            <div class="fw-bold mb-0" [class.text-primary]="item.notify" style="font-size: 14px;">開啟提醒</div>
-            <div class="text-muted" style="font-size: 12px;">
-              {{ item.notify ? '系統將依照試用結束日前7天通知' : '目前已暫停提醒' }}
-            </div>
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>扣款週期</mat-label>
+            <mat-select required [(ngModel)]="item.billingCycle">
+              <mat-option value="每月">每月</mat-option>
+              <mat-option value="每季">每季</mat-option>
+              <mat-option value="每半年">每半年</mat-option>
+              <mat-option value="每年">每年</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>購買日期</mat-label>
+            <input
+              matInput
+              [matDatepicker]="subPurchasePicker"
+              required
+              [(ngModel)]="item.purchaseDate"
+              [max]="today"
+            />
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="subPurchasePicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #subPurchasePicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>試用結束日</mat-label>
+            <input
+              matInput
+              [matDatepicker]="trialPicker"
+              required
+              [(ngModel)]="item.trialEndDate"
+              [min]="today"
+            />
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="trialPicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #trialPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <div class="col-12">
+          <div class="subscription-hint">
+            下次扣款日將由後端依照「試用結束日 + 扣款週期」自動計算
           </div>
-          <mat-slide-toggle [(ngModel)]="item.notify" color="primary"></mat-slide-toggle>
         </div>
-      </div>
 
-      <div class="col-12">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>備註事項</mat-label>
-          <textarea cdkTextareaAutosize cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5" matInput rows="3"
-            [(ngModel)]="item.note" placeholder="可以記錄帳號、方案、付款方式或其他提醒...">
+        <div class="col-12 mt-2">
+          <div
+            class="d-flex align-items-center justify-content-between p-3 rounded-3 bg-light border"
+          >
+            <div>
+              <div
+                class="fw-bold mb-0"
+                [class.text-primary]="item.notify"
+                style="font-size: 14px"
+              >
+                開啟提醒
+              </div>
+              <div class="text-muted" style="font-size: 12px">
+                {{
+                  item.notify
+                    ? "系統將依照試用結束日前7天通知"
+                    : "目前已暫停提醒"
+                }}
+              </div>
+            </div>
+            <mat-slide-toggle
+              [(ngModel)]="item.notify"
+              color="primary"
+            ></mat-slide-toggle>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>備註事項</mat-label>
+            <textarea
+              cdkTextareaAutosize
+              cdkAutosizeMinRows="1"
+              cdkAutosizeMaxRows="5"
+              matInput
+              rows="3"
+              [(ngModel)]="item.note"
+              placeholder="可以記錄帳號、方案、付款方式或其他提醒..."
+            >
             </textarea>
-        </mat-form-field>
-      </div>
+          </mat-form-field>
+        </div>
 
-      <mat-dialog-actions align="end" class="p-3">
-        <button mat-button (click)="onNoClick()">取消</button>
-        <!-- ✅ 統一改用 isSubmitDisabled() -->
-        <button mat-raised-button color="primary" [disabled]="isSubmitDisabled()" (click)="addItemInfo()">
-          確認新增
-        </button>
-      </mat-dialog-actions>
+        <mat-dialog-actions align="end" class="p-3">
+          <button mat-button (click)="onNoClick()">取消</button>
+          <!-- ✅ 統一改用 isSubmitDisabled() -->
+          <button
+            mat-raised-button
+            color="primary"
+            [disabled]="isSubmitDisabled()"
+            (click)="addItemInfo()"
+          >
+            確認新增
+          </button>
+        </mat-dialog-actions>
       }
 
       <!-- ==================== 保固類別區塊 ==================== -->
       @if (isWarrantyCategory()) {
-
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>品牌</mat-label>
-          <input matInput [(ngModel)]="item.brand" placeholder="例如：Apple">
-        </mat-form-field>
-      </div>
-
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>型號</mat-label>
-          <input matInput [(ngModel)]="item.model" placeholder="例如：M2">
-        </mat-form-field>
-      </div>
-
-      <div class="col-12">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>序號</mat-label>
-          <input matInput [(ngModel)]="item.serialNumber" placeholder="例如：ABC123456">
-        </mat-form-field>
-      </div>
-
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>購買日期</mat-label>
-          <input matInput [matDatepicker]="warrantyPurchasePicker" required [(ngModel)]="item.purchaseDate"
-            [max]="today">
-          <mat-datepicker-toggle matIconSuffix [for]="warrantyPurchasePicker"></mat-datepicker-toggle>
-          <mat-datepicker #warrantyPurchasePicker></mat-datepicker>
-        </mat-form-field>
-      </div>
-
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>保固到期日</mat-label>
-          <input matInput [matDatepicker]="warrantyEndPicker" required [(ngModel)]="item.warrantyEndDate" [min]="today">
-          <mat-datepicker-toggle matIconSuffix [for]="warrantyEndPicker"></mat-datepicker-toggle>
-          <mat-datepicker #warrantyEndPicker></mat-datepicker>
-        </mat-form-field>
-      </div>
-
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>購買店家</mat-label>
-          <input matInput [(ngModel)]="item.storeName" placeholder="例如：Apple Store">
-        </mat-form-field>
-      </div>
-
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>購買金額</mat-label>
-          <!-- ✅ placeholder 取代預設 0 -->
-          <input matInput type="number" [(ngModel)]="item.unitPrice" min="0" placeholder="例如：30000">
-          <span matPrefix>$&nbsp;</span>
-        </mat-form-field>
-      </div>
-
-      <div class="col-12 mt-2">
-        <div class="d-flex align-items-center justify-content-between p-3 rounded-3 bg-light border">
-          <div>
-            <div class="fw-bold mb-0" [class.text-primary]="item.notify" style="font-size: 14px;">開啟保固提醒</div>
-            <div class="text-muted" style="font-size: 12px;">
-              {{ item.notify ? '系統將在保固到期前7天送通知' : '目前已暫停提醒' }}
-            </div>
-          </div>
-          <mat-slide-toggle [(ngModel)]="item.notify" color="primary"></mat-slide-toggle>
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>品牌</mat-label>
+            <input
+              matInput
+              [(ngModel)]="item.brand"
+              placeholder="例如：Apple"
+            />
+          </mat-form-field>
         </div>
-      </div>
 
-      <div class="col-12">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>備註事項</mat-label>
-          <textarea cdkTextareaAutosize cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5" matInput rows="3"
-            [(ngModel)]="item.note" placeholder="可以記錄保固條件、維修紀錄或發票資訊...">
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>型號</mat-label>
+            <input matInput [(ngModel)]="item.model" placeholder="例如：M2" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-12">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>序號</mat-label>
+            <input
+              matInput
+              [(ngModel)]="item.serialNumber"
+              placeholder="例如：ABC123456"
+            />
+          </mat-form-field>
+        </div>
+
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>購買日期</mat-label>
+            <input
+              matInput
+              [matDatepicker]="warrantyPurchasePicker"
+              required
+              [(ngModel)]="item.purchaseDate"
+              [max]="today"
+            />
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="warrantyPurchasePicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #warrantyPurchasePicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>保固到期日</mat-label>
+            <input
+              matInput
+              [matDatepicker]="warrantyEndPicker"
+              required
+              [(ngModel)]="item.warrantyEndDate"
+              [min]="today"
+            />
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="warrantyEndPicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #warrantyEndPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>購買店家</mat-label>
+            <input
+              matInput
+              [(ngModel)]="item.storeName"
+              placeholder="例如：Apple Store"
+            />
+          </mat-form-field>
+        </div>
+
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>購買金額</mat-label>
+            <!-- ✅ placeholder 取代預設 0 -->
+            <input
+              matInput
+              type="number"
+              [(ngModel)]="item.unitPrice"
+              min="0"
+              placeholder="例如：30000"
+            />
+            <span matPrefix>$&nbsp;</span>
+          </mat-form-field>
+        </div>
+
+        <div class="col-12 mt-2">
+          <div
+            class="d-flex align-items-center justify-content-between p-3 rounded-3 bg-light border"
+          >
+            <div>
+              <div
+                class="fw-bold mb-0"
+                [class.text-primary]="item.notify"
+                style="font-size: 14px"
+              >
+                開啟保固提醒
+              </div>
+              <div class="text-muted" style="font-size: 12px">
+                {{
+                  item.notify ? "系統將在保固到期前7天送通知" : "目前已暫停提醒"
+                }}
+              </div>
+            </div>
+            <mat-slide-toggle
+              [(ngModel)]="item.notify"
+              color="primary"
+            ></mat-slide-toggle>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>備註事項</mat-label>
+            <textarea
+              cdkTextareaAutosize
+              cdkAutosizeMinRows="1"
+              cdkAutosizeMaxRows="5"
+              matInput
+              rows="3"
+              [(ngModel)]="item.note"
+              placeholder="可以記錄保固條件、維修紀錄或發票資訊..."
+            >
             </textarea>
-        </mat-form-field>
-      </div>
+          </mat-form-field>
+        </div>
 
-      <mat-dialog-actions align="end" class="p-3">
-        <button mat-button (click)="onNoClick()">取消</button>
-        <!-- ✅ 原本檢查了 locationId 和 expireDate，但保固根本沒這兩個欄位，改用 isSubmitDisabled() -->
-        <button mat-raised-button color="primary" [disabled]="isSubmitDisabled()" (click)="addItemInfo()">
-          確認新增
-        </button>
-      </mat-dialog-actions>
+        <mat-dialog-actions align="end" class="p-3">
+          <button mat-button (click)="onNoClick()">取消</button>
+          <!-- ✅ 原本檢查了 locationId 和 expireDate，但保固根本沒這兩個欄位，改用 isSubmitDisabled() -->
+          <button
+            mat-raised-button
+            color="primary"
+            [disabled]="isSubmitDisabled()"
+            (click)="addItemInfo()"
+          >
+            確認新增
+          </button>
+        </mat-dialog-actions>
       }
 
       <!-- ==================== 藥品類別區塊 ==================== -->
       @if (isMedicineCategory()) {
-
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>藥品類型</mat-label>
-          <mat-select [(ngModel)]="item.medicineType">
-            <mat-option value="錠劑">錠劑</mat-option>
-            <mat-option value="膠囊">膠囊</mat-option>
-            <mat-option value="藥水">藥水</mat-option>
-            <mat-option value="藥膏">藥膏</mat-option>
-            <mat-option value="眼藥水">眼藥水</mat-option>
-            <mat-option value="其他">其他</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>數量</mat-label>
-          <input matInput type="number" required [(ngModel)]="item.quantity" min="0" placeholder="例如：5">
-        </mat-form-field>
-      </div>
-
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>單價</mat-label>
-          <!-- ✅ placeholder 取代預設 0 -->
-          <input matInput type="number" [(ngModel)]="item.unitPrice" min="0" placeholder="例如：120">
-          <span matPrefix>$&nbsp;</span>
-        </mat-form-field>
-      </div>
-
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>單位</mat-label>
-          <mat-select required [(ngModel)]="item.unit">
-            <mat-option value="顆">顆</mat-option>
-            <mat-option value="瓶">瓶</mat-option>
-            <mat-option value="盒">盒</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>總價（自動計算）</mat-label>
-          <input matInput type="number" [ngModel]="totalPrice" readonly>
-          <span matPrefix>$&nbsp;</span>
-          <mat-hint>{{ item.quantity || 0 }} × {{ item.unitPrice || 0 }}</mat-hint>
-        </mat-form-field>
-      </div>
-
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>安全庫存量</mat-label>
-          <!-- ✅ placeholder 取代預設 0 -->
-          <input matInput type="number" [(ngModel)]="item.safeQuantity" min="0" placeholder="例如：1">
-        </mat-form-field>
-      </div>
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>購買日期</mat-label>
-          <!-- ✅ 補 required -->
-          <input matInput [matDatepicker]="medPurchasePicker" required [(ngModel)]="item.purchaseDate" [max]="today">
-          <mat-datepicker-toggle matIconSuffix [for]="medPurchasePicker"></mat-datepicker-toggle>
-          <mat-datepicker #medPurchasePicker></mat-datepicker>
-        </mat-form-field>
-      </div>
-
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>到期日期</mat-label>
-          <!-- ✅ 補 required（原本有兩個 required 屬性，也一起清掉） -->
-          <input matInput [matDatepicker]="medExpirePicker" required [(ngModel)]="item.expireDate" [min]="today">
-          <mat-datepicker-toggle matIconSuffix [for]="medExpirePicker"></mat-datepicker-toggle>
-          <mat-datepicker #medExpirePicker></mat-datepicker>
-        </mat-form-field>
-      </div>
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>藥品來源</mat-label>
-          <input matInput [(ngModel)]="item.source" placeholder="藥局/診所/醫院">
-        </mat-form-field>
-      </div>
-
-      <div class="col-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>劑量</mat-label>
-          <input matInput [(ngModel)]="item.dosage" placeholder="例如：一次 1 顆">
-        </mat-form-field>
-      </div>
-      <div class="col-12">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>用法</mat-label>
-          <input matInput [(ngModel)]="item.usageMethod" placeholder="例如：飯後服用">
-        </mat-form-field>
-      </div>
-
-      <div class="col-12 mt-2">
-        <div class="d-flex align-items-center justify-content-between p-3 rounded-3 bg-light border">
-          <div>
-            <div class="fw-bold mb-0" [class.text-primary]="item.notify" style="font-size: 14px;">開啟藥品到期提醒</div>
-            <div class="text-muted" style="font-size: 12px;">
-              {{ item.notify ? '系統將在藥品到期前7天發送通知' : '目前已暫停提醒' }}
-            </div>
-          </div>
-          <mat-slide-toggle [(ngModel)]="item.notify" color="primary"></mat-slide-toggle>
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>藥品類型</mat-label>
+            <mat-select [(ngModel)]="item.medicineType">
+              <mat-option value="錠劑">錠劑</mat-option>
+              <mat-option value="膠囊">膠囊</mat-option>
+              <mat-option value="藥水">藥水</mat-option>
+              <mat-option value="藥膏">藥膏</mat-option>
+              <mat-option value="眼藥水">眼藥水</mat-option>
+              <mat-option value="其他">其他</mat-option>
+            </mat-select>
+          </mat-form-field>
         </div>
-      </div>
 
-      <div class="col-12">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>備註事項</mat-label>
-          <textarea cdkTextareaAutosize cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5" matInput rows="3"
-            [(ngModel)]="item.note" placeholder="可以記錄藥品注意事項、保存方式或醫囑...">
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>數量</mat-label>
+            <input
+              matInput
+              type="number"
+              required
+              [(ngModel)]="item.quantity"
+              min="0"
+              placeholder="例如：5"
+            />
+          </mat-form-field>
+        </div>
+
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>單價</mat-label>
+            <!-- ✅ placeholder 取代預設 0 -->
+            <input
+              matInput
+              type="number"
+              [(ngModel)]="item.unitPrice"
+              min="0"
+              placeholder="例如：120"
+            />
+            <span matPrefix>$&nbsp;</span>
+          </mat-form-field>
+        </div>
+
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>單位</mat-label>
+            <mat-select required [(ngModel)]="item.unit">
+              <mat-option value="顆">顆</mat-option>
+              <mat-option value="瓶">瓶</mat-option>
+              <mat-option value="盒">盒</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>總價（自動計算）</mat-label>
+            <input matInput type="number" [ngModel]="totalPrice" readonly />
+            <span matPrefix>$&nbsp;</span>
+            <mat-hint
+              >{{ item.quantity || 0 }} × {{ item.unitPrice || 0 }}</mat-hint
+            >
+          </mat-form-field>
+        </div>
+
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>安全庫存量</mat-label>
+            <!-- ✅ placeholder 取代預設 0 -->
+            <input
+              matInput
+              type="number"
+              [(ngModel)]="item.safeQuantity"
+              min="0"
+              placeholder="例如：1"
+            />
+          </mat-form-field>
+        </div>
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>購買日期</mat-label>
+            <!-- ✅ 補 required -->
+            <input
+              matInput
+              [matDatepicker]="medPurchasePicker"
+              required
+              [(ngModel)]="item.purchaseDate"
+              [max]="today"
+            />
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="medPurchasePicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #medPurchasePicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>到期日期</mat-label>
+            <!-- ✅ 補 required（原本有兩個 required 屬性，也一起清掉） -->
+            <input
+              matInput
+              [matDatepicker]="medExpirePicker"
+              required
+              [(ngModel)]="item.expireDate"
+              [min]="today"
+            />
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="medExpirePicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #medExpirePicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>藥品來源</mat-label>
+            <input
+              matInput
+              [(ngModel)]="item.source"
+              placeholder="藥局/診所/醫院"
+            />
+          </mat-form-field>
+        </div>
+
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>劑量</mat-label>
+            <input
+              matInput
+              [(ngModel)]="item.dosage"
+              placeholder="例如：一次 1 顆"
+            />
+          </mat-form-field>
+        </div>
+        <div class="col-12">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>用法</mat-label>
+            <input
+              matInput
+              [(ngModel)]="item.usageMethod"
+              placeholder="例如：飯後服用"
+            />
+          </mat-form-field>
+        </div>
+
+        <div class="col-12 mt-2">
+          <div
+            class="d-flex align-items-center justify-content-between p-3 rounded-3 bg-light border"
+          >
+            <div>
+              <div
+                class="fw-bold mb-0"
+                [class.text-primary]="item.notify"
+                style="font-size: 14px"
+              >
+                開啟藥品到期提醒
+              </div>
+              <div class="text-muted" style="font-size: 12px">
+                {{
+                  item.notify
+                    ? "系統將在藥品到期前7天發送通知"
+                    : "目前已暫停提醒"
+                }}
+              </div>
+            </div>
+            <mat-slide-toggle
+              [(ngModel)]="item.notify"
+              color="primary"
+            ></mat-slide-toggle>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>備註事項</mat-label>
+            <textarea
+              cdkTextareaAutosize
+              cdkAutosizeMinRows="1"
+              cdkAutosizeMaxRows="5"
+              matInput
+              rows="3"
+              [(ngModel)]="item.note"
+              placeholder="可以記錄藥品注意事項、保存方式或醫囑..."
+            >
             </textarea>
-        </mat-form-field>
-      </div>
+          </mat-form-field>
+        </div>
 
-      <mat-dialog-actions align="end" class="p-3">
-        <button mat-button (click)="onNoClick()">取消</button>
-        <!-- ✅ 原本只檢查 name + expireDate，缺少 unit，改用 isSubmitDisabled() -->
-        <button mat-raised-button color="primary" [disabled]="isSubmitDisabled()" (click)="addItemInfo()">
-          確認新增
-        </button>
-      </mat-dialog-actions>
+        <mat-dialog-actions align="end" class="p-3">
+          <button mat-button (click)="onNoClick()">取消</button>
+          <!-- ✅ 原本只檢查 name + expireDate，缺少 unit，改用 isSubmitDisabled() -->
+          <button
+            mat-raised-button
+            color="primary"
+            [disabled]="isSubmitDisabled()"
+            (click)="addItemInfo()"
+          >
+            確認新增
+          </button>
+        </mat-dialog-actions>
       }
-
     </div>
   </div>
 </mat-dialog-content>
