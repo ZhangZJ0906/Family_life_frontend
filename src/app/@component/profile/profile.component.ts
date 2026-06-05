@@ -161,6 +161,8 @@ export class ProfileComponent implements CanComponentDeactivate {
 
   // 開啟修改資料彈窗
   openEditDialog(): void {
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 
     // 測試按鈕是否有觸發
     console.log('修改按鈕被點擊');
@@ -199,6 +201,16 @@ export class ProfileComponent implements CanComponentDeactivate {
 
         if (!email) {
           Swal.showValidationMessage('Email 不可為空');
+          return false;
+        }
+
+        if (!emailPattern.test(email)) {
+          Swal.showValidationMessage('Email 格式錯誤');
+          return false;
+        }
+
+        if(email == "familyLifeTest123456@gmail.com"){
+          Swal.showValidationMessage('這是官方email!!用妳妹!!');
           return false;
         }
 
@@ -444,6 +456,11 @@ openAvatarDialog(): void {
       }
 
     }).then((result) => {
+       // 按取消
+      if (!result.isConfirmed) {
+        this.emailNotify = false;
+        return;
+      }
 
       if (result.isConfirmed) {
         Swal.fire({
