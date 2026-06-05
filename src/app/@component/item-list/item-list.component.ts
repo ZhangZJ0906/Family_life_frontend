@@ -353,7 +353,6 @@ export class ItemListComponent {
 
       const url = this.basicUrl + (this.updateApiMap[_type] ?? 'item/update');
       this.showLoading('更新中...');
-      
 
       // 將原本的 JSON payload 封裝成 Blob 並宣告為 application/json
       const jsonBlob = new Blob([JSON.stringify(payload)], {
@@ -368,6 +367,7 @@ export class ItemListComponent {
         // 名稱對應後端的 @RequestPart(value = "avatar")
         formData.append('avatar', selectedFile);
       }
+      console.log(formData);
       this.http.postApi(url, formData).subscribe({
         next: (res: any) => {
           Swal.close();
@@ -512,8 +512,6 @@ export class ItemListComponent {
           this.currentMode = TableMode.Item;
           this.refreshTableData(this.cachedData.item);
 
-          console.log('item:', res.items);
-
           // 背景載入其他三種資料，供全域搜尋的 allData 使用
           this.loadAllListSilently(groupId);
 
@@ -546,7 +544,7 @@ export class ItemListComponent {
   }
 
   // 背景靜默載入訂閱 / 保固 / 藥品資料（供全域搜尋使用）
-  private loadAllListSilently(groupId: number): void {
+  private loadAllListSilently(groupId: number) {
     const modes = [
       TableMode.Subscription,
       TableMode.Warranty,
@@ -561,7 +559,6 @@ export class ItemListComponent {
         .subscribe({
           next: (res: any) => {
             (this.cachedData as Record<string, any[]>)[mode] = res.data || [];
-            console.log('data', res);
           },
         });
     });
@@ -901,24 +898,31 @@ export class ItemListComponent {
   }
   //圖片顯示
   getItemAvatar(element: any): string {
-    // 1. 如果資料庫根本沒圖片，直接給前端預設圖
-    if (!element.avatar || element.avatar.trim() === '') {
+    // 1. 防呆：如果 element 沒傳入或根本沒有圖片欄位
+    if (!element || !element.avatar || element.avatar.trim() === '') {
       return 'assets/default-avatar.png';
     }
 
-    // 2. 如果是 Base64 或是已經包含 http 的完整網址，直接回傳
+    const avatarStr = element.avatar.trim();
+
+    // 2. 如果已經是 Base64 或是完整的 http 網址，直接回傳（不可進行全字串 encodeURIComponent）
     if (
-      element.avatar.startsWith('data:') ||
-      element.avatar.startsWith('http')
+      avatarStr.startsWith('data:') ||
+      avatarStr.startsWith('http://') ||
+      avatarStr.startsWith('https://')
     ) {
-      return element.avatar;
+      return avatarStr;
     }
 
-    // 3. 📌 關鍵修正：使用 encodeURIComponent 處理含有中文與空格的檔名
-    // 這樣 "1780583651502_螢幕擷取畫面 2026-05-31 111911.png"
-    // 就會被正確轉換為瀏覽器看得懂的網址，不會再破圖或閃爍了！
-    const safeAvatar = encodeURIComponent(element.avatar.trim());
+    // 3. 如果後端給的路徑已經包含了 "uploads/"，先把它拿掉，避免重複疊加
+    let fileName = avatarStr;
+    if (fileName.startsWith('uploads/')) {
+      fileName = fileName.replace('uploads/', '');
+    }
 
-    return `${this.basicUrl}uploads/${safeAvatar}`;
+    // 4. 只針對「純檔名」部分進行 URL 編碼，防止中文與空白破圖
+    const safeFileName = encodeURIComponent(fileName);
+
+    return `${this.basicUrl}uploads/${safeFileName}`;
   }
 }

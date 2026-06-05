@@ -324,7 +324,6 @@ imagePreview: string | null = null;
         notify: this.item.notify,
         note: this.item.note,
         selectedFile: this.selectedFile
-
       };
     } else if (this.isWarrantyCategory()) {
       if (!this.item.purchaseDate) {
