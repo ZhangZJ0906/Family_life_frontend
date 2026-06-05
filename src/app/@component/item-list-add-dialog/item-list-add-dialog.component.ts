@@ -108,7 +108,7 @@ export class ItemListAddDialogComponent implements OnInit {
 
   basicUrl!: string;
   group: any[] = [];
-  
+
   constructor(
     public dialogRef: MatDialogRef<ItemListAddDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -195,12 +195,40 @@ export class ItemListAddDialogComponent implements OnInit {
     return (this.item.unitPrice || 0) * (this.item.quantity || 0);
   }
   //選圖片
-  onFileSelected(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.selectedFile = file;
-    }
+  onFileSelected(event: Event): void {
+  const input = event.target as HTMLInputElement;
+
+  if (!input.files || input.files.length === 0) {
+    return;
   }
+
+  const file = input.files[0];
+
+  // 限制 5MB
+  const maxSize = 5 * 1024 * 1024;
+
+  if (file.size > maxSize) {
+    Swal.fire({
+      icon: 'warning',
+      title: '圖片太大',
+      text: '請上傳 5MB 以下的圖片',
+      confirmButtonText: '確認'
+    });
+
+    // 清空 input
+    input.value = '';
+
+    // 清空已選檔案
+    this.selectedFile = null;
+
+    return;
+  }
+
+  // 檢查通過後才存檔案
+  this.selectedFile = file;
+}
+
+
   // ✅ 全面補強，四種模式都有完整驗證
   isSubmitDisabled(): boolean {
     if (!this.item.name?.trim()) return true;
