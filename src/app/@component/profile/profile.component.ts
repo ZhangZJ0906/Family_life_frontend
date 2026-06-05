@@ -51,6 +51,9 @@ export class ProfileComponent implements CanComponentDeactivate {
   //切到其它分頁時護衛模式
   isDirty = false;
 
+  //email驗證
+  emailVerify = false;
+
   isLoading = false;
 
   constructor(
@@ -82,6 +85,7 @@ export class ProfileComponent implements CanComponentDeactivate {
         this.endDateNotify = res.notifyByEndDate;
         this.emailNotify = res.notifyByEmail;
         this.avatarUrl = res.avatar;
+        this.emailVerify = res.emailVerify;
         console.log(res.notifyByEmail)
 
         //共享userInfo
@@ -385,14 +389,89 @@ openAvatarDialog(): void {
     });
   }
 
-  VerifyEmailExist(){
-    Swal.fire({
-      title: '驗證中...',
-      text: '正在確認 Email 資訊',
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
+  verifyEmailExist(emailVerify: boolean) {
+    if(emailVerify){
+      this.emailNotify = true;
+    }
+    else{
+      Swal.fire({
+        title: '正在送驗證碼到你的gmail...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      this.http.post('http://localhost:8080/users/send',
+        {
+          email: this.email
+        }
+      ).subscribe({
+
+        next: (res: any) => {
+          Swal.close()
+          Swal.fire('驗證碼已送出', '', 'success');
+
+        },
+        error: () => {
+          Swal.close()
+          Swal.fire('送出失敗', '', 'error');
+        }
+      });
+      Swal.fire({
+        title: '輸入驗證碼',
+        input: 'text',
+        inputPlaceholder: '請輸入驗證碼',
+        showCancelButton: true,
+        confirmButtonText: '驗證',
+        cancelButtonText: '取消',
+
+        preConfirm: async (verifyCode) => {
+
+          if (!verifyCode) {
+            Swal.showValidationMessage('請輸入驗證碼');
+            return;
+          }
+
+          return verifyCode;
+        }
+
+      }).then((result) => {
+
+        if (result.isConfirmed) {
+          Swal.fire({
+            title: '驗證中...',
+            allowOutsideClick: false,
+            didOpen: () => {
+              Swal.showLoading();
+            }
+          });
+
+          this.http.post(
+            'http://localhost:8080/users/verify',
+            {
+              email: this.email,
+              code: result.value
+            }
+          ).subscribe({
+
+            next: (res: any) => {
+              Swal.close()
+              if(res == "驗證成功"){
+                Swal.fire('驗證成功', '', 'success');
+                this.emailNotify = true;
+              }
+            },
+
+            error: () => {
+              Swal.close()
+              Swal.fire('驗證失敗', '', 'error');
+            }
+
+          });
+
+        }
+
+      });
+    }
   }
 }
