@@ -176,8 +176,8 @@
 
               <span class="item-name">
                 {{
-                  element.name.length >= 10
-                    ? (element.name | slice: 0 : 10) + "..."
+                  element.name.length >= 5
+                    ? (element.name | slice: 0 : 5) + "..."
                     : element.name
                 }}
               </span>
@@ -247,19 +247,34 @@
         </ng-container>
 
 <ng-container matColumnDef="avatar">
-  <th mat-header-cell *matHeaderCellDef style="width: 60px; text-align: center;">圖片</th>
-  <td mat-cell *matCellDef="let element" style="text-align: center;">
+  <th mat-header-cell *matHeaderCellDef class="avatar-column">
+    圖片
+  </th>
+
+  <td mat-cell *matCellDef="let element" class="avatar-column">
     @if (element.avatar && element.avatar.trim() !== '') {
-      <img
-        [src]="getItemAvatar(element)"
-        alt="Item Avatar"
-        style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; vertical-align: middle;"
-        class="border"
-      />
+      <div class="avatar-preview-box">
+        <img
+          [src]="getItemAvatar(element)"
+          alt="Item Avatar"
+          class="item-avatar-img"
+        />
+
+        <!-- 滑鼠移上去才出現 -->
+        <div class="avatar-mask">
+          <button
+            type="button"
+            class="avatar-action-btn"
+            title="檢視圖片"
+            (click)="openImagePreview(element, $event)"
+          >
+            <mat-icon>visibility</mat-icon>
+          </button>
+        </div>
+      </div>
     } @else {
-      <div class="d-inline-flex align-items-center justify-content-center rounded-circle border bg-light text-secondary"
-           style="width: 40px; height: 40px; vertical-align: middle;">
-        <mat-icon style="font-size: 20px; width: 20px; height: 20px;">inventory_2</mat-icon>
+      <div class="item-avatar-empty">
+        <mat-icon>inventory_2</mat-icon>
       </div>
     }
   </td>
@@ -459,4 +474,53 @@
       </button>
     </div>
   </section>
+
+  @if (imagePreviewVisible) {
+  <div class="image-preview-backdrop" (click)="closeImagePreview()">
+    <div class="image-preview-panel" (click)="$event.stopPropagation()">
+
+      <button
+        type="button"
+        class="preview-close-btn"
+        (click)="closeImagePreview()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <div class="image-preview-stage">
+        <img
+          [src]="previewImageUrl"
+          [alt]="previewImageTitle"
+          class="preview-main-img"
+          [style.transform]="
+            'scale(' + previewScale + ') rotate(' + previewRotate + 'deg)'
+          "
+          (wheel)="onPreviewWheel($event)"
+        />
+      </div>
+
+      <div class="preview-toolbar">
+        <button type="button" (click)="zoomOut()">
+          <mat-icon>zoom_out</mat-icon>
+        </button>
+
+        <button type="button" (click)="zoomIn()">
+          <mat-icon>zoom_in</mat-icon>
+        </button>
+
+        <button type="button" (click)="rotateLeft()">
+          <mat-icon>rotate_left</mat-icon>
+        </button>
+
+        <button type="button" (click)="rotateRight()">
+          <mat-icon>rotate_right</mat-icon>
+        </button>
+
+        <button type="button" (click)="resetPreview()">
+          <mat-icon>restart_alt</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+}
 </div>
