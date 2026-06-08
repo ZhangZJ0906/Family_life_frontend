@@ -320,8 +320,8 @@
               <span class="new-badge">NEW</span>
             }
             {{
-              element.productName.length >= 10
-                ? (element.productName | slice: 0 : 10) + "..."
+              element.productName.length >= 5
+                ? (element.productName | slice: 0 : 5) + "..."
                 : element.productName
             }}
           </td>
@@ -348,9 +348,9 @@
           <th mat-header-cell *matHeaderCellDef>序號</th>
           <td mat-cell *matCellDef="let element">
             {{
-              element.serialNumber.length >= 8
-                ? (element.productName | slice: 0 : 8) + "..."
-                : element.productName || "無"
+              element.serialNumber.length >= 5
+                ? (element.serialNumber | slice: 0 : 5) + "..."
+                : element.serialNumber || "無"
             }}
           </td>
         </ng-container>
