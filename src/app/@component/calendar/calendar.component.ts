@@ -497,9 +497,9 @@ const payload = {
         icon: 'success',
         title: '新增成功',
         confirmButtonText: '確認',
+      }).then(() => {
+        this.loadCalendarEvents(groupId, this.createdBy);
       });
-
-      this.loadCalendarEvents(groupId, this.createdBy);
     },
 
     error: (err) => {
@@ -651,13 +651,15 @@ const assignedUserIds = await this.getBatchAssignedUserIds(
             return;
           }
 
+          Swal.close();
+
           Swal.fire({
             icon: 'success',
             title: '修改成功',
             confirmButtonText: '確認',
+          }).then(() => {
+            this.loadCalendarEvents(groupId, this.createdBy);
           });
-
-          this.loadCalendarEvents(groupId, this.createdBy);
         },
 
         error: (err) => {
@@ -741,20 +743,22 @@ const assignedUserIds = await this.getBatchAssignedUserIds(
             }
 
             Swal.fire({
-              icon: 'success',
-              title: '刪除成功',
-              confirmButtonText: '確認',
-            });
-
+            icon: 'success',
+            title: '刪除成功',
+            confirmButtonText: '確認',
+          }).then(() => {
             this.loadCalendarEvents(groupId, this.createdBy);
+          });
           },
 
-          error: (err) => {
-            Swal.fire({
-              icon: 'error',
-              title: '刪除失敗',
-              text: err.error?.message || '請稍後再試',
-            });
+         error: (err) => {
+          Swal.close();
+
+          Swal.fire({
+            icon: 'error',
+            title: '刪除失敗',
+            text: err.error?.message || '請稍後再試',
+          });
           },
         });
     });
@@ -878,12 +882,12 @@ async handleEventDrop(info: any): Promise<void> {
         }
 
         Swal.fire({
-          icon: 'success',
-          title: '移動成功',
-          confirmButtonText: '確認',
-        });
-
+        icon: 'success',
+        title: '移動成功',
+        confirmButtonText: '確認',
+      }).then(() => {
         this.loadCalendarEvents(this.currentGroupId, this.createdBy);
+      });
       },
 
       error: (err) => {
