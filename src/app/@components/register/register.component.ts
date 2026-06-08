@@ -31,6 +31,9 @@ export class RegisterComponent {
     private http: HttpClient,
   ) {}
 
+  errorMessage = '';
+  successMessage = '';
+
   name = '';
   email = '';
   password = '';
@@ -64,15 +67,26 @@ export class RegisterComponent {
     return '';
   }
 
+  get emailError(): string {
+    if (!this.email) {
+      return '';
+    }
+
+    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+
+    if (!gmailRegex.test(this.email)) {
+      return '請輸入正確的 Gmail 信箱';
+    }
+
+    return '';
+  }
+
   register(): void {
 
+    this.errorMessage = '';
+
     if (!this.emailVerified) {
-
-      Swal.fire({
-        icon: 'warning',
-        title: '請先完成Email驗證'
-      });
-
+      this.errorMessage = '請先完成 Email 驗證';
       return;
     }
 
@@ -81,84 +95,58 @@ export class RegisterComponent {
       email: this.email,
       pwd: this.password,
       avatar: this.avatar ?? '',
-      // notify: this.is_notify ?? true
     }).subscribe({
       next: (res) => {
-        console.log('register response:', res);
 
         if (res.code === 200) {
+          this.successMessage = '註冊成功，即將前往登入頁';
+
           Swal.fire({
             icon: 'success',
             title: '註冊成功',
-            text: '請使用新帳號登入',
             timer: 1200,
-            showConfirmButton: false,
+            showConfirmButton: false
           }).then(() => {
             this.router.navigate(['/login']);
           });
+
           return;
         }
 
-        Swal.fire({
-          icon: 'error',
-          title: '註冊失敗',
-          text: res.message ?? '請稍後再試',
-          confirmButtonText: '確認',
-        });
+        this.errorMessage = res.message ?? '註冊失敗';
       },
       error: (err) => {
-      console.error(err);
-
-      if (err.error?.message === 'PASSWORD_ERROR') {
-        Swal.fire({
-          icon: 'warning',
-          title: '密碼格式不正確',
-          text: '請至少輸入 6 個字元',
-          confirmButtonText: '確認',
-        });
-        return;
+        this.errorMessage =
+          err.error?.message ?? '系統發生錯誤，請稍後再試';
       }
-
-      Swal.fire({
-        icon: 'error',
-        title: '註冊失敗',
-        text: err.error?.message ?? '請稍後再試',
-        confirmButtonText: '確認',
-      });
-    }
     });
   }
 
   startRegister(): void {
 
+    this.errorMessage = '';
+    this.successMessage = '';
+
     if (!this.email || !this.name || !this.password || !this.confirmPassword) {
-      Swal.fire({
-        icon: 'warning',
-        title: '資料未填完整',
-        text: '請完整填寫資料'
-      });
+      this.errorMessage = '請完整填寫所有欄位';
+      return;
+    }
+
+    if (this.emailError) {
+      this.errorMessage = this.emailError;
       return;
     }
 
     if (this.passwordError) {
-      Swal.fire({
-        icon: 'warning',
-        title: '密碼格式不正確',
-        text: this.passwordError
-      });
+      this.errorMessage = this.passwordError;
       return;
     }
 
     if (this.confirmPasswordError) {
-      Swal.fire({
-        icon: 'warning',
-        title: '確認密碼錯誤',
-        text: this.confirmPasswordError
-      });
+      this.errorMessage = this.confirmPasswordError;
       return;
     }
 
-    // 開始寄驗證碼
     this.verifyEmailExist(this.email);
   }
 
@@ -231,6 +219,7 @@ export class RegisterComponent {
           next: (res: any) => {
             Swal.close()
             if(res == "驗證成功"){
+              this.emailVerified = true;
               Swal.fire('驗證成功', '', 'success');
               // 驗證成功才真正註冊
               this.register();
