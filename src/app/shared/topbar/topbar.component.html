@@ -9,32 +9,64 @@
     <mat-icon>{{ isMenuOpen ? 'close' : 'menu' }}</mat-icon>
   </button>
 
-  <!-- 導覽選單 -->
-  <nav class="top-nav" [class.open]="isMenuOpen">
-    <button routerLink="/itemList" routerLinkActive="active" (click)="closeMenu()">
-      物品清單
-    </button>
+ <!-- 導覽選單 -->
+<nav class="top-nav" [class.open]="isMenuOpen">
 
-    <button routerLink="/shopping-list" routerLinkActive="active" (click)="closeMenu()">
-      購物清單
-    </button>
+  <button
+    routerLink="/itemList"
+    routerLinkActive="active"
+    (click)="closeMenu()"
+  >
+    <mat-icon>inventory_2</mat-icon>
+    <span>物品清單</span>
+  </button>
 
-    <button routerLink="/calendar" routerLinkActive="active" (click)="closeMenu()">
-      家庭行事曆
-    </button>
+  <button
+    routerLink="/shopping-list"
+    routerLinkActive="active"
+    (click)="closeMenu()"
+  >
+    <mat-icon>shopping_cart</mat-icon>
+    <span>購物清單</span>
+  </button>
 
-    <button routerLink="/expenses" routerLinkActive="active" (click)="closeMenu()">
-      記帳
-    </button>
+  <button
+    routerLink="/calendar"
+    routerLinkActive="active"
+    (click)="closeMenu()"
+  >
+    <mat-icon>calendar_month</mat-icon>
+    <span>家庭行事曆</span>
+  </button>
 
-    <button routerLink="/group" routerLinkActive="active" (click)="closeMenu()">
-      我的群組
-    </button>
+  <button
+    routerLink="/expenses"
+    routerLinkActive="active"
+    (click)="closeMenu()"
+  >
+    <mat-icon>credit_card</mat-icon>
+    <span>記帳</span>
+  </button>
 
-    <button routerLink="/profile" routerLinkActive="active" (click)="closeMenu()">
-      個人資料
-    </button>
-  </nav>
+  <button
+    routerLink="/group"
+    routerLinkActive="active"
+    (click)="closeMenu()"
+  >
+    <mat-icon>groups</mat-icon>
+    <span>我的群組</span>
+  </button>
+
+  <button
+    routerLink="/profile"
+    routerLinkActive="active"
+    (click)="closeMenu()"
+  >
+    <mat-icon>account_circle</mat-icon>
+    <span>個人資料</span>
+  </button>
+
+</nav>
 
   <!-- 右側功能區 -->
   <div class="top-actions">

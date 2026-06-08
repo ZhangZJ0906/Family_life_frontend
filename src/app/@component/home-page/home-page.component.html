@@ -8,7 +8,7 @@
 
   <!-- 左邊：標題 -->
   <div class="welcome-text">
-    <h1>早安，Jack</h1>
+    <h1>早安，{{ currentUserName || '使用者' }}</h1>
     <p>今天有 3 件生活事項需要優先處理</p>
   </div>
 
@@ -41,22 +41,48 @@
 
   </div>
 
-  <!-- 右邊：群組切換 -->
-  <mat-form-field appearance="outline" class="home-group-select">
-    <mat-label>記帳環境</mat-label>
+ <!-- 右邊：群組切換 -->
+<mat-form-field appearance="outline" class="home-group-select">
+  <mat-label>記帳環境</mat-label>
 
-    <mat-select
-      [(ngModel)]="currentGroupId"
-      (selectionChange)="onExpenseGroupChange($event.value)"
+  <mat-select
+    [(ngModel)]="currentGroupId"
+    (selectionChange)="onExpenseGroupChange($event.value)"
+  >
+    <!-- 下拉關閉時，顯示目前選到的頭像 + 名稱 -->
+    <mat-select-trigger>
+      <div class="home-selected-group" *ngIf="getCurrentExpenseGroup() as group">
+        <img
+          class="home-group-avatar"
+          [src]="group.avatar || 'assets/default-avatar.png'"
+          alt="群組頭像"
+        />
+
+        <span>
+          {{ group.groupName }}
+        </span>
+      </div>
+    </mat-select-trigger>
+
+    <!-- 下拉選項 -->
+    <mat-option
+      *ngFor="let group of expenseGroups"
+      [value]="group.groupId"
     >
-      <mat-option
-        *ngFor="let group of expenseGroups"
-        [value]="group.groupId"
-      >
-        👥 {{ group.groupName }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
+      <div class="home-group-option">
+        <img
+          class="home-group-avatar"
+          [src]="group.avatar || 'assets/default-avatar.png'"
+          alt="群組頭像"
+        />
+
+        <span>
+          {{ group.groupName }}
+        </span>
+      </div>
+    </mat-option>
+  </mat-select>
+</mat-form-field>
 
 </div>
 
@@ -65,7 +91,7 @@
       <div class="money-icon red-icon">↘</div>
       <div>
         <p>總額</p>
-        <h2 class="money-red">NT$ - 5,655</h2>
+        <h2 class="money-red">NT $ - 5,655</h2>
       </div>
     </div>
 
@@ -73,7 +99,7 @@
       <div class="money-icon green-icon">↗</div>
       <div>
         <p>收入</p>
-        <h2 class="money-green">NT$ 0</h2>
+        <h2 class="money-green">NT $ 0</h2>
       </div>
     </div>
 
@@ -81,7 +107,7 @@
       <div class="money-icon red-icon">💳</div>
       <div>
         <p>本月支出</p>
-        <h2 class="money-red">NT$ {{ monthlyExpense | number }}</h2>
+        <h2 class="money-red">NT $ {{ monthlyExpense | number }}</h2>
       </div>
     </div>
   </div>
@@ -130,34 +156,30 @@
     </section>
 
     <!-- 右邊：今日優先處理 -->
-    <section class="priority-card">
-      <h3>今日優先處理</h3>
+<section class="priority-card">
+  <h3>今日優先處理</h3>
 
-      <div class="task danger">
-        <div>
-          <h4>牛奶即將到期</h4>
-          <p>剩餘 2 天｜冰箱</p>
+  <div class="priority-list">
+    @if (priorityTasks.length > 0) {
+      @for (task of priorityTasks; track task.id) {
+        <div class="task" [ngClass]="task.levelClass">
+          <div>
+            <h4>{{ task.title }}</h4>
+            <p>{{ task.description }}</p>
+          </div>
+
+          <span>{{ task.levelText }}</span>
         </div>
-        <span>高</span>
-      </div>
-
-      <div class="task warning">
-        <div>
-          <h4>感冒藥庫存不足</h4>
-          <p>剩餘 1 盒｜藥品櫃</p>
-        </div>
-        <span>中</span>
-      </div>
-
+      }
+    } @else {
       <div class="task normal">
         <div>
-          <h4>Netflix 即將續扣</h4>
-          <p>明天扣款｜NT$390</p>
+          <h4>目前沒有優先事項</h4>
+          <p>目前群組沒有需要立即處理的生活提醒</p>
         </div>
+
         <span>低</span>
       </div>
-    </section>
-
-  </section>
-
-</div>
+    }
+  </div>
+</section>
