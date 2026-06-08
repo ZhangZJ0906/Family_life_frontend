@@ -349,7 +349,10 @@ openAvatarDialog(): void {
           icon: 'success',
           title: '已儲存',
           text: '資料已更新',
-          confirmButtonText: '確認'
+          timer: 1000,
+          showConfirmButton: false,
+          toast: true,
+          position: 'top-end'
         });
 
         //共享info
@@ -401,106 +404,4 @@ openAvatarDialog(): void {
     });
   }
 
-  verifyEmailExist(emailVerify: boolean) {
-    if(emailVerify){
-      this.emailNotify = true;
-    }
-    else{
-      Swal.fire({
-        title: '正在送驗證碼到你的gmail...',
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        }
-      });
-      this.http.post(`http://localhost:8080/users/send?email=${this.email}`,{},
-        {
-          responseType: 'text'
-        }
-      ).subscribe({
-
-        next: (res: any) => {
-          Swal.close()
-          Swal.fire('驗證碼已送出', '', 'success');
-          this.showVerifyDialog();
-        },
-        error: (err) => {
-          Swal.close()
-            console.error(err);
-
-          this.emailNotify = false
-          Swal.fire('送出失敗', '', 'error');
-        }
-      });
-
-    }
-  }
-
-  showVerifyDialog(){
-    Swal.fire({
-      title: '輸入驗證碼',
-      input: 'text',
-      inputPlaceholder: '請輸入驗證碼',
-      showCancelButton: true,
-      confirmButtonText: '驗證',
-      cancelButtonText: '取消',
-
-      preConfirm: async (verifyCode) => {
-
-        if (!verifyCode) {
-          Swal.showValidationMessage('請輸入驗證碼');
-          return;
-        }
-
-        return verifyCode;
-      }
-
-    }).then((result) => {
-       // 按取消
-      if (!result.isConfirmed) {
-        this.emailNotify = false;
-        return;
-      }
-
-      if (result.isConfirmed) {
-        Swal.fire({
-          title: '驗證中...',
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          }
-        });
-
-        this.http.post(
-          `http://localhost:8080/users/verify?email=${this.email}&code=${result.value}`,
-          {},
-          {
-            responseType: 'text'
-          }
-        ).subscribe({
-
-          next: (res: any) => {
-            Swal.close()
-            if(res == "驗證成功"){
-              Swal.fire('驗證成功', '', 'success');
-              this.emailNotify = true;
-            }
-            else{
-              Swal.fire('驗證失敗', '', 'error');
-              this.emailNotify = false;
-            }
-          },
-
-          error: () => {
-            this.emailNotify = false;
-            Swal.close()
-            Swal.fire('驗證失敗', '', 'error');
-          }
-
-        });
-
-      }
-
-    });
-  }
 }
