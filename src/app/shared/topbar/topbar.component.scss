@@ -235,73 +235,74 @@
 }
 
 /* 平板版 */
-@media (max-width: 1200px) {
-  .topbar {
-    grid-template-columns: 190px 1fr auto;
-    gap: 14px;
-    padding: 0 18px;
-  }
+@media (max-width: 1024px) {
 
   .logo-img {
-    width: 170px;
-    height: 54px;
+    width: 150px;
+    height: 90px;
   }
 
   .top-nav {
-    gap: 6px;
+    gap: 4px;
   }
 
   .top-nav button {
-    font-size: 14px;
-    padding: 9px 10px;
+    padding: 10px;
+  }
+
+  .top-nav button span {
+    display: none;
   }
 }
 
 /* 小平板：導覽按鈕可橫向滑動 */
-@media (max-width: 900px) {
-  .topbar {
-    grid-template-columns: 170px 1fr auto;
-  }
+// @media (max-width: 900px) {
+//   .topbar {
+//     grid-template-columns: 170px 1fr auto;
+//   }
 
-  .top-nav {
-    justify-content: flex-start;
-    overflow-x: auto;
-    padding-bottom: 4px;
+//   .top-nav {
+//     justify-content: flex-start;
+//     overflow-x: auto;
+//     padding-bottom: 4px;
 
-    scrollbar-width: none;
-  }
+//     scrollbar-width: none;
+//   }
 
-  .top-nav::-webkit-scrollbar {
-    display: none;
-  }
+//   .top-nav::-webkit-scrollbar {
+//     display: none;
+//   }
 
-  .top-nav button {
-    flex: 0 0 auto;
-  }
-}
+//   .top-nav button {
+//     flex: 0 0 auto;
+//   }
+// }
 
 /* 手機版：變成漢堡選單 */
-@media (max-width: 720px) {
+@media (max-width: 768px) {
+
   .topbar {
-    min-height: 70px;
+    min-height: auto;
 
     grid-template-columns: 1fr auto auto;
     grid-template-areas:
       "logo menu actions"
       "nav nav nav";
 
-    padding: 0 14px;
-    border-radius: 14px;
+    padding: 12px 14px;
+
+    row-gap: 12px;
   }
 
   .logo-area {
     grid-area: logo;
-    height: 70px;
+
+    height: 50px;
   }
 
   .logo-img {
-    width: 150px;
-    height: 48px;
+    width: 130px;
+    height: 50px;
   }
 
   .menu-toggle {
@@ -309,78 +310,81 @@
     display: flex;
   }
 
- .top-actions {
-  grid-area: actions;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  flex-direction: row;
-  gap: 8px;
-}
-
-  .icon-btn,
-  .logout-btn,
-  .user-avatar {
-    width: 38px;
-    height: 38px;
+  .top-actions {
+    grid-area: actions;
+    gap: 8px;
   }
 
   .top-nav {
     grid-area: nav;
 
     display: none;
+    flex-direction: column;
+
     width: 100%;
 
-    flex-direction: column;
-    align-items: stretch;
     gap: 8px;
 
-    padding: 0 0 14px;
-    overflow: visible;
+    margin-top: 4px;
   }
 
   .top-nav.open {
     display: flex;
   }
 
- .top-nav button {
-  width: 100%;
-  text-align: left;
+  .top-nav button {
+    width: 100%;
 
-  padding: 13px 14px;
-  border-radius: 12px;
+    justify-content: flex-start;
 
-  background: #f8fafc;
+    background: #f8fafc;
 
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-}
+    padding: 12px 14px;
 
-.top-nav button mat-icon {
-  font-size: 22px;
-  width: 22px;
-  height: 22px;
-}
+    border-radius: 12px;
+  }
 
-  .top-nav button.active {
-    background: #eef3ff;
-    color: #2f80ed;
+  /* 手機版顯示文字 */
+  .top-nav button span {
+    display: inline;
   }
 }
 
 /* 超小手機 */
-@media (max-width: 420px) {
-  .logo-img {
-    width: 132px;
+@media (max-width: 480px) {
+
+  .topbar {
+    padding: 10px 12px;
   }
 
-  .icon-btn {
+  .logo-area {
+    height: 42px;
+  }
+
+  .logo-img {
+    width: 110px;
+    height: 42px;
+  }
+
+  .user-avatar {
     display: none;
   }
 
-  .topbar {
-    grid-template-columns: 1fr auto auto;
+  .icon-btn,
+  .logout-btn,
+  .menu-toggle {
+    width: 36px;
+    height: 36px;
+  }
+
+  .top-nav button {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+
+  .top-nav button mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
   }
 }

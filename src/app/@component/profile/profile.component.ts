@@ -37,7 +37,7 @@ export class ProfileComponent implements CanComponentDeactivate {
   groups: any[] = [];
 
   //到期通知
-  endDateNotify = true;
+  endDateNotify = false;
 
   //email通知
   emailNotify = false;
