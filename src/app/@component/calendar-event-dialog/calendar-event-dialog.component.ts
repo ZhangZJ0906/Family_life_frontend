@@ -47,7 +47,7 @@ export class CalendarEventDialogComponent {
     eventTime: null as Date | null,
     endDate: null as Date | null,
     endTime: null as Date | null,
-    notifyBefore: 0,
+    notifyBefore: 60,
 
     // 指派成員清單
   // 群組活動可以一次選多個成員
@@ -153,7 +153,7 @@ export class CalendarEventDialogComponent {
       this.form.eventTime = new Date(e.startStr);
       this.form.endDate = e.endStr ? new Date(e.endStr) : null;
       this.form.endTime = e.endStr ? new Date(e.endStr) : null;
-      this.form.notifyBefore = e.extendedProps?.notifyBefore || 0;
+      this.form.notifyBefore = e.extendedProps?.notifyBefore || 60;
 
      // 修改時帶入原本指派成員
       // 因為 mat-select multiple 綁定的是陣列，所以就算只有一個人也要包成陣列
