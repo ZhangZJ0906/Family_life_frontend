@@ -39,6 +39,7 @@ export class CalendarEventDialogComponent {
   // 記錄 Dialog 剛開啟時的原始資料
   // 用來判斷使用者有沒有真的修改內容
   originalFormJson = '';
+  SELECT_ALL_VALUE = -999;
 
   form = {
     title: '',
@@ -273,15 +274,18 @@ if (data.assignedUserIds && data.assignedUserIds.length > 0) {
       return;
     }
 
-    this.dialogRef.close({
-      title: this.form.title,
-      description: this.form.description,
-      eventTime: startDateTime,
-      endTime: endDateTime,
-      notifyBefore: this.form.notifyBefore,
-      // 回傳多位指派成員給父層
-    assignedUserIds: this.form.assignedUserIds,
-        });
+    const assignedUserIds = this.form.assignedUserIds.filter(
+  (id) => id !== this.SELECT_ALL_VALUE
+);
+
+this.dialogRef.close({
+  title: this.form.title,
+  description: this.form.description,
+  eventTime: startDateTime,
+  endTime: endDateTime,
+  notifyBefore: this.form.notifyBefore,
+  assignedUserIds: assignedUserIds,
+});
   }
 
   combineDateAndTime(date: Date, time: Date): string {
@@ -300,4 +304,42 @@ if (data.assignedUserIds && data.assignedUserIds.length > 0) {
   cancel() {
     this.dialogRef.close();
   }
+
+  // 取得所有成員 ID
+getAllMemberIds(): number[] {
+  return this.members
+    .map((member) => this.getMemberId(member))
+    .filter((id) => !isNaN(id));
+}
+
+// 判斷是否已經全選
+isAllMembersSelected(): boolean {
+  const allMemberIds = this.getAllMemberIds();
+
+  if (allMemberIds.length === 0) {
+    return false;
+  }
+
+  return allMemberIds.every((id) =>
+    this.form.assignedUserIds.includes(id)
+  );
+}
+
+// 點擊全選
+toggleSelectAllMembers(event: MouseEvent): void {
+  event.stopPropagation();
+
+  const allMemberIds = this.getAllMemberIds();
+
+  if (this.isAllMembersSelected()) {
+    this.form.assignedUserIds = [];
+  } else {
+    this.form.assignedUserIds = allMemberIds;
+  }
+
+  // 避免 -999 被放進 assignedUserIds
+  this.form.assignedUserIds = this.form.assignedUserIds.filter(
+    (id) => id !== this.SELECT_ALL_VALUE
+  );
+}
 }
