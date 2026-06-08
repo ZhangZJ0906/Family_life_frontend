@@ -1,10 +1,21 @@
 @if (!isForgotPwd) {
-  <section class="auth-page">
-    <div class="brand-section">
-      <img class="auth-hero-img" src="images/auth-hero.png" alt="家庭生活到期管家介紹圖" />
+  <section class="auth-page container-fluid">
+  <div class="row auth-row justify-content-center align-items-center">
+
+    <!-- 左側圖片區 -->
+    <div class="col-12 col-md-6 col-lg-5 brand-col">
+      <div class="brand-section">
+        <img
+          class="auth-hero-img"
+          src="images/auth-hero.png"
+          alt="家庭生活到期管家介紹圖"
+        />
+      </div>
     </div>
 
-    <form class="auth-card login-card" (ngSubmit)="signIn()">
+    <!-- 右側表單 -->
+    <div class="col-12 col-md-6 col-lg-5 form-col">
+      <form class="auth-card login-card" (ngSubmit)="signIn()">
       <div class="form-icon login-icon"><mat-icon>login</mat-icon></div>
       <h1>登入</h1>
       <p class="subtitle">歡迎回來！請輸入您的帳號密碼</p>
@@ -42,13 +53,21 @@
         還沒有帳號？ <a class="register-link" [routerLink]="['/register']">立即註冊</a>
       </p>
     </form>
-  </section>
+    </div>
+  </div>
+</section>
 
 } @else if (isForgotPwd && !updatePwd) {
-  <section class="auth-page">
-    <div class="brand-section">
-      <img class="auth-hero-img" src="images/auth-hero.png" alt="家庭生活到期管家介紹圖" />
-    </div>
+  <section class="auth-page container-fluid">
+    <div class="row auth-row justify-content-center align-items-center">
+
+      <!-- 左側圖片區 -->
+      <div class="col-12 col-md-6 col-lg-5 brand-col">
+        <div class="brand-section">
+          <img class="auth-hero-img" src="images/auth-hero.png" alt="家庭生活到期管家介紹圖" />
+        </div>
+      </div>
+
 
     <form class="auth-card login-card" (ngSubmit)="checkEmailFromBackend()">
       <div class="form-icon login-icon"><mat-icon>mail</mat-icon></div>
@@ -66,13 +85,19 @@
       <button type="submit" class="login-btn">下一步</button>
       <button type="button" class="login-btn mt-5" (click)="getBackToLogin()">返回登入</button>
     </form>
+    </div>
   </section>
 
 } @else if (isForgotPwd && updatePwd) {
-  <section class="auth-page">
-    <div class="brand-section">
-      <img class="auth-hero-img" src="images/auth-hero.png" alt="家庭生活到期管家介紹圖" />
-    </div>
+  <section class="auth-page container-fluid">
+    <div class="row auth-row justify-content-center align-items-center">
+
+      <!-- 左側圖片區 -->
+      <div class="col-12 col-md-6 col-lg-5 brand-col">
+        <div class="brand-section">
+          <img class="auth-hero-img" src="images/auth-hero.png" alt="家庭生活到期管家介紹圖" />
+        </div>
+      </div>
 
     <form class="auth-card login-card" (ngSubmit)="updatePassword()">
       <div class="form-icon login-icon"><mat-icon>lock_reset</mat-icon></div>
@@ -90,17 +115,21 @@
       <button type="submit" class="login-btn">確認修改</button>
       <button type="button" class="login-btn mt-5" (click)="getBackToLogin()">取消並返回</button>
     </form>
+    </div>
   </section>
 } @else {
-  <section class="auth-page">
-    <!-- 左側圖片區 -->
-    <div class="brand-section">
-      <img
-        class="auth-hero-img"
-        src="images/auth-hero.png"
-        alt="家庭生活到期管家介紹圖"
-      />
-    </div>
+  <section class="auth-page container-fluid">
+    <div class="row auth-row justify-content-center align-items-center">
+      <!-- 左側圖片區 -->
+      <div class="col-12 col-md-6 col-lg-5 brand-col">
+        <div class="brand-section">
+          <img
+            class="auth-hero-img"
+            src="images/auth-hero.png"
+            alt="家庭生活到期管家介紹圖"
+          />
+        </div>
+      </div>
 
     <!-- 右側登入表單 -->
     <form class="auth-card login-card" (ngSubmit)="signIn()">
@@ -161,5 +190,6 @@
         <a class="register-link" [routerLink]="['/register']">立即註冊</a>
       </p>
     </form>
+    </div>
   </section>
 }

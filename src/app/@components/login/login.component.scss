@@ -1,12 +1,5 @@
 .auth-page {
   min-height: 100vh;
-
-  display: grid;
-  grid-template-columns: 560px 500px;
-  justify-content: center;
-  align-items: center;
-  gap: 90px;
-
   padding: 40px 64px;
   box-sizing: border-box;
 
@@ -16,24 +9,29 @@
     #f7fafc;
 
   color: #0f172a;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
-/* 左側圖片區：高度跟右邊登入卡片一致 */
-.brand-section {
-  width: 560px;
-  height: 640px;
+.auth-row {
+  min-height: calc(100vh - 80px);
+  gap: 64px;
+}
 
+/* 左側圖片區 */
+.brand-section {
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 /* 左側整張圖片：固定高度，讓它跟右邊卡片對齊 */
+/* 左側圖片 */
 .auth-hero-img {
   width: 100%;
   max-width: 540px;
-  height: 640px;
+  height: auto;
+  max-height: 640px;
 
   display: block;
   object-fit: contain;
@@ -43,12 +41,10 @@
 }
 
 /* 右側登入卡片：高度跟左邊圖片一致 */
+/* 右側表單卡片 */
 .auth-card {
-  align-self: center;
-
-  width: 500px;
+  width: 100%;
   max-width: 500px;
-  height: 640px;
   min-height: 640px;
 
   border-radius: 34px;
@@ -58,11 +54,11 @@
   padding: 42px 46px 34px;
   box-sizing: border-box;
 
-  margin-right: 0;
-
   display: flex;
   flex-direction: column;
   justify-content: center;
+
+  margin: 0 auto;
 }
 
 /* 登入 icon */
@@ -218,69 +214,191 @@
   }
 }
 
-/* 1280 以下縮小 */
-@media (max-width: 1280px) {
+//平板
+@media (max-width: 991px) {
   .auth-page {
-    grid-template-columns: 500px 470px;
-    justify-content: center;
-    gap: 56px;
-    padding: 36px 48px;
+    padding: 32px 28px;
   }
 
-  .brand-section {
-    width: 500px;
+  .auth-row {
+    gap: 28px;
   }
 
   .auth-hero-img {
-    max-width: 500px;
+    max-width: 420px;
+    max-height: 560px;
   }
 
   .auth-card {
-    width: 470px;
-    max-width: 470px;
+    max-width: 460px;
+    min-height: 580px;
+    padding: 36px 34px 30px;
+  }
+
+  .auth-card h1 {
+    font-size: 32px;
+  }
+
+  .subtitle {
+    font-size: 15px;
   }
 }
 
-/* 小螢幕只顯示登入 */
-@media (max-width: 1280px) {
+//手機
+@media (max-width: 767px) {
   .auth-page {
-    grid-template-columns: 500px 470px;
+    min-height: 100vh;
+    padding: 24px 18px;
+
+    display: flex;
+    align-items: center;
     justify-content: center;
-    gap: 56px;
-    padding: 36px 48px;
   }
 
-  .brand-section {
-    width: 500px;
-    height: 620px;
+  .auth-row {
+    width: 100%;
+    min-height: calc(100vh - 48px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 20px;
   }
 
-  .auth-hero-img {
-    max-width: 500px;
-    height: 620px;
+  .brand-col {
+    display: none;
+  }
+
+  .form-col {
+    width: 100%;
   }
 
   .auth-card {
-    width: 470px;
-    max-width: 470px;
-    height: 620px;
-    min-height: 620px;
+    width: 100%;
+    max-width: 100%;
+    min-height: auto;
+
+    border-radius: 24px;
+    padding: 32px 24px 28px;
+  }
+
+  .form-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 14px;
+  }
+
+  .form-icon mat-icon {
+    font-size: 30px;
+    width: 30px;
+    height: 30px;
+  }
+
+  .auth-card h1 {
+    font-size: 30px;
+  }
+
+  .subtitle {
+    margin: 8px 0 22px;
+    font-size: 14px;
+  }
+
+  .input-box {
+    height: 54px;
+    padding: 0 14px;
+  }
+
+  .input-box input {
+    font-size: 15px;
+  }
+
+  .option-row {
+    font-size: 14px;
+    margin-bottom: 22px;
+  }
+
+  .login-btn {
+    height: 56px;
+    font-size: 20px;
   }
 }
+//超小手機
+  @media (max-width: 767px) {
+  .auth-page {
+    min-height: 100vh;
+    padding: 24px 18px;
 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-.login-panel {
-  width: 320px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
+  .auth-row {
+    width: 100%;
+    min-height: calc(100vh - 48px);
 
-.full-width {
-  width: 100%;
-}
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-.error {
-  color: red;
+    gap: 20px;
+  }
+
+  .brand-col {
+    display: none;
+  }
+
+  .form-col {
+    width: 100%;
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: 100%;
+    min-height: auto;
+
+    border-radius: 24px;
+    padding: 32px 24px 28px;
+  }
+
+  .form-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 14px;
+  }
+
+  .form-icon mat-icon {
+    font-size: 30px;
+    width: 30px;
+    height: 30px;
+  }
+
+  .auth-card h1 {
+    font-size: 30px;
+  }
+
+  .subtitle {
+    margin: 8px 0 22px;
+    font-size: 14px;
+  }
+
+  .input-box {
+    height: 54px;
+    padding: 0 14px;
+  }
+
+  .input-box input {
+    font-size: 15px;
+  }
+
+  .option-row {
+    font-size: 14px;
+    margin-bottom: 22px;
+  }
+
+  .login-btn {
+    height: 56px;
+    font-size: 20px;
+  }
 }
