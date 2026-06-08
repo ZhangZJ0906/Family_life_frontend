@@ -12,6 +12,8 @@ import { AuthService } from '../../@services/auth.service';
 import { map } from 'rxjs';
 
 import { CanComponentDeactivate } from '../../@guard/pending-changes.guard';
+import { EmailVerifyService } from './../../@services/EmailVerifyService';
+
 
 @Component({
   selector: 'app-profile',
@@ -59,7 +61,8 @@ export class ProfileComponent implements CanComponentDeactivate {
   constructor(
     private http: HttpClient,
     private authService: AuthService,
-    private notifySettingService: NotifySettingService //共享userInfo
+    private notifySettingService: NotifySettingService, //共享userInfo
+    private readonly emailVerifyService: EmailVerifyService
   ) {}
 
   user_id = 0;
@@ -161,11 +164,7 @@ export class ProfileComponent implements CanComponentDeactivate {
 
   // 開啟修改資料彈窗
   openEditDialog(): void {
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-
-    // 測試按鈕是否有觸發
-    console.log('修改按鈕被點擊');
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     Swal.fire({
       title: '修改基本資料',
@@ -173,14 +172,30 @@ export class ProfileComponent implements CanComponentDeactivate {
       html: `
         <div class="swal-form">
 
+          <!-- 頭像預覽 + 上傳 -->
+          <div style="text-align:center; margin-bottom:16px;">
+            <img id="avatarPreview"
+                src="${this.avatarUrl || ''}"
+                style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:2px solid #eee;" />
+
+            <input id="avatarInput"
+                  type="file"
+                  accept="image/*"
+                  style="margin-top:10px;" />
+          </div>
+
           <div class="swal-row">
             <label>使用者名稱</label>
-            <input id="editUserName" class="swal2-input" value="${this.userName}">
+            <input id="editUserName"
+                  class="swal2-input"
+                  value="${this.userName}">
           </div>
 
           <div class="swal-row">
             <label>Email</label>
-            <input id="editEmail" class="swal2-input" value="${this.email}">
+            <input id="editEmail"
+                  class="swal2-input"
+                  value="${this.email}">
           </div>
 
         </div>
@@ -190,9 +205,23 @@ export class ProfileComponent implements CanComponentDeactivate {
       confirmButtonText: '修改',
       cancelButtonText: '取消',
 
+      didOpen: () => {
+        // ⭐ 即時預覽頭像
+        const input = document.getElementById('avatarInput') as HTMLInputElement;
+        const preview = document.getElementById('avatarPreview') as HTMLImageElement;
+
+        input?.addEventListener('change', () => {
+          const file = input.files?.[0];
+          if (file) {
+            preview.src = URL.createObjectURL(file);
+          }
+        });
+      },
+
       preConfirm: () => {
         const userName = (document.getElementById('editUserName') as HTMLInputElement).value.trim();
         const email = (document.getElementById('editEmail') as HTMLInputElement).value.trim();
+        const file = (document.getElementById('avatarInput') as HTMLInputElement).files?.[0];
 
         if (!userName) {
           Swal.showValidationMessage('使用者名稱不可為空');
@@ -209,82 +238,40 @@ export class ProfileComponent implements CanComponentDeactivate {
           return false;
         }
 
-        if(email == "familyLifeTest123456@gmail.com"){
-          Swal.showValidationMessage('這是官方email!!用妳妹!!');
+        if (email === "familyLifeTest123456@gmail.com") {
+          Swal.showValidationMessage('這是官方 email!!');
           return false;
         }
 
         return {
           userName,
-          email
+          email,
+          file
         };
       }
-    }).then((result: SweetAlertResult<{ userName: string; email: string }>) => {
+    }).then((result) => {
+      if (!result.isConfirmed || !result.value) return;
 
-      if (!result.isConfirmed || !result.value) {
-        return;
-      }
-
-      // 更新畫面上的資料
+      // 更新資料
       this.userName = result.value.userName;
       this.email = result.value.email;
 
-      //共享
-      this.notifySettingService.setName(this.userName);
+      // ⭐ 如果有新頭像
+      if (result.value.file) {
+        this.file = result.value.file;
+        this.avatarUrl = URL.createObjectURL(this.file);
+      }
 
-      //暫存
+      this.notifySettingService.setName(this.userName);
       this.isDirty = true;
 
       Swal.fire({
         icon: 'success',
         title: '修改成功',
-        confirmButtonText: '確認',
-        showConfirmButton: true
+        timer: 1200,
+        showConfirmButton: false
       });
     });
-  }
-
-// 開啟更換頭像視窗
-openAvatarDialog(): void {
- Swal.fire({
-    title: '更換頭像',
-
-    html: `
-      <div class="avatar-dialog">
-        <input id="avatarInput" type="file" accept="image/*" class="swal2-file">
-      </div>
-    `,
-
-    showCancelButton: true,
-    confirmButtonText: '修改',
-    cancelButtonText: '取消',
-
-    preConfirm: () => {
-      const input = document.getElementById('avatarInput') as HTMLInputElement;
-      const selectedFile = input.files?.[0];
-
-      if (!selectedFile) {
-        Swal.showValidationMessage('請選擇一張圖片');
-        return false;
-      }
-
-      return selectedFile;
-    }
-  }).then((result) => {
-    if (!result.isConfirmed || !result.value) {
-      return;
-    }
-
-    // 1. 暫存使用者選到的檔案
-    this.file = result.value as File;
-
-    // 2. 先在畫面上預覽新頭像
-    this.avatarUrl = URL.createObjectURL(this.file);
-
-    //暫存
-    this.isDirty = true;
-  });
-
   }
 
   saveAll(){

@@ -1,44 +1,54 @@
 <div class="profile-page">
 <app-topbar></app-topbar>
 
+<div class="profile-content">
   <section class="profile-grid">
 
-    <!-- 左上：頭像 -->
-    <div class="profile-card user-card">
-    <!-- 頭像外框：圖片和文字都放在這個圓形框裡 -->
-    <div class="avatar-large">
+    <!-- 左上：個人資訊（合併卡） -->
+    <div class="profile-card profile-user-card">
 
-      <!-- 有選圖片時顯示圖片 -->
-      <img *ngIf="avatarUrl; else textAvatar" [src]="avatarUrl" alt="頭像">
+      <div class="user-card-inner">
 
-      <!-- 沒有圖片時顯示文字 J -->
-      <ng-template #textAvatar>
-        {{ avatarText }}
-      </ng-template>
+        <!-- 左：頭像 -->
+        <div class="avatar-section">
+          <div class="avatar-large">
+            <img *ngIf="avatarUrl; else textAvatar" [src]="avatarUrl" alt="頭像">
 
-    </div>
-      <h3>{{ userName }}</h3>
-      <p>{{ email }}</p>
-      <button type="button" class="edit-avatar-btn" (click)="openAvatarDialog()">更換頭像</button>
-    </div>
+            <ng-template #textAvatar>
+              {{ avatarText }}
+            </ng-template>
+          </div>
 
-    <!-- 中上：基本資料 -->
-    <div class="profile-card info-card">
-      <h3>基本資料</h3>
 
-      <div class="form-row">
-        <label>使用者名稱</label>
-        <p class="profile-text">{{ userName }}</p>
+        </div>
+
+        <!-- 右：基本資料 -->
+        <div class="info-section">
+
+          <h3 class="name">{{ userName }}</h3>
+          <p class="email">{{ email }}</p>
+
+          <!-- <div class="info-block">
+            <div class="info-row">
+              <span class="label">使用者名稱</span>
+              <span class="value">{{ userName }}</span>
+            </div>
+
+            <div class="info-row">
+              <span class="label">Email</span>
+              <span class="value">{{ email }}</span>
+            </div>
+          </div> -->
+          <button type="button"
+                  class="edit-avatar-btn"
+                  (click)="openEditDialog()">
+            更改資料
+          </button>
+
+        </div>
+
       </div>
 
-      <div class="form-row">
-        <label>Email</label>
-        <p class="profile-text">{{ email }}</p>
-      </div>
-
-      <div class="form-actions">
-        <button type="button" class="revise-btn" (click)="openEditDialog()">修改</button>
-      </div>
     </div>
 
     <!-- 右側：群組，往下跨兩列 -->
@@ -74,7 +84,9 @@
 
       <div class="group-detail">
         <div class="invite-row">
-          <p>邀請碼 : {{ group.inviteCode }}</p>
+          <p class="invite-code">
+            邀請碼：{{ group.inviteCode }}
+          </p>
 
           <button
             class="copy-btn"
@@ -120,6 +132,8 @@
     </div>
 
   </section>
+</div>
+
 
   <div class="save-wrapper">
     <button class="save-btn" (click)="saveAll()">
