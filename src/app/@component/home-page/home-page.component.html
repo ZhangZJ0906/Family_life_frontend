@@ -87,14 +87,26 @@
 </div>
   <div class="welcome-bottom">
 
-    <div class="money-item">
-      <div class="money-icon red-icon">💳</div>
-      <div>
-        <p>本月支出</p>
-        <h2 class="money-red">NT $ {{ monthlyExpense | number }}</h2>
-      </div>
+  <!-- 本月支出 -->
+  <div class="money-item">
+    <div class="money-icon red-icon">💳</div>
+    <div>
+      <p>本月支出</p>
+      <h2 class="money-red">NT $ {{ monthlyExpense | number }}</h2>
     </div>
   </div>
+
+  <!-- 到期件數 -->
+  <div class="money-item expired-card">
+    <div class="money-icon expired-icon">⚠️</div>
+    <div>
+      <p>已到期項目</p>
+      <h2 class="expired-count">{{ expiredTotalCount }} 件</h2>
+    </div>
+  </div>
+
+</div>
+
 </section>
 
   <!-- 第二區：左邊統計數量，右邊今日優先處理，各占一半 -->

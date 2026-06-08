@@ -47,6 +47,36 @@
   font-size: 16px;
 }
 
+/* 歡迎卡片下方：本月支出 + 已到期項目 */
+.welcome-bottom {
+  display: grid;
+  grid-template-columns: minmax(420px, 520px) minmax(260px, 360px);
+  gap: 18px;
+  align-items: stretch;
+}
+
+/* 覆蓋原本 width: 30%，避免卡片太窄 */
+.welcome-bottom .money-item {
+  width: 100%;
+}
+
+/* 已到期卡片 */
+.expired-card {
+  background: #fff1f1;
+  border: 1px solid #ffd6d6;
+}
+
+/* 已到期 icon */
+.expired-icon {
+  background: #ffe2e2;
+  color: #dc2626;
+}
+
+/* 已到期數字 */
+.expired-count {
+  color: #dc2626;
+}
+
 /* 首頁記帳控制區：月份切換 + 群組切換 */
 .home-expense-toolbar {
   display: flex;
@@ -230,8 +260,6 @@
   display: flex;
   align-items: center;
   gap: 18px;
-  width: 30%;
-
 }
 
 /* 金額圖示 */
@@ -259,6 +287,11 @@
   margin: 0;
   font-size: 32px;
   font-weight: 800;
+  white-space: nowrap;
+}
+
+.money-item > div:last-child {
+  min-width: 0;
 }
 
 /* 紅色圖示背景 */
@@ -522,4 +555,21 @@
   .money-item h2 {
     font-size: 28px;
   }
+
+    .welcome-bottom {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-bottom .money-item {
+    width: 100%;
+  }
+
+  .money-item h2 {
+  font-size: 24px;
+  white-space: nowrap;
+}
+
+.welcome-bottom {
+  grid-template-columns: 1fr;
+}
 }

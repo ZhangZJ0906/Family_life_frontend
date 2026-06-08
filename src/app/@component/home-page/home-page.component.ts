@@ -535,6 +535,29 @@ export class HomePageComponent implements OnInit {
   get highPriorityCount(): number {
     return this.priorityTasks.filter((task) => task.level === 3).length;
   }
+
+  // 已到期總件數
+get expiredTotalCount(): number {
+  const expiredItems = this.itemsList.filter(
+    (item: any) => item.status === '已到期'
+  ).length;
+
+  const expiredMedicines = this.medicineList.filter(
+    (item: any) => item.status === '已到期'
+  ).length;
+
+  const expiredWarranties = this.warrantyList.filter(
+    (item: any) => item.status === '已到期'
+  ).length;
+
+  const expiredSubscriptions = this.subscriptionList.filter(
+    (item: any) =>
+      item.status === '已逾期扣款' ||
+      item.status === '已到期'
+  ).length;
+
+  return expiredItems + expiredMedicines + expiredWarranties + expiredSubscriptions;
+}
   // 計算剩餘天數文字
   getRemainText(dateStr: string): string {
     if (!dateStr) {
