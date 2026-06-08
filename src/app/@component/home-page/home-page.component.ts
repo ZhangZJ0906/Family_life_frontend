@@ -29,19 +29,15 @@ interface PriorityTask {
   templateUrl: './home-page.component.html',
   styleUrls: ['./home-page.component.scss'],
 })
-
-
 export class HomePageComponent implements OnInit {
-
   basicUrl = '';
   currentUserId!: number;
   currentGroupId: number = 0;
-  expenseGroups: { groupId: number; groupName: string;
-  avatar?: string; }[] = [];
+  expenseGroups: { groupId: number; groupName: string; avatar?: string }[] = [];
   // 登入者名稱，首頁問候語使用
-currentUserName = '';
+  currentUserName = '';
   // 登入者自己的頭像，私人記帳使用
-currentUserAvatar = 'assets/default-avatar.png';
+  currentUserAvatar = 'assets/default-avatar.png';
   // 目前年月
   selectedYear = new Date().getFullYear();
   selectedMonth = new Date().getMonth() + 1;
@@ -52,25 +48,25 @@ currentUserAvatar = 'assets/default-avatar.png';
   subscriptionList: any[] = []; // 定期訂閱
   warrantyList: any[] = [];
   // 物品位置對照表
-locationMap: { [key: number]: string } = {};
+  locationMap: { [key: number]: string } = {};
 
   constructor(private http: HttpClientService) {
-     this.basicUrl = this.http.basicUrl;
+    this.basicUrl = this.http.basicUrl;
 
-  const raw = sessionStorage.getItem('family-life-current-user');
+    const raw = sessionStorage.getItem('family-life-current-user');
 
-  if (raw) {
-    const user = JSON.parse(raw);
+    if (raw) {
+      const user = JSON.parse(raw);
 
-    this.currentUserId = user.user_id;
+      this.currentUserId = user.user_id;
 
-     // 首頁顯示登入者名稱
-    this.currentUserName = user.name || '使用者';
+      // 首頁顯示登入者名稱
+      this.currentUserName = user.name || '使用者';
 
-    // 私人記帳使用自己的頭像
-    this.currentUserAvatar = user.avatar || 'assets/default-avatar.png';
+      // 私人記帳使用自己的頭像
+      this.currentUserAvatar = user.avatar || 'assets/default-avatar.png';
+    }
   }
-}
 
   ngOnInit(): void {
     // 載入群組
@@ -80,71 +76,71 @@ locationMap: { [key: number]: string } = {};
     this.loadAllCategoriesData();
   }
 
-// 取得使用者群組，資料來源改成跟 Profile 一樣
-// 這樣才拿得到 group.avatar
-getExpenseGroups(): void {
-  this.http
-    .getApi(
-      this.basicUrl +
-        `family_life/get_group_list?user_id=${this.currentUserId}`,
-    )
-    .subscribe({
-      next: (res: any) => {
-        // Profile 頁是直接使用 res.groupList
-        // 所以首頁也改用 res.groupList
-        if (!res.groupList) {
+  // 取得使用者群組，資料來源改成跟 Profile 一樣
+  // 這樣才拿得到 group.avatar
+  getExpenseGroups(): void {
+    this.http
+      .getApi(
+        this.basicUrl +
+          `family_life/get_group_list?user_id=${this.currentUserId}`,
+      )
+      .subscribe({
+        next: (res: any) => {
+          // Profile 頁是直接使用 res.groupList
+          // 所以首頁也改用 res.groupList
+          if (!res.groupList) {
+            Swal.fire({
+              icon: 'error',
+              title: '群組載入失敗',
+              text: res.message || '無法取得群組資料',
+            });
+            return;
+          }
+
+          const groups = res.groupList.map((group: any) => ({
+            groupId: Number(group.groupId),
+            groupName: group.groupName,
+
+            // 真正的群組頭像
+            // 如果資料庫沒有頭像，才使用預設圖
+            avatar: group.avatar || 'assets/default-avatar.png',
+          }));
+
+          // 私人記帳固定放第一個
+          // 頭像使用登入者自己的頭像
+          this.expenseGroups = [
+            {
+              groupId: 0,
+              groupName: '私人記帳',
+              avatar: this.currentUserAvatar || 'assets/default-avatar.png',
+            },
+            ...groups,
+          ];
+
+          // 預設私人記帳
+          this.currentGroupId = 0;
+
+          // 群組載入後再查一次私人記帳
+          this.getHomeMonthlyExpense();
+        },
+
+        error: (err) => {
+          console.log(err);
+
           Swal.fire({
             icon: 'error',
             title: '群組載入失敗',
-            text: res.message || '無法取得群組資料',
+            text: '請確認後端是否啟動',
           });
-          return;
-        }
-
-        const groups = res.groupList.map((group: any) => ({
-          groupId: Number(group.groupId),
-          groupName: group.groupName,
-
-          // 真正的群組頭像
-          // 如果資料庫沒有頭像，才使用預設圖
-          avatar: group.avatar || 'assets/default-avatar.png',
-        }));
-
-        // 私人記帳固定放第一個
-        // 頭像使用登入者自己的頭像
-        this.expenseGroups = [
-          {
-            groupId: 0,
-            groupName: '私人記帳',
-            avatar: this.currentUserAvatar || 'assets/default-avatar.png',
-          },
-          ...groups,
-        ];
-
-        // 預設私人記帳
-        this.currentGroupId = 0;
-
-        // 群組載入後再查一次私人記帳
-        this.getHomeMonthlyExpense();
-      },
-
-      error: (err) => {
-        console.log(err);
-
-        Swal.fire({
-          icon: 'error',
-          title: '群組載入失敗',
-          text: '請確認後端是否啟動',
-        });
-      },
-    });
-}
-// 取得目前選到的群組資料
-getCurrentExpenseGroup() {
-  return this.expenseGroups.find(
-    (group) => Number(group.groupId) === Number(this.currentGroupId),
-  );
-}
+        },
+      });
+  }
+  // 取得目前選到的群組資料
+  getCurrentExpenseGroup() {
+    return this.expenseGroups.find(
+      (group) => Number(group.groupId) === Number(this.currentGroupId),
+    );
+  }
   // 切換群組
   onExpenseGroupChange(groupId: number): void {
     this.currentGroupId = groupId;
@@ -355,235 +351,236 @@ getCurrentExpenseGroup() {
   }
 
   get expiringFoodCount(): number {
-  return this.itemsList.filter((item: any) =>
-    item.status === '即將到期'
-  ).length;
-}
+    return this.itemsList.filter((item: any) => item.status === '即將到期')
+      .length;
+  }
 
-get medicineReminderCount(): number {
-  return this.medicineList.filter((item: any) =>
-    item.status === '即將到期' ||
-    item.status === '庫存不足' ||
-    item.status === '已到期'
-  ).length;
-}
+  get medicineReminderCount(): number {
+    return this.medicineList.filter(
+      (item: any) =>
+        item.status === '即將到期' ||
+        item.status === '庫存不足' ||
+        item.status === '已到期',
+    ).length;
+  }
 
-get warrantyExpiringCount(): number {
-  return this.warrantyList.filter((item: any) =>
-    item.status === '即將到期' ||
-    item.status === '即將到期'
-  ).length;
-}
+  get warrantyExpiringCount(): number {
+    return this.warrantyList.filter(
+      (item: any) => item.status === '即將到期' || item.status === '即將到期',
+    ).length;
+  }
 
-get subscriptionReminderCount(): number {
-  return this.subscriptionList.filter((item: any) =>
-    item.status === '即將扣款' ||
-    item.status === '試用即將結束' ||
-    item.status === '已逾期扣款'
-  ).length;
-}
+  get subscriptionReminderCount(): number {
+    return this.subscriptionList.filter(
+      (item: any) =>
+        item.status === '即將扣款' ||
+        item.status === '試用即將結束' ||
+        item.status === '已逾期扣款',
+    ).length;
+  }
 
-// 今日優先處理清單
-// 從物品、藥品、保固、訂閱四種資料整理出最需要處理的前 3 筆
-get priorityTasks(): PriorityTask[] {
-  const tasks: PriorityTask[] = [];
+  // 今日優先處理清單
+  // 從物品、藥品、保固、訂閱四種資料整理出最需要處理的前 3 筆
+  get priorityTasks(): PriorityTask[] {
+    const tasks: PriorityTask[] = [];
 
-  // 1. 物品 / 食材：即將到期、已到期、庫存不足
-  this.itemsList.forEach((item: any) => {
-    const status = item.status || '';
-    const name = item.name || '未命名物品';
+    // 1. 物品 / 食材：即將到期、已到期、庫存不足
+    this.itemsList.forEach((item: any) => {
+      const status = item.status || '';
+      const name = item.name || '未命名物品';
 
-    if (status === '已到期') {
-      tasks.push({
-        id: `item-expired-${item.id}`,
-        title: `${name} 已到期`,
-        description: `${this.getRemainText(item.expireDate)}｜${this.getItemLocationText(item)}`,
-        level: 3,
-        levelText: '高',
-        levelClass: 'danger',
-      });
-    }
+      if (status === '已到期') {
+        tasks.push({
+          id: `item-expired-${item.id}`,
+          title: `${name} 已到期`,
+          description: `${this.getRemainText(item.expireDate)}｜${this.getItemLocationText(item)}`,
+          level: 3,
+          levelText: '高',
+          levelClass: 'danger',
+        });
+      }
 
-    if (status === '即將到期') {
-      tasks.push({
-        id: `item-soon-${item.id}`,
-        title: `${name} 即將到期`,
-        description: `${this.getRemainText(item.expireDate)}｜${this.getItemLocationText(item)}`,
-        level: 3,
-        levelText: '高',
-        levelClass: 'danger',
-      });
-    }
+      if (status === '即將到期') {
+        tasks.push({
+          id: `item-soon-${item.id}`,
+          title: `${name} 即將到期`,
+          description: `${this.getRemainText(item.expireDate)}｜${this.getItemLocationText(item)}`,
+          level: 3,
+          levelText: '高',
+          levelClass: 'danger',
+        });
+      }
 
-    if (status === '庫存不足') {
-      tasks.push({
-        id: `item-low-${item.id}`,
-        title: `${name} 庫存不足`,
-        description: `目前數量 ${item.quantity ?? 0} ${item.unit || ''}`,
-        level: 2,
-        levelText: '中',
-        levelClass: 'warning',
-      });
-    }
-  });
-
-  // 2. 藥品：到期、即將到期、庫存不足
-  this.medicineList.forEach((item: any) => {
-    const status = item.status || '';
-    const name = item.name || item.medicineName || '未命名藥品';
-
-    if (status === '已到期') {
-      tasks.push({
-        id: `medicine-expired-${item.id}`,
-        title: `${name} 已到期`,
-        description: `${this.getRemainText(item.expireDate)}｜藥品`,
-        level: 3,
-        levelText: '高',
-        levelClass: 'danger',
-      });
-    }
-
-    if (status === '即將到期') {
-      tasks.push({
-        id: `medicine-soon-${item.id}`,
-        title: `${name} 即將到期`,
-        description: `${this.getRemainText(item.expireDate)}｜藥品`,
-        level: 2,
-        levelText: '中',
-        levelClass: 'warning',
-      });
-    }
-
-    if (status === '庫存不足') {
-      tasks.push({
-        id: `medicine-low-${item.id}`,
-        title: `${name} 庫存不足`,
-        description: `目前數量 ${item.quantity ?? 0}`,
-        level: 2,
-        levelText: '中',
-        levelClass: 'warning',
-      });
-    }
-  });
-
-  // 3. 保固：即將到期、已到期
-this.warrantyList.forEach((item: any) => {
-  const status = item.status || '';
-  const name = item.productName || item.name || '未命名保固';
-
-  if (status === '已到期') {
-    tasks.push({
-      id: `warranty-expired-${item.id}`,
-      title: `${name} 保固已到期`,
-      description: `${this.getRemainText(item.warrantyEndDate)}｜保固`,
-      level: 2,
-      levelText: '中',
-      levelClass: 'warning',
+      if (status === '庫存不足') {
+        tasks.push({
+          id: `item-low-${item.id}`,
+          title: `${name} 庫存不足`,
+          description: `目前數量 ${item.quantity ?? 0} ${item.unit || ''}`,
+          level: 2,
+          levelText: '中',
+          levelClass: 'warning',
+        });
+      }
     });
-  }
 
-  if (status === '即將到期') {
-    tasks.push({
-      id: `warranty-soon-${item.id}`,
-      title: `${name} 保固即將到期`,
-      description: `${this.getRemainText(item.warrantyEndDate)}｜保固`,
-      level: 2,
-      levelText: '中',
-      levelClass: 'warning',
+    // 2. 藥品：到期、即將到期、庫存不足
+    this.medicineList.forEach((item: any) => {
+      const status = item.status || '';
+      const name = item.name || item.medicineName || '未命名藥品';
+
+      if (status === '已到期') {
+        tasks.push({
+          id: `medicine-expired-${item.id}`,
+          title: `${name} 已到期`,
+          description: `${this.getRemainText(item.expireDate)}｜藥品`,
+          level: 3,
+          levelText: '高',
+          levelClass: 'danger',
+        });
+      }
+
+      if (status === '即將到期') {
+        tasks.push({
+          id: `medicine-soon-${item.id}`,
+          title: `${name} 即將到期`,
+          description: `${this.getRemainText(item.expireDate)}｜藥品`,
+          level: 2,
+          levelText: '中',
+          levelClass: 'warning',
+        });
+      }
+
+      if (status === '庫存不足') {
+        tasks.push({
+          id: `medicine-low-${item.id}`,
+          title: `${name} 庫存不足`,
+          description: `目前數量 ${item.quantity ?? 0}`,
+          level: 2,
+          levelText: '中',
+          levelClass: 'warning',
+        });
+      }
     });
+
+    // 3. 保固：即將到期、已到期
+    this.warrantyList.forEach((item: any) => {
+      const status = item.status || '';
+      const name = item.productName || item.name || '未命名保固';
+
+      if (status === '已到期') {
+        tasks.push({
+          id: `warranty-expired-${item.id}`,
+          title: `${name} 保固已到期`,
+          description: `${this.getRemainText(item.warrantyEndDate)}｜保固`,
+          level: 2,
+          levelText: '中',
+          levelClass: 'warning',
+        });
+      }
+
+      if (status === '即將到期') {
+        tasks.push({
+          id: `warranty-soon-${item.id}`,
+          title: `${name} 保固即將到期`,
+          description: `${this.getRemainText(item.warrantyEndDate)}｜保固`,
+          level: 2,
+          levelText: '中',
+          levelClass: 'warning',
+        });
+      }
+    });
+
+    // 4. 訂閱：即將扣款、試用即將結束、逾期扣款
+    this.subscriptionList.forEach((item: any) => {
+      const status = item.status || '';
+      const name = item.name || '未命名訂閱';
+
+      if (status === '已逾期扣款') {
+        tasks.push({
+          id: `subscription-overdue-${item.id}`,
+          title: `${name} 已逾期扣款`,
+          description: `${this.getRemainText(item.nextBillingDate)}｜NT$${item.price ?? 0}`,
+          level: 3,
+          levelText: '高',
+          levelClass: 'danger',
+        });
+      }
+
+      if (status === '即將扣款') {
+        tasks.push({
+          id: `subscription-soon-${item.id}`,
+          title: `${name} 即將續扣`,
+          description: `${this.getRemainText(item.nextBillingDate)}｜NT$${item.price ?? 0}`,
+          level: 1,
+          levelText: '低',
+          levelClass: 'normal',
+        });
+      }
+
+      if (status === '試用即將結束') {
+        tasks.push({
+          id: `subscription-trial-${item.id}`,
+          title: `${name} 試用即將結束`,
+          description: `${this.getRemainText(item.trialEndDate)}｜訂閱`,
+          level: 2,
+          levelText: '中',
+          levelClass: 'warning',
+        });
+      }
+    });
+
+    // 不要只取前三筆，全部顯示，讓右側清單可以滾動
+    return tasks.sort((a, b) => b.level - a.level);
   }
-});
-
-  // 4. 訂閱：即將扣款、試用即將結束、逾期扣款
-  this.subscriptionList.forEach((item: any) => {
-    const status = item.status || '';
-    const name = item.name || '未命名訂閱';
-
-    if (status === '已逾期扣款') {
-      tasks.push({
-        id: `subscription-overdue-${item.id}`,
-        title: `${name} 已逾期扣款`,
-        description: `${this.getRemainText(item.nextBillingDate)}｜NT$${item.price ?? 0}`,
-        level: 3,
-        levelText: '高',
-        levelClass: 'danger',
-      });
+  get highPriorityCount(): number {
+    return this.priorityTasks.filter((task) => task.level === 3).length;
+  }
+  // 計算剩餘天數文字
+  getRemainText(dateStr: string): string {
+    if (!dateStr) {
+      return '未設定日期';
     }
 
-    if (status === '即將扣款') {
-      tasks.push({
-        id: `subscription-soon-${item.id}`,
-        title: `${name} 即將續扣`,
-        description: `${this.getRemainText(item.nextBillingDate)}｜NT$${item.price ?? 0}`,
-        level: 1,
-        levelText: '低',
-        levelClass: 'normal',
-      });
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const target = new Date(dateStr);
+    target.setHours(0, 0, 0, 0);
+
+    const diffDays = Math.ceil(
+      (target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+    );
+
+    if (diffDays < 0) {
+      return `已過期 ${Math.abs(diffDays)} 天`;
     }
 
-    if (status === '試用即將結束') {
-      tasks.push({
-        id: `subscription-trial-${item.id}`,
-        title: `${name} 試用即將結束`,
-        description: `${this.getRemainText(item.trialEndDate)}｜訂閱`,
-        level: 2,
-        levelText: '中',
-        levelClass: 'warning',
-      });
+    if (diffDays === 0) {
+      return '今天到期';
     }
-  });
 
-
-  // 不要只取前三筆，全部顯示，讓右側清單可以滾動
-return tasks.sort((a, b) => b.level - a.level);
-}
-
-// 計算剩餘天數文字
-getRemainText(dateStr: string): string {
-  if (!dateStr) {
-    return '未設定日期';
+    return `剩餘 ${diffDays} 天`;
   }
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // 取得物品位置文字
+  getItemLocationText(item: any): string {
+    // 後端可能回傳 locationId 或 location_id
+    const locationId = item.locationId ?? item.location_id;
 
-  const target = new Date(dateStr);
-  target.setHours(0, 0, 0, 0);
+    // 如果 item 本身有位置名稱，優先使用
+    if (item.locationName) {
+      return item.locationName;
+    }
 
-  const diffDays = Math.ceil(
-    (target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
-  );
+    if (item.location) {
+      return item.location;
+    }
 
-  if (diffDays < 0) {
-    return `已過期 ${Math.abs(diffDays)} 天`;
+    // 如果 item 只有 locationId，就去 locationMap 找名稱
+    if (locationId !== undefined && locationId !== null) {
+      return this.locationMap[Number(locationId)] || '未設定位置';
+    }
+
+    return '未設定位置';
   }
-
-  if (diffDays === 0) {
-    return '今天到期';
-  }
-
-  return `剩餘 ${diffDays} 天`;
-}
-
-// 取得物品位置文字
-getItemLocationText(item: any): string {
-  // 後端可能回傳 locationId 或 location_id
-  const locationId = item.locationId ?? item.location_id;
-
-  // 如果 item 本身有位置名稱，優先使用
-  if (item.locationName) {
-    return item.locationName;
-  }
-
-  if (item.location) {
-    return item.location;
-  }
-
-  // 如果 item 只有 locationId，就去 locationMap 找名稱
-  if (locationId !== undefined && locationId !== null) {
-    return this.locationMap[Number(locationId)] || '未設定位置';
-  }
-
-  return '未設定位置';
-}
 }

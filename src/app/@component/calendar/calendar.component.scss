@@ -367,7 +367,7 @@
 
 /* 活動 hover */
 :host ::ng-deep .fc .fc-event:hover {
-  background: #dbeafe !important;
+  background: #101010 !important;
 }
 
 /* 一般活動圓點 */
@@ -498,7 +498,7 @@
 /* 活動資訊卡外層 */
 .event-tooltip {
   position: fixed;
-  z-index: 99999;
+  z-index: 1200;
 
   width: 300px;
   max-width: calc(100vw - 32px);
