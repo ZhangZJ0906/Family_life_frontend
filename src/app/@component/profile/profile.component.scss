@@ -99,9 +99,58 @@
 .group-card {
   grid-column: 3;
   grid-row: 1 / span 2;
-  height: 100%;
+
+  height: 720px;
+
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+/* 群組標題固定，不跟著滾動 */
+.group-header {
+  flex-shrink: 0;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 20px;
+}
+
+.group-header h3 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+/* 群組列表：超過高度用滾輪 */
+.group-list {
+  flex: 1;
+  min-height: 0;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding-right: 8px;
+}
+
+/* 滾輪樣式 */
+.group-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.group-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.group-list::-webkit-scrollbar-thumb {
+  background: #cfd6e0;
+  border-radius: 999px;
+}
+
+.group-list::-webkit-scrollbar-thumb:hover {
+  background: #aeb8c6;
 }
 //loading
 .table-skeleton {
@@ -485,32 +534,8 @@
   background: #1f6fd6;
 }
 
-/* 群組卡片 */
-.group-card {
 
-  /* 卡片固定高度 */
-  height: 720px;
 
-  /* 讓內部可以上下排列 */
-  display: flex;
-  flex-direction: column;
-}
-
-/* 群組列表區 */
-.group-list {
-
-  /* 自動填滿剩餘高度 */
-  flex: 1;
-
-  /* 群組內容最大高度 */
-  max-height: 620px;
-
-  /* 超過高度時顯示垂直滾輪 */
-  overflow-y: auto;
-
-  /* 避免滾輪貼齊內容 */
-  padding-right: 8px;
-}
 
 /* 滾輪寬度 */
 .group-list::-webkit-scrollbar {
