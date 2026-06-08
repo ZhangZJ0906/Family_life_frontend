@@ -4,10 +4,35 @@
   <div class="container-fluid pt-2">
     <div class="row g-3">
       <!-- 圖片 -->
-      <div class="file-upload-section" style="margin-bottom: 15px;">
-        <label style="display: block; margin-bottom: 5px; font-weight: bold;">上傳物品圖片</label>
-        <input type="file" accept="image/*" (change)="onFileSelected($event)" class="form-control" />
-      </div>
+<div class="col-12 mb-2">
+  <label for="image" class="form-label fw-bold text-secondary mb-2" style="font-size: 14px;">
+    物品圖片
+  </label>
+
+  <div class="d-flex flex-column flex-sm-row gap-2 align-items-sm-center">
+
+    <div class="file-upload-wrapper flex-grow-1"
+      style="border: 1px solid #ced4da; border-radius: 8px; display: flex; align-items: center; overflow: hidden; height: 50px; background-color: #fff; transition: border-color 0.15s ease-in-out;">
+
+      <label for="image" class="btn btn-light select-file-btn d-flex align-items-center justify-content-center px-4"
+        style="border-radius: 0; height: 100%; margin-bottom: 0; border-right: 1px solid #ced4da; cursor: pointer; background-color: #f8f9fa; font-size: 14px;">
+        選擇檔案
+      </label>
+
+      <span class="file-name text-muted ms-3 flex-grow-1 text-truncate pe-2" style="font-size: 14px;">
+        {{ selectedFile ? selectedFile.name : '未選擇任何檔案' }}
+      </span>
+
+      <input type="file" id="image" class="d-none" (change)="onFileSelected($event)" accept="image/*">
+    </div>
+
+    <button type="button" class="btn btn-outline-primary px-3 d-flex align-items-center justify-content-center"
+      style="height: 50px; border-radius: 8px; font-size: 14px; white-space: nowrap;" (click)="openDefaultImageModal()">
+      <i class="bi bi-image me-1"></i> 選擇預設圖片
+    </button>
+
+  </div>
+</div>
       <!-- 物品名稱 -->
       <div class="col-12">
         <mat-form-field appearance="outline" class="w-100">

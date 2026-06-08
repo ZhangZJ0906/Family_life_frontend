@@ -49,7 +49,8 @@ export class ItemListAddDialogComponent implements OnInit {
   minDate: string = '';
   today = new Date();
   selectedFile: File | null = null; //圖片
-
+  basicUrl!: string;
+  group: any[] = [];
   item: {
     created_by_id: number;
     groupId: number;
@@ -105,9 +106,12 @@ export class ItemListAddDialogComponent implements OnInit {
     usageMethod: '',
     source: '',
   };
-
-  basicUrl!: string;
-  group: any[] = [];
+  defaultImages = [
+    { name: '普拿疼', url: 'assets/panodol.png' },
+    { name: '牙膏', url: 'assets/toothpaste.png' },
+    { name: '預設藥水', url: 'assets/default-potion.png' },
+    
+  ];
 
   constructor(
     public dialogRef: MatDialogRef<ItemListAddDialogComponent>,
@@ -196,39 +200,105 @@ export class ItemListAddDialogComponent implements OnInit {
   }
   //選圖片
   onFileSelected(event: Event): void {
-  const input = event.target as HTMLInputElement;
+    const input = event.target as HTMLInputElement;
 
-  if (!input.files || input.files.length === 0) {
-    return;
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
+
+    const file = input.files[0];
+
+    // 限制 5MB
+    const maxSize = 5 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+      Swal.fire({
+        icon: 'warning',
+        title: '圖片太大',
+        text: '請上傳 5MB 以下的圖片',
+        confirmButtonText: '確認',
+      });
+
+      // 清空 input
+      input.value = '';
+
+      // 清空已選檔案
+      this.selectedFile = null;
+
+      return;
+    }
+
+    // 檢查通過後才存檔案
+    this.selectedFile = file;
   }
+  openDefaultImageModal(): void {
+    const imagesHtml = this.defaultImages
+      .map(
+        (img: any) => `
+    <div class="default-img-option" data-url="${img.url}" data-name="${img.name}" 
+         style="display:inline-block; margin:12px; cursor:pointer; border:2px solid #e0e0e0; border-radius:8px; padding:8px; text-align:center; transition:0.2s;">
+      <img src="${img.url}" width="90" height="90" style="object-fit:cover; border-radius:4px;"><br>
+      <span style="font-size:12px; color:#555; display:block; margin-top:5px;">${img.name}</span>
+    </div>
+  `,
+      )
+      .join('');
 
-  const file = input.files[0];
-
-  // 限制 5MB
-  const maxSize = 5 * 1024 * 1024;
-
-  if (file.size > maxSize) {
     Swal.fire({
-      icon: 'warning',
-      title: '圖片太大',
-      text: '請上傳 5MB 以下的圖片',
-      confirmButtonText: '確認'
+      title: '請選擇預設物品圖片',
+      html: `
+       <div>${this.categories}</div>
+      <div id="default-img-container" style="display:flex; justify-content:center; flex-wrap:wrap;">${imagesHtml}</div>`,
+      showConfirmButton: false,
+      showCloseButton: true,
+      didOpen: () => {
+        const container = document.getElementById('default-img-container');
+        container?.querySelectorAll('.default-img-option').forEach((el) => {
+          el.addEventListener(
+            'mouseenter',
+            () => ((el as HTMLElement).style.borderColor = '#007bff'),
+          );
+          el.addEventListener(
+            'mouseleave',
+            () => ((el as HTMLElement).style.borderColor = '#e0e0e0'),
+          );
+
+          el.addEventListener('click', async (e) => {
+            const target = e.currentTarget as HTMLElement;
+            const url = target.getAttribute('data-url')!;
+            const name = target.getAttribute('data-name')!;
+
+            Swal.showLoading();
+            await this.selectDefaultImage(url, name);
+            Swal.close();
+          });
+        });
+      },
     });
-
-    // 清空 input
-    input.value = '';
-
-    // 清空已選檔案
-    this.selectedFile = null;
-
-    return;
   }
 
-  // 檢查通過後才存檔案
-  this.selectedFile = file;
-}
+  // 3. 修正後的版本：完全配合你原本的 selectedFile 變數
+  async selectDefaultImage(url: string, name: string): Promise<void> {
+    try {
+      // 抓取前端 assets 的圖片二進位資料
+      const response = await fetch(url);
+      const blob = await response.blob();
 
+      // 包裝成標準 File 物件
+      const file = new File([blob], `${name}.png`, { type: 'image/png' });
 
+      // ✅ 修正：你原本宣告存圖片的變數是 selectedFile，直接賦值給它
+      this.selectedFile = file;
+      // 我們要把原生的檔案輸入框（Input File）清空，避免畫面和資料打架
+      const fileInput = document.getElementById('image') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
+    } catch (error) {
+      console.error('預設圖片轉換失敗:', error);
+      Swal.fire('錯誤', '無法載入預設圖片', 'error');
+    }
+  }
   // ✅ 全面補強，四種模式都有完整驗證
   isSubmitDisabled(): boolean {
     if (!this.item.name?.trim()) return true;
@@ -564,7 +634,7 @@ export class ItemListAddDialogComponent implements OnInit {
     }
 
     this.showLoading('新增保固中...');
-   const formData = new FormData();
+    const formData = new FormData();
 
     // 1. 將純 JSON 轉為 Blob 並指定 type 為 application/json 傳給後端的 @RequestPart("req")
     const jsonBlob = new Blob([JSON.stringify(payload)], {

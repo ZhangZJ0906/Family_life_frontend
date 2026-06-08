@@ -263,6 +263,9 @@ imagePreview: string | null = null;
       this.showError('請選擇分類');
       return;
     }
+        if (!this.selectedFile) {
+         this.selectedFile = this.item.selectedFile;
+        }
 
     const newCat = this.categories.find(
       (cat) => Number(cat.id) === Number(this.item.categoryId),
