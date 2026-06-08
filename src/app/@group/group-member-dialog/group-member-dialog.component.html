@@ -64,6 +64,17 @@
     *ngIf="selectedTab === 'members'"
   >
 
+    <!-- loading -->
+    <div *ngIf="isLoadingMembers" class="loading-table">
+      <div class="loading-row" *ngFor="let i of [1,2,3,4]">
+        <div class="loading-avatar"></div>
+        <div class="loading-text"></div>
+      </div>
+    </div>
+
+    <!-- data -->
+    <div *ngIf="!isLoadingMembers">
+
     <div
       class="member-card"
       *ngFor="let member of members"
@@ -118,6 +129,8 @@
 
     </div>
 
+    </div>
+
   </div>
 
   <!-- 等待加入 -->
@@ -125,6 +138,15 @@
     class="member-list"
     *ngIf="selectedTab === 'waiting'"
   >
+
+    <div *ngIf="isLoadingInvited" class="loading-table">
+      <div class="loading-row" *ngFor="let i of [1,2,3]">
+        <div class="loading-avatar"></div>
+        <div class="loading-text"></div>
+      </div>
+    </div>
+
+    <div *ngIf="!isLoadingInvited">
 
     <div
       class="member-card"
@@ -151,6 +173,8 @@
         </div>
 
       </div>
+
+    </div>
 
     </div>
 

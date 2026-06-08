@@ -32,22 +32,69 @@
       <div class="list-filter">
         <span>{{ filteredLists.length }} 筆</span>
 
-        <mat-form-field appearance="outline" class="filter-field">
-          <mat-label>群組</mat-label>
-          <mat-select name="groupFilter" [(ngModel)]="groupFilter" aria-label="群組篩選">
-            <mat-option [value]="'all'">全部群組</mat-option>
-            <mat-option [value]="null">無</mat-option>
-            @for (group of groupOptions; track group.id) {
-              @if (group.id !== null) {
-                <mat-option [value]="group.id">{{ group.name }}</mat-option>
-              }
-            }
-          </mat-select>
-        </mat-form-field>
+        <!-- 群組篩選：顯示群組頭像 -->
+<mat-form-field appearance="outline" class="filter-field group-filter-field">
+  <mat-label>群組</mat-label>
 
-        <mat-form-field appearance="outline" class="filter-field">
+  <mat-select
+    name="groupFilter"
+    [(ngModel)]="groupFilter"
+    aria-label="群組篩選"
+  >
+    <!-- 下拉關閉時，顯示目前選到的頭像 + 名稱 -->
+    <mat-select-trigger>
+      @if (getSelectedGroupOption(groupFilter); as group) {
+        <div class="group-select-trigger">
+          <img
+            class="group-select-avatar"
+            [src]="group.avatar || defaultGroupAvatar"
+            alt="群組頭像"
+          />
+
+          <span>{{ group.name }}</span>
+        </div>
+      }
+    </mat-select-trigger>
+
+    <!-- 全部群組 -->
+    <mat-option [value]="'all'">
+      <div class="group-option-row">
+        <img
+          class="group-select-avatar"
+          [src]="defaultGroupAvatar"
+          alt="全部群組"
+        />
+
+        <span>全部群組</span>
+      </div>
+    </mat-option>
+
+    <!-- 私人 + 群組 -->
+    @for (group of groupOptions; track group.id) {
+      <mat-option [value]="group.id">
+        <div class="group-option-row">
+          <img
+            class="group-select-avatar"
+            [src]="group.avatar || defaultGroupAvatar"
+            alt="群組頭像"
+          />
+
+          <span>{{ group.name }}</span>
+        </div>
+      </mat-option>
+    }
+  </mat-select>
+</mat-form-field>
+
+        <!-- 狀態 -->
+        <mat-form-field appearance="outline" class="filter-field status-filter-field">
           <mat-label>狀態</mat-label>
-          <mat-select name="statusFilter" [(ngModel)]="statusFilter" aria-label="清單狀態篩選">
+
+          <mat-select
+            name="statusFilter"
+            [(ngModel)]="statusFilter"
+            aria-label="清單狀態篩選"
+          >
             <mat-option value="unfinished">未完成</mat-option>
             <mat-option value="completed">已完成</mat-option>
           </mat-select>
@@ -74,8 +121,11 @@
             <header class="list-card-header">
               <div class="list-title">
                 <strong>{{ list.title }}</strong>
+                @if (list.group_id == 0) {
+                  <small>私人清單</small>
+                }
 
-                @if (list.group_id !== null) {
+                @if (list.group_id !== 0) {
                   <small>群組：{{ getGroupName(list.group_id) }}</small>
                 }
               </div>
@@ -92,6 +142,11 @@
               </button>
 
               <button mat-button type="button" [routerLink]="['/purchase-item', list.id]">
+                <mat-icon>add</mat-icon>
+                新增
+              </button>
+
+              <button mat-button type="button" [routerLink]="['/edit-item', list.id]">
                 <mat-icon>edit</mat-icon>
                 編輯
               </button>
@@ -138,15 +193,43 @@
           />
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="field">
-          <mat-label>群組</mat-label>
-          <mat-select name="groupId" [(ngModel)]="selectedGroupId">
-            @for (group of groupOptions; track group.id) {
-              <mat-option [value]="group.id">{{ group.name }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+        <!-- 建立清單 Dialog 的群組選擇 -->
+<mat-form-field appearance="outline" class="field group-filter-field">
+  <mat-label>群組</mat-label>
 
+  <mat-select
+    name="groupId"
+    [(ngModel)]="selectedGroupId"
+  >
+    <mat-select-trigger>
+      @if (getSelectedGroupOption(selectedGroupId); as group) {
+        <div class="group-select-trigger">
+          <img
+            class="group-select-avatar"
+            [src]="group.avatar || defaultGroupAvatar"
+            alt="群組頭像"
+          />
+
+          <span>{{ group.name }}</span>
+        </div>
+      }
+    </mat-select-trigger>
+
+    @for (group of groupOptions; track group.id) {
+      <mat-option [value]="group.id">
+        <div class="group-option-row">
+          <img
+            class="group-select-avatar"
+            [src]="group.avatar || defaultGroupAvatar"
+            alt="群組頭像"
+          />
+
+          <span>{{ group.name }}</span>
+        </div>
+      </mat-option>
+    }
+  </mat-select>
+</mat-form-field>
         @if (formError) {
           <p class="form-error">{{ formError }}</p>
         }

@@ -1,0 +1,17 @@
+/* 所有 matPrefix 的 $ 往右移 */
+::ng-deep .mat-mdc-form-field-icon-prefix {
+  padding-left: 8px;
+}
+
+/* $ 符號本身樣式 */
+::ng-deep .mat-mdc-form-field-icon-prefix span[matprefix],
+::ng-deep .mat-mdc-form-field-icon-prefix span[matPrefix] {
+  color: #334155;
+  font-size: 20px;
+  font-weight: 800;
+
+  display: inline-flex;
+  align-items: center;
+
+  margin-right: 8px;
+}

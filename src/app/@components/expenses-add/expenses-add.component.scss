@@ -182,11 +182,20 @@ mat-form-field {
   font-size: 12px;
 }
 
+/* 只調整支出金額欄位的 prefix */
+::ng-deep .price-field .mat-mdc-form-field-icon-prefix {
+  padding-left: 18px;
+}
+
 /* 金額前綴 */
 .price-prefix {
   color: #334155;
   font-size: 20px;
   font-weight: 800;
+
+  display: inline-flex;
+  align-items: center;
+  margin-right: 8px;
 }
 
 /* textarea */
@@ -206,40 +215,79 @@ textarea {
   gap: 10px;
 }
 
-/* 取消 */
-.cancel-btn {
-  height: 42px;
-  padding: 0 22px;
-  border-radius: 12px;
-  color: #2563eb;
-  font-weight: 800;
+/* 底部按鈕區：固定在 dialog 底部，樣式接近物品清單新增 */
+.dialog-actions {
+  padding: 20px 36px 28px !important;
+  border-top: 1px solid #eef0f3;
+
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 16px;
+
+  background: #ffffff;
 }
 
-/* 儲存 */
-.save-btn {
-  min-width: 108px;
-  height: 42px;
-  border-radius: 12px;
-  font-size: 15px;
+/* 取消：藍色文字按鈕 */
+.cancel-btn {
+  min-width: 96px;
+  height: 48px;
+
+  border-radius: 16px;
+  color: #4169e1 !important;
+  font-size: 18px;
   font-weight: 900;
 
-  display: inline-flex;
+  background: transparent !important;
+}
+
+/* 取消 hover */
+.cancel-btn:hover {
+  background: #eef3ff !important;
+}
+
+/* 儲存：可按時藍色膠囊 */
+.save-btn {
+  min-width: 96px;
+  height: 52px;
+
+  border-radius: 18px !important;
+
+  font-size: 18px;
+  font-weight: 900;
+
+  display: inline-flex !important;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 8px;
+
+  background: #4169e1 !important;
+  color: #ffffff !important;
+
+  box-shadow: none !important;
 }
 
-.save-btn mat-icon {
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
-}
 
-/* disabled 狀態 */
-.save-btn:disabled {
+
+/* 儲存 disabled：像物品清單新增的灰色狀態 */
+.save-btn:disabled,
+.save-btn[disabled] {
   background: #e5e7eb !important;
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+}
+
+/* disabled icon */
+.save-btn:disabled mat-icon,
+.save-btn[disabled] mat-icon {
   color: #9ca3af !important;
 }
 
+/* 儲存 hover */
+.save-btn:not(:disabled):hover {
+  background: #3158c9 !important;
+}
 /* 手機版 */
 @media (max-width: 720px) {
   .expense-dialog {

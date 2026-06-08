@@ -44,6 +44,8 @@ export class GroupPageComponent{
 
   unreadCount!: number;
 
+  isLoading = true;
+
   constructor(
     private dialog: MatDialog,
     private http: HttpClient,
@@ -87,6 +89,8 @@ export class GroupPageComponent{
 
     // const user_id = 1;
 
+    this.isLoading = true;
+
     this.http.get<any>(
       `http://localhost:8080/family_life/get_group_list?user_id=${this.user_id}`
     ).subscribe({
@@ -99,11 +103,13 @@ export class GroupPageComponent{
         // 預設全部顯示
         this.filteredGroups = this.groups;
 
+        this.isLoading = false;
         console.log(res.groupList);
       },
 
       error: (err) => {
         console.log(err);
+        this.isLoading = false;
       }
 
     });
@@ -208,6 +214,14 @@ export class GroupPageComponent{
 
         const invite_code = result.value;
 
+        Swal.fire({
+          title: '加入中...請稍後',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
         this.http.post(
           'http://localhost:8080/family_life/join',
           {
@@ -217,7 +231,7 @@ export class GroupPageComponent{
         ).subscribe({
 
           next: (res: any) => {
-
+            Swal.close();
             if (res.message === "this id is exist in this group") {
               Swal.fire('你已在群組', '', 'error');
 
@@ -232,6 +246,7 @@ export class GroupPageComponent{
           },
 
           error: () => {
+            Swal.close()
             Swal.fire('加入失敗', '', 'error');
           }
 
@@ -273,6 +288,14 @@ export class GroupPageComponent{
 
         const groupName = result.value;
 
+        Swal.fire({
+          title: '建立群組中...',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
         // ✅ 呼叫後端 create API
         this.http.post(
           'http://localhost:8080/family_life/create',
@@ -282,7 +305,7 @@ export class GroupPageComponent{
           }
         ).subscribe({
           next: (res: any) => {
-
+            Swal.close()
             Swal.fire({
               icon: 'success',
               title: `${groupName} 建立成功`
@@ -294,7 +317,7 @@ export class GroupPageComponent{
           },
           error: (err) => {
             console.log(err);
-
+            Swal.close()
             Swal.fire({
               icon: 'error',
               title: '建立失敗'
@@ -451,6 +474,14 @@ export class GroupPageComponent{
           user_id
         );
 
+        Swal.fire({
+          title: '更新群組中...',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
 
         this.http.post(
           'http://localhost:8080/family_life/update_group',
@@ -458,7 +489,7 @@ export class GroupPageComponent{
         ).subscribe({
 
           next: (res: any) => {
-
+            Swal.close();
             Swal.fire({
               icon: 'success',
               title: '修改成功'
@@ -469,7 +500,7 @@ export class GroupPageComponent{
           },
 
           error: (err) => {
-
+            Swal.close();
             console.log(err);
 
             Swal.fire({
@@ -499,12 +530,20 @@ export class GroupPageComponent{
       cancelButtonText: "取消"
     }).then((result) => {
       if (result.isConfirmed) {
+        Swal.fire({
+          title: '解散中...',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
 
         this.http.delete(
           `http://localhost:8080/family_life/delete_group/${group_id}`,
         ).subscribe({
 
           next: (res: any) => {
+            Swal.close();
 
             console.log(res);
 
@@ -521,6 +560,7 @@ export class GroupPageComponent{
           },
 
           error: (err) => {
+            Swal.close()
             console.log(err);
           }
 
@@ -529,4 +569,6 @@ export class GroupPageComponent{
     });
 
   }
+
+
 }

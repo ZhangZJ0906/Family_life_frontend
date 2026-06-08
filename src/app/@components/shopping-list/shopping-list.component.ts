@@ -26,6 +26,7 @@ import Swal from 'sweetalert2';
 interface GroupOption {
   id: number | 0;
   name: string;
+  avatar: string;
 }
 
 interface GroupMember {
@@ -81,7 +82,7 @@ export class ShoppingListComponent implements OnInit {
   newTitle = '';
   selectedGroupId: number | null = null;
   selectedStatsList: ShoppingList | null = null;
-
+  userAvatar = 'assets/images/default-user.png';
 
   constructor(
     private readonly authService: AuthService,
@@ -91,13 +92,31 @@ export class ShoppingListComponent implements OnInit {
     private readonly http: HttpClientService
   ) {}
 
-  ngOnInit(): void {
-    this.userId = this.authService.currentUser()?.user_id ?? 1;
-    this.loadGroups();
-    this.loadLists();
-    this.loadItemMetadata();
-  }
+ngOnInit(): void {
+  this.userId = this.authService.currentUser()?.user_id ?? 1;
 
+  this.loadUserInfo();
+  this.loadLists();
+  this.loadItemMetadata();
+}
+private loadUserInfo(): void {
+  this.http.getApi(
+    `${this.http.basicUrl}users/get_user_info?userId=${this.userId}`
+  ).subscribe({
+    next: (res: any) => {
+      this.userAvatar = res.avatar || this.defaultUserAvatar;
+
+      // 使用者頭像抓到後，再載入群組
+      this.loadGroups();
+    },
+    error: () => {
+      this.userAvatar = this.defaultUserAvatar;
+
+      // 就算使用者頭像失敗，也要載入群組
+      this.loadGroups();
+    }
+  });
+}
   get filteredLists(): ShoppingList[] {
     return this.lists.filter((list) => {
       const matchesStatus =
@@ -114,6 +133,57 @@ export class ShoppingListComponent implements OnInit {
     });
   }
 
+  // 預設群組頭像
+readonly defaultGroupAvatar = 'assets/default-avatar.png';
+
+// 預設使用者頭像
+readonly defaultUserAvatar = 'assets/images/default-user.png';
+
+// 取得目前選到的群組資料
+getSelectedGroupOption(value: number | 0 | 'all' | null): GroupOption | null {
+  if (value === 'all') {
+    return {
+      id: -1,
+      name: '全部群組',
+      avatar: 'assets/default-avatar.png',
+    };
+  }
+
+  if (value === null) {
+    return {
+      id: -2,
+      name: '無',
+      avatar: 'assets/default-avatar.png',
+    };
+  }
+
+  return this.groupOptions.find((group) => group.id === value) ?? null;
+}
+
+// 取得群組頭像
+getGroupAvatar(groupId: number | null): string {
+  if (groupId === 0) {
+    return this.userAvatar || this.defaultUserAvatar;
+  }
+
+  return (
+    this.groupOptions.find((group) => group.id === groupId)?.avatar ||
+    this.defaultGroupAvatar
+  );
+}
+
+// 取得群組名稱
+getGroupLabel(groupId: number | null): string {
+  if (groupId === 0) {
+    return '私人';
+  }
+
+  if (groupId === null) {
+    return '無';
+  }
+
+  return this.groupOptions.find((group) => group.id === groupId)?.name ?? '未知群組';
+}
   openCreateDialog(): void {
     this.newTitle = '';
     this.selectedGroupId = null;
@@ -170,29 +240,79 @@ export class ShoppingListComponent implements OnInit {
     });
   }
 
-  loadGroups(): void {
-    this.isLoadingGroups = true;
+ loadGroups(): void {
+  this.isLoadingGroups = true;
 
-    this.shoppingService.getUserGroups(this.userId).subscribe({
-      next: (res) => {
-        const groups = Object.entries(res.groupIdList ?? {}).map(([id, name]) => ({
-          id: Number(id),
-          name
+  // 使用跟物品清單相同的群組 API
+  this.http
+    .getApi(`${this.http.basicUrl}family_life/get_group_list?user_id=${this.userId}`)
+    .subscribe({
+      next: (res: any) => {
+        if (!res.groupList) {
+          Swal.fire({
+            icon: 'error',
+            title: '拉取群組錯誤',
+            text: res.message || 'server error',
+            confirmButtonText: '確認',
+          });
+
+          this.groupOptions = [
+            {
+              id: 0,
+              name: '私人',
+              avatar: this.userAvatar || this.defaultUserAvatar,
+            },
+          ];
+
+          this.syncUserGroups();
+          this.isLoadingGroups = false;
+          return;
+        }
+
+        // 後端 groupList 內要有 groupId、groupName、avatar
+        const groups: GroupOption[] = res.groupList.map((group: any) => ({
+          id: Number(group.groupId),
+          name: group.groupName,
+          avatar: group.avatar || this.defaultGroupAvatar,
         }));
 
-        this.groupOptions = [{ id: 0, name: '私人' }, ...groups];
+        // 私人固定放第一個，頭像用登入者自己的頭像
+        this.groupOptions = [
+          {
+            id: 0,
+            name: '私人',
+            avatar: this.userAvatar || this.defaultUserAvatar,
+          },
+          ...groups,
+        ];
+
         this.syncUserGroups();
         this.isLoadingGroups = false;
       },
+
       error: (err) => {
         console.error(err);
-        this.groupOptions = [{ id: 0, name: '私人' }];
+
+        this.groupOptions = [
+          {
+            id: 0,
+            name: '私人',
+            avatar: this.userAvatar || this.defaultUserAvatar,
+          },
+        ];
+
         this.syncUserGroups();
         this.isLoadingGroups = false;
-      }
-    });
-  }
 
+        Swal.fire({
+          icon: 'error',
+          title: '拉取群組錯誤',
+          text: err.message || 'server error',
+          confirmButtonText: '確認',
+        });
+      },
+    });
+}
   createList(): void {
     const title = this.newTitle.trim();
     this.formError = '';
@@ -703,12 +823,13 @@ export class ShoppingListComponent implements OnInit {
     });
   }
 
-  private syncUserGroups(): void {
-    this.userGroups = this.groupOptions.map((group) => ({
-      groupId: group.id ?? 0,
-      groupName: group.name
-    }));
-  }
+ private syncUserGroups(): void {
+  this.userGroups = this.groupOptions.map((group) => ({
+    groupId: group.id,
+    groupName: group.name,
+    avatar: group.avatar,
+  } as any));
+}
 
   private getDialogGroups(groupId: number | null): DropDownGroupList[] {
     const dialogGroups = this.userGroups.length > 0

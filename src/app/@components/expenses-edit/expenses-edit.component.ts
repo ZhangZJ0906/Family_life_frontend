@@ -43,6 +43,8 @@ export class ExpensesEditComponent {
   currentGroupId = 0;
   currentGroupName = '私人記帳';
   currentUserId!: number;
+  selectedFile: File | null = null; //圖片
+
   constructor(
     private http: HttpClientService,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -57,6 +59,13 @@ export class ExpensesEditComponent {
     this.currentGroupName = data.currentGroupName || '私人記帳';
 
     this.originalRecord = JSON.parse(JSON.stringify(this.record));
+  }
+  //選圖片
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+    }
   }
 
   private formatToBackendDate(dateInput: any): string {
@@ -77,9 +86,11 @@ export class ExpensesEditComponent {
 
     return `${year}-${month}-${day}`;
   }
+
   onCancel() {
     this.dialogRef.close();
   }
+
   get isNotModified(): boolean {
     // 1. 如果根本沒有原始資料，表示還在載入中
     if (!this.originalRecord || !this.record) return false;
@@ -87,10 +98,15 @@ export class ExpensesEditComponent {
     // 2. 正確的比對：當兩者字串完全一樣，代表「沒有修改」，回傳 true 讓按鈕 disabled
     return JSON.stringify(this.record) === JSON.stringify(this.originalRecord);
   }
+
   onSave() {
     if (!this.record) return;
     // 1. 先解構複製一份，避免直接污染畫面綁定的 this.record
-    const payload = { ...this.record, operationUser: this.currentUserId };
+    const payload = {
+      ...this.record,
+      operationUser: this.currentUserId,
+      selectedFile: this.selectedFile,
+    };
 
     // 2. 核心修正：相容兩種欄位命名，確保一定能抓到日期資料
     const rawDate = payload.expenseDate;

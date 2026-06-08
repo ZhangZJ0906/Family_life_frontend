@@ -41,6 +41,8 @@ export class NotifyDialogComponent implements OnInit {
     | 'expense'
     | 'calendar'
     | 'calendar_self'
+    | 'warring'
+    | 'warring_self'
     | 'update' = 'all';
 
   unreadMap = {
@@ -51,8 +53,12 @@ export class NotifyDialogComponent implements OnInit {
     expense:0,
     calendar: 0,
     calendar_self: 0,
+    warring: 0,
+    warring_self: 0,
     update: 0
   };
+
+  isLoading = true;
 
   constructor(
     public dialogRef: MatDialogRef<NotifyDialogComponent>,
@@ -85,6 +91,7 @@ export class NotifyDialogComponent implements OnInit {
 
 
   getNotify() {
+    this.isLoading = true;
     this.http.get<any>(
       `http://localhost:8080/family_life/get_notify?user_id=${this.user_id}`
     ).subscribe({
@@ -97,6 +104,8 @@ export class NotifyDialogComponent implements OnInit {
 
         this.calculateUnread();
         this.syncBadge();
+
+        this.isLoading = false;
 
       },
       error: (err) => {
@@ -117,7 +126,9 @@ export class NotifyDialogComponent implements OnInit {
     this.unreadMap.group = list.filter(n => n.isRead !== 1 && n.type === 'group').length;
     this.unreadMap.itemlist = list.filter(n => n.isRead !== 1 && n.type === 'itemlist').length;
     this.unreadMap.calendar = list.filter(n => n.isRead !== 1 && n.type === 'calendar').length;
-    this.unreadMap.calendar = list.filter(n => n.isRead !== 1 && n.type === 'calendar_self').length;
+    this.unreadMap.calendar_self = list.filter(n => n.isRead !== 1 && n.type === 'calendar_self').length;
+    this.unreadMap.warring = list.filter(n => n.isRead !== 1 && n.type === 'warring').length;
+    this.unreadMap.warring_self = list.filter(n => n.isRead !== 1 && n.type === 'warring_self').length;
     this.unreadMap.expense = list.filter(n => n.isRead !== 1 && n.type === 'expense').length;
     this.unreadMap.update = list.filter(n => n.isRead !== 1 && n.type === 'update').length;
   }
@@ -137,11 +148,15 @@ export class NotifyDialogComponent implements OnInit {
 
     if (n.isRead === 1 || n.type === 'invite') return;
 
+    this.showLoading('標記已讀中...');
+
     this.http.post(
       `http://localhost:8080/family_life/read_notify?notify_id=${n.id}`,
       {}
     ).subscribe({
       next: () => {
+
+        this.closeLoading();
 
         n.isRead = 1;
 
@@ -162,12 +177,15 @@ export class NotifyDialogComponent implements OnInit {
       .map(n => n.id);
 
     if (!unreadIds.length) return;
+    this.showLoading('全部標記已讀中...');
+
 
     this.http.post(
       'http://localhost:8080/family_life/read_all_notify',
       { ids: unreadIds }
     ).subscribe({
       next: () => {
+        this.closeLoading();
 
         this.notifies.forEach(n => n.isRead = 1);
 
@@ -188,12 +206,15 @@ export class NotifyDialogComponent implements OnInit {
       .map(n => n.id);
 
     if (!ids.length) return;
+    this.showLoading('刪除中...');
 
     this.http.post(
       'http://localhost:8080/family_life/delete_all_isReadNotify',
       { ids }
     ).subscribe({
       next: () => {
+
+        this.closeLoading();
 
         this.notifies = this.notifies.filter(n => n.isRead !== 1);
 
@@ -321,7 +342,7 @@ this.router.navigate(['/expenses'], { queryParams: { groupId: n.sendUserId } });
 
     if (this.filterType === 'calendar') {
       return this.notifies.filter(n =>
-        n.type === 'calendar' || n.type === 'calendar_self'
+        n.type === 'calendar' || n.type === 'calendar_self' || n.type === 'warring' || n.type === 'warring_self'
       );
     }
 
@@ -339,5 +360,20 @@ this.router.navigate(['/expenses'], { queryParams: { groupId: n.sendUserId } });
     this.dialogRef.close({
       unreadCount: unread
     });
+  }
+
+  //loading中....
+  private showLoading(message = '處理中...') {
+    Swal.fire({
+      title: message,
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  }
+
+  private closeLoading() {
+    Swal.close();
   }
 }

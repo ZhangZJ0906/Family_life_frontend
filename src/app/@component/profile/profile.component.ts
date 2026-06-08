@@ -29,7 +29,7 @@ export class ProfileComponent implements CanComponentDeactivate {
   email = 'jack@example.com';
 
   // 頭像預設文字
-  avatarText = 'J';
+  avatarText = 'U';
 
   // 頭像圖片，空值代表用文字頭像
   avatarUrl = '';
@@ -50,6 +50,11 @@ export class ProfileComponent implements CanComponentDeactivate {
 
   //切到其它分頁時護衛模式
   isDirty = false;
+
+  //email驗證
+  emailVerify = false;
+
+  isLoading = false;
 
   constructor(
     private http: HttpClient,
@@ -80,6 +85,7 @@ export class ProfileComponent implements CanComponentDeactivate {
         this.endDateNotify = res.notifyByEndDate;
         this.emailNotify = res.notifyByEmail;
         this.avatarUrl = res.avatar;
+        this.emailVerify = res.emailVerify;
         console.log(res.notifyByEmail)
 
         //共享userInfo
@@ -98,6 +104,8 @@ export class ProfileComponent implements CanComponentDeactivate {
 
   getGroup() {
 
+    this.isLoading = true;
+
     this.user_id = this.authService.currentUser()?.user_id ?? 0;
 
     console.log("userId: " + this.user_id);
@@ -114,10 +122,13 @@ export class ProfileComponent implements CanComponentDeactivate {
           this.publicInventoryObj[group.groupId] = !!res.publicInventory[index];
         });
 
+        this.isLoading = false;
+
         console.log("list001:", this.publicInventoryObj[22]);
       },
 
       error: (err) => {
+        this.isLoading = false;
         console.log(err);
       }
 
@@ -299,12 +310,21 @@ openAvatarDialog(): void {
       formData.append('avatar', this.file);
     }
 
+    Swal.fire({
+      title: '儲存中...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     this.http.post(
       'http://localhost:8080/users/update_info',
       formData
     ).subscribe({
       next: (res: any) => {
         if (res.code !== 200) {
+          Swal.close()
           Swal.fire({
             icon: 'error',
             title: '儲存失敗',
@@ -339,6 +359,7 @@ openAvatarDialog(): void {
       },
 
       error: (err) => {
+        Swal.close()
         Swal.fire({
           icon: 'error',
           title: '失敗',
@@ -365,6 +386,104 @@ openAvatarDialog(): void {
       cancelButtonText: '留在此頁'
     }).then(result => {
       return result.isConfirmed;
+    });
+  }
+
+  verifyEmailExist(emailVerify: boolean) {
+    if(emailVerify){
+      this.emailNotify = true;
+    }
+    else{
+      Swal.fire({
+        title: '正在送驗證碼到你的gmail...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      this.http.post(`http://localhost:8080/users/send?email=${this.email}`,{},
+        {
+          responseType: 'text'
+        }
+      ).subscribe({
+
+        next: (res: any) => {
+          Swal.close()
+          Swal.fire('驗證碼已送出', '', 'success');
+          this.showVerifyDialog();
+        },
+        error: (err) => {
+          Swal.close()
+            console.error(err);
+
+          this.emailNotify = false
+          Swal.fire('送出失敗', '', 'error');
+        }
+      });
+
+    }
+  }
+
+  showVerifyDialog(){
+    Swal.fire({
+      title: '輸入驗證碼',
+      input: 'text',
+      inputPlaceholder: '請輸入驗證碼',
+      showCancelButton: true,
+      confirmButtonText: '驗證',
+      cancelButtonText: '取消',
+
+      preConfirm: async (verifyCode) => {
+
+        if (!verifyCode) {
+          Swal.showValidationMessage('請輸入驗證碼');
+          return;
+        }
+
+        return verifyCode;
+      }
+
+    }).then((result) => {
+
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: '驗證中...',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        this.http.post(
+          `http://localhost:8080/users/verify?email=${this.email}&code=${result.value}`,
+          {},
+          {
+            responseType: 'text'
+          }
+        ).subscribe({
+
+          next: (res: any) => {
+            Swal.close()
+            if(res == "驗證成功"){
+              Swal.fire('驗證成功', '', 'success');
+              this.emailNotify = true;
+            }
+            else{
+              Swal.fire('驗證失敗', '', 'error');
+              this.emailNotify = false;
+            }
+          },
+
+          error: () => {
+            this.emailNotify = false;
+            Swal.close()
+            Swal.fire('驗證失敗', '', 'error');
+          }
+
+        });
+
+      }
+
     });
   }
 }

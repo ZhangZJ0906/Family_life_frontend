@@ -65,6 +65,12 @@
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+          "host": "0.0.0.0",
+          "port": 4200,
+          "allowedHosts": [
+        "kindred-june-gravel.ngrok-free.dev"
+      ]},
           "configurations": {
             "production": {
               "buildTarget": "Family_life_frontend:build:production"

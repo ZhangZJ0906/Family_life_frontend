@@ -44,11 +44,12 @@
       </span>
     </button>
 
-    <button [class.active]="filterType === 'calendar' || filterType === 'calendar_self'" (click)="filterType = 'calendar'">
+    <button [class.active]="filterType === 'calendar' || filterType === 'calendar_self'
+     || filterType === 'warring' || filterType === 'warring_self'" (click)="filterType = 'calendar'">
       到期通知
 
-      <span class="tab-badge" *ngIf="(unreadMap.calendar + unreadMap.calendar_self) > 0">
-        {{ unreadMap.calendar + unreadMap.calendar_self }}
+      <span class="tab-badge" *ngIf="(unreadMap.calendar + unreadMap.calendar_self + unreadMap.warring + unreadMap.warring_self) > 0">
+        {{ unreadMap.calendar + unreadMap.calendar_self + unreadMap.warring + unreadMap.warring_self}}
       </span>
     </button>
 
@@ -63,11 +64,18 @@
 
   <div class="notify-list">
 
+    <!-- 🔥 loading state -->
+    <div class="empty-state" *ngIf="isLoading">
+      <div>⏳</div>
+      載入中...
+    </div>
+
     <!-- 空狀態 -->
-    <div class="empty-state" *ngIf="filteredNotifies().length === 0">
+    <div class="empty-state" *ngIf="!isLoading && filteredNotifies().length === 0">
       <div>📭</div>
       尚未有通知
     </div>
+
 
     <div class="notify-item" *ngFor="let n of filteredNotifies()" [class.unread]="n.isRead !== 1" (click)="markAsRead(n)">
 
@@ -137,7 +145,7 @@
         </ng-container>
 
         <!-- calendar -->
-        <ng-container *ngIf="n.type === 'calendar' || n.type === 'calendar_self'">
+        <ng-container *ngIf="n.type === 'calendar' || n.type === 'calendar_self' || n.type === 'warring' || n.type === 'warring_self'">
 
           <button class="view-btn" (click)="goCalendar(n)">
             查看

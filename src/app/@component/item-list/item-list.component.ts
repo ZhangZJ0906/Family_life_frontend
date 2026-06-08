@@ -1,4 +1,4 @@
-import { MatSort } from '@angular/material/sort';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 import {
   DropDownGroupList,
   Item,
@@ -25,7 +25,11 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { ItemListAddDialogComponent } from '../item-list-add-dialog/item-list-add-dialog.component';
 import { ItemListEditDialogComponent } from '../item-list-edit-dialog/item-list-edit-dialog.component';
-import { MatSelect, MatOption } from '@angular/material/select';
+import {
+  MatSelect,
+  MatOption,
+  MatSelectModule,
+} from '@angular/material/select';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../@services/auth.service';
@@ -53,8 +57,8 @@ export enum TableMode {
     MatInputModule,
     MatChipListbox,
     MatChipOption,
-    MatSelect,
-    MatOption,
+    MatSelectModule,
+    MatSortModule,
     TopbarComponent,
   ],
   templateUrl: './item-list.component.html',
@@ -77,6 +81,7 @@ export class ItemListComponent {
       'price',
       'expireDate',
       'status',
+      'avatar',
       'notify',
       'actions',
     ],
@@ -88,6 +93,7 @@ export class ItemListComponent {
       'trialEndDate',
       'nextBillingDate',
       'status',
+      'avatar',
       'notify',
       'actions',
     ],
@@ -101,6 +107,7 @@ export class ItemListComponent {
       'purchaseDate',
       'warrantyEndDate',
       'status',
+      'avatar',
       'notify',
       'actions',
     ],
@@ -113,6 +120,7 @@ export class ItemListComponent {
       'expireDate',
       'usageMethod',
       'status',
+      'avatar',
       'notify',
       'actions',
     ],
@@ -123,6 +131,7 @@ export class ItemListComponent {
       'price',
       'expireOrEndDate',
       'status',
+      'avatar',
       'actions',
     ],
   };
@@ -136,6 +145,12 @@ export class ItemListComponent {
   currentGroupId: any = null;
   currentUserId: any;
   lastSelectedRow: any = null;
+  currentUserAvatar = 'assets/default-avatar.png';//預設群組投向
+
+  isLoading = true;
+
+  //上次登入時間
+  lastLoginTime!: Date;
 
   // 統一資料快取（取代四個 xxxList 屬性）
   cachedData: {
@@ -154,6 +169,13 @@ export class ItemListComponent {
   selection = new SelectionModel<any>(true, []);
   dataSource = new MatTableDataSource<any>([]);
 
+  // 圖片預覽狀態
+imagePreviewVisible = false;
+previewImageUrl = '';
+previewImageTitle = '';
+previewScale = 1;
+previewRotate = 0;
+
   constructor(
     private http: HttpClientService,
     private authService: AuthService,
@@ -163,6 +185,9 @@ export class ItemListComponent {
   ) {
     this.basicUrl = this.http.basicUrl;
     this.currentUserId = this.authService.currentUser()?.user_id ?? 0;
+    // 目前登入者自己的頭像，私人物品使用
+    this.currentUserAvatar =
+      this.authService.currentUser()?.avatar || 'assets/default-avatar.png';
   }
 
   ngOnInit() {
@@ -182,11 +207,16 @@ export class ItemListComponent {
         case 'expireOrEndDate':
         case 'warrantyEndDate':
         case 'nextBillingDate':
+        case 'nextBillingDate':
+        case 'trialEndDate':
+        case 'purchaseDate':
           const dateStr =
             item.expireDate ||
             item.expireOrEndDate ||
             item.warrantyEndDate ||
-            item.nextBillingDate;
+            item.nextBillingDate ||
+            item.trialEndDate ||
+            item.purchaseDate;
           return dateStr ? new Date(dateStr).getTime() : 0;
         default:
           return item[property];
@@ -197,7 +227,11 @@ export class ItemListComponent {
   initData(groupId: number) {
     this.currentGroupId = groupId;
     if (groupId == null) groupId = 0;
-    this.getUserGroupData(groupId);
+    this.getLoginItemPageTime().then(() => {
+      console.log('login:', this.lastLoginTime);
+
+      this.getUserGroupData(groupId);
+    });
   }
   // 自動根據當前模式回傳欄位（取代可寫的 displayedColumns 屬性）
   get displayedColumns(): string[] {
@@ -227,11 +261,15 @@ export class ItemListComponent {
 
   // Edit Dialog 回傳的 _type → 更新 API 端點對應表
   // 注意：edit-dialog 回傳的是 'item'（不是 'general'），確保 key 一致
-  private readonly updateApiMap: Record<string, string> = {
+  private updateApiMap: Record<string, string> = {
     item: 'item/update',
     subscription: 'subscription/update',
     warranty: 'warranty/update',
     medicine: 'medicine/update',
+    notifyOnly: 'item/updateNotify', // ✅
+    subscriptionNotifyOnly: 'subscription/updateNotify', // ✅
+    warrantyNotifyOnly: 'warranty/updateNotify', // ✅
+    medicineNotifyOnly: 'medicine/updateNotify', // ✅
   };
   private refreshTableData(newData: any[]) {
     this.dataSource.data = newData;
@@ -308,8 +346,6 @@ export class ItemListComponent {
         locationMap: this.location,
         categoriesMap: this.categories,
         groups: this.userGroups,
-        // 同上，由 currentMode 計算
-        // 全域搜尋模式下，dialog 會改用 row.categoryId 判斷分類，三個 boolean 均為 false 沒關係
         isSubscriptionMode: this.currentMode === TableMode.Subscription,
         isWarrantyMode: this.currentMode === TableMode.Warranty,
         isMedicineMode: this.currentMode === TableMode.Medicine,
@@ -318,15 +354,30 @@ export class ItemListComponent {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (!result) return;
+      const formData = new FormData();
 
       // edit-dialog 回傳的 _type 為 'item' | 'subscription' | 'warranty' | 'medicine'
-      const { _type, ...payload } = result;
+      const { _type, selectedFile, ...payload } = result;
       payload.userId = this.currentUserId;
 
       const url = this.basicUrl + (this.updateApiMap[_type] ?? 'item/update');
       this.showLoading('更新中...');
 
-      this.http.postApi(url, payload).subscribe({
+      // 將原本的 JSON payload 封裝成 Blob 並宣告為 application/json
+      const jsonBlob = new Blob([JSON.stringify(payload)], {
+        type: 'application/json',
+      });
+
+      // 注意：這裡的 key 名稱（'req'）要跟後端 @RequestBody / @RequestPart 接收的變數名稱一致！
+      formData.append('req', jsonBlob);
+
+      // 如果有選擇新圖片，才塞入 FormData
+      if (selectedFile) {
+        // 名稱對應後端的 @RequestPart(value = "avatar")
+        formData.append('avatar', selectedFile);
+      }
+      console.log(formData);
+      this.http.postApi(url, formData).subscribe({
         next: (res: any) => {
           Swal.close();
           if (res.code !== 200) {
@@ -355,11 +406,11 @@ export class ItemListComponent {
   getUserGroupData(groupId: any) {
     this.http
       .getApi(
-        `${this.basicUrl}family_life/getGroupList?user_Id=${this.currentUserId}`,
+        `${this.basicUrl}family_life/get_group_list?user_id=${this.currentUserId}`,
       )
       .subscribe({
         next: (res: any) => {
-          if (res.code !== 200) {
+          if (!res.groupList) {
             Swal.fire({
               title: '拉取群組錯誤',
               text: res.message || 'server error',
@@ -367,15 +418,25 @@ export class ItemListComponent {
             });
             return;
           }
-          this.userGroups = Object.entries(res.groupIdList).map(
-            ([id, name]) => ({
-              groupId: Number(id),
-              groupName: name as string,
-            }),
-          );
-          this.userGroups.unshift({ groupId: 0, groupName: '私人物品' });
+
+          // 使用 Profile 相同的群組資料格式
+          // groupList 內應該有 groupId、groupName、avatar
+          this.userGroups = res.groupList.map((group: any) => ({
+            groupId: Number(group.groupId),
+            groupName: group.groupName,
+            avatar: group.avatar || 'assets/default-avatar.png',
+          }));
+
+          // 私人物品固定放第一個，頭像用登入者自己的頭像
+          this.userGroups.unshift({
+            groupId: 0,
+            groupName: '私人物品',
+            avatar: this.currentUserAvatar || 'assets/default-avatar.png',
+          });
+
           this.getItemByGroupId(groupId);
         },
+
         error: (err) => {
           Swal.fire({
             title: '拉取群組錯誤',
@@ -386,6 +447,12 @@ export class ItemListComponent {
       });
   }
 
+  // 取得目前選中的群組資料
+  getCurrentGroup() {
+    return this.userGroups.find(
+      (group) => Number(group.groupId) === Number(this.currentGroupId),
+    );
+  }
   // ─── API：統一查詢（訂閱 / 保固 / 藥品）────────────────────
   // 取代原本三個獨立的 getXxxByGroupId 方法
   private fetchGroupData(mode: TableMode, groupId: number | null): void {
@@ -426,6 +493,8 @@ export class ItemListComponent {
 
   // ─── API：查詢一般物品（邏輯特殊，單獨保留）──────────────────
   getItemByGroupId(groupId: number): void {
+
+    this.isLoading = true; // 🔥 開啟 table loading
     this.currentGroupId = groupId;
     // 切換群組時先清空快取，避免讀到舊群組資料
     this.cachedData = {
@@ -472,8 +541,11 @@ export class ItemListComponent {
           ];
           this.selectedCategory = '全部';
           this.dataSource.paginator?.firstPage();
+
+          this.isLoading = false; // 🔥 關閉
         },
         error: (err: any) => {
+          this.isLoading = false; // 🔥 一定要關
           Swal.fire({
             title: '錯誤',
             text: err.message || 'Server error',
@@ -486,7 +558,7 @@ export class ItemListComponent {
   }
 
   // 背景靜默載入訂閱 / 保固 / 藥品資料（供全域搜尋使用）
-  private loadAllListSilently(groupId: number): void {
+  private loadAllListSilently(groupId: number) {
     const modes = [
       TableMode.Subscription,
       TableMode.Warranty,
@@ -799,6 +871,36 @@ export class ItemListComponent {
     return `剩餘 ${days} 天`;
   }
 
+  //抓取上次登入該page時間
+  getLoginItemPageTime(): Promise<void> {
+    return new Promise((resolve) => {
+      this.http
+        .getApi(
+          `${this.basicUrl}item/getLoginItemPageTime?userId=${this.currentUserId}`,
+        )
+        .subscribe({
+          next: (res: any) => {
+            this.lastLoginTime = new Date(res);
+            resolve();
+          },
+          error: () => resolve(),
+        });
+    });
+  }
+
+  //判斷是否非私人新物品
+  isNewItem(createdTime: string | Date, createdBy: number): boolean {
+    if (createdBy == this.currentUserId) return false;
+    if (!createdTime || !this.lastLoginTime) return false;
+
+    const created = new Date(createdTime).getTime();
+    const login = this.lastLoginTime.getTime();
+
+    if (isNaN(created)) return false;
+
+    return created > login;
+  }
+
   private showLoading(message = '處理中...'): void {
     Swal.fire({
       title: message,
@@ -808,4 +910,107 @@ export class ItemListComponent {
       didOpen: () => Swal.showLoading(),
     });
   }
+  //圖片顯示
+  getItemAvatar(element: any): string {
+    // 1. 防呆：如果 element 沒傳入或根本沒有圖片欄位
+    if (!element || !element.avatar || element.avatar.trim() === '') {
+      return 'assets/default-avatar.png';
+    }
+
+    const avatarStr = element.avatar.trim();
+
+    // 2. 如果已經是 Base64 或是完整的 http 網址，直接回傳（不可進行全字串 encodeURIComponent）
+    if (
+      avatarStr.startsWith('data:') ||
+      avatarStr.startsWith('http://') ||
+      avatarStr.startsWith('https://')
+    ) {
+      return avatarStr;
+    }
+
+    // 3. 如果後端給的路徑已經包含了 "uploads/"，先把它拿掉，避免重複疊加
+    let fileName = avatarStr;
+    if (fileName.startsWith('uploads/')) {
+      fileName = fileName.replace('uploads/', '');
+    }
+
+    // 4. 只針對「純檔名」部分進行 URL 編碼，防止中文與空白破圖
+    const safeFileName = encodeURIComponent(fileName);
+
+    return `${this.basicUrl}uploads/${safeFileName}`;
+  }
+
+  // 開啟圖片預覽
+openImagePreview(element: any, event: MouseEvent): void {
+  event.stopPropagation();
+
+  if (!element || !element.avatar || element.avatar.trim() === '') {
+    return;
+  }
+
+  this.previewImageUrl = this.getItemAvatar(element);
+  this.previewImageTitle =
+    element.name ||
+    element.productName ||
+    element.title ||
+    '物品圖片';
+
+  this.previewScale = 1;
+  this.previewRotate = 0;
+  this.imagePreviewVisible = true;
+}
+
+// 關閉圖片預覽
+closeImagePreview(): void {
+  this.imagePreviewVisible = false;
+  this.previewImageUrl = '';
+  this.previewImageTitle = '';
+  this.previewScale = 1;
+  this.previewRotate = 0;
+}
+
+// 放大
+zoomIn(): void {
+  if (this.previewScale >= 3) {
+    return;
+  }
+
+  this.previewScale = Number((this.previewScale + 0.2).toFixed(1));
+}
+
+// 縮小
+zoomOut(): void {
+  if (this.previewScale <= 0.4) {
+    return;
+  }
+
+  this.previewScale = Number((this.previewScale - 0.2).toFixed(1));
+}
+
+// 向左旋轉
+rotateLeft(): void {
+  this.previewRotate -= 90;
+}
+
+// 向右旋轉
+rotateRight(): void {
+  this.previewRotate += 90;
+}
+
+// 重置
+resetPreview(): void {
+  this.previewScale = 1;
+  this.previewRotate = 0;
+}
+
+// 滑鼠滾輪放大縮小
+onPreviewWheel(event: WheelEvent): void {
+  event.preventDefault();
+
+  if (event.deltaY < 0) {
+    this.zoomIn();
+  } else {
+    this.zoomOut();
+  }
+}
 }

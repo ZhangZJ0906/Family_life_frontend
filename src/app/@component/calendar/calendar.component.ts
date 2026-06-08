@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { CalendarOptions, EventClickArg } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -51,91 +51,136 @@ export class CalendarComponent {
   userInfo!: any;
   createdBy!: number;
   groupMemberList: any[] = [];
-// 滑鼠移到活動時，是否顯示資訊卡
-showEventTooltip = false;
+  // 滑鼠移到活動時，是否顯示資訊卡
+  showEventTooltip = false;
+  tooltipHoverToken = 0;
 
-// 資訊卡顯示位置
-tooltipX = 0;
-tooltipY = 0;
+  // 資訊卡顯示位置
+  tooltipX = 0;
+  tooltipY = 0;
 
-// 資訊卡內容
-tooltipEvent = {
-  title: '',
-  description: '',
-  startTime: '',
-  endTime: '',
-  notifyBefore: 0,
-  groupName: '',
+  //上次登入時間
+  lastLoginTime!: Date;
 
-  // 是否為私人活動
-  // 私人活動不顯示「指派成員」
-  isPrivateGroup: true,
+  // 資訊卡內容
+  tooltipEvent = {
+    title: '',
+    description: '',
+    startTime: '',
+    endTime: '',
+    notifyBefore: 0,
+    groupName: '',
 
-  // 群組活動才顯示
-  assignedUserNames: [] as string[],
-};
+    // 是否為私人活動
+    // 私人活動不顯示「指派成員」
+    isPrivateGroup: true,
+
+    // 群組活動才顯示
+    assignedUserNames: [] as string[],
+  };
   routeGroupId: number = 0;
 
+
+  // 關閉活動資訊卡
+hideEventTooltip(): void {
+  this.showEventTooltip = false;
+}
+
+// 點擊頁面其他地方時，關閉活動資訊卡
+@HostListener('document:click')
+onDocumentClick(): void {
+  this.hideEventTooltip();
+}
+
+// 滾動畫面時，關閉活動資訊卡
+@HostListener('window:scroll')
+onWindowScroll(): void {
+  this.hideEventTooltip();
+}
   // FullCalendar 的主要設定
   calendarOptions: CalendarOptions = {
-  plugins: [
-    dayGridPlugin,
-    timeGridPlugin,
-    interactionPlugin
-  ],
+    plugins: [
+      dayGridPlugin,
+      timeGridPlugin,
+      interactionPlugin
+    ],
 
-  initialView: 'dayGridMonth',
 
-  locale: 'zh-tw',
 
-  headerToolbar: {
-    left: 'prev,next today',
-    center: 'title',
-    right: 'dayGridMonth,timeGridWeek'
-  },
 
-  buttonText: {
-    today: 'today',
-    month: 'month',
-    week: 'week'
-  },
 
-  views: {
-    timeGridWeek: {
-      buttonText: 'week',
-      allDayText: 'all-day'
-    }
-  },
+    initialView: 'dayGridMonth',
 
-  slotMinTime: '01:00:00',
-  slotMaxTime: '24:00:00',
-  slotDuration: '01:00:00',
-  slotLabelFormat: {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  },
+    locale: 'zh-tw',
 
-  allDaySlot: true,
-  nowIndicator: true,
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek'
+    },
 
-  editable: true,
-  selectable: true,
+    buttonText: {
+      today: 'today',
+      month: 'month',
+      week: 'week'
+    },
 
-  dateClick: this.handleDateClick.bind(this),
+    views: {
+      timeGridWeek: {
+        buttonText: 'week',
+        allDayText: 'all-day'
+      }
+    },
 
-  // 這裡要改回 handleEventClick
-  // 點擊活動後才會跳 SweetAlert：修改 / 刪除 / 取消
-  eventClick: this.handleEventClick.bind(this),
+    slotMinTime: '01:00:00',
+    slotMaxTime: '24:00:00',
+    slotDuration: '01:00:00',
+    slotLabelFormat: {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    },
 
-  eventDrop: this.handleEventDrop.bind(this),
 
-  // 滑鼠移到活動上顯示資訊卡
-  eventMouseEnter: this.handleEventMouseEnter.bind(this),
-  eventMouseLeave: this.handleEventMouseLeave.bind(this),
 
-  events: []
-};
+    allDaySlot: true,
+    nowIndicator: true,
+
+    editable: true,
+    selectable: true,
+
+    dateClick: this.handleDateClick.bind(this),
+
+    // 這裡要改回 handleEventClick
+    // 點擊活動後才會跳 SweetAlert：修改 / 刪除 / 取消
+    eventClick: this.handleEventClick.bind(this),
+
+    eventDrop: this.handleEventDrop.bind(this),
+
+    // 滑鼠移到活動上顯示資訊卡
+    eventMouseEnter: this.handleEventMouseEnter.bind(this),
+    eventMouseLeave: this.handleEventMouseLeave.bind(this),
+
+
+
+    //判斷新事件
+    eventContent: (arg) => {
+      const isNew = this.isNewItem(
+          arg.event.extendedProps['createdTime'],
+          arg.event.extendedProps['createdBy']
+        );
+
+      return {
+        html: `
+          ${isNew ? '<span class="new-tag">NEW</span>' : ''}
+          ${arg.event.title}
+        `
+      };
+    },
+
+    events: []
+  };
+
   constructor(
     private dialog: MatDialog,
     private calendarApiService: CalendarApiService,
@@ -150,33 +195,39 @@ tooltipEvent = {
     this.getUserGroupList(this.createdBy);
   }
 
-  getGroupMembers(groupId: number): void {
-    console.log('Getting members for groupId:', groupId);
-  if (!groupId || groupId === 0) {
-    this.groupMemberList = [];
-    return;
+  ngOnInit() {
+    const now = new Date();
+    this.getLoginCalendarPageTime();
+    sessionStorage.setItem('calendar-last-view', now.toISOString());
   }
 
-  this.http
-    .getApi(this.http.basicUrl + `family_life/get_members?group_id=${groupId}`)
-    .subscribe({
-      next: (res: any) => {
-        console.log('Group Members Response:', res);
-        this.groupMemberList = res.groupMembersList ?? [];
-      },
-      error: (err) => {
-        console.error(err);
-        this.groupMemberList = [];
+  getGroupMembers(groupId: number): void {
+    console.log('Getting members for groupId:', groupId);
+    if (!groupId || groupId === 0) {
+      this.groupMemberList = [];
+      return;
+    }
 
-        Swal.fire({
-          icon: 'error',
-          title: '群組成員載入失敗',
-          text: err.error?.message || '請稍後再試',
-          confirmButtonText: '確認',
-        });
-      },
-    });
-}
+    this.http
+      .getApi(this.http.basicUrl + `family_life/get_members?group_id=${groupId}`)
+      .subscribe({
+        next: (res: any) => {
+          console.log('Group Members Response:', res);
+          this.groupMemberList = res.groupMembersList ?? [];
+        },
+        error: (err) => {
+          console.error(err);
+          this.groupMemberList = [];
+
+          Swal.fire({
+            icon: 'error',
+            title: '群組成員載入失敗',
+            text: err.error?.message || '請稍後再試',
+            confirmButtonText: '確認',
+          });
+        },
+      });
+  }
 
 
 
@@ -185,12 +236,21 @@ isSelectedGroup(groupId: number): boolean {
   return Number(groupId) === Number(this.selectedGroupId);
 }
   getUserGroupList(userId: number) {
+    // 👉 開 loading
+    Swal.fire({
+      title: '載入群組中...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
   this.http
     // 改用 profile 頁相同概念的群組清單 API
     // 這支 API 需要回傳 groupList，裡面要有 groupId、groupName、avatar
     .getApi(this.http.basicUrl + `family_life/get_group_list?user_id=${userId}`)
     .subscribe({
       next: (res: any) => {
+        Swal.close();
         if (res.code !== 200 && res.groupList == null) {
           Swal.fire({
             title: '拉取群組錯誤',
@@ -240,6 +300,7 @@ isSelectedGroup(groupId: number): boolean {
       },
 
       error: (err) => {
+        Swal.close();
         Swal.fire({
           title: '拉取群組錯誤',
           text: err.message || 'server error',
@@ -251,8 +312,17 @@ isSelectedGroup(groupId: number): boolean {
 
 
 // 從後端查詢目前登入者在某個群組中的行事曆事件
-loadCalendarEvents(groupId: number | null, userId: number): void {
+async loadCalendarEvents(groupId: number | null, userId: number): Promise<void>  {
   const realGroupId = groupId == null ? 0 : Number(groupId);
+
+  // 👉 開 loading
+  Swal.fire({
+    title: '載入行事曆中...',
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
 
   // 重點：
   // 不要打 calendar/group/1
@@ -263,6 +333,8 @@ loadCalendarEvents(groupId: number | null, userId: number): void {
 
   this.http.getApi(url).subscribe({
     next: (res: any) => {
+      Swal.close(); // ✅ 關掉 loading
+
       if (res.code !== 200) {
         Swal.fire({
           icon: 'error',
@@ -283,9 +355,11 @@ loadCalendarEvents(groupId: number | null, userId: number): void {
           createdBy: item.createdBy,
           groupId: item.groupId,
           assignedUserId: item.assignedUserId,
+          createdTime: item.createdAt,
 
           // 同一批活動的識別碼
           eventBatchId: item.eventBatchId,
+
         },
       }));
 
@@ -296,6 +370,8 @@ loadCalendarEvents(groupId: number | null, userId: number): void {
     },
 
     error: (err) => {
+      Swal.close(); // ❗記得錯誤也要關
+
       Swal.fire({
         icon: 'error',
         title: '查詢行事曆失敗',
@@ -316,6 +392,7 @@ loadCalendarEvents(groupId: number | null, userId: number): void {
   }
   // 點擊日期時新增活動，日期會帶入使用者點到的日期
   handleDateClick(info: DateClickArg): void {
+    this.hideEventTooltip();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -337,6 +414,7 @@ loadCalendarEvents(groupId: number | null, userId: number): void {
   }
 
   createCalendarEvent(dateStr?: string): void {
+    this.hideEventTooltip();
     // 後端目前私人活動是 groupId = 0，不是 null
     const groupId =
       this.currentGroupId === undefined || this.currentGroupId === null
@@ -396,8 +474,16 @@ const payload = {
     ? this.createdBy
     : result.assignedUserIds?.[0],
 };
+  Swal.fire({
+    title: '新增中...',
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
   this.calendarApiService.create(payload).subscribe({
     next: (res: any) => {
+      Swal.close();
       if (res.code !== 200) {
         Swal.fire({
           icon: 'error',
@@ -411,12 +497,13 @@ const payload = {
         icon: 'success',
         title: '新增成功',
         confirmButtonText: '確認',
+      }).then(() => {
+        this.loadCalendarEvents(groupId, this.createdBy);
       });
-
-      this.loadCalendarEvents(groupId, this.createdBy);
     },
 
     error: (err) => {
+      Swal.close()
       Swal.fire({
         icon: 'error',
         title: '新增失敗',
@@ -474,8 +561,9 @@ getMemberNameById(userId: number): string {
 }
 
 async openUpdateDialog(info: EventClickArg): Promise<void> {
-    const eventBatchId = info.event.extendedProps['eventBatchId'];
-const fallbackAssignedUserId =
+  this.hideEventTooltip();
+  const eventBatchId = info.event.extendedProps['eventBatchId'];
+  const fallbackAssignedUserId =
   info.event.extendedProps['assignedUserId'] ?? this.createdBy;
 
 // 先查出同一批活動有哪些成員
@@ -544,9 +632,17 @@ const assignedUserIds = await this.getBatchAssignedUserIds(
     ? this.createdBy
     : result.assignedUserIds?.[0],
 };
+  Swal.fire({
+    title: '更新行事曆中...',
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
       this.calendarApiService.update(Number(info.event.id), payload).subscribe({
         next: (res: any) => {
           if (res.code !== 200) {
+            Swal.close()
             Swal.fire({
               icon: 'error',
               title: '更新失敗',
@@ -555,16 +651,19 @@ const assignedUserIds = await this.getBatchAssignedUserIds(
             return;
           }
 
+          Swal.close();
+
           Swal.fire({
             icon: 'success',
             title: '修改成功',
             confirmButtonText: '確認',
+          }).then(() => {
+            this.loadCalendarEvents(groupId, this.createdBy);
           });
-
-          this.loadCalendarEvents(groupId, this.createdBy);
         },
 
         error: (err) => {
+          Swal.close()
           Swal.fire({
             icon: 'error',
             title: '修改失敗',
@@ -576,6 +675,8 @@ const assignedUserIds = await this.getBatchAssignedUserIds(
   }
   // 點擊活動後，可選擇修改或刪除
   handleEventClick(info: EventClickArg): void {
+     info.jsEvent.stopPropagation();
+    this.hideEventTooltip();
     const eventId = Number(info.event.id);
     Swal.fire({
       title: info.event.title,
@@ -600,6 +701,7 @@ const assignedUserIds = await this.getBatchAssignedUserIds(
   }
 
   deleteCalendarEvent(eventId: number, title: string): void {
+    this.hideEventTooltip();
     Swal.fire({
       icon: 'warning',
       title: `是否刪除「${title}」？`,
@@ -618,10 +720,19 @@ const assignedUserIds = await this.getBatchAssignedUserIds(
           ? 0
           : Number(this.currentGroupId);
 
+      Swal.fire({
+        title: '刪除中...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
       this.calendarApiService
         .delete(eventId, this.createdBy, groupId)
         .subscribe({
           next: (res: any) => {
+            Swal.close();
             if (res.code !== 200) {
               Swal.fire({
                 icon: 'error',
@@ -632,26 +743,31 @@ const assignedUserIds = await this.getBatchAssignedUserIds(
             }
 
             Swal.fire({
-              icon: 'success',
-              title: '刪除成功',
-              confirmButtonText: '確認',
-            });
-
+            icon: 'success',
+            title: '刪除成功',
+            confirmButtonText: '確認',
+          }).then(() => {
             this.loadCalendarEvents(groupId, this.createdBy);
+          });
           },
 
-          error: (err) => {
-            Swal.fire({
-              icon: 'error',
-              title: '刪除失敗',
-              text: err.error?.message || '請稍後再試',
-            });
+         error: (err) => {
+          Swal.close();
+
+          Swal.fire({
+            icon: 'error',
+            title: '刪除失敗',
+            text: err.error?.message || '請稍後再試',
+          });
           },
         });
     });
   }
+
+
   // 拖曳活動到其他日期後，更新後端資料
 async handleEventDrop(info: any): Promise<void> {
+  this.hideEventTooltip();
   const eventId = Number(info.event.id);
 
   const title = info.event.title;
@@ -766,12 +882,12 @@ async handleEventDrop(info: any): Promise<void> {
         }
 
         Swal.fire({
-          icon: 'success',
-          title: '移動成功',
-          confirmButtonText: '確認',
-        });
-
+        icon: 'success',
+        title: '移動成功',
+        confirmButtonText: '確認',
+      }).then(() => {
         this.loadCalendarEvents(this.currentGroupId, this.createdBy);
+      });
       },
 
       error: (err) => {
@@ -789,6 +905,7 @@ async handleEventDrop(info: any): Promise<void> {
 }
   // 滑鼠移到活動上時，顯示活動資訊卡
 async handleEventMouseEnter(info: any): Promise<void> {
+  const hoverToken = ++this.tooltipHoverToken;
   const event = info.event;
 
   // 取得活動所屬群組
@@ -822,6 +939,10 @@ async handleEventMouseEnter(info: any): Promise<void> {
       fallbackAssignedUserId
     );
 
+    if (hoverToken !== this.tooltipHoverToken) {
+    return;
+  }
+
     // 把 userId 轉成使用者名稱
     assignedUserNames = assignedUserIds.map((id) =>
       this.getMemberNameById(Number(id))
@@ -847,6 +968,7 @@ this.showEventTooltip = true;
 
 // 滑鼠離開活動時，關閉資訊卡
 handleEventMouseLeave(): void {
+  this.tooltipHoverToken++;
   this.showEventTooltip = false;
 }
 
@@ -902,4 +1024,35 @@ setTooltipPosition(mouseEvent: MouseEvent): void {
   this.tooltipX = x;
   this.tooltipY = y;
 }
+  //抓取上次登入該page時間
+  getLoginCalendarPageTime(): Promise<void> {
+    return new Promise((resolve) => {
+      this.http
+        .getApi(this.http.basicUrl + `calendar/getLoginCalendarPageTime?userId=${this.createdBy}`)
+        .subscribe({
+          next: (res: any) => {
+            this.lastLoginTime = new Date(res);
+            resolve();
+          },
+          error: () => resolve(),
+        });
+    });
+  }
+
+  //判斷是否非私人新物品
+  isNewItem(createdTime: string | Date, createdBy: number): boolean {
+    if (createdBy == this.createdBy) return false;
+    if (!createdTime || !this.lastLoginTime) return false;
+
+    console.log("ct", createdTime)
+    console.log("login", this.lastLoginTime)
+
+    const created = new Date(createdTime).getTime();
+    const login = this.lastLoginTime.getTime();
+
+
+    if (isNaN(created)) return false;
+
+    return created > login;
+  }
 }
