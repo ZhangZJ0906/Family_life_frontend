@@ -17,7 +17,13 @@ export interface Item {
   note: string;
   createdAt: string; // ISO 8601 格式
   // souce:string//貨源
-  avatar:string// 圖片
+  avatar: string; // 圖片
+}
+//預設圖片
+export interface DefaultImage {
+  name: string;
+  url: string;
+  category: string;
 }
 /*============================================== */
 /* 存放地點  && 分類  2026-05-12 by zj */
