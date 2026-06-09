@@ -526,6 +526,11 @@
     grid-template-columns: 1fr;
 
   }
+  .home-group-select {
+    width: 30%;
+    margin-left: 50%;
+    transform: translateX(-50%);
+  }
 }
 
 /* 手機版 */
@@ -589,6 +594,7 @@
   .home-group-select {
     width: 100%;
     margin-top: 8px;
+
   }
 
   .home-group-select ::ng-deep .mat-mdc-text-field-wrapper {

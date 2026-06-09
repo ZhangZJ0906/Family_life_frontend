@@ -273,12 +273,12 @@
   align-items: center;
 }
 
-.expense-list-title h2 {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 900;
-  color: #111827;
-}
+ /* 支出明細標題 */
+  .expense-list-title h2 {
+    font-size: 28px;
+    font-weight: 900;
+    margin: 0 0 4px;
+  }
 
 /* 右側篩選列 */
 .expense-filter-right {
@@ -350,10 +350,10 @@
 }
 
 /* Angular Material 欄位白底 */
-.filter-field ::ng-deep .mat-mdc-text-field-wrapper {
-  background: #ffffff;
-  border-radius: 12px;
-}
+ .filter-field ::ng-deep .mat-mdc-text-field-wrapper {
+    height: 62px;
+    border-radius: 12px;
+  }
 
 /* 移除 Material form-field 底部空白 */
 .filter-field ::ng-deep .mat-mdc-form-field-subscript-wrapper {
@@ -853,24 +853,77 @@ tr.mat-mdc-row:hover {
    RWD：中等螢幕
    ========================================================= */
 @media (max-width: 1400px) {
-  .expense-header-card {
-    grid-template-columns: 1fr;
-    gap: 22px;
-  }
 
-  .month-switch {
-    justify-content: flex-start;
-  }
-
-  .summary-row {
-    grid-template-columns: 1fr 1fr;
-  }
 }
 
 /* =========================================================
    RWD：平板
    ========================================================= */
 @media (max-width: 1200px) {
+  .expense-header-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+
+    padding: 30px 28px;
+  }
+
+   /* 標題區置中 */
+  .expense-title {
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+
+    text-align: center;
+
+    /* 只讓標題區往左移一點 */
+    transform: translateX(-200px);
+}
+
+    /* icon + 文字靠中 */
+  .expense-title > div:last-child {
+    text-align: left;
+  }
+
+    /* 家庭記帳系統標題 */
+  .expense-title h3 {
+    font-size: 30px;
+    text-align: left;
+  }
+
+   /* 費用管理 Dashboard */
+  .expense-title small {
+    font-size: 16px;
+    display: block;
+    text-align: left;
+  }
+
+   /* 月份切換置中 */
+  .month-switch {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+
+    /* 統計卡片區 */
+  .summary-row {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
+    gap: 18px;
+  }
+
+  /* 統計卡片 */
+  .summary-card {
+    width: 100%;
+    min-height: 130px;
+  }
   .expense-filter-card {
     grid-template-columns: 1fr;
     gap: 18px;
@@ -903,7 +956,7 @@ tr.mat-mdc-row:hover {
     right: 20px;
     bottom: 20px;
   }
-}
+
 
 //新物品
 .item-name-wrapper {
@@ -1014,6 +1067,8 @@ tr.mat-mdc-row:hover {
     flex-wrap: wrap;
   }
 }
+
+}
 /* =========================================================
    RWD：手機
    ========================================================= */
@@ -1030,6 +1085,10 @@ tr.mat-mdc-row:hover {
   .expense-title h3,
   .container-fluid h3 {
     font-size: 26px;
+  }
+
+   .expense-title {
+    transform: none;
   }
 
   .month-switch {
@@ -1049,13 +1108,22 @@ tr.mat-mdc-row:hover {
   }
 
   .expense-filter-card {
-    padding: 20px;
+    padding: 22px 20px;
     border-radius: 18px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
   }
 
   .expense-filter-right {
+    width: 100%;
+
+    display: flex;
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
+    gap: 12px;
   }
 
   .card-header {
@@ -1067,8 +1135,9 @@ tr.mat-mdc-row:hover {
     align-items: stretch;
   }
 
-  .filter-field {
-    width: 100%;
+    .filter-field {
+    width: 92%;
+    max-width: 320px;
   }
 
   .big-table th.mat-mdc-header-cell,
@@ -1089,5 +1158,16 @@ tr.mat-mdc-row:hover {
   .expense-fab-btn {
     width: 56px !important;
     height: 56px !important;
+  }
+
+  .search-field {
+    width: 88%;
+    max-width: 300px;
+  }
+
+  .filter-field {
+    width: 70%;
+    max-width: 300px;
+
   }
 }
