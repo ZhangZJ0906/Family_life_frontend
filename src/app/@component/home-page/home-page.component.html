@@ -2,122 +2,114 @@
 
   <app-topbar></app-topbar>
 
-  <!-- 第一區：歡迎卡片，內含橫向金額摘要 -->
-  <section class="welcome-card">
-  <div class="welcome-top">
+<!-- 第一區：歡迎卡片，內含橫向金額摘要 -->
+<section class="welcome-card">
 
+  <!-- 上方：標題 / 月份 / 記帳環境 -->
   <div class="welcome-top row align-items-center g-3">
-  <!-- 左邊：標題 -->
-   <div class="col-12 col-lg-4">
+
+    <!-- 左邊：標題 -->
+    <div class="welcome-title-col col-12 col-lg-4">
       <div class="welcome-text">
         <h1>早安，{{ currentUserName || '使用者' }}</h1>
-        <p>今天有 {{highPriorityCount}} 件生活事項需要優先處理</p>
+        <p>今天有 {{ highPriorityCount }} 件生活事項需要優先處理</p>
       </div>
-  </div>
-
-  <!-- 中間：月份切換 -->
-  <div class="col-12 col-lg-4 d-flex justify-content-center">
-    <div class="home-month-switch">
-
-      <button
-        type="button"
-        class="month-btn"
-        (click)="prevMonth()"
-        title="上一個月"
-      >
-        <mat-icon>chevron_left</mat-icon>
-      </button>
-
-      <div class="month-info">
-        <span>目前月份</span>
-        <strong>{{ selectedYear }} 年 {{ selectedMonth }} 月</strong>
-      </div>
-
-      <button
-        type="button"
-        class="month-btn"
-        (click)="nextMonth()"
-        [disabled]="isCurrentMonth()"
-        title="下一個月"
-      >
-        <mat-icon>chevron_right</mat-icon>
-      </button>
-
     </div>
+
+    <!-- 中間：月份切換 -->
+    <div class="welcome-month-col col-12 col-lg-4 d-flex justify-content-center">
+      <div class="home-month-switch">
+
+        <button
+          type="button"
+          class="month-btn"
+          (click)="prevMonth()"
+          title="上一個月"
+        >
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <div class="month-info">
+          <span>目前月份</span>
+          <strong>{{ selectedYear }} 年 {{ selectedMonth }} 月</strong>
+        </div>
+
+        <button
+          type="button"
+          class="month-btn"
+          (click)="nextMonth()"
+          [disabled]="isCurrentMonth()"
+          title="下一個月"
+        >
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- 右邊：群組切換 -->
+    <div class="welcome-group-col col-12 col-lg-4 d-flex justify-content-lg-end justify-content-start">
+      <mat-form-field appearance="outline" class="home-group-select">
+        <mat-label>記帳環境</mat-label>
+
+        <mat-select
+          [(ngModel)]="currentGroupId"
+          (selectionChange)="onExpenseGroupChange($event.value)"
+        >
+          <mat-select-trigger>
+            <div class="home-selected-group" *ngIf="getCurrentExpenseGroup() as group">
+              <img
+                class="home-group-avatar"
+                [src]="group.avatar || 'assets/default-avatar.png'"
+                alt="群組頭像"
+              />
+              <span>{{ group.groupName }}</span>
+            </div>
+          </mat-select-trigger>
+
+          <mat-option
+            *ngFor="let group of expenseGroups"
+            [value]="group.groupId"
+          >
+            <div class="home-group-option">
+              <img
+                class="home-group-avatar"
+                [src]="group.avatar || 'assets/default-avatar.png'"
+                alt="群組頭像"
+              />
+              <span>{{ group.groupName }}</span>
+            </div>
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
   </div>
 
- <!-- 右邊：群組切換 -->
-<div class="col-12 col-lg-4 d-flex justify-content-lg-end justify-content-start">
-  <mat-form-field appearance="outline" class="home-group-select">
-    <mat-label>記帳環境</mat-label>
-
-    <mat-select
-      [(ngModel)]="currentGroupId"
-      (selectionChange)="onExpenseGroupChange($event.value)"
-    >
-      <!-- 下拉關閉時，顯示目前選到的頭像 + 名稱 -->
-      <mat-select-trigger>
-        <div class="home-selected-group" *ngIf="getCurrentExpenseGroup() as group">
-          <img
-            class="home-group-avatar"
-            [src]="group.avatar || 'assets/default-avatar.png'"
-            alt="群組頭像"
-          />
-
-          <span>
-            {{ group.groupName }}
-          </span>
-        </div>
-      </mat-select-trigger>
-
-      <!-- 下拉選項 -->
-      <mat-option
-        *ngFor="let group of expenseGroups"
-        [value]="group.groupId"
-      >
-        <div class="home-group-option">
-          <img
-            class="home-group-avatar"
-            [src]="group.avatar || 'assets/default-avatar.png'"
-            alt="群組頭像"
-          />
-
-          <span>
-            {{ group.groupName }}
-          </span>
-        </div>
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-</div>
-</div>
-
-</div>
+  <!-- 下方：本月支出 + 到期件數 -->
   <div class="welcome-bottom row g-3">
 
-  <!-- 本月支出 -->
-   <div class="col-12 col-md-7 col-lg-5">
-  <div class="money-item">
-    <div class="money-icon red-icon">💳</div>
-    <div>
-      <p>本月支出</p>
-      <h2 class="money-red">NT $ {{ monthlyExpense | number }}</h2>
+    <div class="col-12 col-md-7 col-lg-5">
+      <div class="money-item">
+        <div class="money-icon red-icon">💳</div>
+        <div>
+          <p>本月支出</p>
+          <h2 class="money-red">NT $ {{ monthlyExpense | number }}</h2>
+        </div>
+      </div>
     </div>
-  </div>
-  </div>
 
-  <!-- 到期件數 -->
-   <div class="col-12 col-md-5 col-lg-3">
-  <div class="money-item expired-card">
-    <div class="money-icon expired-icon">⚠️</div>
-    <div>
-      <p>已到期項目</p>
-      <h2 class="expired-count">{{ expiredTotalCount }} 件</h2>
+    <div class="col-12 col-md-5 col-lg-3">
+      <div class="money-item expired-card">
+        <div class="money-icon expired-icon">⚠️</div>
+        <div>
+          <p>已到期項目</p>
+          <h2 class="expired-count">{{ expiredTotalCount }} 件</h2>
+        </div>
+      </div>
     </div>
-  </div>
 
-</div>
-</div>
+  </div>
 
 </section>
 
