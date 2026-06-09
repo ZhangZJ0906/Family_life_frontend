@@ -45,7 +45,7 @@
       <div class="summary-card summary-expense">
         <div class="summary-info">
           <div class="label">本月支出</div>
-          <div class="value">NT ${{ totalExpense() }}</div>
+          <div class="value">NT ${{ totalExpense() | number }}</div>
         </div>
 
         <div class="summary-icon expense-icon">
@@ -140,8 +140,9 @@
 
   </section>
 
-  <!-- 表格區 -->
-  <section class="table-card">
+
+  <!-- 表格區：平板與桌機顯示 -->
+<section class="table-card d-none d-md-block">
 
     <div class="table-responsive">
 
@@ -300,6 +301,77 @@
 
   </section>
 
+  <!-- 手機版列表：只在手機顯示 -->
+<section class="expense-mobile-list d-block d-md-none">
+
+  @for (e of dataSource.filteredData; track e.id) {
+    <div class="expense-mobile-card">
+
+      <!-- 上方：日期 + 金額 -->
+      <div class="mobile-card-top">
+        <div>
+          <div class="mobile-date">{{ e.expenseDate }}</div>
+          <div class="mobile-title">
+            {{ e.relatedItemName || '--' }}
+          </div>
+        </div>
+
+        <div class="mobile-price">
+          ${{ e.price }}
+        </div>
+      </div>
+
+      <!-- 中間：分類與備註 -->
+      <div class="mobile-card-body">
+
+        <div class="mobile-row">
+          <span>分類</span>
+          <strong>{{ getCategoryName(e.categoryId) || '未分類' }}</strong>
+        </div>
+
+        <div class="mobile-row">
+          <span>備註</span>
+          <strong>{{ e.note || '--' }}</strong>
+        </div>
+
+        <div class="mobile-row">
+          <span>消費者</span>
+
+          @if (currentGroupId === 0) {
+            <strong>私人</strong>
+          } @else {
+            <strong>{{ groupUserInfo[e.userId]?.userName || '未知使用者' }}</strong>
+          }
+        </div>
+
+      </div>
+
+      <!-- 下方：勾選 + 修改 -->
+      <div class="mobile-card-actions">
+
+        <mat-checkbox
+          (click)="$event.stopPropagation()"
+          (change)="$event ? selection.toggle(e) : null"
+          [checked]="selection.isSelected(e)">
+          選取
+        </mat-checkbox>
+
+        <button
+          mat-icon-button
+          color="primary"
+          type="button"
+          (click)="openEditDialog(e)"
+          title="修改">
+          <mat-icon>edit</mat-icon>
+        </button>
+
+      </div>
+
+    </div>
+  }
+
+</section>
+
   <div class="fab-container">
 
   @if (selection.selected.length > 0) {
@@ -311,7 +383,7 @@
   }
 
   <!-- 固定在畫面右下角的新增支出按鈕 -->
-  <button mat-fab type="button" class=".expense-fab-btn" (click)="openCreateDialog()" title="新增支出">
+  <button mat-fab type="button" class="expense-fab-btn" (click)="openCreateDialog()" title="新增支出">
     <mat-icon>add</mat-icon>
   </button>
   </div>

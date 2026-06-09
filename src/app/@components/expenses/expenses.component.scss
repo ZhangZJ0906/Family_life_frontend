@@ -744,6 +744,112 @@ tr.mat-mdc-row:hover {
 }
 
 /* =========================================================
+   手機版：支出明細改成卡片列表
+   ========================================================= */
+.expense-mobile-list {
+  display: flex;
+  flex-direction: column;
+
+  /* 控制兩張卡片之間的距離 */
+  gap: 26px;
+}
+
+/* 手機單筆支出卡片 */
+.expense-mobile-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+  margin-bottom: 20px;
+}
+
+/* 手機卡片上方：日期、名稱、金額 */
+.mobile-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+/* 日期 */
+.mobile-date {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+/* 消費名稱 */
+.mobile-title {
+  color: #111827;
+  font-size: 18px;
+  font-weight: 900;
+
+  max-width: 190px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* 金額 */
+.mobile-price {
+  color: #d85c5c;
+  font-size: 20px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+/* 中間資訊區 */
+.mobile-card-body {
+  border-top: 1px solid #eef1f5;
+  border-bottom: 1px solid #eef1f5;
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* 每一列資訊 */
+.mobile-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 左側標籤 */
+.mobile-row span {
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* 右側內容 */
+.mobile-row strong {
+  color: #111827;
+  font-size: 14px;
+  font-weight: 800;
+  text-align: right;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* 下方操作列 */
+.mobile-card-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+}
+
+
+
+/* =========================================================
    RWD：中等螢幕
    ========================================================= */
 @media (max-width: 1400px) {
@@ -891,6 +997,22 @@ tr.mat-mdc-row:hover {
     transform: translateY(-2px);
     box-shadow: 0 18px 36px rgba(15, 23, 42, 0.26) !important;
   }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .big-table {
+    min-width: 1000px;
+  }
+
+  .filter-field {
+    width: calc(50% - 8px);
+  }
+
+  .expense-filter-right {
+    flex-wrap: wrap;
+  }
 }
 /* =========================================================
    RWD：手機
@@ -957,5 +1079,15 @@ tr.mat-mdc-row:hover {
   .expense-add-fab {
     right: 20px;
     bottom: 20px;
+  }
+
+    .fab-container {
+    right: 18px;
+    bottom: 18px;
+  }
+
+  .expense-fab-btn {
+    width: 56px !important;
+    height: 56px !important;
   }
 }
