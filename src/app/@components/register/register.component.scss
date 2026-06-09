@@ -21,7 +21,7 @@
 /* 左側圖片區 */
 .brand-section {
   width: 560px;
-  min-height: 620px;
+  height: 620px;
 
   display: flex;
   justify-content: center;
@@ -32,7 +32,7 @@
 .auth-hero-img {
   width: 100%;
   max-width: 540px;
-  height: auto;
+  height: 620px;
 
   display: block;
   object-fit: contain;
@@ -45,11 +45,11 @@
 .auth-card {
   width: 500px;
   max-width: 500px;
+  height: 620px;
   min-height: 620px;
 
   border-radius: 34px;
   background: rgba(255, 255, 255, 0.92);
-
   box-shadow: 0 24px 70px rgba(15, 23, 42, 0.1);
 
   padding: 42px 46px 34px;
@@ -59,7 +59,6 @@
   flex-direction: column;
   justify-content: center;
 }
-
 /* Icon */
 .form-icon {
   width: 78px;
@@ -230,24 +229,27 @@
 
 /* 平板 */
 @media (max-width: 1280px) {
-  .auth-page {
+    .auth-page {
     grid-template-columns: 500px 470px;
-    gap: 56px;
-
+    gap: 40px;
     padding: 36px 48px;
   }
 
   .brand-section {
     width: 500px;
+    height: 600px;
   }
 
   .auth-hero-img {
     max-width: 500px;
+    height: 600px;
   }
 
   .auth-card {
     width: 470px;
     max-width: 470px;
+    height: 600px;
+    min-height: 600px;
   }
 }
 
