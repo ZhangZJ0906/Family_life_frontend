@@ -13,9 +13,9 @@ import { ChatRoomComponent } from './../chat-room/chat-room.component';
 import { GroupMemberDialogComponent } from '../group-member-dialog/group-member-dialog.component';
 import { NotifyDialogComponent } from '../notify-dialog/notify-dialog.component';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
+
 import { AuthService } from '../../@services/auth.service';
 
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-group-page',
@@ -53,7 +53,6 @@ export class GroupPageComponent{
     private dialog: MatDialog,
     private http: HttpClient,
     private authService: AuthService,
-    private router: Router,
   ) {}
 
   user_id = 0;
