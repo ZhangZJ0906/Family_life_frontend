@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { HttpClientService } from '../../@services/http-client.service';
 import Swal from 'sweetalert2';
 import { NotifySettingService } from '../../@services/NotifySettingService';
+import { EmailVerifyService } from './../../@services/EmailVerifyService';
 
 @Component({
   selector: 'app-login',
@@ -28,7 +29,7 @@ export class LoginComponent {
     private readonly router: Router,
 
     private notifySettingService: NotifySettingService, //共享userInfo
-
+    private readonly emailVerifyService: EmailVerifyService,
     private readonly http: HttpClientService,
 
   ) {}
@@ -102,6 +103,7 @@ export class LoginComponent {
   }
   getBackToLogin() {
     this.isForgotPwd = false;
+    this.updatePwd = false;
   }
 
   checkEmailFromBackend() {
@@ -117,7 +119,12 @@ export class LoginComponent {
             });
             return;
           }
-          this.updatePwd = true;
+          this.emailVerifyService.sendVerifyCode(
+            this.checkEmail,
+            () => {
+              this.updatePwd = true;
+            }
+          );
         },
         error(err) {
           Swal.fire({

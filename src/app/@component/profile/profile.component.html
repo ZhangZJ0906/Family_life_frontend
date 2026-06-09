@@ -1,112 +1,106 @@
 <div class="profile-page">
 <app-topbar></app-topbar>
 
+<div class="profile-content">
   <section class="profile-grid">
 
-    <!-- 左上：頭像 -->
-    <div class="profile-card user-card">
-    <!-- 頭像外框：圖片和文字都放在這個圓形框裡 -->
-    <div class="avatar-large">
+    <!-- 左上：個人資訊（合併卡） -->
+    <div class="profile-card profile-user-card">
 
-      <!-- 有選圖片時顯示圖片 -->
-      <img *ngIf="avatarUrl; else textAvatar" [src]="avatarUrl" alt="頭像">
+      <div class="user-card-inner">
 
-      <!-- 沒有圖片時顯示文字 J -->
-      <ng-template #textAvatar>
-        {{ avatarText }}
-      </ng-template>
+        <!-- 左：頭像 -->
+        <div class="avatar-section">
+          <div class="avatar-large">
+            <img *ngIf="avatarUrl; else textAvatar" [src]="avatarUrl" alt="頭像">
 
-    </div>
-      <h3>{{ userName }}</h3>
-      <p>{{ email }}</p>
-      <button type="button" class="edit-avatar-btn" (click)="openAvatarDialog()">更換頭像</button>
-    </div>
+            <ng-template #textAvatar>
+              {{ avatarText }}
+            </ng-template>
+          </div>
 
-    <!-- 中上：基本資料 -->
-    <div class="profile-card info-card">
-      <h3>基本資料</h3>
 
-      <div class="form-row">
-        <label>使用者名稱</label>
-        <p class="profile-text">{{ userName }}</p>
-      </div>
+        </div>
 
-      <div class="form-row">
-        <label>Email</label>
-        <p class="profile-text">{{ email }}</p>
-      </div>
+        <!-- 右：基本資料 -->
+        <div class="info-section">
 
-      <div class="form-actions">
-        <button type="button" class="revise-btn" (click)="openEditDialog()">修改</button>
-      </div>
-    </div>
+          <h3 class="name">{{ userName }}</h3>
+          <p class="email">{{ email }}</p>
 
-    <!-- 右側：群組，往下跨兩列 -->
-    <div class="profile-card group-card" >
-      <div class="group-header">
-          <h3>群組狀態</h3>
-      </div>
+          <!-- <div class="info-block">
+            <div class="info-row">
+              <span class="label">使用者名稱</span>
+              <span class="value">{{ userName }}</span>
+            </div>
 
-      <!-- LOADING TABLE -->
-      <div *ngIf="isLoading" class="table-skeleton">
+            <div class="info-row">
+              <span class="label">Email</span>
+              <span class="value">{{ email }}</span>
+            </div>
+          </div> -->
+          <button type="button"
+                  class="edit-avatar-btn"
+                  (click)="openEditDialog()">
+            更改資料
+          </button>
 
-        <div class="row skeleton-row" *ngFor="let i of [1,2,3,4,5]">
-          <div class="cell avatar"></div>
-          <div class="cell text"></div>
-          <div class="cell text short"></div>
         </div>
 
       </div>
 
-      <!-- REAL TABLE -->
-      <div *ngIf="!isLoading">
-
-        <!-- <div class="group-list"> -->
-          <details class="group-accordion" *ngFor="let group of groups" open>
-            <summary>
-              <div class="group-summary-left">
-                <img class="group-avatar" [src]="group.avatar || 'assets/default-avatar.png'">
-
-                <span class="group-name">
-                  {{ truncateName(group.groupName) }}
-                </span>
-              </div>
-
-              <!-- 右側：文字 + switch -->
-            <!-- <div class="group-share-setting">
-              <span class="group-share-text">
-                顯示個人清單給該群組
-              </span>
-
-              <label class="switch">
-                <input
-                  type="checkbox"
-                  name="publicInventory{{group.groupId}}"
-                  [(ngModel)]="publicInventoryObj[group.groupId]"
-                  (change)="isDirty = true"
-                >
-                <span class="slider"></span>
-              </label>
-            </div> -->
-          </summary>
-            <div class="group-detail">
-              <div class="invite-row">
-                <p>邀請碼 : {{ group.inviteCode }}</p>
-
-                <button
-                  class="copy-btn"
-                  (click)="copyInviteCode(group)"
-                >
-                  複製
-                </button>
-              </div>
-
-            </div>
-          </details>
-
-        <!-- </div> -->
-      </div>
     </div>
+
+    <!-- 右側：群組，往下跨兩列 -->
+<div class="profile-card group-card">
+  <div class="group-header">
+    <h3>群組狀態</h3>
+  </div>
+
+  <!-- LOADING TABLE -->
+  <div *ngIf="isLoading" class="table-skeleton">
+    <div class="row skeleton-row" *ngFor="let i of [1,2,3,4,5]">
+      <div class="cell avatar"></div>
+      <div class="cell text"></div>
+      <div class="cell text short"></div>
+    </div>
+  </div>
+
+  <!-- REAL TABLE -->
+  <div *ngIf="!isLoading" class="group-list">
+    <details class="group-accordion" *ngFor="let group of groups" open>
+      <summary>
+        <div class="group-summary-left">
+          <img
+            class="group-avatar"
+            [src]="group.avatar || 'assets/default-avatar.png'"
+          />
+
+          <span class="group-name">
+            {{ truncateName(group.groupName) }}
+          </span>
+        </div>
+      </summary>
+
+      <div class="group-detail">
+        <div class="invite-row">
+          <p class="invite-code">
+            邀請碼：{{ group.inviteCode }}
+          </p>
+
+          <button
+            class="copy-btn"
+            type="button"
+            (click)="copyInviteCode(group)"
+          >
+            複製
+          </button>
+        </div>
+      </div>
+    </details>
+  </div>
+</div>
+
 
     <!-- 左下：通知設定，橫跨頭像 + 基本資料 -->
     <div class="profile-card notify-card">
@@ -131,13 +125,15 @@
         </div>
 
         <label class="switch">
-          <input type="checkbox" [(ngModel)]="emailNotify" (change)="isDirty = true" (click)="verifyEmailExist(emailVerify)">
+          <input type="checkbox" [(ngModel)]="emailNotify" (change)="isDirty = true">
           <span class="slider"></span>
         </label>
       </div>
     </div>
 
   </section>
+</div>
+
 
   <div class="save-wrapper">
     <button class="save-btn" (click)="saveAll()">

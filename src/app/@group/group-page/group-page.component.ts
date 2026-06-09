@@ -9,10 +9,13 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatBadgeModule } from '@angular/material/badge';
 
+import { ChatRoomComponent } from './../chat-room/chat-room.component';
 import { GroupMemberDialogComponent } from '../group-member-dialog/group-member-dialog.component';
 import { NotifyDialogComponent } from '../notify-dialog/notify-dialog.component';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
+
 import { AuthService } from '../../@services/auth.service';
+
 
 @Component({
   selector: 'app-group-page',
@@ -49,7 +52,7 @@ export class GroupPageComponent{
   constructor(
     private dialog: MatDialog,
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
   ) {}
 
   user_id = 0;
@@ -257,6 +260,55 @@ export class GroupPageComponent{
     });
   }
 
+  private chatDialogs = new Map<number, any>();
+
+  openChatRoom(group: any) {
+    const groupId = group.groupId;
+
+    // ❌ 已經開過 → 不再開新視窗
+    if (this.chatDialogs.has(groupId)) {
+
+      return;
+    }
+
+    let offset = this.dialog.openDialogs.length * 30;
+
+    const dialogRef = this.dialog.open(ChatRoomComponent, {
+      position: {
+        bottom: `${offset}px`,
+        right: `${offset}px`
+      },
+
+      width: '420px',
+      height: '650px',
+
+      panelClass: 'chat-dialog',
+
+      data: {
+        groupId: group.groupId,
+        groupName: group.groupName
+      },
+
+      // ⭐ 重點：允許多開
+      disableClose: false,
+
+      // ⭐ 避免覆蓋（可選）
+      hasBackdrop: false,
+
+      // ⭐ 每個 dialog 都可獨立互動
+      autoFocus: false
+    });
+
+    // 👉 存起來
+    this.chatDialogs.set(groupId, dialogRef);
+
+    // 👉 關閉時移除紀錄
+    dialogRef.afterClosed().subscribe(() => {
+      this.chatDialogs.delete(groupId);
+    });
+
+  }
+
   openCreateDialog() {
 
     Swal.fire({
@@ -355,31 +407,71 @@ export class GroupPageComponent{
 
       html: `
 
-        <input
-          id="groupName"
-          class="swal2-input"
-          placeholder="群組名稱"
-          value="${group.groupName}"
-        />
-
-        <input
-          id="groupAvatar"
-          type="file"
-          class="swal2-file"
-          accept="image/*"
-        />
-
-        <img
-          id="avatarPreview"
-          src="${group.avatar || ''}"
+        <div
           style="
-            width:100px;
-            height:100px;
-            border-radius:50%;
-            object-fit:cover;
-            margin-top:10px;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            gap:12px;
           "
-        />
+        >
+
+          <!-- 圖片預覽 -->
+          <img
+            id="avatarPreview"
+            src="${group.avatar || ''}"
+            style="
+              width:100px;
+              height:100px;
+              border-radius:50%;
+              object-fit:cover;
+              border:2px solid #eee;
+            "
+          />
+
+          <!-- 選擇圖片 -->
+          <label
+            for="groupAvatar"
+            style="
+              background:#2f80ed;
+              color:white;
+              padding:8px 16px;
+              border-radius:10px;
+              cursor:pointer;
+              font-weight:600;
+            "
+          >
+            選擇圖片
+          </label>
+
+          <input
+            id="groupAvatar"
+            type="file"
+            accept="image/*"
+            style="display:none;"
+          />
+
+          <!-- 檔名 -->
+          <span
+            id="fileName"
+            style="
+              font-size:13px;
+              color:#666;
+            "
+          >
+            尚未選擇圖片
+          </span>
+
+          <!-- 群組名稱 -->
+          <input
+            id="groupName"
+            class="swal2-input"
+            placeholder="群組名稱"
+            value="${group.groupName}"
+            style="margin-top:8px;"
+          />
+
+        </div>
 
       `,
 
@@ -399,24 +491,31 @@ export class GroupPageComponent{
             'avatarPreview'
           ) as HTMLImageElement;
 
+        const fileName = document.getElementById('fileName');
+
         fileInput.addEventListener('change', (event: any) => {
 
           selectedFile = event.target.files[0];
 
-          if (selectedFile) {
-
-            const reader = new FileReader();
-
-            reader.onload = (e: any) => {
-              preview.src = e.target.result;
-            };
-
-            reader.readAsDataURL(selectedFile);
-
+          if (!selectedFile) {
+            return;
           }
 
-        });
+          // 顯示檔名
+          if (fileName) {
+            fileName.textContent = selectedFile.name;
+          }
 
+          // 預覽圖片
+          const reader = new FileReader();
+
+          reader.onload = (e: any) => {
+            preview.src = e.target.result;
+          };
+
+          reader.readAsDataURL(selectedFile);
+
+        });
       },
 
       preConfirm: () => {

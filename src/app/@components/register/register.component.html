@@ -8,6 +8,19 @@
   </div>
 
   <form class="auth-card register-card" (ngSubmit)="register()">
+
+    @if(errorMessage){
+      <div class="alert-error">
+        {{ errorMessage }}
+      </div>
+    }
+
+    @if(successMessage){
+      <div class="alert-success">
+        {{ successMessage }}
+      </div>
+    }
+
     <div class="form-icon register-icon">
       <mat-icon>person_add</mat-icon>
     </div>
@@ -28,18 +41,30 @@
       />
     </mat-form-field>
 
-    <mat-form-field class="auth-field" appearance="outline">
+    <mat-form-field
+      class="auth-field"
+      appearance="outline"
+      subscriptSizing="fixed"
+      [class.email-invalid]="emailError">
+
       <mat-label>Email</mat-label>
+
       <mat-icon matPrefix>mail</mat-icon>
+
       <input
         matInput
         type="email"
         name="email"
         [(ngModel)]="email"
-        placeholder="請輸入 Email"
         required
       />
+
     </mat-form-field>
+    @if(emailError){
+      <div class="field-error">
+        {{ emailError }}
+      </div>
+    }
 
     <mat-form-field class="auth-field" appearance="outline">
       <mat-label>密碼</mat-label>
@@ -77,9 +102,9 @@
     <button
       mat-raised-button
       color="primary"
-      type="submit"
+      type="button"
       class="register-btn"
-      [disabled]="!!passwordError || !!confirmPasswordError"
+      (click)="startRegister()"
     >
       註冊
     </button>

@@ -147,7 +147,11 @@
         <!-- calendar -->
         <ng-container *ngIf="n.type === 'calendar' || n.type === 'calendar_self' || n.type === 'warring' || n.type === 'warring_self'">
 
-          <button class="view-btn" (click)="goCalendar(n)">
+          <button class="view-btn" *ngIf="n.type === 'calendar'" (click)="goCalendar(n)">
+            查看
+          </button>
+
+          <button class="view-btn" *ngIf="n.type === 'warring' || n.type === 'warring_self'" (click)="goItemList(n)">
             查看
           </button>
 

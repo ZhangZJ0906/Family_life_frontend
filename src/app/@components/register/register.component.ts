@@ -1,3 +1,4 @@
+import { EmailVerifyService } from './../../@services/EmailVerifyService';
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -25,8 +26,12 @@ export class RegisterComponent {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly emailVerifyService: EmailVerifyService
   ) {}
+
+  errorMessage = '';
+  successMessage = '';
 
   name = '';
   email = '';
@@ -34,6 +39,8 @@ export class RegisterComponent {
   confirmPassword = '';
   avatar = '';
   is_notify: boolean = true;
+
+  emailVerified = false;
 
   get passwordError(): string {
     if (!this.password) {
@@ -59,34 +66,30 @@ export class RegisterComponent {
     return '';
   }
 
+  get emailError(): string {
+    if (!this.email) {
+      return '';
+    }
+
+    if(this.email == "familyLifeTest123456@gmail.com"){
+      return '官方email請勿使用';
+    }
+
+    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+
+    if (!gmailRegex.test(this.email)) {
+      return '請輸入正確的 Gmail 信箱';
+    }
+
+    return '';
+  }
+
   register(): void {
-    if (!this.email || !this.name || !this.password || !this.confirmPassword) {
-      Swal.fire({
-        icon: 'warning',
-        title: '資料未填完整',
-        text: '請完整填寫姓名、Email、密碼、確認密碼',
-        confirmButtonText: '確認',
-      });
-      return;
-    }
 
-    if (this.passwordError) {
-      Swal.fire({
-        icon: 'warning',
-        title: '密碼格式不正確',
-        text: this.passwordError,
-        confirmButtonText: '確認',
-      });
-      return;
-    }
+    this.errorMessage = '';
 
-    if (this.password !== this.confirmPassword) {
-      Swal.fire({
-        icon: 'warning',
-        title: '確認密碼錯誤',
-        text: '兩次輸入的密碼不一致',
-        confirmButtonText: '確認',
-      });
+    if (!this.emailVerified) {
+      this.errorMessage = '請先完成 Email 驗證';
       return;
     }
 
@@ -95,53 +98,73 @@ export class RegisterComponent {
       email: this.email,
       pwd: this.password,
       avatar: this.avatar ?? '',
-      // notify: this.is_notify ?? true
     }).subscribe({
       next: (res) => {
-        console.log('register response:', res);
-
-        if (res.code === 200) {
+        if(res.message == "Email already exists"){
           Swal.fire({
-            icon: 'success',
-            title: '註冊成功',
-            text: '請使用新帳號登入',
-            timer: 1200,
-            showConfirmButton: false,
-          }).then(() => {
-            this.router.navigate(['/login']);
+            icon: 'error',
+            title: '註冊失敗',
+            text: 'Email已存在',
           });
           return;
         }
 
-        Swal.fire({
-          icon: 'error',
-          title: '註冊失敗',
-          text: res.message ?? '請稍後再試',
-          confirmButtonText: '確認',
-        });
+        else if (res.code === 200) {
+          this.successMessage = '註冊成功，即將前往登入頁';
+
+          Swal.fire({
+            icon: 'success',
+            title: '註冊成功',
+            timer: 1200,
+            showConfirmButton: false
+          }).then(() => {
+            this.router.navigate(['/login']);
+          });
+
+          return;
+        }
+
+        this.errorMessage = res.message ?? '註冊失敗';
       },
       error: (err) => {
-      console.error(err);
-
-      if (err.error?.message === 'PASSWORD_ERROR') {
-        Swal.fire({
-          icon: 'warning',
-          title: '密碼格式不正確',
-          text: '請至少輸入 6 個字元',
-          confirmButtonText: '確認',
-        });
-        return;
+        this.errorMessage =
+          err.error?.message ?? '系統發生錯誤，請稍後再試';
       }
-
-      Swal.fire({
-        icon: 'error',
-        title: '註冊失敗',
-        text: err.error?.message ?? '請稍後再試',
-        confirmButtonText: '確認',
-      });
-    }
     });
   }
 
+  startRegister(): void {
+
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    if (!this.email || !this.name || !this.password || !this.confirmPassword) {
+      this.errorMessage = '請完整填寫所有欄位';
+      return;
+    }
+
+    if (this.emailError) {
+      this.errorMessage = this.emailError;
+      return;
+    }
+
+    if (this.passwordError) {
+      this.errorMessage = this.passwordError;
+      return;
+    }
+
+    if (this.confirmPasswordError) {
+      this.errorMessage = this.confirmPasswordError;
+      return;
+    }
+
+    this.emailVerifyService.sendVerifyCode(
+      this.email,
+      () => {
+        this.emailVerified = true;
+        this.register();
+      }
+    );
+  }
 
 }

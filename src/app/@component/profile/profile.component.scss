@@ -1,16 +1,27 @@
-/* 整個個人資料頁背景 */
+/* =========================
+   PAGE LAYOUT
+========================= */
+
 .profile-page {
   min-height: 100vh;
   padding: 28px;
-  background: #f6f7f9;
+  background: linear-gradient(180deg, #f6f7f9 0%, #eef1f6 100%);
   color: #222;
   box-sizing: border-box;
 }
 
-/* 上方標題列 */
+.profile-content {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* =========================
+   TOP BAR
+========================= */
+
 .profile-topbar {
   height: 72px;
-  background: #ffffff;
+  background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 18px;
   padding: 0 24px;
@@ -20,97 +31,149 @@
   margin-bottom: 24px;
 }
 
-/* 標題文字 */
-.profile-topbar h2 {
-  margin: 0;
-  font-size: 26px;
-  font-weight: 800;
+/* =========================
+   CARD SYSTEM (GLOBAL)
+========================= */
+
+.profile-card {
+  background: #fff;
+  border-radius: 22px;
+  border: 1px solid rgba(0,0,0,0.06);
+
+  box-shadow: 0 8px 24px rgba(20, 30, 50, 0.06);
+  transition: all 0.25s ease;
 }
 
-/* 群組標題列：左邊群組標題，右邊返回首頁按鈕 */
-.group-header {
-  display: flex;                  /* 左右排列 */
-  justify-content: space-between; /* 左右貼齊 */
-  align-items: center;            /* 垂直置中 */
-  margin-bottom: 20px;            /* 與下方群組內容保持距離 */
+.profile-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 40px rgba(20, 30, 50, 0.10);
 }
 
-/* 群組標題文字 */
-.group-header h3 {
-  margin: 0;          /* 移除預設外距 */
-  font-size: 22px;    /* 標題大小 */
-  font-weight: 800;   /* 粗體 */
-}
+/* =========================
+   GRID
+========================= */
 
-/* 返回首頁按鈕 */
-.back-btn {
-  border: none;              /* 移除邊框 */
-  background: #f3f4f6;       /* 淺灰背景 */
-  color: #333;               /* 深灰文字 */
-  border-radius: 12px;       /* 圓角 */
-  padding: 10px 18px;        /* 內距 */
-  font-weight: 700;          /* 粗體 */
-  cursor: pointer;           /* 滑鼠移入顯示可點擊 */
-  transition: 0.2s;          /* hover 動畫 */
-}
-
-/* 滑鼠移到按鈕上的效果 */
-.back-btn:hover {
-  background: #e9eef6; /* hover 時背景變淡藍灰 */
-  color: #2f80ed;      /* hover 時文字變藍 */
-}
-
-/* 主版面：三欄兩列 */
 .profile-grid {
   display: grid;
   grid-template-columns: 320px 1fr 1fr;
   grid-template-rows: 274px auto;
-  column-gap: 20px;
-  row-gap: 20px; /* 原本空太大就改這裡 */
-  align-items: stretch;
+  gap: 20px;
 }
 
-/* 所有白色卡片共用樣式 */
-.profile-card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 22px;
-  padding: 26px;
-  box-sizing: border-box;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
-}
+/* =========================
+   USER CARD (LEFT TOP)
+========================= */
 
-/* 頭像卡片 */
-.user-card {
-  grid-column: 1;
+.profile-user-card {
+  grid-column: 1 / span 2;
   grid-row: 1;
-  text-align: center;
-  height: 274px;
+  padding: 32px;
 }
 
-/* 基本資料卡片 */
-.info-card {
-  grid-column: 2;
-  grid-row: 1;
-  height: 274px;
+.user-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 28px;
 }
 
-/* 群組卡片：右欄跨兩列 */
+/* Avatar */
+.avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.avatar-large {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(135deg, #2f80ed, #56ccf2);
+  box-shadow: 0 10px 25px rgba(47, 128, 237, 0.25);
+
+  border: 4px solid #fff;
+  font-size: 52px;
+  font-weight: 800;
+}
+
+.avatar-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Info */
+.info-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 140px;
+}
+
+.info-section .name {
+  font-size: 30px;
+  font-weight: 900;
+  margin: 0 0 6px;
+}
+
+.info-section .email {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 16px;
+}
+
+/* Button */
+.edit-avatar-btn {
+  width: fit-content;
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: none;
+
+  background: linear-gradient(135deg, #2f80ed, #1f6fd6);
+  color: #fff;
+
+  font-weight: 700;
+  cursor: pointer;
+
+  box-shadow: 0 6px 18px rgba(47, 128, 237, 0.25);
+}
+
+/* =========================
+   GROUP CARD (RIGHT)
+========================= */
+
 .group-card {
   grid-column: 3;
   grid-row: 1 / span 2;
-  height: 100%;
+  padding: 20px;
+  height: 720px;
   display: flex;
   flex-direction: column;
 }
-//loading
+
+.group-header {
+  flex-shrink: 0;
+  margin-bottom: 16px;
+}
+
+.group-header h3 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+/* Loading skeleton */
 .table-skeleton {
   padding: 10px;
 }
 
 .skeleton-row {
   display: flex;
-  align-items: center;
   gap: 12px;
   margin-bottom: 12px;
 }
@@ -142,157 +205,124 @@
   100% { opacity: 1; }
 }
 
-/* 通知設定：橫跨頭像 + 基本資料 */
+/* Group list */
+.group-list {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.group-accordion {
+  background: #f8fafc;
+  border: 1px solid #eef1f5;
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+}
+
+.group-accordion summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.group-summary-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.group-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.group-name {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.group-detail {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.invite-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* ⭐ 左右貼齊 */
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.invite-code {
+  margin: 0;
+  font-size: 14px;
+  color: #555;
+  font-weight: 500;
+}
+
+/* 複製按鈕（維持你現在風格但微調） */
+.copy-btn {
+  border: none;
+  background: #2f80ed;
+  color: #fff;
+
+  padding: 6px 14px;
+  border-radius: 10px;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+  transition: 0.2s;
+  flex-shrink: 0;
+}
+
+.copy-btn:hover {
+  background: #1f6fd6;
+}
+
+/* =========================
+   NOTIFY CARD
+========================= */
+
 .notify-card {
   grid-column: 1 / span 2;
   grid-row: 2;
+  padding: 22px;
 }
 
-/* 大頭像外框 */
-.avatar-large {
-  width: 96px;
-  height: 96px;
-  border-radius: 50%;
-  background: #2f80ed;
-  color: white;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 42px;
-  font-weight: 800;
-  margin: 0 auto 16px;
-
-  overflow: hidden; /* 重要：圖片超出圓形範圍時裁切 */
-}
-
-/* 頭像圖片 */
-.avatar-large img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* 讓圖片填滿圓形，不變形 */
-  border-radius: 50%;
-  display: block;
-}
-
-.user-card h3 {
-  margin: 0;
-  font-size: 24px;
-}
-
-.user-card p {
-  color: #777;
-  margin: 10px 0 16px;
-}
-
-.edit-avatar-btn {
-  border: none;
-  background: #f3f6fb;
-  color: #2f80ed;
-  border-radius: 12px;
-  padding: 10px 18px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-/* 卡片標題 */
-.info-card h3,
-.notify-card h3,
-.group-card h3 {
-  margin: 0 0 20px;
-  font-size: 22px;
-  font-weight: 800;
-}
-
-/* 基本資料每一列 */
-.form-row {
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 22px;
-}
-
-.form-row label {
-  font-size: 15px;
-  font-weight: 700;
-  color: #444;
-  text-align: right;
-}
-
-.profile-text {
-  margin: 0;
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  padding: 16px 18px;
-  font-size: 16px;
-  color: #222;
-}
-
-.form-actions {
-  text-align: right;
-}
-
-.revise-btn{
-  border: none;
-  background: #2f80ed;
-  color: #ffffff;
-  border-radius: 12px;
-  padding: 8px 20px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.save-wrapper {
-  display: flex;
-  justify-content: center;
-  margin-top: 24px;
-  margin-bottom: 40px;
-}
-
-.save-btn {
-  min-width: 180px;
-  border: none;
-  background: #2f80ed;
-  color: #ffffff;
-  border-radius: 12px;
-  padding: 8px 20px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-/* 通知項目卡片 */
 .setting-item {
   background: #f8fafc;
   border-radius: 20px;
   padding: 22px;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
+
   margin-bottom: 16px;
 }
 
 .setting-info h4 {
   margin: 0 0 6px;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 18px;
 }
 
 .setting-info p {
   margin: 0;
   color: #7a7a7a;
-  font-size: 15px;
 }
 
-/* 開關外層 */
+/* switch */
 .switch {
   position: relative;
   width: 52px;
   height: 28px;
-  display: inline-block;
-  flex-shrink: 0;
 }
 
 .switch input {
@@ -301,11 +331,9 @@
 
 .slider {
   position: absolute;
-  cursor: pointer;
   inset: 0;
   background: #d1d5db;
   border-radius: 999px;
-  transition: 0.2s;
 }
 
 .slider::before {
@@ -313,9 +341,9 @@
   position: absolute;
   width: 22px;
   height: 22px;
-  left: 3px;
   top: 3px;
-  background: #ffffff;
+  left: 3px;
+  background: #fff;
   border-radius: 50%;
   transition: 0.2s;
 }
@@ -328,230 +356,38 @@
   transform: translateX(24px);
 }
 
-/* 群組列表：很多群組時滾動 */
-.group-list {
-  flex: 1;
-  overflow-y: auto;
-  padding-right: 6px;
-  height: 60px;
-}
+/* =========================
+   SAVE BUTTON
+========================= */
 
-.group-list::-webkit-scrollbar {
-  width: 8px;
-}
-
-.group-list::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.group-list::-webkit-scrollbar-thumb {
-  background: #d6dbe4;
-  border-radius: 999px;
-}
-
-.group-avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-}
-
-/* 群組手風琴 */
-.group-accordion {
-  background: #f8fafc;
-  border: 1px solid #eef1f5;
-  border-radius: 16px;
-  padding: 16px 18px;
-  margin-bottom: 14px;
-}
-
-/* summary 左右排列 */
-/* summary 左右排列 */
-.group-accordion summary {
+.save-wrapper {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  cursor: pointer;
-  list-style: none;
-  position: relative;
-
-  padding-left: 28px;
+  justify-content: center;
+  margin-top: 24px;
 }
 
-/* 左側 */
-.group-summary-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* 群組名稱 */
-.group-name {
-  font-size: 18px;
-  font-weight: 700;
-  color: #222;
-}
-
-/* 右側設定 */
-.group-share-setting {
-  display: flex;
-  align-items: center;
-  gap: 10px; /* 文字和 slider 距離 */
-}
-
-/* 顯示個人清單文字 */
-.group-share-text {
-  font-size: 14px;
-  font-weight: 400;
-  color: #777;
-}
-
-/* 顯示個人清單文字 */
-.group-share-text {
-  font-size: 14px;
-  font-weight: 400;   /* 字體變細 */
-  color: #777;
-  margin-left: 6px;
-}
-
-/* switch 對齊 */
-.group-accordion .switch {
-  display: flex;
-  align-items: center;
-  margin-left: auto;
-}
-
-.group-accordion summary::-webkit-details-marker {
-  display: none;
-}
-
-.group-accordion summary::before {
-  content: "›";
-  position: absolute;
-  left: 0;
-  top: -2px;
-  font-size: 24px;
-  color: #2f80ed;
-  transition: 0.2s;
-}
-
-.group-accordion[open] summary::before {
-  transform: rotate(90deg);
-}
-
-.group-detail {
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.group-detail p {
-  margin: 0 0 6px;
-  color: #777;
-}
-
-.group-detail h4 {
-  margin: 0;
-  font-size: 20px;
-}
-
-.invite-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.invite-row p {
-  margin: 0;
-  color: #777;
-}
-
-/* 複製按鈕 */
-.copy-btn {
-  border: none;
+.save-btn {
+  min-width: 180px;
   background: #2f80ed;
-  color: white;
-  border-radius: 10px;
-  padding: 6px 14px;
-  font-size: 14px;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
   font-weight: 700;
-  cursor: pointer;
-  transition: 0.2s;
-  flex-shrink: 0;
 }
 
-.copy-btn:hover {
-  background: #1f6fd6;
-}
+/* =========================
+   RWD
+========================= */
 
-/* 群組卡片 */
-.group-card {
-
-  /* 卡片固定高度 */
-  height: 720px;
-
-  /* 讓內部可以上下排列 */
-  display: flex;
-  flex-direction: column;
-}
-
-/* 群組列表區 */
-.group-list {
-
-  /* 自動填滿剩餘高度 */
-  flex: 1;
-
-  /* 群組內容最大高度 */
-  max-height: 620px;
-
-  /* 超過高度時顯示垂直滾輪 */
-  overflow-y: auto;
-
-  /* 避免滾輪貼齊內容 */
-  padding-right: 8px;
-}
-
-/* 滾輪寬度 */
-.group-list::-webkit-scrollbar {
-  width: 8px;
-}
-
-/* 滾輪背景軌道 */
-.group-list::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-/* 滾輪本體 */
-.group-list::-webkit-scrollbar-thumb {
-  background: #cfd6e0;
-  border-radius: 999px;
-}
-
-/* 滑鼠移上滾輪時顏色 */
-.group-list::-webkit-scrollbar-thumb:hover {
-  background: #aeb8c6;
-}
-
-/* 窄螢幕改單欄 */
 @media (max-width: 1100px) {
   .profile-grid {
     grid-template-columns: 1fr;
+    grid-template-rows: auto;
   }
 
-  .user-card,
-  .info-card,
-  .group-card,
-  .notify-card {
-    grid-column: 1;
-    grid-row: auto;
-    height: auto;
+  .profile-card {
+    grid-column: 1 !important;
+    grid-row: auto !important;
   }
-
-.avatar-large img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-}
 }
