@@ -355,15 +355,29 @@ export class GroupPageComponent{
 
       html: `
 
-        <input
-          id="groupName"
-          class="swal2-input"
-          placeholder="群組名稱"
-          value="${group.groupName}"
-        />
+        <div
+          style="
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            gap:12px;
+          "
+        >
 
-        <div style="display:flex;align-items:center;gap:12px;">
+          <!-- 圖片預覽 -->
+          <img
+            id="avatarPreview"
+            src="${group.avatar || ''}"
+            style="
+              width:100px;
+              height:100px;
+              border-radius:50%;
+              object-fit:cover;
+              border:2px solid #eee;
+            "
+          />
 
+          <!-- 選擇圖片 -->
           <label
             for="groupAvatar"
             style="
@@ -378,8 +392,6 @@ export class GroupPageComponent{
             選擇圖片
           </label>
 
-          <span id="fileName">尚未選擇圖片</span>
-
           <input
             id="groupAvatar"
             type="file"
@@ -387,19 +399,27 @@ export class GroupPageComponent{
             style="display:none;"
           />
 
-        </div>
+          <!-- 檔名 -->
+          <span
+            id="fileName"
+            style="
+              font-size:13px;
+              color:#666;
+            "
+          >
+            尚未選擇圖片
+          </span>
 
-        <img
-          id="avatarPreview"
-          src="${group.avatar || ''}"
-          style="
-            width:100px;
-            height:100px;
-            border-radius:50%;
-            object-fit:cover;
-            margin-top:10px;
-          "
-        />
+          <!-- 群組名稱 -->
+          <input
+            id="groupName"
+            class="swal2-input"
+            placeholder="群組名稱"
+            value="${group.groupName}"
+            style="margin-top:8px;"
+          />
+
+        </div>
 
       `,
 
