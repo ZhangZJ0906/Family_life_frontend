@@ -231,18 +231,23 @@ export class ProfileComponent implements CanComponentDeactivate {
         // ⭐ 即時預覽頭像
         const input = document.getElementById('avatarInput') as HTMLInputElement;
         const preview = document.getElementById('avatarPreview') as HTMLImageElement;
+        const fileName = document.getElementById('fileName');
 
         input?.addEventListener('change', () => {
           const file = input.files?.[0];
           if (file) {
             preview.src = URL.createObjectURL(file);
+
+            if (fileName) {
+              fileName.textContent = file.name;
+            }
           }
         });
       },
 
       preConfirm: () => {
         const userName = (document.getElementById('editUserName') as HTMLInputElement).value.trim();
-        const email = (document.getElementById('editEmail') as HTMLInputElement).value.trim();
+        // const email = (document.getElementById('editEmail') as HTMLInputElement).value.trim();
         const file = (document.getElementById('avatarInput') as HTMLInputElement).files?.[0];
 
         if (!userName) {
@@ -250,24 +255,24 @@ export class ProfileComponent implements CanComponentDeactivate {
           return false;
         }
 
-        if (!email) {
-          Swal.showValidationMessage('Email 不可為空');
-          return false;
-        }
+        // if (!email) {
+        //   Swal.showValidationMessage('Email 不可為空');
+        //   return false;
+        // }
 
-        if (!emailPattern.test(email)) {
-          Swal.showValidationMessage('Email 格式錯誤');
-          return false;
-        }
+        // if (!emailPattern.test(email)) {
+        //   Swal.showValidationMessage('Email 格式錯誤');
+        //   return false;
+        // }
 
-        if (email === "familyLifeTest123456@gmail.com") {
-          Swal.showValidationMessage('這是官方 email!!');
-          return false;
-        }
+        // if (email === "familyLifeTest123456@gmail.com") {
+        //   Swal.showValidationMessage('這是官方 email!!');
+        //   return false;
+        // }
 
         return {
           userName,
-          email,
+          // email,
           file
         };
       }
@@ -276,7 +281,7 @@ export class ProfileComponent implements CanComponentDeactivate {
 
       // 更新資料
       this.userName = result.value.userName;
-      this.email = result.value.email;
+      // this.email = result.value.email;
 
       // ⭐ 如果有新頭像
       if (result.value.file) {
