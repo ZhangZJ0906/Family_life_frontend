@@ -362,12 +362,32 @@ export class GroupPageComponent{
           value="${group.groupName}"
         />
 
-        <input
-          id="groupAvatar"
-          type="file"
-          class="swal2-file"
-          accept="image/*"
-        />
+        <div style="display:flex;align-items:center;gap:12px;">
+
+          <label
+            for="groupAvatar"
+            style="
+              background:#2f80ed;
+              color:white;
+              padding:8px 16px;
+              border-radius:10px;
+              cursor:pointer;
+              font-weight:600;
+            "
+          >
+            選擇圖片
+          </label>
+
+          <span id="fileName">尚未選擇圖片</span>
+
+          <input
+            id="groupAvatar"
+            type="file"
+            accept="image/*"
+            style="display:none;"
+          />
+
+        </div>
 
         <img
           id="avatarPreview"
@@ -399,24 +419,31 @@ export class GroupPageComponent{
             'avatarPreview'
           ) as HTMLImageElement;
 
+        const fileName = document.getElementById('fileName');
+
         fileInput.addEventListener('change', (event: any) => {
 
           selectedFile = event.target.files[0];
 
-          if (selectedFile) {
-
-            const reader = new FileReader();
-
-            reader.onload = (e: any) => {
-              preview.src = e.target.result;
-            };
-
-            reader.readAsDataURL(selectedFile);
-
+          if (!selectedFile) {
+            return;
           }
 
-        });
+          // 顯示檔名
+          if (fileName) {
+            fileName.textContent = selectedFile.name;
+          }
 
+          // 預覽圖片
+          const reader = new FileReader();
+
+          reader.onload = (e: any) => {
+            preview.src = e.target.result;
+          };
+
+          reader.readAsDataURL(selectedFile);
+
+        });
       },
 
       preConfirm: () => {
