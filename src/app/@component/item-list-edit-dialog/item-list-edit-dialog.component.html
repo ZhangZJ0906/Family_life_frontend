@@ -16,43 +16,45 @@
     }
 
 
-    <div class="col-12" [style.pointer-events]="isExpired ? 'none' : 'auto'">
-      <div
-        class="p-3 rounded-3 bg-light border d-flex align-items-center gap-3"
-      >
-        <div class="position-relative">
-          <img
-            [src]="imagePreview || 'assets/default-avatar.png'"
-            alt="Item Avatar"
-            style="
-              width: 70px;
-              height: 70px;
-              border-radius: 50%;
-              object-fit: cover;
-            "
-            class="border"
-          />
-        </div>
-        <div class="flex-grow-1">
-          <label class="fw-bold mb-1 d-block" style="font-size: 14px"
-            >更換物品圖片</label
-          >
-          <input
-            type="file"
-            accept="image/*"
-            (change)="onFileSelected($event)"
-            class="form-control form-control-sm"
-            [disabled]="isExpired"
-          />
-        </div>
+<div class="col-12 mb-3" [style.pointer-events]="isExpired ? 'none' : 'auto'">
+  <div class="p-3 rounded-3 bg-light border d-flex align-items-center gap-3">
 
+    <div class="position-relative">
+      <img [src]="imagePreview || 'assets/default-avatar.png'" alt="Item Avatar"
+        style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover;" class="border" />
+    </div>
+
+    <div class="flex-grow-1">
+      <label class="fw-bold mb-1 d-block" style="font-size: 14px">更換物品圖片</label>
+
+      <!-- ✅ 跟 Add Dialog 一樣：自訂外框 + 隱藏原生 input -->
+      <div class="file-upload-wrapper" style="border: 1px solid #ced4da; border-radius: 8px; display: flex;
+               align-items: center; overflow: hidden; height: 40px; background-color: #fff;">
+
+<label for="image" class="btn btn-light d-flex align-items-center justify-content-center px-1 " style="border-radius: 0; height: 100%; margin-bottom: 0;
+         border-right: 1px solid #ced4da; cursor: pointer;
+         background-color: #f8f9fa; font-size: 13px;
+         white-space: nowrap;">
+  選擇檔案
+</label>
+
+        <!-- ✅ 直接用 selectedFile?.name 顯示，跟 Add 邏輯一致 -->
+        <span class="text-muted ms-2 text-truncate pe-2" style="font-size: 13px;">
+          {{ selectedFile?.name || '未選擇任何檔案' }}
+        </span>
+
+        <!-- ✅ 隱藏原生 input -->
+        <input type="file" id="image" accept="image/*" class="d-none" (change)="onFileSelected($event)"
+          [disabled]="isExpired" />
+      </div>
+    </div>
 
     <button type="button" class="btn btn-outline-primary px-3 d-flex align-items-center justify-content-center"
       style="height: 50px; border-radius: 8px; font-size: 14px; white-space: nowrap;" (click)="openDefaultImageModal()">
       <i class="bi bi-image me-1"></i> 選擇預設圖片
     </button>
-      </div>
-    </div>
+  </div>
+</div>
 
 
     <div class="row g-3">

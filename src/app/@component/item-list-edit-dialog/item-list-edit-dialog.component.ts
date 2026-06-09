@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -54,186 +54,138 @@ export class ItemListEditDialogComponent implements OnInit {
     // 1. 食品類 (food)
     // ==========================================
     { name: '雞蛋', url: 'assets/eggs.png', category: '食品' },
-    { name: '牛奶 / 乳製品', url: 'assets/milk.png', category: '食品' },
+    { name: '牛奶,乳製品', url: 'assets/milk.png', category: '食品' },
     { name: '新鮮蔬菜', url: 'assets/vegetables.png', category: '食品' },
     { name: '新鮮水果', url: 'assets/fruits.png', category: '食品' },
-    { name: '肉類 / 海鮮', url: 'assets/meat.png', category: '食品' },
+    { name: '肉類,海鮮', url: 'assets/meat.png', category: '食品' },
     {
-      name: '白米 / 麵條 / 主食',
+      name: '白米,麵條,主食',
       url: 'assets/rice-noodles.png',
       category: '食品',
     },
-    { name: '泡麵 / 罐頭', url: 'assets/instant.png', category: '食品' },
-    { name: '零食 / 餅乾 / 糖果', url: 'assets/snack.png', category: '食品' },
-    { name: '麵包 / 吐司', url: 'assets/bread.png', category: '食品' },
-    { name: '咖啡豆 / 茶包', url: 'assets/coffee-tea.png', category: '食品' },
-    { name: '飲料 / 礦泉水', url: 'assets/drinks.png', category: '食品' },
-    { name: '醬油 / 調味料', url: 'assets/sauces.png', category: '食品' },
+    { name: '泡麵,罐頭', url: 'assets/instant.png', category: '食品' },
+    { name: '零食,餅乾,糖果', url: 'assets/snack.png', category: '食品' },
+    { name: '麵包,吐司', url: 'assets/bread.png', category: '食品' },
+    { name: '咖啡豆,茶包', url: 'assets/coffee-tea.png', category: '食品' },
+    { name: '飲料,礦泉水', url: 'assets/drinks.png', category: '食品' },
+    { name: '醬油,調味料', url: 'assets/sauces.png', category: '食品' },
     { name: '預設食品', url: 'assets/default.png', category: '食品' },
 
     // ==========================================
     // 2. 藥品類 (medicine)
     // ==========================================
+    { name: '普拿疼,止痛藥', url: 'assets/panodol.png', category: '藥品' },
+    { name: '綜合感冒藥', url: 'assets/cold.png', category: '藥品' },
+    { name: '腸胃藥,止瀉藥', url: 'assets/stomach.png', category: '藥品' },
     {
-      name: '普拿疼 / 止痛藥',
-      url: 'assets/panodol.png',
-      category: '藥品',
-    },
-    {
-      name: '綜合感冒藥',
-      url: 'assets/cold.png',
-      category: '藥品',
-    },
-    {
-      name: '腸胃藥 / 止瀉藥',
-      url: 'assets/stomach.png',
-      category: '藥品',
-    },
-    {
-      name: '眼藥水 / 隱形眼鏡藥水',
+      name: '眼藥水,隱形眼鏡藥水',
       url: 'assets/eye-drops.png',
       category: '藥品',
     },
+    { name: '維他命,保健食品', url: 'assets/vitamins.png', category: '藥品' },
+    { name: 'OK繃,紗布,繃帶', url: 'assets/band-aid.png', category: '藥品' },
     {
-      name: '維他命 / 保健食品',
-      url: 'assets/vitamins.png',
-      category: '藥品',
-    },
-    {
-      name: 'OK繃 / 紗布 / 繃帶',
-      url: 'assets/band-aid.png',
-      category: '藥品',
-    },
-    {
-      name: '棉花棒 / 醫療膠帶',
+      name: '棉花棒,醫療膠帶',
       url: 'assets/cotton-swabs.png',
       category: '藥品',
     },
     {
-      name: '防蚊液 / 止癢膏',
+      name: '防蚊液,止癢膏',
       url: 'assets/mosquito-repellent.png',
       category: '藥品',
     },
-    {
-      name: '外傷藥膏 / 優碘',
-      url: 'assets/ointment.png',
-      category: '藥品',
-    },
-    {
-      name: '體溫計 / 耳溫槍',
-      url: 'assets/thermometer.png',
-      category: '藥品',
-    },
-    {
-      name: '預設藥品',
-      url: 'assets/default.png',
-      category: '藥品',
-    },
+    { name: '外傷藥膏,優碘', url: 'assets/ointment.png', category: '藥品' },
+    { name: '體溫計,耳溫槍', url: 'assets/thermometer.png', category: '藥品' },
+    { name: '預設藥品', url: 'assets/default.png', category: '藥品' },
 
     // ==========================================
     // 3. 日用品類 (daily)
     // ==========================================
-    { name: '衛生紙 / 袖珍包', url: 'assets/tissue.png', category: '日用品' },
+    { name: '衛生紙,袖珍包', url: 'assets/tissue.png', category: '日用品' },
     {
-      name: '廚房紙巾 / 濕紙巾',
+      name: '廚房紙巾,濕紙巾',
       url: 'assets/kitchen-towel.png',
       category: '日用品',
     },
+    { name: '牙膏', url: 'assets/toothpaste.png', category: '日用品' },
+    { name: '洗髮精,潤髮乳', url: 'assets/shampoo.png', category: '日用品' },
+    { name: '沐浴乳,香皂', url: 'assets/body-wash.png', category: '日用品' },
     {
-      name: '牙膏 ',
-      url: 'assets/toothpaste.png',
-      category: '日用品',
-    },
-    { name: '洗髮精 / 潤髮乳', url: 'assets/shampoo.png', category: '日用品' },
-    { name: '沐浴乳 / 香皂', url: 'assets/body-wash.png', category: '日用品' },
-    {
-      name: '洗面乳 / 卸妝水',
+      name: '洗面乳,卸妝水',
       url: 'assets/facial-cleanser.png',
       category: '日用品',
     },
     {
-      name: '化妝水 / 乳液 / 保養品',
+      name: '化妝水,乳液,保養品',
       url: 'assets/skincare.png',
       category: '日用品',
     },
     {
-      name: '衛生棉 / 生理用品',
+      name: '衛生棉,生理用品',
       url: 'assets/sanitary-pads.png',
       category: '日用品',
     },
     { name: '垃圾袋', url: 'assets/trash-bags.png', category: '日用品' },
-    {
-      name: '電池 (AA / AAA)',
-      url: 'assets/batteries.png',
-      category: '日用品',
-    },
+    { name: '電池(AA,AAA)', url: 'assets/batteries.png', category: '日用品' },
     { name: '預設日用品', url: 'assets/default-daily.png', category: '日用品' },
 
     // ==========================================
     // 4. 訂閱類 (subscription)
     // ==========================================
     {
-      name: '影音串流 (如 Netflix/Disney+)',
+      name: '影音串流(如 Netflix,Disney+)',
       url: 'assets/video-streaming.png',
       category: '訂閱',
     },
     {
-      name: '音樂串流 (如 Spotify/Apple Music)',
+      name: '音樂串流(如 Spotify,Apple Music)',
       url: 'assets/music-streaming.png',
       category: '訂閱',
     },
     {
-      name: '雲端空間 (如 Google One/iCloud)',
+      name: '雲端空間(如 Google One,iCloud)',
       url: 'assets/cloud-storage.png',
       category: '訂閱',
     },
     {
-      name: '工作軟體 (如 Adobe/Microsoft 365)',
+      name: '工作軟體(如 Adobe,Microsoft 365)',
       url: 'assets/software-sub.png',
       category: '訂閱',
     },
+    { name: '電信費,手機網路費', url: 'assets/telecom.png', category: '訂閱' },
     {
-      name: '電信費 / 手機網路費',
-      url: 'assets/telecom.png',
-      category: '訂閱',
-    },
-    {
-      name: '健身房 / 運動會籍',
+      name: '健身房,運動會籍',
       url: 'assets/gym-membership.png',
       category: '訂閱',
     },
     {
-      name: '報章雜誌 / 線上課閱訂閱',
+      name: '報章雜誌,線上課閱訂閱',
       url: 'assets/magazine-sub.png',
       category: '訂閱',
     },
     {
-      name: '外送平台會員 (如 Foodpanda/Uber One)',
+      name: '外送平台會員(如 Foodpanda,Uber One)',
       url: 'assets/delivery-sub.png',
       category: '訂閱',
     },
-    {
-      name: '預設訂閱服務',
-      url: 'assets/default.png',
-      category: '訂閱',
-    },
+    { name: '預設訂閱服務', url: 'assets/default.png', category: '訂閱' },
 
     // ==========================================
     // 5. 清潔用品類 (cleaning)
     // ==========================================
     {
-      name: '洗衣精 / 洗衣球 / 洗衣粉',
+      name: '洗衣精,洗衣球,洗衣粉',
       url: 'assets/laundry-detergent.png',
       category: '清潔用品',
     },
     {
-      name: '柔軟精 / 漂白水',
+      name: '柔軟精,漂白水',
       url: 'assets/fabric-softener.png',
       category: '清潔用品',
     },
     { name: '洗碗精', url: 'assets/dish-soap.png', category: '清潔用品' },
     {
-      name: '菜瓜布 / 鋼絲球 / 科技海綿',
+      name: '菜瓜布,科技海綿,鋼絲球',
       url: 'assets/sponge.png',
       category: '清潔用品',
     },
@@ -248,76 +200,65 @@ export class ItemListEditDialogComponent implements OnInit {
       category: '清潔用品',
     },
     {
-      name: '馬桶 / 衛浴清潔劑',
+      name: '馬桶,衛浴清潔劑',
       url: 'assets/bathroom-cleaner.png',
       category: '清潔用品',
     },
     {
-      name: '除濕劑 / 防霉包 / 克潮靈',
+      name: '除濕劑,防霉包,克潮靈',
       url: 'assets/dehumidifier-bag.png',
       category: '清潔用品',
     },
-    {
-      name: '預設清潔用品',
-      url: 'assets/default.png',
-      category: '清潔用品',
-    },
+    { name: '預設清潔用品', url: 'assets/default.png', category: '清潔用品' },
 
     // ==========================================
     // 6. 保固類 (warranty)
     // ==========================================
     {
-      name: '智慧型手機 / 平板電腦',
+      name: '智慧型手機,平板電腦',
       url: 'assets/phone-tablet.png',
       category: '保固',
     },
     {
-      name: '桌上型電腦 / 筆記型電腦',
+      name: '桌上型電腦,筆記型電腦',
       url: 'assets/computer.png',
       category: '保固',
     },
-    { name: '螢幕 / 電視', url: 'assets/tv-monitor.png', category: '保固' },
-    { name: '藍牙耳機 / 音響', url: 'assets/audio.png', category: '保固' },
-    { name: '相機 / 鏡頭', url: 'assets/camera.png', category: '保固' },
+    { name: '螢幕,電視', url: 'assets/tv-monitor.png', category: '保固' },
+    { name: '藍牙耳機,音響', url: 'assets/audio.png', category: '保固' },
+    { name: '相機,鏡頭', url: 'assets/camera.png', category: '保固' },
     {
-      name: '行動電源 / 充電線材',
+      name: '行動電源,充電線材',
       url: 'assets/power-bank.png',
       category: '保固',
     },
     {
-      name: '大型家電 (冰箱/洗衣機/冷氣)',
+      name: '大型家電(冰箱,洗衣機,冷氣)',
       url: 'assets/home-appliances.png',
       category: '保固',
     },
     {
-      name: '廚房家電 (微波爐/烤箱/電鍋)',
+      name: '廚房家電(微波爐,烤箱,電鍋)',
       url: 'assets/kitchen-appliances.png',
       category: '保固',
     },
     {
-      name: '生活小家電 (吹風機/刮鬍刀/吸塵器)',
+      name: '生活小家電(吹風機,刮鬍刀,吸塵器)',
       url: 'assets/small-appliances.png',
       category: '保固',
     },
     {
-      name: '汽機車保固 / 零件保固',
+      name: '汽機車保固,零件保固',
       url: 'assets/vehicle-保固.png',
       category: '保固',
     },
-    {
-      name: '手錶 / 精品 / 智慧手環',
-      url: 'assets/watch.png',
-      category: '保固',
-    },
-    {
-      name: '預設保固項目',
-      url: 'assets/default.png',
-      category: '保固',
-    },
+    { name: '手錶,精品,智慧手環', url: 'assets/watch.png', category: '保固' },
+    { name: '預設保固項目', url: 'assets/default.png', category: '保固' },
   ];
   constructor(
     public dialogRef: MatDialogRef<ItemListEditDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
+    private chr:ChangeDetectorRef,
   ) {
     this.group = this.data.groups ?? [];
   }
@@ -860,9 +801,14 @@ export class ItemListEditDialogComponent implements OnInit {
       // 包裝成標準 File 物件
       const file = new File([blob], `${name}.png`, { type: 'image/png' });
 
-      // ✅ 修正：你原本宣告存圖片的變數是 selectedFile，直接賦值給它
       this.selectedFile = file;
-      // 我們要把原生的檔案輸入框（Input File）清空，避免畫面和資料打架
+      const render = new FileReader();
+      render.onload = (e: any) => {
+        this.imagePreview = e.target.result;
+        this.chr.detectChanges();
+      };
+          render.readAsDataURL(file);
+
       const fileInput = document.getElementById('image') as HTMLInputElement;
       if (fileInput) {
         fileInput.value = '';
