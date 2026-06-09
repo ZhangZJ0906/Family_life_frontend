@@ -1,4 +1,4 @@
-<div class="home-page">
+<div class="home-page container-fluid">
 
   <app-topbar></app-topbar>
 
@@ -6,88 +6,97 @@
   <section class="welcome-card">
   <div class="welcome-top">
 
+  <div class="welcome-top row align-items-center g-3">
   <!-- 左邊：標題 -->
-  <div class="welcome-text">
-    <h1>早安，{{ currentUserName || '使用者' }}</h1>
-    <p>今天有 {{highPriorityCount}} 件生活事項需要優先處理</p>
+   <div class="col-12 col-lg-4">
+      <div class="welcome-text">
+        <h1>早安，{{ currentUserName || '使用者' }}</h1>
+        <p>今天有 {{highPriorityCount}} 件生活事項需要優先處理</p>
+      </div>
   </div>
 
   <!-- 中間：月份切換 -->
-  <div class="home-month-switch">
+  <div class="col-12 col-lg-4 d-flex justify-content-center">
+    <div class="home-month-switch">
 
-    <button
-      type="button"
-      class="month-btn"
-      (click)="prevMonth()"
-      title="上一個月"
-    >
-      <mat-icon>chevron_left</mat-icon>
-    </button>
+      <button
+        type="button"
+        class="month-btn"
+        (click)="prevMonth()"
+        title="上一個月"
+      >
+        <mat-icon>chevron_left</mat-icon>
+      </button>
 
-    <div class="month-info">
-      <span>目前月份</span>
-      <strong>{{ selectedYear }} 年 {{ selectedMonth }} 月</strong>
+      <div class="month-info">
+        <span>目前月份</span>
+        <strong>{{ selectedYear }} 年 {{ selectedMonth }} 月</strong>
+      </div>
+
+      <button
+        type="button"
+        class="month-btn"
+        (click)="nextMonth()"
+        [disabled]="isCurrentMonth()"
+        title="下一個月"
+      >
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+
     </div>
-
-    <button
-      type="button"
-      class="month-btn"
-      (click)="nextMonth()"
-      [disabled]="isCurrentMonth()"
-      title="下一個月"
-    >
-      <mat-icon>chevron_right</mat-icon>
-    </button>
-
   </div>
 
  <!-- 右邊：群組切換 -->
-<mat-form-field appearance="outline" class="home-group-select">
-  <mat-label>記帳環境</mat-label>
+<div class="col-12 col-lg-4 d-flex justify-content-lg-end justify-content-start">
+  <mat-form-field appearance="outline" class="home-group-select">
+    <mat-label>記帳環境</mat-label>
 
-  <mat-select
-    [(ngModel)]="currentGroupId"
-    (selectionChange)="onExpenseGroupChange($event.value)"
-  >
-    <!-- 下拉關閉時，顯示目前選到的頭像 + 名稱 -->
-    <mat-select-trigger>
-      <div class="home-selected-group" *ngIf="getCurrentExpenseGroup() as group">
-        <img
-          class="home-group-avatar"
-          [src]="group.avatar || 'assets/default-avatar.png'"
-          alt="群組頭像"
-        />
-
-        <span>
-          {{ group.groupName }}
-        </span>
-      </div>
-    </mat-select-trigger>
-
-    <!-- 下拉選項 -->
-    <mat-option
-      *ngFor="let group of expenseGroups"
-      [value]="group.groupId"
+    <mat-select
+      [(ngModel)]="currentGroupId"
+      (selectionChange)="onExpenseGroupChange($event.value)"
     >
-      <div class="home-group-option">
-        <img
-          class="home-group-avatar"
-          [src]="group.avatar || 'assets/default-avatar.png'"
-          alt="群組頭像"
-        />
+      <!-- 下拉關閉時，顯示目前選到的頭像 + 名稱 -->
+      <mat-select-trigger>
+        <div class="home-selected-group" *ngIf="getCurrentExpenseGroup() as group">
+          <img
+            class="home-group-avatar"
+            [src]="group.avatar || 'assets/default-avatar.png'"
+            alt="群組頭像"
+          />
 
-        <span>
-          {{ group.groupName }}
-        </span>
-      </div>
-    </mat-option>
-  </mat-select>
-</mat-form-field>
+          <span>
+            {{ group.groupName }}
+          </span>
+        </div>
+      </mat-select-trigger>
+
+      <!-- 下拉選項 -->
+      <mat-option
+        *ngFor="let group of expenseGroups"
+        [value]="group.groupId"
+      >
+        <div class="home-group-option">
+          <img
+            class="home-group-avatar"
+            [src]="group.avatar || 'assets/default-avatar.png'"
+            alt="群組頭像"
+          />
+
+          <span>
+            {{ group.groupName }}
+          </span>
+        </div>
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+</div>
 
 </div>
-  <div class="welcome-bottom">
+  <div class="welcome-bottom row g-3">
 
   <!-- 本月支出 -->
+   <div class="col-12 col-md-7 col-lg-5">
   <div class="money-item">
     <div class="money-icon red-icon">💳</div>
     <div>
@@ -95,8 +104,10 @@
       <h2 class="money-red">NT $ {{ monthlyExpense | number }}</h2>
     </div>
   </div>
+  </div>
 
   <!-- 到期件數 -->
+   <div class="col-12 col-md-5 col-lg-3">
   <div class="money-item expired-card">
     <div class="money-icon expired-icon">⚠️</div>
     <div>
@@ -106,76 +117,94 @@
   </div>
 
 </div>
+</div>
 
 </section>
 
-  <!-- 第二區：左邊統計數量，右邊今日優先處理，各占一半 -->
-  <section class="bottom-grid">
 
-    <!-- 左邊：數量統計區 -->
-    <section class="summary-grid">
-      <div class="summary-card">
-        <div class="summary-text">
-          <span class="card-label">即將到期食材</span>
-          <h2>{{ expiringFoodCount }}</h2>
-          <p>7 天內到期</p>
+  <!-- 第二區：左邊統計數量，右邊今日優先處理 -->
+<section class="bottom-grid row g-4 align-items-stretch">
+
+  <!-- 左邊：數量統計區 -->
+  <div class="col-12 col-lg-6 d-flex">
+    <section class="summary-grid row g-3 flex-fill">
+
+      <div class="col-12 col-md-6 d-flex">
+        <div class="summary-card flex-fill">
+          <div class="summary-text">
+            <span class="card-label">即將到期食材</span>
+            <h2>{{ expiringFoodCount }}</h2>
+            <p>7 天內到期</p>
+          </div>
+          <div class="summary-icon food-icon">🥬</div>
         </div>
-        <div class="summary-icon food-icon">🥬</div>
       </div>
 
-      <div class="summary-card">
-        <div class="summary-text">
-          <span class="card-label">藥品提醒</span>
-          <h2>{{ medicineReminderCount }}</h2>
-          <p>需要補充</p>
+      <div class="col-12 col-md-6 d-flex">
+        <div class="summary-card flex-fill">
+          <div class="summary-text">
+            <span class="card-label">藥品提醒</span>
+            <h2>{{ medicineReminderCount }}</h2>
+            <p>需要補充</p>
+          </div>
+          <div class="summary-icon medicine-icon">💊</div>
         </div>
-        <div class="summary-icon medicine-icon">💊</div>
       </div>
 
-      <div class="summary-card">
-        <div class="summary-text">
-          <span class="card-label">保固到期</span>
-          <h2>{{ warrantyExpiringCount }}</h2>
-          <p>本月到期</p>
+      <div class="col-12 col-md-6 d-flex">
+        <div class="summary-card flex-fill">
+          <div class="summary-text">
+            <span class="card-label">保固到期</span>
+            <h2>{{ warrantyExpiringCount }}</h2>
+            <p>本月到期</p>
+          </div>
+          <div class="summary-icon warranty-icon">🧾</div>
         </div>
-        <div class="summary-icon warranty-icon">🧾</div>
       </div>
 
-      <div class="summary-card">
-        <div class="summary-text">
-          <span class="card-label">訂閱續扣</span>
-          <h2>{{ subscriptionReminderCount }}</h2>
-          <p>近期扣款</p>
+      <div class="col-12 col-md-6 d-flex">
+        <div class="summary-card flex-fill">
+          <div class="summary-text">
+            <span class="card-label">訂閱續扣</span>
+            <h2>{{ subscriptionReminderCount }}</h2>
+            <p>近期扣款</p>
+          </div>
+          <div class="summary-icon sub-icon">💳</div>
         </div>
-        <div class="summary-icon sub-icon">💳</div>
+      </div>
+
+    </section>
+  </div>
+
+  <!-- 右邊：今日優先處理 -->
+  <div class="col-12 col-lg-6 d-flex">
+    <section class="priority-card flex-fill">
+      <h3>今日優先處理</h3>
+
+      <div class="priority-list">
+        @if (priorityTasks.length > 0) {
+          @for (task of priorityTasks; track task.id) {
+            <div class="task" [ngClass]="task.levelClass">
+              <div>
+                <h4>{{ task.title }}</h4>
+                <p>{{ task.description }}</p>
+              </div>
+
+              <span>{{ task.levelText }}</span>
+            </div>
+          }
+        } @else {
+          <div class="task normal">
+            <div>
+              <h4>目前沒有優先事項</h4>
+              <p>目前群組沒有需要立即處理的生活提醒</p>
+            </div>
+
+            <span>低</span>
+          </div>
+        }
       </div>
     </section>
-
-    <!-- 右邊：今日優先處理 -->
-<section class="priority-card">
-  <h3>今日優先處理</h3>
-
-  <div class="priority-list">
-    @if (priorityTasks.length > 0) {
-      @for (task of priorityTasks; track task.id) {
-        <div class="task" [ngClass]="task.levelClass">
-          <div>
-            <h4>{{ task.title }}</h4>
-            <p>{{ task.description }}</p>
-          </div>
-
-          <span>{{ task.levelText }}</span>
-        </div>
-      }
-    } @else {
-      <div class="task normal">
-        <div>
-          <h4>目前沒有優先事項</h4>
-          <p>目前群組沒有需要立即處理的生活提醒</p>
-        </div>
-
-        <span>低</span>
-      </div>
-    }
   </div>
+
 </section>

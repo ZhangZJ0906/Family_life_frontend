@@ -19,10 +19,6 @@
 
 /* 歡迎卡片上半部：左標題 / 中月份 / 右群組 */
 .welcome-top {
-  display: grid;
-  grid-template-columns: 360px 1fr 240px;
-  align-items: center;
-  gap: 28px;
   margin-bottom: 24px;
 }
 
@@ -47,13 +43,7 @@
   font-size: 16px;
 }
 
-/* 歡迎卡片下方：本月支出 + 已到期項目 */
-.welcome-bottom {
-  display: grid;
-  grid-template-columns: minmax(420px, 520px) minmax(260px, 360px);
-  gap: 18px;
-  align-items: stretch;
-}
+
 
 /* 覆蓋原本 width: 30%，避免卡片太窄 */
 .welcome-bottom .money-item {
@@ -318,17 +308,11 @@
 
 /* 第二區：左邊統計數量，右邊今日優先處理 */
 .bottom-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  margin-top: 0;
+  align-items: stretch;
 }
 
-/* 左邊統計數量：上下兩列，每列兩張 */
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 18px;
-}
+
 
 /* 統計卡片 */
 .summary-card {
@@ -336,7 +320,11 @@
   border-radius: 18px;
   padding: 22px;
   border: 1px solid #e5e7eb;
-  min-height: 130px;
+
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -406,16 +394,13 @@
   padding: 24px;
   box-sizing: border-box;
 
-  /* 固定高度，超過才會滾動 */
-  height: 400px;
+  /* 固定右邊高度 */
+  height: 508px;
 
   display: flex;
   flex-direction: column;
-
-  /* 不讓整張卡片自己滾動，只讓內部清單滾動 */
   overflow: hidden;
 }
-
 /* 今日優先處理標題 */
 .priority-card h3 {
   margin: 0 0 18px;
@@ -433,6 +418,17 @@
   overflow-x: hidden;
 
   padding-right: 8px;
+}
+
+/* 左邊統計區 */
+.summary-grid {
+  width: 100%;
+  height: 520px;
+}
+
+/* 讓 Bootstrap row 裡面的欄位平均分成上下兩列 */
+.summary-grid > .col-12 {
+  display: flex;
 }
 
 /* 滾輪樣式 */
@@ -502,6 +498,16 @@
   color: #2f80ed;
 }
 
+@media (min-width: 769px) and (max-width: 991px) {
+  .home-group-select {
+    width: 100%;
+  }
+
+  .priority-card {
+    height: 380px;
+  }
+}
+
 /* 平板以下：首頁區塊改成直向排列 */
 @media (max-width: 1100px) {
   .welcome-top {
@@ -518,58 +524,129 @@
   .bottom-grid,
   .summary-grid {
     grid-template-columns: 1fr;
+
   }
 }
 
 /* 手機版 */
 @media (max-width: 768px) {
+
   .home-page {
-    padding: 16px;
+    padding: 18px 14px;
   }
 
   .welcome-card {
-    padding: 22px;
+    padding: 22px 22px 24px;
+    border-radius: 20px;
+  }
+
+  .welcome-top {
+    margin-bottom: 26px;
+  }
+
+  .welcome-text {
+    text-align: center;
+    width: 100%;
   }
 
   .welcome-text h1 {
-    font-size: 28px;
+    font-size: 30px;
+    line-height: 1.25;
+    margin-bottom: 10px;
   }
 
-  .home-expense-toolbar {
-    flex-direction: column;
-    align-items: stretch;
+  .welcome-text p {
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0;
   }
 
   .home-month-switch {
+    width: 100%;
     justify-content: center;
+    margin-top: 18px;
+    margin-bottom: 12px;
+  }
+
+  .month-btn {
+    width: 52px;
+    height: 52px;
+  }
+
+  .month-info {
+    min-width: 178px;
+    height: 66px;
+  }
+
+  .month-info span {
+    font-size: 13px;
+  }
+
+  .month-info strong {
+    font-size: 21px;
   }
 
   .home-group-select {
     width: 100%;
+    margin-top: 8px;
+  }
+
+  .home-group-select ::ng-deep .mat-mdc-text-field-wrapper {
+    height: 66px;
+  }
+
+  .home-group-select ::ng-deep .mat-mdc-form-field-flex {
+    height: 66px;
+  }
+
+  .welcome-bottom {
+    row-gap: 18px;
   }
 
   .money-item {
-    padding: 18px;
+    padding: 22px 20px;
+    border-radius: 18px;
+  }
+
+  .money-icon {
+    width: 58px;
+    height: 58px;
+  }
+
+  .money-item p {
+    font-size: 17px;
   }
 
   .money-item h2 {
-    font-size: 28px;
+    font-size: 25px;
+    white-space: nowrap;
   }
 
-    .welcome-bottom {
-    grid-template-columns: 1fr;
+  /* 統計卡片手機版高度 */
+  .summary-card {
+    min-height: 150px;
   }
 
-  .welcome-bottom .money-item {
-    width: 100%;
+  /* 今日優先處理卡片 */
+  .priority-card {
+    height: auto;
+    max-height: 520px;
+    min-height: 360px;
+    padding: 24px 22px;
+    margin-top: 150px;
   }
 
-  .money-item h2 {
-  font-size: 24px;
-  white-space: nowrap;
-}
+  /* 今日優先處理清單 */
+  .priority-list {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 8px;
+    padding-bottom: 20px;
+  }
 
-.welcome-bottom {
-  grid-template-columns: 1fr;
-}
+  /* 優先處理項目 */
+  .task {
+    min-height: 86px;
+    padding: 16px;
+  }
 }
