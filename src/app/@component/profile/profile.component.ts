@@ -178,24 +178,46 @@ export class ProfileComponent implements CanComponentDeactivate {
                 src="${this.avatarUrl || ''}"
                 style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:2px solid #eee;" />
 
-            <input id="avatarInput"
-                  type="file"
-                  accept="image/*"
-                  style="margin-top:10px;" />
+            <div style="margin-top:12px;">
+              <label
+                for="avatarInput"
+                style="
+                  display:inline-block;
+                  padding:8px 16px;
+                  background:#2f80ed;
+                  color:white;
+                  border-radius:10px;
+                  cursor:pointer;
+                  font-weight:600;
+                ">
+                選擇圖片
+              </label>
+
+              <input
+                id="avatarInput"
+                type="file"
+                accept="image/*"
+                style="display:none;"
+              />
+
+              <div
+                id="fileName"
+                style="
+                  margin-top:8px;
+                  font-size:13px;
+                  color:#666;
+                ">
+                尚未選擇圖片
+              </div>
+            </div>
           </div>
+
 
           <div class="swal-row">
             <label>使用者名稱</label>
             <input id="editUserName"
                   class="swal2-input"
                   value="${this.userName}">
-          </div>
-
-          <div class="swal-row">
-            <label>Email</label>
-            <input id="editEmail"
-                  class="swal2-input"
-                  value="${this.email}">
           </div>
 
         </div>
