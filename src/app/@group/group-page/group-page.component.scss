@@ -348,6 +348,11 @@
   filter: brightness(0.98);
 }
 
+.chat{
+  background: #01dbe7;
+  color: #3820ee;
+}
+
 .member {
   background: #eaf7ee;
   color: #27ae60;
@@ -410,6 +415,12 @@
   font-size: 15px;
   font-weight: 800;
   color: #111827;
+}
+
+::ng-deep .chat-dialog {
+  border-radius: 12px;
+  overflow: hidden;
+  position: absolute; /* 讓多個可自由疊 */
 }
 
 /* =========================================================

@@ -9,10 +9,13 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatBadgeModule } from '@angular/material/badge';
 
+import { ChatRoomComponent } from './../chat-room/chat-room.component';
 import { GroupMemberDialogComponent } from '../group-member-dialog/group-member-dialog.component';
 import { NotifyDialogComponent } from '../notify-dialog/notify-dialog.component';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
 import { AuthService } from '../../@services/auth.service';
+
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-group-page',
@@ -49,7 +52,8 @@ export class GroupPageComponent{
   constructor(
     private dialog: MatDialog,
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router,
   ) {}
 
   user_id = 0;
@@ -255,6 +259,55 @@ export class GroupPageComponent{
       }
 
     });
+  }
+
+  private chatDialogs = new Map<number, any>();
+
+  openChatRoom(group: any) {
+    const groupId = group.groupId;
+
+    // ❌ 已經開過 → 不再開新視窗
+    if (this.chatDialogs.has(groupId)) {
+
+      return;
+    }
+
+    let offset = this.dialog.openDialogs.length * 30;
+
+    const dialogRef = this.dialog.open(ChatRoomComponent, {
+      position: {
+        bottom: `${offset}px`,
+        right: `${offset}px`
+      },
+
+      width: '420px',
+      height: '650px',
+
+      panelClass: 'chat-dialog',
+
+      data: {
+        groupId: group.groupId,
+        groupName: group.groupName
+      },
+
+      // ⭐ 重點：允許多開
+      disableClose: false,
+
+      // ⭐ 避免覆蓋（可選）
+      hasBackdrop: false,
+
+      // ⭐ 每個 dialog 都可獨立互動
+      autoFocus: false
+    });
+
+    // 👉 存起來
+    this.chatDialogs.set(groupId, dialogRef);
+
+    // 👉 關閉時移除紀錄
+    dialogRef.afterClosed().subscribe(() => {
+      this.chatDialogs.delete(groupId);
+    });
+
   }
 
   openCreateDialog() {
