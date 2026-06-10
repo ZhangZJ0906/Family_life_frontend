@@ -1,7 +1,15 @@
 <div class="chat-container" cdkDrag cdkDragRootElement=".cdk-overlay-pane">
 
   <div class="chat-header">
+
+    <div>
       💬 {{ groupName }}
+    </div>
+
+    <div class="online-badge">
+      🟢 {{ onlineCount }}
+    </div>
+
   </div>
 
   <button class="close-btn" (click)="closeChat()">
