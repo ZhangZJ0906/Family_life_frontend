@@ -273,12 +273,12 @@
   align-items: center;
 }
 
-.expense-list-title h2 {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 900;
-  color: #111827;
-}
+ /* 支出明細標題 */
+  .expense-list-title h2 {
+    font-size: 28px;
+    font-weight: 900;
+    margin: 0 0 4px;
+  }
 
 /* 右側篩選列 */
 .expense-filter-right {
@@ -350,10 +350,10 @@
 }
 
 /* Angular Material 欄位白底 */
-.filter-field ::ng-deep .mat-mdc-text-field-wrapper {
-  background: #ffffff;
-  border-radius: 12px;
-}
+ .filter-field ::ng-deep .mat-mdc-text-field-wrapper {
+    height: 62px;
+    border-radius: 12px;
+  }
 
 /* 移除 Material form-field 底部空白 */
 .filter-field ::ng-deep .mat-mdc-form-field-subscript-wrapper {
@@ -744,27 +744,186 @@ tr.mat-mdc-row:hover {
 }
 
 /* =========================================================
+   手機版：支出明細改成卡片列表
+   ========================================================= */
+.expense-mobile-list {
+  display: flex;
+  flex-direction: column;
+
+  /* 控制兩張卡片之間的距離 */
+  gap: 26px;
+}
+
+/* 手機單筆支出卡片 */
+.expense-mobile-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+  margin-bottom: 20px;
+}
+
+/* 手機卡片上方：日期、名稱、金額 */
+.mobile-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+/* 日期 */
+.mobile-date {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+/* 消費名稱 */
+.mobile-title {
+  color: #111827;
+  font-size: 18px;
+  font-weight: 900;
+
+  max-width: 190px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* 金額 */
+.mobile-price {
+  color: #d85c5c;
+  font-size: 20px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+/* 中間資訊區 */
+.mobile-card-body {
+  border-top: 1px solid #eef1f5;
+  border-bottom: 1px solid #eef1f5;
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* 每一列資訊 */
+.mobile-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 左側標籤 */
+.mobile-row span {
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* 右側內容 */
+.mobile-row strong {
+  color: #111827;
+  font-size: 14px;
+  font-weight: 800;
+  text-align: right;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* 下方操作列 */
+.mobile-card-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+}
+
+
+
+/* =========================================================
    RWD：中等螢幕
    ========================================================= */
 @media (max-width: 1400px) {
-  .expense-header-card {
-    grid-template-columns: 1fr;
-    gap: 22px;
-  }
 
-  .month-switch {
-    justify-content: flex-start;
-  }
-
-  .summary-row {
-    grid-template-columns: 1fr 1fr;
-  }
 }
 
 /* =========================================================
    RWD：平板
    ========================================================= */
 @media (max-width: 1200px) {
+  .expense-header-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+
+    padding: 30px 28px;
+  }
+
+   /* 標題區置中 */
+  .expense-title {
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+
+    text-align: center;
+
+    /* 只讓標題區往左移一點 */
+    transform: translateX(-200px);
+}
+
+    /* icon + 文字靠中 */
+  .expense-title > div:last-child {
+    text-align: left;
+  }
+
+    /* 家庭記帳系統標題 */
+  .expense-title h3 {
+    font-size: 30px;
+    text-align: left;
+  }
+
+   /* 費用管理 Dashboard */
+  .expense-title small {
+    font-size: 16px;
+    display: block;
+    text-align: left;
+  }
+
+   /* 月份切換置中 */
+  .month-switch {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+
+    /* 統計卡片區 */
+  .summary-row {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
+    gap: 18px;
+  }
+
+  /* 統計卡片 */
+  .summary-card {
+    width: 100%;
+    min-height: 130px;
+  }
   .expense-filter-card {
     grid-template-columns: 1fr;
     gap: 18px;
@@ -797,7 +956,7 @@ tr.mat-mdc-row:hover {
     right: 20px;
     bottom: 20px;
   }
-}
+
 
 //新物品
 .item-name-wrapper {
@@ -891,6 +1050,24 @@ tr.mat-mdc-row:hover {
     transform: translateY(-2px);
     box-shadow: 0 18px 36px rgba(15, 23, 42, 0.26) !important;
   }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .big-table {
+    min-width: 1000px;
+  }
+
+  .filter-field {
+    width: calc(50% - 8px);
+  }
+
+  .expense-filter-right {
+    flex-wrap: wrap;
+  }
+}
+
 }
 /* =========================================================
    RWD：手機
@@ -910,6 +1087,10 @@ tr.mat-mdc-row:hover {
     font-size: 26px;
   }
 
+   .expense-title {
+    transform: none;
+  }
+
   .month-switch {
     justify-content: center;
   }
@@ -927,13 +1108,22 @@ tr.mat-mdc-row:hover {
   }
 
   .expense-filter-card {
-    padding: 20px;
+    padding: 22px 20px;
     border-radius: 18px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
   }
 
   .expense-filter-right {
+    width: 100%;
+
+    display: flex;
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
+    gap: 12px;
   }
 
   .card-header {
@@ -945,8 +1135,9 @@ tr.mat-mdc-row:hover {
     align-items: stretch;
   }
 
-  .filter-field {
-    width: 100%;
+    .filter-field {
+    width: 92%;
+    max-width: 320px;
   }
 
   .big-table th.mat-mdc-header-cell,
@@ -957,5 +1148,26 @@ tr.mat-mdc-row:hover {
   .expense-add-fab {
     right: 20px;
     bottom: 20px;
+  }
+
+    .fab-container {
+    right: 18px;
+    bottom: 18px;
+  }
+
+  .expense-fab-btn {
+    width: 56px !important;
+    height: 56px !important;
+  }
+
+  .search-field {
+    width: 88%;
+    max-width: 300px;
+  }
+
+  .filter-field {
+    width: 70%;
+    max-width: 300px;
+
   }
 }

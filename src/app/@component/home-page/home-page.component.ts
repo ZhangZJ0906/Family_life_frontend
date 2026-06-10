@@ -492,6 +492,7 @@ this.warrantyList.forEach((item: any) => {
       levelClass: 'warning',
     });
   }
+<<<<<<< HEAD
 });
 
   // 4. 訂閱：即將扣款、試用即將結束、逾期扣款
@@ -538,6 +539,31 @@ this.warrantyList.forEach((item: any) => {
   return tasks.sort((a, b) => b.level - a.level);
 }
 
+=======
+
+  // 已到期總件數
+get expiredTotalCount(): number {
+  const expiredItems = this.itemsList.filter(
+    (item: any) => item.status === '已到期'
+  ).length;
+
+  const expiredMedicines = this.medicineList.filter(
+    (item: any) => item.status === '已到期'
+  ).length;
+
+  const expiredWarranties = this.warrantyList.filter(
+    (item: any) => item.status === '已到期'
+  ).length;
+
+  const expiredSubscriptions = this.subscriptionList.filter(
+    (item: any) =>
+      item.status === '已逾期扣款' ||
+      item.status === '已到期'
+  ).length;
+
+  return expiredItems + expiredMedicines + expiredWarranties + expiredSubscriptions;
+}
+>>>>>>> origin/ZJ
   // 計算剩餘天數文字
   getRemainText(dateStr: string): string {
     if (!dateStr) {

@@ -241,6 +241,8 @@ export class NotifyDialogComponent implements OnInit {
 
       if (!result.isConfirmed) return;
 
+      this.showLoading('刪除中...');
+
       this.http.post(
         `http://localhost:8080/family_life/delete_notify?notify_id=${n.id}`,
         {}
@@ -277,6 +279,8 @@ export class NotifyDialogComponent implements OnInit {
     n.status = 'accepted';
     n.isRead = 1;
 
+    this.showLoading('處理中...');
+
     this.http.post(
       `http://localhost:8080/family_life/accept_join_group?user_id=${this.user_id}&group_id=${n.targetGroupId}&notify_id=${n.id}`,
       {}
@@ -296,6 +300,8 @@ export class NotifyDialogComponent implements OnInit {
 
     n.status = 'rejected';
     n.isRead = 1;
+
+    this.showLoading('處理中...');
 
     this.http.post(
       `http://localhost:8080/family_life/reject_join_group?user_id=${this.user_id}&group_id=${n.targetGroupId}&notify_id=${n.id}`,
@@ -321,10 +327,11 @@ export class NotifyDialogComponent implements OnInit {
   goCalendar(n: any) {
     this.router.navigate(['/calendar', n.sendUserId]);
   }
-goExpense(n:any){
-  this.dialogRef.close();
-this.router.navigate(['/expenses'], { queryParams: { groupId: n.sendUserId } });
-}
+
+  goExpense(n:any){
+    this.dialogRef.close();
+    this.router.navigate(['/expenses'], { queryParams: { groupId: n.sendUserId } });
+  }
   // ========================
   // 🔥 filter
   // ========================

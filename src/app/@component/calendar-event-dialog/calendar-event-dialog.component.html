@@ -47,6 +47,15 @@
           required
           #assignedUserRef="ngModel"
         >
+          <!-- 全選選項 -->
+          <mat-option
+            [value]="SELECT_ALL_VALUE"
+            (click)="toggleSelectAllMembers($event)"
+          >
+            {{ isAllMembersSelected() ? '取消全選' : '全選' }}
+          </mat-option>
+
+          <!-- 成員選項 -->
           @for (member of members; track getMemberId(member)) {
             <mat-option [value]="getMemberId(member)">
               👤 {{ getMemberName(member) }}

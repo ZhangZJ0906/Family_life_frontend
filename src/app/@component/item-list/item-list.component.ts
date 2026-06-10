@@ -145,7 +145,7 @@ export class ItemListComponent {
   currentGroupId: any = null;
   currentUserId: any;
   lastSelectedRow: any = null;
-  currentUserAvatar = 'assets/default-avatar.png';//預設群組投向
+  currentUserAvatar = 'assets/default-avatar.png'; //預設群組投向
 
   isLoading = true;
 
@@ -170,11 +170,11 @@ export class ItemListComponent {
   dataSource = new MatTableDataSource<any>([]);
 
   // 圖片預覽狀態
-imagePreviewVisible = false;
-previewImageUrl = '';
-previewImageTitle = '';
-previewScale = 1;
-previewRotate = 0;
+  imagePreviewVisible = false;
+  previewImageUrl = '';
+  previewImageTitle = '';
+  previewScale = 1;
+  previewRotate = 0;
 
   constructor(
     private http: HttpClientService,
@@ -228,7 +228,7 @@ previewRotate = 0;
     this.currentGroupId = groupId;
     if (groupId == null) groupId = 0;
     this.getLoginItemPageTime().then(() => {
-      console.log('login:', this.lastLoginTime);
+      
 
       this.getUserGroupData(groupId);
     });
@@ -376,7 +376,7 @@ previewRotate = 0;
         // 名稱對應後端的 @RequestPart(value = "avatar")
         formData.append('avatar', selectedFile);
       }
-      console.log(formData);
+      
       this.http.postApi(url, formData).subscribe({
         next: (res: any) => {
           Swal.close();
@@ -388,7 +388,12 @@ previewRotate = 0;
             });
             return;
           }
-          Swal.fire({ title: '更新成功', icon: 'success' });
+          Swal.fire({
+            title: '更新成功',
+            icon: 'success',
+            timer: 1500,
+            showConfirmButton: false,
+          });
           this.refreshCurrentMode();
         },
         error: (err: any) => {
@@ -456,6 +461,8 @@ previewRotate = 0;
   // ─── API：統一查詢（訂閱 / 保固 / 藥品）────────────────────
   // 取代原本三個獨立的 getXxxByGroupId 方法
   private fetchGroupData(mode: TableMode, groupId: number | null): void {
+    this.isLoading = true; // ✅ 開啟 loading
+
     const endpoint = this.fetchEndpointMap[mode];
     if (!endpoint) return;
 
@@ -467,6 +474,7 @@ previewRotate = 0;
       )
       .subscribe({
         next: (res: any) => {
+          this.isLoading = false; // ✅ 關閉 loading
           if (res.code !== 200) {
             Swal.fire({
               title: '查詢失敗',
@@ -482,6 +490,7 @@ previewRotate = 0;
           this.dataSource.paginator?.firstPage();
         },
         error: (err: any) => {
+          this.isLoading = false; // ✅ 發生錯誤也要關
           Swal.fire({
             title: '錯誤',
             text: err.message || 'Server error',
@@ -493,7 +502,6 @@ previewRotate = 0;
 
   // ─── API：查詢一般物品（邏輯特殊，單獨保留）──────────────────
   getItemByGroupId(groupId: number): void {
-
     this.isLoading = true; // 🔥 開啟 table loading
     this.currentGroupId = groupId;
     // 切換群組時先清空快取，避免讀到舊群組資料
@@ -941,76 +949,73 @@ previewRotate = 0;
   }
 
   // 開啟圖片預覽
-openImagePreview(element: any, event: MouseEvent): void {
-  event.stopPropagation();
+  openImagePreview(element: any, event: MouseEvent): void {
+    event.stopPropagation();
 
-  if (!element || !element.avatar || element.avatar.trim() === '') {
-    return;
+    if (!element || !element.avatar || element.avatar.trim() === '') {
+      return;
+    }
+
+    this.previewImageUrl = this.getItemAvatar(element);
+    this.previewImageTitle =
+      element.name || element.productName || element.title || '物品圖片';
+
+    this.previewScale = 1;
+    this.previewRotate = 0;
+    this.imagePreviewVisible = true;
   }
 
-  this.previewImageUrl = this.getItemAvatar(element);
-  this.previewImageTitle =
-    element.name ||
-    element.productName ||
-    element.title ||
-    '物品圖片';
-
-  this.previewScale = 1;
-  this.previewRotate = 0;
-  this.imagePreviewVisible = true;
-}
-
-// 關閉圖片預覽
-closeImagePreview(): void {
-  this.imagePreviewVisible = false;
-  this.previewImageUrl = '';
-  this.previewImageTitle = '';
-  this.previewScale = 1;
-  this.previewRotate = 0;
-}
-
-// 放大
-zoomIn(): void {
-  if (this.previewScale >= 3) {
-    return;
+  // 關閉圖片預覽
+  closeImagePreview(): void {
+    this.imagePreviewVisible = false;
+    this.previewImageUrl = '';
+    this.previewImageTitle = '';
+    this.previewScale = 1;
+    this.previewRotate = 0;
   }
 
-  this.previewScale = Number((this.previewScale + 0.2).toFixed(1));
-}
+  // 放大
+  zoomIn(): void {
+    if (this.previewScale >= 3) {
+      return;
+    }
 
-// 縮小
-zoomOut(): void {
-  if (this.previewScale <= 0.4) {
-    return;
+    this.previewScale = Number((this.previewScale + 0.2).toFixed(1));
   }
 
-  this.previewScale = Number((this.previewScale - 0.2).toFixed(1));
-}
+  // 縮小
+  zoomOut(): void {
+    if (this.previewScale <= 0.4) {
+      return;
+    }
 
-// 向左旋轉
-rotateLeft(): void {
-  this.previewRotate -= 90;
-}
-
-// 向右旋轉
-rotateRight(): void {
-  this.previewRotate += 90;
-}
-
-// 重置
-resetPreview(): void {
-  this.previewScale = 1;
-  this.previewRotate = 0;
-}
-
-// 滑鼠滾輪放大縮小
-onPreviewWheel(event: WheelEvent): void {
-  event.preventDefault();
-
-  if (event.deltaY < 0) {
-    this.zoomIn();
-  } else {
-    this.zoomOut();
+    this.previewScale = Number((this.previewScale - 0.2).toFixed(1));
   }
-}
+
+  // 向左旋轉
+  rotateLeft(): void {
+    this.previewRotate -= 90;
+  }
+
+  // 向右旋轉
+  rotateRight(): void {
+    this.previewRotate += 90;
+  }
+
+  // 重置
+  resetPreview(): void {
+    this.previewScale = 1;
+    this.previewRotate = 0;
+  }
+
+  // 滑鼠滾輪放大縮小
+  onPreviewWheel(event: WheelEvent): void {
+    event.preventDefault();
+
+    if (event.deltaY < 0) {
+      this.zoomIn();
+    } else {
+      this.zoomOut();
+    }
+  }
 }

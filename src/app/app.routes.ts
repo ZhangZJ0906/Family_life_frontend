@@ -12,6 +12,7 @@ import { ItemListComponent } from './@component/item-list/item-list.component';
 import { ExpensesComponent } from './@components/expenses/expenses.component';
 import { authGuard } from './@guard/auth.guard';
 import { pendingChangesGuard } from './@guard/pending-changes.guard';
+import { ChatRoomComponent } from './@group/chat-room/chat-room.component';
 
 export const routes: Routes = [
   // 1️⃣ default
@@ -98,6 +99,12 @@ export const routes: Routes = [
     path: 'group',
     component: GroupPageComponent,
     canActivate: [authGuard],
+  },
+
+  //聊天室
+  {
+    path:'group-chat/:groupId',
+    component: ChatRoomComponent
   },
 
   // 8️⃣ fallback（最後一定要）

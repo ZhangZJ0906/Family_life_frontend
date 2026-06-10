@@ -1,0 +1,50 @@
+<div class="chat-container" cdkDrag cdkDragRootElement=".cdk-overlay-pane">
+
+  <div class="chat-header">
+      💬 {{ groupName }}
+  </div>
+
+  <button class="close-btn" (click)="closeChat()">
+    ✕
+  </button>
+
+  <div class="chat-body">
+
+    <div
+      *ngFor="let msg of messages"
+      class="message"
+      [ngClass]="msg.senderId === userId ? 'me' : 'other'"
+    >
+
+      <div class="sender">
+        {{ msg.senderName }}
+      </div>
+
+      <div class="content">
+        {{ msg.message }}
+      </div>
+
+      <div class="time">
+        {{ msg.createTime | date:'MM/dd HH:mm' }}
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="chat-footer">
+
+    <input
+      [(ngModel)]="message"
+      placeholder="輸入訊息..."
+    >
+
+    <button
+      (click)="sendMessage()"
+    >
+      發送
+    </button>
+
+  </div>
+
+</div>

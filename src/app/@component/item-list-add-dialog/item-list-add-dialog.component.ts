@@ -22,6 +22,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { HttpClientService } from '../../@services/http-client.service';
 import Swal from 'sweetalert2';
 import { AuthService } from '../../@services/auth.service';
+import { CATEGORY_ICON_MAP, DEFAULT_IMAGES } from '../../common/item.const';
 
 @Component({
   selector: 'app-item-list-add-dialog',
@@ -49,7 +50,8 @@ export class ItemListAddDialogComponent implements OnInit {
   minDate: string = '';
   today = new Date();
   selectedFile: File | null = null; //圖片
-
+  basicUrl!: string;
+  group: any[] = [];
   item: {
     created_by_id: number;
     groupId: number;
@@ -106,8 +108,7 @@ export class ItemListAddDialogComponent implements OnInit {
     source: '',
   };
 
-  basicUrl!: string;
-  group: any[] = [];
+  defaultImages = DEFAULT_IMAGES;
 
   constructor(
     public dialogRef: MatDialogRef<ItemListAddDialogComponent>,
@@ -196,39 +197,189 @@ export class ItemListAddDialogComponent implements OnInit {
   }
   //選圖片
   onFileSelected(event: Event): void {
-  const input = event.target as HTMLInputElement;
+    const input = event.target as HTMLInputElement;
 
-  if (!input.files || input.files.length === 0) {
-    return;
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
+
+    const file = input.files[0];
+
+    // 限制 5MB
+    const maxSize = 5 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+      Swal.fire({
+        icon: 'warning',
+        title: '圖片太大',
+        text: '請上傳 5MB 以下的圖片',
+        confirmButtonText: '確認',
+      });
+
+      // 清空 input
+      input.value = '';
+
+      // 清空已選檔案
+      this.selectedFile = null;
+
+      return;
+    }
+
+    // 檢查通過後才存檔案
+    this.selectedFile = file;
   }
 
-  const file = input.files[0];
+  //分類跟預設圖片選擇
 
-  // 限制 5MB
-  const maxSize = 5 * 1024 * 1024;
+  openDefaultImageModal(): void {
+    const iconMap = CATEGORY_ICON_MAP;
 
-  if (file.size > maxSize) {
+    const usedCategories = [
+      ...new Set(this.defaultImages.map((img) => img.category)),
+    ];
+
+    // 預設選第一個分類
+    const defaultCategory = usedCategories[0];
+
+    const renderImages = (filter: string): string => {
+      const items = this.defaultImages.filter((img) => img.category === filter);
+      if (!items.length) {
+        return `<div class="col-12 text-center text-muted py-4">此分類暫無圖片</div>`;
+      }
+      return items
+        .map(
+          (img) => `
+        <div class="col-6 col-sm-4 col-md-3">
+          <div class="default-img-option d-flex flex-column align-items-center justify-content-center p-2"
+               data-url="${img.url}" data-name="${img.name}"
+               style="border:2px solid #e0e0e0; border-radius:10px; cursor:pointer;
+                      transition:all .2s; height:130px; background:#fff;">
+            <img src="${img.url}" width="80" height="80"
+                 style="object-fit:cover; border-radius:6px;">
+            <span style="font-size:12px; color:#555; margin-top:6px; text-align:center;
+                         white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;">
+              ${img.name}
+            </span>
+          </div>
+        </div>
+      `,
+        )
+        .join('');
+    };
+
+    const chipsHtml = usedCategories
+      .map(
+        (cat, i) => `
+      <div class="cat-chip" data-category="${cat}"
+           style="display:inline-flex; align-items:center; gap:4px;
+                  padding:6px 14px; border-radius:999px; font-size:14px;
+                  border:1px solid ${i === 0 ? '#1976d2' : '#ccc'};
+                  background:${i === 0 ? '#1976d2' : '#f5f5f5'};
+                  color:${i === 0 ? '#fff' : '#333'};
+                  cursor:pointer; transition:all .2s;">
+        ${iconMap[cat] ?? ''} ${cat}
+      </div>
+    `,
+      )
+      .join('');
+
     Swal.fire({
-      icon: 'warning',
-      title: '圖片太大',
-      text: '請上傳 5MB 以下的圖片',
-      confirmButtonText: '確認'
+      title: '請選擇預設物品圖片',
+      width: 'min(720px, 95vw)', // 讓 md grid 有足夠空間
+      html: `
+<div style="overflow-x: hidden;">   <!-- ✅ 包一層擋掉 row 負 margin -->
+
+      <div id="chip-bar"
+           style="display:flex; flex-wrap:wrap; gap:8px;
+                  justify-content:center; margin-bottom:16px;">
+        ${chipsHtml}
+      </div>
+
+      <div style="max-height:400px; overflow-y:auto; overflow-x:hidden; padding:4px;">
+        <div id="default-img-container" class="row g-3">
+          ${renderImages(defaultCategory)}
+        </div>
+      </div>
+
+    </div>
+    `,
+      showConfirmButton: false,
+      showCloseButton: true,
+      didOpen: () => {
+        document
+          .getElementById('chip-bar')
+          ?.querySelectorAll('.cat-chip')
+          .forEach((chip) => {
+            chip.addEventListener('click', () => {
+              const selected = (chip as HTMLElement).dataset['category']!;
+
+              // chip 樣式重置
+              document.querySelectorAll('.cat-chip').forEach((c) => {
+                (c as HTMLElement).style.background = '#f5f5f5';
+                (c as HTMLElement).style.color = '#333';
+                (c as HTMLElement).style.borderColor = '#ccc';
+              });
+              (chip as HTMLElement).style.background = '#1976d2';
+              (chip as HTMLElement).style.color = '#fff';
+              (chip as HTMLElement).style.borderColor = '#1976d2';
+
+              // 重新渲染圖片
+              const container = document.getElementById(
+                'default-img-container',
+              )!;
+              container.innerHTML = renderImages(selected);
+              this.bindImageClick(container);
+            });
+          });
+
+        this.bindImageClick(document.getElementById('default-img-container')!);
+      },
     });
-
-    // 清空 input
-    input.value = '';
-
-    // 清空已選檔案
-    this.selectedFile = null;
-
-    return;
+  }
+  // 抽出圖片點擊事件，chip 切換後也能重新綁定
+  private bindImageClick(container: HTMLElement): void {
+    container.querySelectorAll('.default-img-option').forEach((el) => {
+      el.addEventListener('mouseenter', () => {
+        (el as HTMLElement).style.borderColor = '#1976d2';
+        (el as HTMLElement).style.boxShadow = '0 2px 8px rgba(25,118,210,0.2)';
+        (el as HTMLElement).style.transform = 'translateY(-2px)';
+      });
+      el.addEventListener('mouseleave', () => {
+        (el as HTMLElement).style.borderColor = '#e0e0e0';
+        (el as HTMLElement).style.boxShadow = 'none';
+        (el as HTMLElement).style.transform = 'none';
+      });
+      el.addEventListener('click', async () => {
+        const url = (el as HTMLElement).dataset['url']!;
+        const name = (el as HTMLElement).dataset['name']!;
+        Swal.showLoading();
+        await this.selectDefaultImage(url, name);
+        Swal.close();
+      });
+    });
   }
 
-  // 檢查通過後才存檔案
-  this.selectedFile = file;
-}
+  // 3. 修正後的版本：完全配合你原本的 selectedFile 變數
+  async selectDefaultImage(url: string, name: string): Promise<void> {
+    try {
+      // 抓取前端 assets 的圖片二進位資料
+      const response = await fetch(url);
+      const blob = await response.blob();
 
+      // 包裝成標準 File 物件
+      const file = new File([blob], `${name}.png`, { type: 'image/png' });
 
+      // ✅ 修正：你原本宣告存圖片的變數是 selectedFile，直接賦值給它
+      this.selectedFile = file;
+      // 我們要把原生的檔案輸入框（Input File）清空，避免畫面和資料打架
+      const fileInput = document.getElementById('image') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
+    } catch (error) {
+      Swal.fire('錯誤', '無法載入預設圖片', 'error');
+    }
+  }
   // ✅ 全面補強，四種模式都有完整驗證
   isSubmitDisabled(): boolean {
     if (!this.item.name?.trim()) return true;
@@ -289,6 +440,10 @@ export class ItemListAddDialogComponent implements OnInit {
 
     if (!payload.name?.trim()) {
       this.showError('請輸入物品名稱');
+      return;
+    }
+    if (!payload.unitPrice) {
+      this.showError('單價不能為0');
       return;
     }
     if (!payload.categoryId) {
@@ -560,7 +715,7 @@ export class ItemListAddDialogComponent implements OnInit {
     }
 
     this.showLoading('新增保固中...');
-   const formData = new FormData();
+    const formData = new FormData();
 
     // 1. 將純 JSON 轉為 Blob 並指定 type 為 application/json 傳給後端的 @RequestPart("req")
     const jsonBlob = new Blob([JSON.stringify(payload)], {
@@ -659,7 +814,11 @@ export class ItemListAddDialogComponent implements OnInit {
       this.showError('請輸入藥品名稱');
       return;
     }
-    if (!payload.unitPrice || payload.quantity <= 0) {
+    if (!payload.unitPrice) {
+      this.showError('藥品價格不能是0');
+      return;
+    }
+    if (payload.quantity <= 0) {
       this.showError('請輸入藥品數量');
       return;
     }

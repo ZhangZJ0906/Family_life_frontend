@@ -12,6 +12,8 @@ import { AuthService } from '../../@services/auth.service';
 import { map } from 'rxjs';
 
 import { CanComponentDeactivate } from '../../@guard/pending-changes.guard';
+import { EmailVerifyService } from './../../@services/EmailVerifyService';
+
 
 @Component({
   selector: 'app-profile',
@@ -37,7 +39,7 @@ export class ProfileComponent implements CanComponentDeactivate {
   groups: any[] = [];
 
   //到期通知
-  endDateNotify = true;
+  endDateNotify = false;
 
   //email通知
   emailNotify = false;
@@ -59,7 +61,8 @@ export class ProfileComponent implements CanComponentDeactivate {
   constructor(
     private http: HttpClient,
     private authService: AuthService,
-    private notifySettingService: NotifySettingService //共享userInfo
+    private notifySettingService: NotifySettingService, //共享userInfo
+    private readonly emailVerifyService: EmailVerifyService
   ) {}
 
   user_id = 0;
@@ -161,9 +164,7 @@ export class ProfileComponent implements CanComponentDeactivate {
 
   // 開啟修改資料彈窗
   openEditDialog(): void {
-
-    // 測試按鈕是否有觸發
-    console.log('修改按鈕被點擊');
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     Swal.fire({
       title: '修改基本資料',
@@ -171,14 +172,52 @@ export class ProfileComponent implements CanComponentDeactivate {
       html: `
         <div class="swal-form">
 
-          <div class="swal-row">
-            <label>使用者名稱</label>
-            <input id="editUserName" class="swal2-input" value="${this.userName}">
+          <!-- 頭像預覽 + 上傳 -->
+          <div style="text-align:center; margin-bottom:16px;">
+            <img id="avatarPreview"
+                src="${this.avatarUrl || ''}"
+                style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:2px solid #eee;" />
+
+            <div style="margin-top:12px;">
+              <label
+                for="avatarInput"
+                style="
+                  display:inline-block;
+                  padding:8px 16px;
+                  background:#2f80ed;
+                  color:white;
+                  border-radius:10px;
+                  cursor:pointer;
+                  font-weight:600;
+                ">
+                選擇圖片
+              </label>
+
+              <input
+                id="avatarInput"
+                type="file"
+                accept="image/*"
+                style="display:none;"
+              />
+
+              <div
+                id="fileName"
+                style="
+                  margin-top:8px;
+                  font-size:13px;
+                  color:#666;
+                ">
+                尚未選擇圖片
+              </div>
+            </div>
           </div>
 
+
           <div class="swal-row">
-            <label>Email</label>
-            <input id="editEmail" class="swal2-input" value="${this.email}">
+            <label>使用者名稱</label>
+            <input id="editUserName"
+                  class="swal2-input"
+                  value="${this.userName}">
           </div>
 
         </div>
@@ -188,91 +227,78 @@ export class ProfileComponent implements CanComponentDeactivate {
       confirmButtonText: '修改',
       cancelButtonText: '取消',
 
+      didOpen: () => {
+        // ⭐ 即時預覽頭像
+        const input = document.getElementById('avatarInput') as HTMLInputElement;
+        const preview = document.getElementById('avatarPreview') as HTMLImageElement;
+        const fileName = document.getElementById('fileName');
+
+        input?.addEventListener('change', () => {
+          const file = input.files?.[0];
+          if (file) {
+            preview.src = URL.createObjectURL(file);
+
+            if (fileName) {
+              fileName.textContent = file.name;
+            }
+          }
+        });
+      },
+
       preConfirm: () => {
         const userName = (document.getElementById('editUserName') as HTMLInputElement).value.trim();
-        const email = (document.getElementById('editEmail') as HTMLInputElement).value.trim();
+        // const email = (document.getElementById('editEmail') as HTMLInputElement).value.trim();
+        const file = (document.getElementById('avatarInput') as HTMLInputElement).files?.[0];
 
         if (!userName) {
           Swal.showValidationMessage('使用者名稱不可為空');
           return false;
         }
 
-        if (!email) {
-          Swal.showValidationMessage('Email 不可為空');
-          return false;
-        }
+        // if (!email) {
+        //   Swal.showValidationMessage('Email 不可為空');
+        //   return false;
+        // }
+
+        // if (!emailPattern.test(email)) {
+        //   Swal.showValidationMessage('Email 格式錯誤');
+        //   return false;
+        // }
+
+        // if (email === "familyLifeTest123456@gmail.com") {
+        //   Swal.showValidationMessage('這是官方 email!!');
+        //   return false;
+        // }
 
         return {
           userName,
-          email
+          // email,
+          file
         };
       }
-    }).then((result: SweetAlertResult<{ userName: string; email: string }>) => {
+    }).then((result) => {
+      if (!result.isConfirmed || !result.value) return;
 
-      if (!result.isConfirmed || !result.value) {
-        return;
+      // 更新資料
+      this.userName = result.value.userName;
+      // this.email = result.value.email;
+
+      // ⭐ 如果有新頭像
+      if (result.value.file) {
+        this.file = result.value.file;
+        this.avatarUrl = URL.createObjectURL(this.file);
       }
 
-      // 更新畫面上的資料
-      this.userName = result.value.userName;
-      this.email = result.value.email;
-
-      //共享
       this.notifySettingService.setName(this.userName);
-
-      //暫存
       this.isDirty = true;
 
       Swal.fire({
         icon: 'success',
         title: '修改成功',
-        confirmButtonText: '確認',
-        showConfirmButton: true
+        timer: 1200,
+        showConfirmButton: false
       });
     });
-  }
-
-// 開啟更換頭像視窗
-openAvatarDialog(): void {
- Swal.fire({
-    title: '更換頭像',
-
-    html: `
-      <div class="avatar-dialog">
-        <input id="avatarInput" type="file" accept="image/*" class="swal2-file">
-      </div>
-    `,
-
-    showCancelButton: true,
-    confirmButtonText: '修改',
-    cancelButtonText: '取消',
-
-    preConfirm: () => {
-      const input = document.getElementById('avatarInput') as HTMLInputElement;
-      const selectedFile = input.files?.[0];
-
-      if (!selectedFile) {
-        Swal.showValidationMessage('請選擇一張圖片');
-        return false;
-      }
-
-      return selectedFile;
-    }
-  }).then((result) => {
-    if (!result.isConfirmed || !result.value) {
-      return;
-    }
-
-    // 1. 暫存使用者選到的檔案
-    this.file = result.value as File;
-
-    // 2. 先在畫面上預覽新頭像
-    this.avatarUrl = URL.createObjectURL(this.file);
-
-    //暫存
-    this.isDirty = true;
-  });
-
   }
 
   saveAll(){
@@ -337,7 +363,10 @@ openAvatarDialog(): void {
           icon: 'success',
           title: '已儲存',
           text: '資料已更新',
-          confirmButtonText: '確認'
+          timer: 1000,
+          showConfirmButton: false,
+          toast: true,
+          position: 'top-end'
         });
 
         //共享info
@@ -389,101 +418,4 @@ openAvatarDialog(): void {
     });
   }
 
-  verifyEmailExist(emailVerify: boolean) {
-    if(emailVerify){
-      this.emailNotify = true;
-    }
-    else{
-      Swal.fire({
-        title: '正在送驗證碼到你的gmail...',
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        }
-      });
-      this.http.post(`http://localhost:8080/users/send?email=${this.email}`,{},
-        {
-          responseType: 'text'
-        }
-      ).subscribe({
-
-        next: (res: any) => {
-          Swal.close()
-          Swal.fire('驗證碼已送出', '', 'success');
-          this.showVerifyDialog();
-        },
-        error: (err) => {
-          Swal.close()
-            console.error(err);
-
-          this.emailNotify = false
-          Swal.fire('送出失敗', '', 'error');
-        }
-      });
-
-    }
-  }
-
-  showVerifyDialog(){
-    Swal.fire({
-      title: '輸入驗證碼',
-      input: 'text',
-      inputPlaceholder: '請輸入驗證碼',
-      showCancelButton: true,
-      confirmButtonText: '驗證',
-      cancelButtonText: '取消',
-
-      preConfirm: async (verifyCode) => {
-
-        if (!verifyCode) {
-          Swal.showValidationMessage('請輸入驗證碼');
-          return;
-        }
-
-        return verifyCode;
-      }
-
-    }).then((result) => {
-
-      if (result.isConfirmed) {
-        Swal.fire({
-          title: '驗證中...',
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          }
-        });
-
-        this.http.post(
-          `http://localhost:8080/users/verify?email=${this.email}&code=${result.value}`,
-          {},
-          {
-            responseType: 'text'
-          }
-        ).subscribe({
-
-          next: (res: any) => {
-            Swal.close()
-            if(res == "驗證成功"){
-              Swal.fire('驗證成功', '', 'success');
-              this.emailNotify = true;
-            }
-            else{
-              Swal.fire('驗證失敗', '', 'error');
-              this.emailNotify = false;
-            }
-          },
-
-          error: () => {
-            this.emailNotify = false;
-            Swal.close()
-            Swal.fire('驗證失敗', '', 'error');
-          }
-
-        });
-
-      }
-
-    });
-  }
 }

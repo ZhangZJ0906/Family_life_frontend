@@ -14,7 +14,9 @@
 
 .auth-row {
   min-height: calc(100vh - 80px);
-  gap: 64px;
+  display: flex;
+  align-items: center;
+
 }
 
 /* 左側圖片區 */
@@ -221,7 +223,7 @@
   }
 
   .auth-row {
-    gap: 28px;
+    gap: 18px;
   }
 
   .auth-hero-img {

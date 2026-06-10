@@ -15,6 +15,7 @@ export class AuthService {
 
   private readonly currentUserSignal = signal<User | null>(this.readStoredUser());
   private readonly userUrl = 'http://localhost:8080/users';
+  // private readonly userUrl = 'https://zipping-cytoplast-laxative.ngrok-free.dev/users';
 
 
   readonly currentUser = this.currentUserSignal.asReadonly();

@@ -464,7 +464,7 @@ getCurrentGroup() {
 
       error: (err) => {
         Swal.close();
-        console.log('記帳查詢錯誤:', err);
+        
 
         Swal.fire({
           title: '錯誤',

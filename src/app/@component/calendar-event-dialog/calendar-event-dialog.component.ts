@@ -39,6 +39,7 @@ export class CalendarEventDialogComponent {
   // 記錄 Dialog 剛開啟時的原始資料
   // 用來判斷使用者有沒有真的修改內容
   originalFormJson = '';
+  SELECT_ALL_VALUE = -999;
 
   form = {
     title: '',
@@ -47,7 +48,7 @@ export class CalendarEventDialogComponent {
     eventTime: null as Date | null,
     endDate: null as Date | null,
     endTime: null as Date | null,
-    notifyBefore: 0,
+    notifyBefore: 60,
 
     // 指派成員清單
   // 群組活動可以一次選多個成員
@@ -153,7 +154,7 @@ export class CalendarEventDialogComponent {
       this.form.eventTime = new Date(e.startStr);
       this.form.endDate = e.endStr ? new Date(e.endStr) : null;
       this.form.endTime = e.endStr ? new Date(e.endStr) : null;
-      this.form.notifyBefore = e.extendedProps?.notifyBefore || 0;
+      this.form.notifyBefore = e.extendedProps?.notifyBefore || 60;
 
      // 修改時帶入原本指派成員
       // 因為 mat-select multiple 綁定的是陣列，所以就算只有一個人也要包成陣列
@@ -273,15 +274,18 @@ if (data.assignedUserIds && data.assignedUserIds.length > 0) {
       return;
     }
 
-    this.dialogRef.close({
-      title: this.form.title,
-      description: this.form.description,
-      eventTime: startDateTime,
-      endTime: endDateTime,
-      notifyBefore: this.form.notifyBefore,
-      // 回傳多位指派成員給父層
-    assignedUserIds: this.form.assignedUserIds,
-        });
+    const assignedUserIds = this.form.assignedUserIds.filter(
+  (id) => id !== this.SELECT_ALL_VALUE
+);
+
+this.dialogRef.close({
+  title: this.form.title,
+  description: this.form.description,
+  eventTime: startDateTime,
+  endTime: endDateTime,
+  notifyBefore: this.form.notifyBefore,
+  assignedUserIds: assignedUserIds,
+});
   }
 
   combineDateAndTime(date: Date, time: Date): string {
@@ -300,4 +304,42 @@ if (data.assignedUserIds && data.assignedUserIds.length > 0) {
   cancel() {
     this.dialogRef.close();
   }
+
+  // 取得所有成員 ID
+getAllMemberIds(): number[] {
+  return this.members
+    .map((member) => this.getMemberId(member))
+    .filter((id) => !isNaN(id));
+}
+
+// 判斷是否已經全選
+isAllMembersSelected(): boolean {
+  const allMemberIds = this.getAllMemberIds();
+
+  if (allMemberIds.length === 0) {
+    return false;
+  }
+
+  return allMemberIds.every((id) =>
+    this.form.assignedUserIds.includes(id)
+  );
+}
+
+// 點擊全選
+toggleSelectAllMembers(event: MouseEvent): void {
+  event.stopPropagation();
+
+  const allMemberIds = this.getAllMemberIds();
+
+  if (this.isAllMembersSelected()) {
+    this.form.assignedUserIds = [];
+  } else {
+    this.form.assignedUserIds = allMemberIds;
+  }
+
+  // 避免 -999 被放進 assignedUserIds
+  this.form.assignedUserIds = this.form.assignedUserIds.filter(
+    (id) => id !== this.SELECT_ALL_VALUE
+  );
+}
 }
