@@ -68,7 +68,6 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
     // 歷史訊息
     this.loadMessages();
 
-    this.markRead();
 
     // WebSocket
     await this.ws.connect();
@@ -120,10 +119,13 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
     ).subscribe({
       next: (res) => {
         this.messages = res.messages ?? [];
-        this.isLoadingMessages = false;
+
+        this.markRead();
 
         this.hasLoaded = true; // ⭐ 關鍵
         // setTimeout(() => this.scrollToBottom());
+
+        this.isLoadingMessages = false;
       },
       error: () => {
         this.isLoadingMessages = false;
@@ -185,6 +187,9 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
   }
 
   scrollToBottom() {
+    if (!this.scrollBox) {
+      return;
+    }
     const el = this.scrollBox.nativeElement;
 
     el.scrollTop = el.scrollHeight;

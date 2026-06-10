@@ -6,9 +6,16 @@ import { Client } from '@stomp/stompjs';
 })
 export class ChatWsService {
 
+  private connected = false;
+
   private client!: Client;
 
   connect(): Promise<void> {
+
+    if (this.connected) {
+      return Promise.resolve();
+    }
+
 
     return new Promise((resolve) => {
 
@@ -22,6 +29,8 @@ export class ChatWsService {
 
       this.client.onConnect = () => {
 
+        this.connected = true;
+
         console.log('WebSocket Connected');
 
         resolve();
@@ -33,9 +42,33 @@ export class ChatWsService {
 
   subscribe(groupId: number, callback: Function) {
 
+    console.log("訂閱聊天室", groupId);
+
     this.client.subscribe(
       `/topic/group/${groupId}`,
-      (msg) => callback(JSON.parse(msg.body))
+      (msg) => {
+
+        console.log("收到WS", msg.body);
+
+        callback(
+          JSON.parse(msg.body)
+        );
+
+      }
+    );
+  }
+
+  subscribeOnline(callback: Function) {
+
+    this.client.subscribe(
+      '/topic/group/global',
+      (msg) => {
+
+        callback(
+          JSON.parse(msg.body)
+        );
+
+      }
     );
 
   }
