@@ -19,6 +19,7 @@ import { Inject } from '@angular/core';
 
 import { ChatWsService } from '../../@services/ChatWsService';
 import { AuthService } from '../../@services/auth.service';
+import { AfterViewChecked } from '@angular/core';
 
 @Component({
   selector: 'app-chat-room',
@@ -31,10 +32,9 @@ import { AuthService } from '../../@services/auth.service';
   templateUrl: './chat-room.component.html',
   styleUrl: './chat-room.component.scss'
 })
-export class ChatRoomComponent implements OnInit {
+export class ChatRoomComponent implements OnInit,  AfterViewChecked {
 
-  @ViewChild('chatBody')
-  chatBody!: ElementRef<HTMLDivElement>;
+  @ViewChild('scrollBox') scrollBox!: ElementRef;
 
   groupId!: number;
   userId!: number;
@@ -42,6 +42,12 @@ export class ChatRoomComponent implements OnInit {
 
   message = '';
   messages: any[] = [];
+
+  onlineCount!: number;
+
+  //msg未全載完
+  hasLoaded = false;
+  isLoadingMessages = true;
 
   constructor(
     private http: HttpClient,
@@ -55,13 +61,14 @@ export class ChatRoomComponent implements OnInit {
 
     this.groupName = this.data.groupName;
 
-    this.userId =
-      this.authService.currentUser()?.user_id ?? 0;
+    this.userId = this.authService.currentUser()?.user_id ?? 0;
 
     this.groupId = this.data.groupId;
 
     // 歷史訊息
     this.loadMessages();
+
+    this.markRead();
 
     // WebSocket
     await this.ws.connect();
@@ -70,26 +77,57 @@ export class ChatRoomComponent implements OnInit {
       this.groupId,
       (msg: any) => {
 
-        this.messages.push(msg);
+        switch (msg.type) {
+
+          case 'ONLINE':
+            this.onlineCount = msg.count;
+            break;
+
+          case 'MESSAGE':
+            this.messages.push(msg);
+            break;
+
+          case 'READ':
+            this.updateReadCount(msg);
+            break;
+
+          case 'IMAGE':
+            this.messages.push(msg);
+            break;
+        }
 
         setTimeout(() => {
           this.scrollToBottom();
-        });
+        }, 50);
       }
     );
   }
 
+  ngAfterViewChecked() {
+
+    if (this.hasLoaded) {
+      this.scrollToBottom();
+      this.hasLoaded = false; // ⭐ 只做一次
+    }
+  }
+
   loadMessages() {
+
+    this.isLoadingMessages = true;
 
     this.http.get<any>(
       `http://localhost:8080/chat/${this.groupId}`
-    ).subscribe(res => {
+    ).subscribe({
+      next: (res) => {
+        this.messages = res.messages ?? [];
+        this.isLoadingMessages = false;
 
-      this.messages = res.messages ?? [];
-
-      setTimeout(() => {
-        this.scrollToBottom();
-      });
+        this.hasLoaded = true; // ⭐ 關鍵
+        // setTimeout(() => this.scrollToBottom());
+      },
+      error: () => {
+        this.isLoadingMessages = false;
+      }
     });
   }
 
@@ -112,15 +150,44 @@ export class ChatRoomComponent implements OnInit {
     }, 200);
   }
 
-  private scrollToBottom(): void {
+  onImageSelected(event: any) {
 
-    if (!this.chatBody) {
-      return;
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    const formData = new FormData();
+
+    formData.append('file', file);
+    formData.append('groupId', this.groupId.toString());
+    formData.append('senderId', this.userId.toString());
+
+    this.http.post(
+      'http://localhost:8080/chat/upload',
+      formData
+    ).subscribe();
+  }
+
+  updateReadCount(msg: any) {
+
+    const target = this.messages.find(m => m.id === msg.messageId);
+
+    if (target) {
+      target.readCount = msg.readCount;
     }
+  }
 
-    const element = this.chatBody.nativeElement;
+  markRead() {
+    this.http.post(
+      `http://localhost:8080/chat/read/${this.groupId}?userId=${this.userId}`,
+      {}
+    ).subscribe();
+  }
 
-    element.scrollTop = element.scrollHeight;
+  scrollToBottom() {
+    const el = this.scrollBox.nativeElement;
+
+    el.scrollTop = el.scrollHeight;
   }
 
   closeChat() {

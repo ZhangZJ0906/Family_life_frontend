@@ -8,7 +8,13 @@
     ✕
   </button>
 
-  <div class="chat-body"  #chatBody>
+  <div class="chat-body" #scrollBox>
+
+    <!-- 🔥 Loading -->
+    <div class="loading-box" *ngIf="isLoadingMessages">
+      <div class="spinner"></div>
+      <div class="loading-text">載入聊天中...</div>
+    </div>
 
     <div
       *ngFor="let msg of messages"
@@ -31,8 +37,26 @@
           {{ msg.message }}
         </div>
 
+        <!-- 🔥 圖片 -->
+        <img
+          *ngIf="msg.type === 'IMAGE'"
+          [src]="msg.imageUrl"
+          class="chat-image"
+        />
+
         <div class="time">
           {{ msg.createTime | date:'HH:mm' }}
+
+          <!-- ✔ 已讀 -->
+          <span class="read-status" *ngIf="msg.senderId === userId">
+            <ng-container *ngIf="msg.readCount > 0; else sent">
+              已讀 {{ msg.readCount }}
+            </ng-container>
+
+            <ng-template #sent>
+              已送出
+            </ng-template>
+          </span>
         </div>
 
       </div>
@@ -42,6 +66,13 @@
   </div>
 
   <div class="chat-footer">
+
+    <!-- 📎 圖片按鈕 -->
+    <label class="img-btn">
+      📷
+      <input type="file" hidden (change)="onImageSelected($event)">
+    </label>
+
 
     <input
       [(ngModel)]="message"
