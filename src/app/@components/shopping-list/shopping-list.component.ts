@@ -484,7 +484,8 @@ getGroupLabel(groupId: number | null): string {
           quantity: item.quantity,
           unit: '個',
           purchaseDate: this.getTodayDate(),
-          groupId: list.group_id ?? 0
+          groupId: list.group_id ?? 0,
+          assignedUserId: item.userId  // 👈 新增這行
         }
       }
     });

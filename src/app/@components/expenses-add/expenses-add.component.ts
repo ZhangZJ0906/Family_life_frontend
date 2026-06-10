@@ -186,7 +186,7 @@ export class ExpensesAddComponent {
       expenseDate: this.formatToBackendDate(formValues.expenseDate),
     };
     // console.log(payload);
-
+this.showLoading('新增中...');
     this.http.postApi(this.basicUrl + 'expense/addInfo', payload).subscribe({
       next: (res: any) => {
         if (res.code != 200) {
@@ -229,4 +229,13 @@ export class ExpensesAddComponent {
   onCancel() {
     this.dialogRef.close(false);
   }
+    private showLoading(message = '載入中...'): void {
+      Swal.fire({
+        title: message,
+        text: '請稍候',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => Swal.showLoading(),
+      });
+    }
 }
