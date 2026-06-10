@@ -8,7 +8,7 @@
     ✕
   </button>
 
-  <div class="chat-body">
+  <div class="chat-body"  #chatBody>
 
     <div
       *ngFor="let msg of messages"
@@ -16,16 +16,25 @@
       [ngClass]="msg.senderId === userId ? 'me' : 'other'"
     >
 
-      <div class="sender">
-        {{ msg.senderName }}
-      </div>
+      <img
+        class="avatar"
+        [src]="msg.senderAvatar || 'assets/default-avatar.png'"
+      />
 
-      <div class="content">
-        {{ msg.message }}
-      </div>
+      <div class="bubble">
 
-      <div class="time">
-        {{ msg.createTime | date:'MM/dd HH:mm' }}
+        <div class="sender">
+          {{ msg.senderName }}
+        </div>
+
+        <div class="content">
+          {{ msg.message }}
+        </div>
+
+        <div class="time">
+          {{ msg.createTime | date:'HH:mm' }}
+        </div>
+
       </div>
 
     </div>
