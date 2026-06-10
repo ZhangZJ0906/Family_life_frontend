@@ -25,6 +25,18 @@
   user-select: none;
 }
 
+.online-badge {
+
+  font-size: 13px;
+
+  background: rgba(255,255,255,.2);
+
+  padding: 4px 10px;
+
+  border-radius: 20px;
+
+}
+
 .close-btn {
   position: absolute;
   right: 12px;
