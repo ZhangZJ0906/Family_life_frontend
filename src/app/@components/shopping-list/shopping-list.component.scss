@@ -9,6 +9,14 @@
   box-sizing: border-box;
 }
 
+.shopping-header-card,
+.lists-panel,
+.error-message {
+  width: min(100%, 66.666vw);
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .item-header-card,
 .table-card,
 .dialog {
@@ -490,6 +498,12 @@ mat-progress-bar {
 }
 
 @media (max-width: 900px) {
+  .shopping-header-card,
+  .lists-panel,
+  .error-message {
+    width: 100%;
+  }
+
   .item-header-card,
   .panel-header {
     grid-template-columns: 1fr;
