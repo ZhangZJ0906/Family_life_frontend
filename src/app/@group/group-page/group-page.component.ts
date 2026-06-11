@@ -15,6 +15,7 @@ import { NotifyDialogComponent } from '../notify-dialog/notify-dialog.component'
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
 
 import { AuthService } from '../../@services/auth.service';
+import { environment } from '../../@models/user.model';
 
 
 @Component({
@@ -95,11 +96,11 @@ export class GroupPageComponent{
     this.isLoading = true;
 
     this.http.get<any>(
-      `http://localhost:8080/family_life/get_group_list?user_id=${this.user_id}`
+      `${environment.apiUrl}/family_life/get_group_list?user_id=${this.user_id}`
     ).subscribe({
 
       next: (res) => {
-        // console.log(res);
+        console.log(res);
 
         this.groups = res.groupList;
 

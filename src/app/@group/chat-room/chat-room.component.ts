@@ -22,6 +22,7 @@ import { AuthService } from '../../@services/auth.service';
 import { AfterViewChecked } from '@angular/core';
 
 import { NgZone } from '@angular/core';
+import { environment } from '../../@models/user.model';
 
 @Component({
   selector: 'app-chat-room',
@@ -121,7 +122,7 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
     this.isLoadingMessages = true;
 
     this.http.get<any>(
-      `http://localhost:8080/chat/${this.groupId}`
+      `${environment.apiUrl}/chat/${this.groupId}`
     ).subscribe({
       next: (res) => {
         this.messages = res.messages ?? [];
@@ -171,7 +172,7 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
     formData.append('senderId', this.userId.toString());
 
     this.http.post(
-      'http://localhost:8080/chat/upload',
+      '${environment.apiUrl}/chat/upload',
       formData
     ).subscribe();
   }
@@ -187,7 +188,7 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
 
   markRead() {
     this.http.post(
-      `http://localhost:8080/chat/read/${this.groupId}?userId=${this.userId}`,
+      `${environment.apiUrl}/chat/read/${this.groupId}?userId=${this.userId}`,
       {}
     ).subscribe();
   }
