@@ -236,7 +236,7 @@
 
 /* =========================
    平板版：768px ~ 1024px
-   Logo + icon 導覽 + 右側功能
+   Logo + icon 導覽 + active 文字
 ========================= */
 @media (min-width: 768px) and (max-width: 1024px) {
 
@@ -256,17 +256,15 @@
     height: 78px;
   }
 
-  /* 平板不顯示漢堡 */
   .menu-toggle {
     display: none;
   }
 
-  /* 平板導覽列顯示 icon */
   .top-nav {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 14px;
+    gap: 10px;
     margin-left: 0;
     overflow: visible;
   }
@@ -276,10 +274,11 @@
     height: 40px;
     padding: 0;
     border-radius: 14px;
-  }
 
-  .top-nav button span {
-    display: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
   }
 
   .top-nav button mat-icon {
@@ -288,8 +287,28 @@
     height: 22px;
   }
 
+  /* 平板預設隱藏文字 */
+  .top-nav button span {
+    display: none;
+  }
+
+  /* 平板目前頁面才顯示文字 */
   .top-nav button.active {
+    width: auto;
+    padding: 0 14px;
     background: #eef3ff;
+    color: #2f80ed;
+  }
+
+  .top-nav button.active span {
+    display: inline;
+    font-size: 14px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .top-nav button.active mat-icon {
+    color: #2f80ed;
   }
 
   .top-actions {
@@ -307,7 +326,6 @@
     height: 44px;
   }
 }
-
 /* 小平板：導覽按鈕可橫向滑動 */
 // @media (max-width: 900px) {
 //   .topbar {
@@ -354,15 +372,16 @@
 
   .logo-area {
     grid-area: logo;
-    height: 52px;
+    height: 56px;
   }
 
+  /* Logo 放大一點 */
   .logo-img {
-    width: 100px;
-    height: 52px;
+    width: 125px;
+    height: 56px;
+    object-fit: contain;
   }
 
-  /* 手機顯示漢堡 */
   .menu-toggle {
     grid-area: menu;
     display: flex;
@@ -383,21 +402,33 @@
 
   .top-actions {
     grid-area: actions;
+    display: flex;
+    align-items: center;
     gap: 8px;
   }
 
-
   .icon-btn,
-  .logout-btn {
+  .logout-btn,
+  .user-avatar {
     width: 42px;
     height: 42px;
+    flex-shrink: 0;
+  }
+
+  .user-avatar {
+    display: flex;
+  }
+
+  .user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .logout-btn mat-icon {
     font-size: 24px;
   }
 
-  /* 手機版選單預設隱藏 */
   .top-nav {
     grid-area: nav;
 
@@ -411,7 +442,6 @@
     padding-top: 6px;
   }
 
-  /* 點漢堡後展開 */
   .top-nav.open {
     display: flex;
   }
@@ -451,26 +481,35 @@
 
   .topbar {
     padding: 10px 12px;
+    column-gap: 8px;
   }
 
   .logo-area {
-    height: 42px;
+    height: 48px;
   }
 
+  /* 超小手機 Logo 還是比原本大 */
   .logo-img {
-    width: 110px;
-    height: 42px;
-  }
-
-  .user-avatar {
-    display: none;
+    width: 112px;
+    height: 48px;
+    object-fit: contain;
   }
 
   .icon-btn,
   .logout-btn,
-  .menu-toggle {
+  .menu-toggle,
+  .user-avatar {
     width: 36px;
     height: 36px;
+    flex-shrink: 0;
+  }
+
+  .user-avatar {
+    display: flex;
+  }
+
+  .top-actions {
+    gap: 6px;
   }
 
   .top-nav button {
