@@ -25,7 +25,7 @@ import Swal from 'sweetalert2';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
 import { ActivatedRoute } from '@angular/router';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-expense-tracker',
@@ -46,6 +46,7 @@ import { MatPaginator } from '@angular/material/paginator';
     TopbarComponent,
     MatSort,
     MatSortHeader,
+    MatPaginatorModule,
   ],
   templateUrl: './expenses.component.html',
   styleUrl: './expenses.component.scss',
@@ -60,6 +61,42 @@ export class ExpensesComponent {
   currentUserAvatar = 'assets/default-avatar.png';
   categoryMap: LocationAndCategory[] = [];
   dataSource = new MatTableDataSource<ExpenseRecord>([]);
+  // 手機版分頁
+mobilePageIndex = 0;
+mobilePageSize = 3;
+
+get mobileExpenses(): ExpenseRecord[] {
+  const data = this.dataSource.filteredData || [];
+  const start = this.mobilePageIndex * this.mobilePageSize;
+  return data.slice(start, start + this.mobilePageSize);
+}
+
+get mobileTotalPages(): number {
+  const total = this.dataSource.filteredData?.length || 0;
+  return Math.ceil(total / this.mobilePageSize);
+}
+
+get mobileCurrentPage(): number {
+  return this.mobileTotalPages === 0 ? 0 : this.mobilePageIndex + 1;
+}
+
+nextMobilePage(): void {
+  if (this.mobilePageIndex < this.mobileTotalPages - 1) {
+    this.mobilePageIndex++;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+prevMobilePage(): void {
+  if (this.mobilePageIndex > 0) {
+    this.mobilePageIndex--;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+resetMobilePage(): void {
+  this.mobilePageIndex = 0;
+}
   selection = new SelectionModel<ExpenseRecord>(true, []);
   expense: ExpenseRecord[] = [];
   itemMap: { [key: number]: any } = {};
@@ -460,6 +497,7 @@ getCurrentGroup() {
         this.dataSource.data = this.expense;
         this.dataSource.filter = JSON.stringify(this.filterValues);
         this.filteredExpense.set(this.dataSource.filteredData);
+        this.resetMobilePage();
       },
 
       error: (err) => {
@@ -484,6 +522,7 @@ getCurrentGroup() {
     this.filterValues.category = categoryId;
     this.dataSource.filter = JSON.stringify(this.filterValues);
     this.filteredExpense.set(this.dataSource.filteredData);
+    this.resetMobilePage();
   }
 
   applyFilter(event: Event) {
@@ -492,6 +531,7 @@ getCurrentGroup() {
       .toLowerCase();
     this.dataSource.filter = JSON.stringify(this.filterValues);
     this.filteredExpense.set(this.dataSource.filteredData);
+    this.resetMobilePage();
   }
 
   //抓取上次登入該page時間

@@ -1027,6 +1027,10 @@ mat-paginator {
    ========================================================= */
 @media (max-width: 767px) {
 
+  .expense-paginator {
+    display: none !important;
+  }
+
     .item-page {
     padding: 16px !important;
   }
