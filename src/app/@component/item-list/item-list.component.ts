@@ -228,8 +228,6 @@ export class ItemListComponent {
     this.currentGroupId = groupId;
     if (groupId == null) groupId = 0;
     this.getLoginItemPageTime().then(() => {
-      
-
       this.getUserGroupData(groupId);
     });
   }
@@ -376,7 +374,7 @@ export class ItemListComponent {
         // 名稱對應後端的 @RequestPart(value = "avatar")
         formData.append('avatar', selectedFile);
       }
-      
+
       this.http.postApi(url, formData).subscribe({
         next: (res: any) => {
           Swal.close();
@@ -898,12 +896,16 @@ export class ItemListComponent {
 
   //判斷是否非私人新物品
   isNewItem(createdTime: string | Date, createdBy: number): boolean {
+    console.log('CTB', createdBy);
+    console.log('LGT', createdTime);
     if (createdBy == this.currentUserId) return false;
     if (!createdTime || !this.lastLoginTime) return false;
 
     const created = new Date(createdTime).getTime();
     const login = this.lastLoginTime.getTime();
 
+    console.log('CT', created);
+    console.log('LG', login);
     if (isNaN(created)) return false;
 
     return created > login;

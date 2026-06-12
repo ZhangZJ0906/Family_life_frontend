@@ -21,7 +21,7 @@ export class ChatWsService {
 
       this.client = new Client({
 
-        brokerURL: 'wss://deposits-plymouth-diet-meetings.trycloudflare.com/ws',
+        brokerURL: 'ws://localhost:8080/ws',
 
         reconnectDelay: 5000
 
