@@ -605,7 +605,7 @@ export class ItemListEditDialogComponent implements OnInit {
         fileInput.value = '';
       }
     } catch (error) {
-      console.error('預設圖片轉換失敗:', error);
+      
       Swal.fire('錯誤', '無法載入預設圖片', 'error');
     }
   }

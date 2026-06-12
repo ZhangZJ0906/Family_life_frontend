@@ -189,6 +189,7 @@ export class ItemListAddDialogComponent implements OnInit {
       quantity: prefill.quantity ?? this.item.quantity,
       purchaseDate: prefill.purchaseDate ?? this.item.purchaseDate,
       unit: (prefill.unit ?? this.item.unit) || '',
+      created_by_id: prefill.assignedUserId ?? this.item.created_by_id,
     };
   }
 
@@ -287,20 +288,17 @@ export class ItemListAddDialogComponent implements OnInit {
       title: '請選擇預設物品圖片',
       width: 'min(720px, 95vw)', // 讓 md grid 有足夠空間
       html: `
-<div style="overflow-x: hidden;">   <!-- ✅ 包一層擋掉 row 負 margin -->
-
+<div style="overflow-x: hidden;">  
       <div id="chip-bar"
            style="display:flex; flex-wrap:wrap; gap:8px;
                   justify-content:center; margin-bottom:16px;">
         ${chipsHtml}
       </div>
-
       <div style="max-height:400px; overflow-y:auto; overflow-x:hidden; padding:4px;">
         <div id="default-img-container" class="row g-3">
           ${renderImages(defaultCategory)}
         </div>
       </div>
-
     </div>
     `,
       showConfirmButton: false,

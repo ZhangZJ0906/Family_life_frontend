@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { computed, Injectable, signal } from '@angular/core';
 import { Observable } from 'rxjs';
-import { User } from '../@models/user.model';
+import { environment, User } from '../@models/user.model';
 import { Router } from '@angular/router';
 
 
@@ -14,7 +14,7 @@ const STORAGE_KEY = 'family-life-current-user';
 export class AuthService {
 
   private readonly currentUserSignal = signal<User | null>(this.readStoredUser());
-  private readonly userUrl = 'http://localhost:8080/users';
+  private readonly userUrl = `${environment.apiUrl}/users`;
   // private readonly userUrl = 'https://zipping-cytoplast-laxative.ngrok-free.dev/users';
 
 

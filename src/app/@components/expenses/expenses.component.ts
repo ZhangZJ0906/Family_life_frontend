@@ -82,7 +82,6 @@ export class ExpensesComponent {
     'category_id',
     'note',
     'price',
-    'user',
     'actions',
   ];
   filteredExpense = signal<ExpenseRecord[]>([]);
@@ -112,16 +111,12 @@ export class ExpensesComponent {
     // 取得目前登入者資料
     const raw = sessionStorage.getItem('family-life-current-user');
 
-
-
     if (raw) {
       this.user = JSON.parse(raw);
       this.currentUserId = this.user.user_id;
-
       // 私人記帳使用登入者自己的頭像
       this.currentUserAvatar = this.user.avatar || 'assets/default-avatar.png';
-
-      this.getLoginExpensePageTime()
+      this.getLoginExpensePageTime();
     }
     // 設定表格篩選邏輯
     this.dataSource.filterPredicate = (data: ExpenseRecord, filter: string) => {
@@ -129,7 +124,6 @@ export class ExpensesComponent {
       // 分類篩選
       const matchCategory =
         f.category == null || data.categoryId === f.category;
-
       // 關鍵字搜尋
       const keyword = f.search;
       const matchSearch =
@@ -156,9 +150,8 @@ export class ExpensesComponent {
 
     // 先載入分類
     this.getCatgories();
-
-    // 再載入群組，載入完成後會自動查私人記帳資料
-    this.getUserGroupData();
+    // 載入記帳
+    this.getExpense(this.currentUserId);
   }
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
@@ -233,31 +226,14 @@ export class ExpensesComponent {
       },
     });
     dialogRef.afterClosed().subscribe((result) => {
-      if (result === true)
-        this.getExpense(this.currentGroupId, this.currentUserId, true);
+      if (result === true) this.getExpense(this.currentUserId, true);
     });
   }
 
   openEditDialog(record: any) {
     const relatedItem =
       record.relatedItemId != null ? this.itemMap[record.relatedItemId] : null;
-    const dialogGroupId =
-      this.currentGroupId !== null && this.currentGroupId !== undefined
-        ? Number(this.currentGroupId)
-        : Number(record.groupId ?? 0);
-    /*
-    取得群組名稱：
-    - groupId = 0：私人記帳
-    - groupId != 0：從 userGroups 找 groupName
-  */
-    const currentGroup = this.userGroups.find(
-      (g: any) => Number(g.groupId) === dialogGroupId,
-    );
 
-    const currentGroupName =
-      dialogGroupId === 0
-        ? '私人記帳'
-        : currentGroup?.groupName || '未選擇群組';
     const dialogRef = this.dialog.open(ExpensesEditComponent, {
       width: '600px',
       maxWidth: '92vw',
@@ -269,15 +245,13 @@ export class ExpensesComponent {
         categoryMap: this.categoryMap,
         relatedItem,
         currentUserId: this.currentUserId,
-        currentGroupId: dialogGroupId,
-        currentGroupName: currentGroupName,
       },
     });
     dialogRef.afterClosed().subscribe((result) => {
       if (!result) {
         return;
       }
-      this.getExpense(this.currentGroupId, this.currentUserId, true);
+      this.getExpense(this.currentUserId, true);
     });
   }
 
@@ -296,7 +270,6 @@ export class ExpensesComponent {
     const selectedIds = this.selection.selected.map((item) => item.id);
     const payLoad = {
       id: selectedIds,
-      groupId: this.currentGroupId,
       userId: this.currentUserId,
     };
     Swal.fire({
@@ -331,10 +304,14 @@ export class ExpensesComponent {
               showConfirmButton: false,
             });
             this.selection.clear();
-            this.getExpense(this.currentGroupId, this.currentUserId, true);
+            this.getExpense(this.currentUserId, true);
           },
           error: (err) =>
-            Swal.fire({ title: '刪除錯誤', text: err.message, icon: 'error' }),
+            Swal.fire({
+              title: '刪除錯誤',
+              text: err.message,
+              icon: 'error',
+            }),
         });
     });
   }
@@ -366,82 +343,14 @@ export class ExpensesComponent {
     });
   }
 
-  // 取得目前選到的群組，用在 mat-select-trigger 顯示頭像與名稱
-getCurrentGroup() {
-  return this.userGroups.find(
-    (group) => Number(group.groupId) === Number(this.currentGroupId),
-  );
-}
-
-  getUserGroupData() {
-    this.showLoading('載入資料中...');
-    this.http
-    .getApi(
-      this.basicUrl +
-        `family_life/get_group_list?user_id=${this.currentUserId}`,
-    )
-    .subscribe({
-      next: (res: any) => {
-        if (!res.groupList) {
-          Swal.fire({
-            title: '錯誤',
-            text: res.message || '無法取得群組資料',
-            icon: 'error',
-          });
-          return;
-        }
-
-        // 群組資料，包含 groupId、groupName、avatar
-        const groups = res.groupList.map((group: any) => ({
-          groupId: Number(group.groupId),
-          groupName: group.groupName,
-          avatar: group.avatar || 'assets/default-avatar.png',
-        }));
-
-        // 私人記帳固定放第一個
-        // 私人頭像使用登入者自己的頭像
-        this.userGroups = [
-          {
-            groupId: 0,
-            groupName: '私人記帳',
-            avatar: this.currentUserAvatar || 'assets/default-avatar.png',
-          },
-          ...groups,
-        ];
-
-        const fromNotify = this.route.snapshot.queryParamMap.get('groupId');
-        this.currentGroupId = fromNotify ? Number(fromNotify) : 0;
-
-        // 查詢記帳資料
-        this.getExpense(this.currentGroupId, this.currentUserId, false);
-      },
-
-      error: (err) => {
-        Swal.fire({
-          title: '錯誤',
-          text: err.message,
-          icon: 'error',
-        });
-      },
-    });
-}
-  onGroupChange(groupId: number) {
-    // 切換目前群組
-    this.currentGroupId = Number(groupId);
-    // 清除勾選狀態
-    this.selection.clear();
-    // 重新查詢資料
-    this.getExpense(this.currentGroupId, this.currentUserId, true);
-  }
-
-  getExpense(groupId: number, userId: number, showLoader: boolean = true) {
+  getExpense(userId: number, showLoader: boolean = true) {
     if (showLoader) {
       this.showLoading('載入記帳資料...');
     }
-    const finalGroupId =
-      groupId === undefined || groupId === null ? 0 : Number(groupId);
+    // const finalGroupId =
+    //   groupId === undefined || groupId === null ? 0 : Number(groupId);
 
-    const url = `${this.basicUrl}expense/getInfo?userId=${userId}&groupId=${finalGroupId}`;
+    const url = `${this.basicUrl}expense/getInfo?userId=${userId}`;
     this.http.getApi(url).subscribe({
       next: (res: any) => {
         Swal.close();
@@ -455,17 +364,12 @@ getCurrentGroup() {
         }
         const list = res.list || [];
         this.expense = [...list];
-        this.itemMap = res.itemMap || {};
-        this.groupUserInfo = res.userMap || {};
         this.dataSource.data = this.expense;
         this.dataSource.filter = JSON.stringify(this.filterValues);
         this.filteredExpense.set(this.dataSource.filteredData);
       },
-
       error: (err) => {
         Swal.close();
-        console.log('記帳查詢錯誤:', err);
-
         Swal.fire({
           title: '錯誤',
           text: err.error?.message || err.message,
