@@ -498,38 +498,69 @@
   color: #2f80ed;
 }
 
-@media (min-width: 769px) and (max-width: 991px) {
-  .home-group-select {
-    width: 100%;
-  }
+/* =========================================================
+   平板版：記帳環境在左，目前月份在右
+   桌機版、手機版不影響
+   ========================================================= */
+@media (min-width: 577px) and (max-width: 1300px) {
 
-  .priority-card {
-    height: 380px;
-  }
-}
-
-/* 平板以下：首頁區塊改成直向排列 */
-@media (max-width: 1100px) {
+  /* 讓上方 row 可以換行 */
   .welcome-top {
-    flex-direction: column;
-    align-items: flex-start;
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 22px;
+    margin-bottom: 36px;
   }
 
-  .home-expense-toolbar {
+  /* 第一列：早安文字橫跨整行 */
+  .welcome-title-col {
+    flex: 0 0 100%;
+    max-width: 100%;
+    order: 1;
+  }
+
+  .welcome-text {
+    text-align: left;
     width: 100%;
-    justify-content: flex-start;
   }
 
-  .money-row,
-  .bottom-grid,
-  .summary-grid {
-    grid-template-columns: 1fr;
+  /* 第二列左邊：記帳環境 */
+  .welcome-group-col {
+    flex: 0 0 280px;
+    max-width: 280px;
+    order: 2;
 
+    display: flex !important;
+    justify-content: flex-start !important;
+  }
+
+  .home-group-select {
+    width: 280px;
+    margin: 0 !important;
+    transform: none !important;
+  }
+
+  /* 第二列右邊：目前月份 */
+  .welcome-month-col {
+    flex: 1 1 0;
+    max-width: calc(100% - 280px);
+    order: 3;
+
+    display: flex !important;
+    justify-content: flex-start !important;
+  }
+
+  .home-month-switch {
+    width: auto;
+    justify-content: flex-start;
+    margin: 0 !important;
   }
 }
+
 
 /* 手機版 */
-@media (max-width: 768px) {
+@media (max-width: 576px) {
 
   .home-page {
     padding: 18px 14px;
@@ -561,6 +592,7 @@
     margin: 0;
   }
 
+
   .home-month-switch {
     width: 100%;
     justify-content: center;
@@ -586,9 +618,10 @@
     font-size: 21px;
   }
 
-  .home-group-select {
+   .home-group-select {
     width: 100%;
     margin-top: 8px;
+    transform: none !important;
   }
 
   .home-group-select ::ng-deep .mat-mdc-text-field-wrapper {
