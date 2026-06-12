@@ -169,6 +169,43 @@ export class ItemListComponent {
   selection = new SelectionModel<any>(true, []);
   dataSource = new MatTableDataSource<any>([]);
 
+  // 手機版分頁
+mobilePageIndex = 0;
+mobilePageSize = 3;
+
+get mobileItems(): any[] {
+  const data = this.dataSource.filteredData || [];
+  const start = this.mobilePageIndex * this.mobilePageSize;
+  return data.slice(start, start + this.mobilePageSize);
+}
+
+get mobileTotalPages(): number {
+  const total = this.dataSource.filteredData?.length || 0;
+  return Math.ceil(total / this.mobilePageSize);
+}
+
+get mobileCurrentPage(): number {
+  return this.mobileTotalPages === 0 ? 0 : this.mobilePageIndex + 1;
+}
+
+nextMobilePage(): void {
+  if (this.mobilePageIndex < this.mobileTotalPages - 1) {
+    this.mobilePageIndex++;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+prevMobilePage(): void {
+  if (this.mobilePageIndex > 0) {
+    this.mobilePageIndex--;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+resetMobilePage(): void {
+  this.mobilePageIndex = 0;
+}
+
   // 圖片預覽狀態
   imagePreviewVisible = false;
   previewImageUrl = '';
@@ -273,6 +310,7 @@ export class ItemListComponent {
   };
   private refreshTableData(newData: any[]) {
     this.dataSource.data = newData;
+     this.resetMobilePage();
     setTimeout(() => {
       this.dataSource.sort = this.sort;
       this.dataSource.paginator = this.paginator;

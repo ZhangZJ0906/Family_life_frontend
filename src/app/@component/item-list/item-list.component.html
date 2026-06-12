@@ -598,6 +598,35 @@
     </div>
   }
 
+  <!-- 手機版分頁 -->
+@if (!isLoading && dataSource.filteredData.length > mobilePageSize) {
+  <div class="mobile-pager">
+    <button
+      type="button"
+      class="mobile-page-btn"
+      [disabled]="mobilePageIndex === 0"
+      (click)="prevMobilePage()"
+    >
+      <mat-icon>chevron_left</mat-icon>
+      上一頁
+    </button>
+
+    <div class="mobile-page-info">
+      {{ mobileCurrentPage }} / {{ mobileTotalPages }}
+    </div>
+
+    <button
+      type="button"
+      class="mobile-page-btn"
+      [disabled]="mobilePageIndex >= mobileTotalPages - 1"
+      (click)="nextMobilePage()"
+    >
+      下一頁
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+}
+
 </section>
 
 <!-- 右下角浮動按鈕 -->
