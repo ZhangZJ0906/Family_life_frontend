@@ -10,6 +10,8 @@ export class ChatWsService {
 
   private client!: Client;
 
+  private subscribedGroups = new Set<number>();
+
   connect(): Promise<void> {
 
     if (this.connected) {
@@ -21,7 +23,7 @@ export class ChatWsService {
 
       this.client = new Client({
 
-        brokerURL: 'ws://localhost:8080/ws',
+        brokerURL: 'ws://192.168.200.212:8080/ws',
 
         reconnectDelay: 5000
 
@@ -43,6 +45,12 @@ export class ChatWsService {
   subscribe(groupId: number, callback: Function) {
 
     console.log("訂閱聊天室", groupId);
+
+    if (this.subscribedGroups.has(groupId)) {
+      return;
+    }
+
+    this.subscribedGroups.add(groupId);
 
     this.client.subscribe(
       `/topic/group/${groupId}`,

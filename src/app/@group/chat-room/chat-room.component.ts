@@ -84,19 +84,19 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
           switch (msg.type) {
 
             case 'ONLINE':
-            this.onlineCount = msg.count;
-            break;
+              this.onlineCount = msg.count;
+              break;
 
             case 'MESSAGE':
-              this.messages.push(msg);
+              this.messages = [...this.messages, msg];
+              break;
+
+            case 'IMAGE':
+              this.messages = [...this.messages, msg];
               break;
 
             case 'READ':
               this.updateReadCount(msg);
-              break;
-
-            case 'IMAGE':
-              this.messages.push(msg);
               break;
 
           }
@@ -121,7 +121,7 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
     this.isLoadingMessages = true;
 
     this.http.get<any>(
-      `http://localhost:8080/chat/${this.groupId}`
+      `http://192.168.200.212:8080/chat/${this.groupId}`
     ).subscribe({
       next: (res) => {
         this.messages = res.messages ?? [];
@@ -171,7 +171,7 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
     formData.append('senderId', this.userId.toString());
 
     this.http.post(
-      'http://localhost:8080/chat/upload',
+      'http://192.168.200.212:8080/chat/upload',
       formData
     ).subscribe();
   }
@@ -187,7 +187,7 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
 
   markRead() {
     this.http.post(
-      `http://localhost:8080/chat/read/${this.groupId}?userId=${this.userId}`,
+      `http://192.168.200.212:8080/chat/read/${this.groupId}?userId=${this.userId}`,
       {}
     ).subscribe();
   }
