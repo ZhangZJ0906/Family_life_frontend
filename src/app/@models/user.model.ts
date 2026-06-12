@@ -9,3 +9,8 @@ export interface User {
   created_at?: string;
   updated_at?: string;
 }
+
+export const environment = {
+  production: false,
+  apiUrl: ' https://deposits-plymouth-diet-meetings.trycloudflare.com'
+};

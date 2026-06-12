@@ -265,7 +265,7 @@ resetMobilePage(): void {
     this.currentGroupId = groupId;
     if (groupId == null) groupId = 0;
     this.getLoginItemPageTime().then(() => {
-      console.log('login:', this.lastLoginTime);
+      
 
       this.getUserGroupData(groupId);
     });
@@ -414,7 +414,7 @@ resetMobilePage(): void {
         // 名稱對應後端的 @RequestPart(value = "avatar")
         formData.append('avatar', selectedFile);
       }
-      console.log(formData);
+      
       this.http.postApi(url, formData).subscribe({
         next: (res: any) => {
           Swal.close();

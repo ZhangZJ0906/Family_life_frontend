@@ -21,6 +21,9 @@ import { ChatWsService } from '../../@services/ChatWsService';
 import { AuthService } from '../../@services/auth.service';
 import { AfterViewChecked } from '@angular/core';
 
+import { NgZone } from '@angular/core';
+import { environment } from '../../@models/user.model';
+
 @Component({
   selector: 'app-chat-room',
   standalone: true,
@@ -54,7 +57,8 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
     private ws: ChatWsService,
     private dialogRef: MatDialogRef<ChatRoomComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private authService: AuthService
+    private authService: AuthService,
+    private zone: NgZone
   ) {}
 
   async ngOnInit() {
@@ -76,25 +80,28 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
       this.groupId,
       (msg: any) => {
 
-        switch (msg.type) {
+        this.zone.run(() => {
 
-          case 'ONLINE':
+          switch (msg.type) {
+
+            case 'ONLINE':
             this.onlineCount = msg.count;
             break;
 
-          case 'MESSAGE':
-            this.messages.push(msg);
-            break;
+            case 'MESSAGE':
+              this.messages.push(msg);
+              break;
 
-          case 'READ':
-            this.updateReadCount(msg);
-            break;
+            case 'READ':
+              this.updateReadCount(msg);
+              break;
 
-          case 'IMAGE':
-            this.messages.push(msg);
-            break;
-        }
+            case 'IMAGE':
+              this.messages.push(msg);
+              break;
 
+          }
+       });
         setTimeout(() => {
           this.scrollToBottom();
         }, 50);
@@ -115,7 +122,7 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
     this.isLoadingMessages = true;
 
     this.http.get<any>(
-      `http://localhost:8080/chat/${this.groupId}`
+      `${environment.apiUrl}/chat/${this.groupId}`
     ).subscribe({
       next: (res) => {
         this.messages = res.messages ?? [];
@@ -165,7 +172,7 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
     formData.append('senderId', this.userId.toString());
 
     this.http.post(
-      'http://localhost:8080/chat/upload',
+      '${environment.apiUrl}/chat/upload',
       formData
     ).subscribe();
   }
@@ -181,7 +188,7 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
 
   markRead() {
     this.http.post(
-      `http://localhost:8080/chat/read/${this.groupId}?userId=${this.userId}`,
+      `${environment.apiUrl}/chat/read/${this.groupId}?userId=${this.userId}`,
       {}
     ).subscribe();
   }
