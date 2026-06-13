@@ -43,7 +43,7 @@ export class ExpensesEditComponent {
   currentGroupId = 0;
   currentGroupName = '私人記帳';
   currentUserId!: number;
-  selectedFile: File | null = null; //圖片
+
 
   constructor(
     private http: HttpClientService,
@@ -60,13 +60,7 @@ export class ExpensesEditComponent {
 
     this.originalRecord = JSON.parse(JSON.stringify(this.record));
   }
-  //選圖片
-  onFileSelected(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.selectedFile = file;
-    }
-  }
+
 
   private formatToBackendDate(dateInput: any): string {
     if (!dateInput) return '';
@@ -105,7 +99,7 @@ export class ExpensesEditComponent {
     const payload = {
       ...this.record,
       operationUser: this.currentUserId,
-      selectedFile: this.selectedFile,
+
     };
 
     // 2. 核心修正：相容兩種欄位命名，確保一定能抓到日期資料
