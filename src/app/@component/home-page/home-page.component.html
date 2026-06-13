@@ -176,7 +176,14 @@
       <div class="priority-list">
         @if (priorityTasks.length > 0) {
           @for (task of priorityTasks; track task.id) {
-            <div class="task" [ngClass]="task.levelClass">
+            <div
+              class="task"
+              [ngClass]="task.levelClass"
+              role="button"
+              tabindex="0"
+              title="點擊標記為已處理"
+              (click)="confirmTaskDone(task)"
+              >
               <div>
                 <h4>{{ task.title }}</h4>
                 <p>{{ task.description }}</p>
