@@ -304,54 +304,76 @@ resetMobilePage(): void {
   }
 
   deleteById() {
-    const selectedIds = this.selection.selected.map((item) => item.id);
-    const payLoad = {
-      id: selectedIds,
-      userId: this.currentUserId,
-    };
-    Swal.fire({
-      title: '確定要刪除嗎？',
-      text: `您選中了 ${selectedIds.length} 筆，刪除後將無法還原！`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: '是的，刪除！',
-      cancelButtonText: '取消',
-    }).then((result) => {
-      this.showLoading('刪除中...');
+  const selectedIds = this.selection.selected.map((item) => item.id);
 
-      if (!result.isConfirmed) return;
-      this.http
-        .postApi(this.basicUrl + 'expense/deleteInfo', payLoad)
-        .subscribe({
-          next: (res: any) => {
-            if (res.code != 200) {
-              Swal.fire({
-                title: '刪除錯誤',
-                text: res.message || 'server error',
-                icon: 'error',
-              });
-              return;
-            }
-            Swal.fire({
-              title: '刪除成功',
-              icon: 'success',
-              timer: 1500,
-              showConfirmButton: false,
-            });
-            this.selection.clear();
-            this.getExpense(this.currentUserId, true);
-          },
-          error: (err) =>
+  if (selectedIds.length === 0) {
+    Swal.fire({
+      title: '提醒',
+      text: '請先選取要刪除的資料',
+      icon: 'warning',
+    });
+    return;
+  }
+
+  const payLoad = {
+    id: selectedIds,
+    userId: this.currentUserId,
+    groupId: this.currentGroupId ?? 0,
+  };
+
+  console.log('delete payload:', payLoad);
+
+  Swal.fire({
+    title: '確定要刪除嗎？',
+    text: `您選中了 ${selectedIds.length} 筆，刪除後將無法還原！`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: '是的，刪除！',
+    cancelButtonText: '取消',
+  }).then((result) => {
+    if (!result.isConfirmed) return;
+
+    this.showLoading('刪除中...');
+
+    this.http
+      .postApi(this.basicUrl + 'expense/deleteInfo', payLoad)
+      .subscribe({
+        next: (res: any) => {
+          Swal.close();
+
+          if (res.code != 200) {
             Swal.fire({
               title: '刪除錯誤',
-              text: err.message,
+              text: res.message || 'server error',
               icon: 'error',
-            }),
-        });
-    });
-  }
+            });
+            return;
+          }
+
+          Swal.fire({
+            title: '刪除成功',
+            icon: 'success',
+            timer: 1500,
+            showConfirmButton: false,
+          });
+
+          this.selection.clear();
+          this.getExpense(this.currentUserId, true);
+        },
+        error: (err) => {
+          Swal.close();
+
+          Swal.fire({
+            title: '刪除錯誤',
+            text: err.error?.message || err.message || '網路異常',
+            icon: 'error',
+          });
+        },
+      });
+  });
+}
 
   // ─── API ─────────────────────────────────────────────
   getCatgories() {
