@@ -93,4 +93,10 @@ export class ShoppingListService {
       { params: { listId, itemId, userId } }
     );
   }
+
+  getItemsBatch(listIds: number[]): Observable<Record<number, PurchaseItemVo[]>> {
+    return this.http.get<Record<number, PurchaseItemVo[]>>(`${this.shoppingUrl}/items/batch`, {
+      params: { listIds: listIds.join(',') }
+    });
+  }
 }
