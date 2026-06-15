@@ -18,7 +18,9 @@ export interface CalendarEventReq {
 export class CalendarApiService {
 
   // private baseUrl = 'http://localhost:8080/calendar';
-  private baseUrl = 'https://labels-biz-sheep-concerning.trycloudflare.com/calendar';
+  // private baseUrl = 'https://labels-biz-sheep-concerning.trycloudflare.com/calendar';
+  private baseUrl = '/api';
+
   constructor(private http: HttpClient) {}
 
   getByGroup(groupId: number): Observable<any> {

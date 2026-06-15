@@ -12,7 +12,7 @@ export interface User {
 
 export const environment = {
   production: false,
-  // apiUrl: 'https://labels-biz-sheep-concerning.trycloudflare.com'
-   apiUrl: 'http://localhost:8080'
+  apiUrl: '/api'
+  //  apiUrl: 'http://localhost:8080'
 
 };
