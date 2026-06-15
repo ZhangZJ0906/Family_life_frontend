@@ -33,6 +33,10 @@
     max-width: 280px;
     min-width: 0;
   }
+
+   .group-card {
+    max-height: 420px;
+  }
 }
 
 /* 平板 */
@@ -41,6 +45,10 @@
     width: 55%;
     max-width: 320px;
   }
+
+  .group-card {
+    max-height: 420px;
+  }
 }
 
 /* 桌機 */
@@ -48,5 +56,9 @@
   .default-image-btn {
     width: 50%;
     max-width: 390px;
+  }
+
+   .group-card {
+    max-height: 720px;
   }
 }
