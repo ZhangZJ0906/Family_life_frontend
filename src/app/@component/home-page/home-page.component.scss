@@ -688,21 +688,36 @@
     white-space: nowrap;
   }
 
+   .summary-grid {
+    width: 100%;
+    height: auto !important;
+  }
+
+  .summary-grid > .col-12 {
+    display: flex;
+  }
+
   /* 統計卡片手機版高度 */
+   /* 手機四張統計卡片正常直排 */
   .summary-card {
     min-height: 150px;
+    position: relative;
+    z-index: 2;
+    cursor: pointer;
   }
 
-  /* 今日優先處理卡片 */
+
+  /* 今日優先處理不要往下硬推 200px */
   .priority-card {
     height: auto;
-    max-height: 520px;
     min-height: 360px;
-    padding: 24px 22px;
-    margin-top: 150px;
+    max-height: 520px;
+    padding: 30px 22px;
+    margin-top: 0 !important;
+    position: relative;
+    z-index: 1;
   }
 
-  /* 今日優先處理清單 */
   .priority-list {
     max-height: 400px;
     overflow-y: auto;
