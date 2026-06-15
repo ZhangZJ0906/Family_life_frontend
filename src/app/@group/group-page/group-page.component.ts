@@ -60,6 +60,10 @@ export class GroupPageComponent{
 
   ngOnInit(): void {
     this.user_id = this.authService.currentUser()?.user_id ?? 0;
+    if (!this.user_id) {
+      console.error('user not ready');
+      return;
+    }
     this.getGroup();
     this.getUnreadNotifyCount();
   }
