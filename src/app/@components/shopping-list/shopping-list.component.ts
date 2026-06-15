@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
@@ -37,6 +37,7 @@ interface GroupMember {
 
 type StatusFilter = 'unfinished' | 'completed';
 type GroupFilter = number | 0 | 'all';
+
 
 
 @Component({
@@ -83,6 +84,11 @@ export class ShoppingListComponent implements OnInit {
   selectedGroupId: number | null = null;
   selectedStatsList: ShoppingList | null = null;
   userAvatar = 'assets/images/default-user.png';
+
+  isMobileView = window.innerWidth <= 768;
+
+  mobilePageIndex = 0;
+  mobilePageSize = 3;
 
   constructor(
     private readonly authService: AuthService,
@@ -222,6 +228,7 @@ getGroupLabel(groupId: number | null): string {
     this.shoppingService.getLists(this.userId).subscribe({
       next: (res) => {
         this.lists = res ?? [];
+        this.resetMobilePage();
         this.removeStaleItemCache(this.lists);
         this.isLoading = false;
         this.loadItemsForLists(this.lists, refreshItems);
@@ -850,5 +857,59 @@ getGroupLabel(groupId: number | null): string {
     ];
   }
 
+  // 監聽視窗大小變化，切換行動版與桌面版
+@HostListener('window:resize')
+onWindowResize(): void {
+  const nextIsMobile = window.innerWidth <= 768;
+
+  if (nextIsMobile !== this.isMobileView) {
+    this.isMobileView = nextIsMobile;
+    this.resetMobilePage();
+  }
+}
+
+// 行動版分頁顯示
+get displayLists(): ShoppingList[] {
+  if (!this.isMobileView) {
+    return this.filteredLists;
+  }
+
+  const start = this.mobilePageIndex * this.mobilePageSize;
+  return this.filteredLists.slice(start, start + this.mobilePageSize);
+}
+
+// 計算行動版總頁數
+get mobileTotalPages(): number {
+  return Math.max(
+    1,
+    Math.ceil(this.filteredLists.length / this.mobilePageSize)
+  );
+}
+
+// 計算行動版目前頁數（從1開始）
+get mobileCurrentPage(): number {
+  return this.filteredLists.length === 0 ? 0 : this.mobilePageIndex + 1;
+}
+
+// 行動版下一頁
+nextMobilePage(): void {
+  if (this.mobilePageIndex < this.mobileTotalPages - 1) {
+    this.mobilePageIndex++;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+// 行動版上一頁
+prevMobilePage(): void {
+  if (this.mobilePageIndex > 0) {
+    this.mobilePageIndex--;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+// 行動版切換群組或狀態時重置頁數
+resetMobilePage(): void {
+  this.mobilePageIndex = 0;
+}
 
 }
