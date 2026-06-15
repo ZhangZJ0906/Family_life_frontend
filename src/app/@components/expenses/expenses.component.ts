@@ -286,7 +286,7 @@ export class ExpensesComponent {
 
       if (!result.isConfirmed) return;
       this.http
-        .postApi(this.basicUrl + 'expense/deleteInfo', payLoad)
+        .postApi('expense/deleteInfo', payLoad)
         .subscribe({
           next: (res: any) => {
             if (res.code != 200) {
@@ -318,7 +318,7 @@ export class ExpensesComponent {
 
   // ─── API ─────────────────────────────────────────────
   getCatgories() {
-    this.http.getApi(this.basicUrl + 'categories/get').subscribe({
+    this.http.getApi('categories/get').subscribe({
       next: (res: any) => {
         if (res.code != 200) {
           Swal.fire({
@@ -350,7 +350,7 @@ export class ExpensesComponent {
     // const finalGroupId =
     //   groupId === undefined || groupId === null ? 0 : Number(groupId);
 
-    const url = `${this.basicUrl}expense/getInfo?userId=${userId}`;
+    const url = `expense/getInfo?userId=${userId}`;
     this.http.getApi(url).subscribe({
       next: (res: any) => {
         Swal.close();
@@ -403,7 +403,7 @@ export class ExpensesComponent {
     return new Promise((resolve) => {
       this.http
         .getApi(
-          `${this.basicUrl}expense/getLoginExpensePageTime?userId=${this.currentUserId}`,
+          `expense/getLoginExpensePageTime?userId=${this.currentUserId}`,
         )
         .subscribe({
           next: (res: any) => {

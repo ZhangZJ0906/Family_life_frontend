@@ -112,7 +112,7 @@ export class ExpensesEditComponent {
     const rawDate = payload.expenseDate;
     payload.expenseDate = this.formatToBackendDate(rawDate);
 
-    this.http.postApi(this.basicUrl + 'expense/updateInfo', payload).subscribe({
+    this.http.postApi('expense/updateInfo', payload).subscribe({
       next: (res: any) => {
         if (res.code != 200) {
           Swal.fire({

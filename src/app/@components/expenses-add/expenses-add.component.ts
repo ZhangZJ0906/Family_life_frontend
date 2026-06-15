@@ -137,7 +137,7 @@ export class ExpensesAddComponent {
    */
   getItemList(groupId: number | null, userId: number) {
     const resolvedGroupId = groupId ?? 0;
-    const url = `${this.basicUrl}item/getItems?userId=${userId}&groupId=${resolvedGroupId}`;
+    const url = `item/getItems?userId=${userId}&groupId=${resolvedGroupId}`;
 
     this.http.getApi(url).subscribe({
       next: (res: any) => {

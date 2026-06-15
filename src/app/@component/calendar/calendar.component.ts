@@ -209,7 +209,7 @@ onWindowScroll(): void {
     }
 
     this.http
-      .getApi(this.http.basicUrl + `family_life/get_members?group_id=${groupId}`)
+      .getApi(`family_life/get_members?group_id=${groupId}`)
       .subscribe({
         next: (res: any) => {
           console.log('Group Members Response:', res);
@@ -247,7 +247,7 @@ isSelectedGroup(groupId: number): boolean {
   this.http
     // 改用 profile 頁相同概念的群組清單 API
     // 這支 API 需要回傳 groupList，裡面要有 groupId、groupName、avatar
-    .getApi(this.http.basicUrl + `family_life/get_group_list?user_id=${userId}`)
+    .getApi(`family_life/get_group_list?user_id=${userId}`)
     .subscribe({
       next: (res: any) => {
         Swal.close();
@@ -328,7 +328,6 @@ async loadCalendarEvents(groupId: number | null, userId: number): Promise<void> 
   // 不要打 calendar/group/1
   // 因為後端目前沒有 @GetMapping("/group/{groupId}")
   const url =
-    this.http.basicUrl +
     `calendar/getByGroup?groupId=${realGroupId}&userId=${userId}`;
 
   this.http.getApi(url).subscribe({
@@ -523,9 +522,7 @@ getBatchAssignedUserIds(
     return Promise.resolve([fallbackUserId]);
   }
 
-  const url =
-    this.http.basicUrl +
-    `calendar/batchAssignedUsers?eventBatchId=${eventBatchId}`;
+  const url = `calendar/batchAssignedUsers?eventBatchId=${eventBatchId}`;
 
   return new Promise((resolve) => {
     this.http.getApi(url).subscribe({
@@ -1028,7 +1025,7 @@ setTooltipPosition(mouseEvent: MouseEvent): void {
   getLoginCalendarPageTime(): Promise<void> {
     return new Promise((resolve) => {
       this.http
-        .getApi(this.http.basicUrl + `calendar/getLoginCalendarPageTime?userId=${this.createdBy}`)
+        .getApi(`calendar/getLoginCalendarPageTime?userId=${this.createdBy}`)
         .subscribe({
           next: (res: any) => {
             this.lastLoginTime = new Date(res);

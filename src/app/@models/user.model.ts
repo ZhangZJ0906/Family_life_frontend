@@ -12,5 +12,7 @@ export interface User {
 
 export const environment = {
   production: false,
-  apiUrl: ' https://deposits-plymouth-diet-meetings.trycloudflare.com'
+  // apiUrl: 'https://labels-biz-sheep-concerning.trycloudflare.com'
+   apiUrl: 'http://localhost:8080'
+
 };

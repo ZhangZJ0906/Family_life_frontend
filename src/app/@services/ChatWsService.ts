@@ -23,11 +23,9 @@ export class ChatWsService {
 
       this.client = new Client({
 
-<<<<<<< HEAD
-        brokerURL: 'ws://192.168.200.212:8080/ws',
-=======
-        brokerURL: 'wss://deposits-plymouth-diet-meetings.trycloudflare.com/ws',
->>>>>>> origin/ZJ
+        brokerURL: 'ws://localhost:8081/ws',
+
+        // brokerURL: 'wss://mic-rugby-designers-programmers.trycloudflare.com/ws',
 
         reconnectDelay: 5000
 

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { MatDialogModule } from '@angular/material/dialog';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../@models/user.model';
 
 @Component({
   selector: 'app-invite-dialog',
@@ -29,7 +30,7 @@ export class InviteDialogComponent {
     const group_id = Number(this.data.groupId);
 
     this.http.get<any>(
-      `http://localhost:8080/family_life/get_invited_members?group_id=${group_id}`
+      `${environment.apiUrl}/family_life/get_invited_members?group_id=${group_id}`
     ).subscribe({
 
       next: (res) => {
@@ -53,7 +54,7 @@ export class InviteDialogComponent {
     }
     else{
       this.http.post(
-        'http://localhost:8080/family_life/invite',
+        `${environment.apiUrl}/family_life/invite`,
         {
           group_id: Number(this.data.groupId),
           sendUserId: Number(this.data.userId),

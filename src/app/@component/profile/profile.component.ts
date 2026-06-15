@@ -13,7 +13,7 @@ import { map } from 'rxjs';
 
 import { CanComponentDeactivate } from '../../@guard/pending-changes.guard';
 import { EmailVerifyService } from './../../@services/EmailVerifyService';
-
+import { HttpClientService } from '../../@services/http-client.service';
 
 @Component({
   selector: 'app-profile',
@@ -59,10 +59,11 @@ export class ProfileComponent implements CanComponentDeactivate {
   isLoading = false;
 
   constructor(
-    private http: HttpClient,
+    // private http: HttpClient,
     private authService: AuthService,
     private notifySettingService: NotifySettingService, //共享userInfo
-    private readonly emailVerifyService: EmailVerifyService
+    private readonly emailVerifyService: EmailVerifyService,
+    private readonly http: HttpClientService,
   ) {}
 
   user_id = 0;
@@ -77,11 +78,11 @@ export class ProfileComponent implements CanComponentDeactivate {
   }
 
   getSelfInfo(){
-    this.http.get<any>(
-      `http://localhost:8080/users/get_user_info?userId=${this.user_id}`
+    this.http.getApi(
+      `users/get_user_info?userId=${this.user_id}`
     ).subscribe({
 
-      next: (res) => {
+      next: (res: any) => {
 
         this.userName = res.name;
         this.email = res.email;
@@ -113,11 +114,14 @@ export class ProfileComponent implements CanComponentDeactivate {
 
     console.log("userId: " + this.user_id);
 
-    this.http.get<any>(
-      `http://localhost:8080/family_life/get_group_list?user_id=${this.user_id}`
+    // this.http.get<any>(
+    //   `http://localhost:8080/family_life/get_group_list?user_id=${this.user_id}`
+    // )
+    this.http.getApi(
+      `family_life/get_group_list?user_id=${this.user_id}`
     ).subscribe({
 
-      next: (res) => {
+      next: (res: any) => {
 
         this.groups = res.groupList;
 
@@ -344,8 +348,12 @@ export class ProfileComponent implements CanComponentDeactivate {
       }
     });
 
-    this.http.post(
-      'http://localhost:8080/users/update_info',
+    // this.http.post(
+    //   'http://localhost:8080/users/update_info',
+    //   formData
+    // )
+    this.http.postApi(
+      'users/update_info',
       formData
     ).subscribe({
       next: (res: any) => {
