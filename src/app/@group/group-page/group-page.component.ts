@@ -71,7 +71,7 @@ export class GroupPageComponent{
   getUnreadNotifyCount() {
 
     this.http.get<any>(
-      `http://localhost:8080/family_life/get_notify?user_id=${this.user_id}`
+      `${environment.apiUrl}/family_life/get_notify?user_id=${this.user_id}`
     ).subscribe({
 
       next: (res) => {

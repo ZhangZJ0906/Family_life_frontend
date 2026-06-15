@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../@models/user.model';
 
 @Injectable({
   providedIn: 'root',
@@ -9,7 +10,7 @@ export class HttpClientService {
     throw new Error('Method not implemented.');
   }
   constructor(private httpClient: HttpClient) {}
-  basicUrl = 'http://localhost:8080/';
+  basicUrl = environment.apiUrl;
   // basicUrl = 'http://localhost:8081/';
   // basicUrl = 'https://labels-biz-sheep-concerning.trycloudflare.com/';
   // getApi(url: string) {
@@ -27,18 +28,18 @@ export class HttpClientService {
 
   getApi(path: string) {
     console.log("url: ", this.basicUrl+path)
-    return this.httpClient.get(`${this.basicUrl}${path}`);
+    return this.httpClient.get(`${this.basicUrl}/${path}`);
   }
 
   postApi(path: string, body: any) {
-    return this.httpClient.post(`${this.basicUrl}${path}`, body);
+    return this.httpClient.post(`${this.basicUrl}/${path}`, body);
   }
 
   putApi(path: string, body: any) {
-    return this.httpClient.put(`${this.basicUrl}${path}`, body);
+    return this.httpClient.put(`${this.basicUrl}/${path}`, body);
   }
 
   deleteApi(path: string) {
-    return this.httpClient.delete(`${this.basicUrl}${path}`);
+    return this.httpClient.delete(`${this.basicUrl}/${path}`);
   }
 }
