@@ -198,12 +198,7 @@
       </table>
     </div>
 
-      <mat-paginator
-        [pageSizeOptions]="[10, 20]"
-        [pageSize]="10"
-        showFirstLastButtons
-        class="expense-paginator"
-      >
+    <mat-paginator [pageSizeOptions]="[10, 20]" [pageSize]="10" showFirstLastButtons class="expense-paginator">
     </mat-paginator>
 
   </section>
@@ -211,7 +206,7 @@
   <!-- 手機版列表：只在手機顯示 -->
   <section class="expense-mobile-list d-block d-md-none">
 
-  @for (e of mobileExpenses; track e.id) {
+    @for (e of mobileExpenses; track e.id) {
     <div class="expense-mobile-card">
 
       <!-- 上方：日期 + 金額 -->
@@ -255,36 +250,27 @@
         </button>
       </div>
     </div>
-  }
+    }
 
 
-  @if (dataSource.filteredData.length > mobilePageSize) {
-  <div class="mobile-pager">
-    <button
-      type="button"
-      class="mobile-page-btn"
-      [disabled]="mobilePageIndex === 0"
-      (click)="prevMobilePage()"
-    >
-      <mat-icon>chevron_left</mat-icon>
-      上一頁
-    </button>
+    @if (dataSource.filteredData.length > mobilePageSize) {
+    <div class="mobile-pager">
+      <button type="button" class="mobile-page-btn" [disabled]="mobilePageIndex === 0" (click)="prevMobilePage()">
+        <mat-icon>chevron_left</mat-icon>
+        上一頁
+      </button>
 
-    <div class="mobile-page-info">
-      {{ mobileCurrentPage }} / {{ mobileTotalPages }}
+      <div class="mobile-page-info">
+        {{ mobileCurrentPage }} / {{ mobileTotalPages }}
+      </div>
+
+      <button type="button" class="mobile-page-btn" [disabled]="mobilePageIndex >= mobileTotalPages - 1"
+        (click)="nextMobilePage()">
+        下一頁
+        <mat-icon>chevron_right</mat-icon>
+      </button>
     </div>
-
-    <button
-      type="button"
-      class="mobile-page-btn"
-      [disabled]="mobilePageIndex >= mobileTotalPages - 1"
-      (click)="nextMobilePage()"
-    >
-      下一頁
-      <mat-icon>chevron_right</mat-icon>
-    </button>
-  </div>
-}
+    }
   </section>
 
 
@@ -305,5 +291,3 @@
       <mat-icon>add</mat-icon>
     </button>
   </div>
-
-
