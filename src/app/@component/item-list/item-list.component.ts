@@ -29,7 +29,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../@services/auth.service';
 import { forkJoin, Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { COLUMN_CONFIG, TableMode } from '../../common/item.const';
+import { CATEGORY_ICON_MAP, COLUMN_CONFIG, TableMode } from '../../common/item.const';
 
 @Component({
   selector: 'app-item-list',
@@ -58,10 +58,8 @@ export class ItemListComponent {
   // ─── 模式管理 ─────────────────────────────────────────────
   currentMode: TableMode = TableMode.Item;
   readonly TableMode = TableMode; // 讓 HTML 模板可以用 enum
-
-  // 各模式對應表格欄位（取代五個 xxxDisplayedColumns 屬性）
-  readonly columnConfig = COLUMN_CONFIG;
-
+  readonly columnConfig = COLUMN_CONFIG; //各模式對應表格欄位（取代五個 xxxDisplayedColumns 屬性）
+  readonly categoryIconMap = CATEGORY_ICON_MAP; // 分類Icon
   // ─── 頁面狀態 ──────────────────────────────────────────────
   basicUrl!: string;
   selectedCategory = '全部';
@@ -72,7 +70,6 @@ export class ItemListComponent {
   currentUserId: any;
   lastSelectedRow: any = null;
   currentUserAvatar = 'assets/default-avatar.png'; //預設群組投向
-
   isLoading = true;
 
   //上次登入時間
@@ -115,9 +112,8 @@ export class ItemListComponent {
   ) {
     this.basicUrl = this.http.basicUrl;
     this.currentUserId = this.authService.currentUser()?.user_id ?? 0;
-    // 目前登入者自己的頭像，私人物品使用
     this.currentUserAvatar =
-      this.authService.currentUser()?.avatar || 'assets/default-avatar.png';
+      this.authService.currentUser()?.avatar || 'assets/default-avatar.png'; // 目前登入者自己的頭像，私人物品使用
   }
 
   ngOnInit() {
@@ -149,10 +145,11 @@ export class ItemListComponent {
       } else {
         return item[property];
       }
-    };;
+    };
   }
 
   initData(groupId: number) {
+    this.showLoading('載入中物品清單中...'); // ← 加這行
     this.currentGroupId = groupId;
     if (groupId == null) groupId = 0;
     this.getLoginItemPageTime().then(() => {
@@ -511,9 +508,11 @@ export class ItemListComponent {
           this.dataSource.paginator?.firstPage();
 
           this.isLoading = false; // 🔥 關閉
+          Swal.close(); // ← 加這行
         },
         error: (err: any) => {
           this.isLoading = false; // 🔥 一定要關
+          Swal.close(); // ← 加這行
           Swal.fire({
             title: '錯誤',
             text: err.message || 'Server error',
@@ -858,18 +857,11 @@ export class ItemListComponent {
 
   //判斷是否非私人新物品
   isNewItem(createdTime: string | Date, createdBy: number): boolean {
-    console.log('CTB', createdBy);
-    console.log('LGT', createdTime);
     if (createdBy == this.currentUserId) return false;
     if (!createdTime || !this.lastLoginTime) return false;
-
     const created = new Date(createdTime).getTime();
     const login = this.lastLoginTime.getTime();
-
-    console.log('CT', created);
-    console.log('LG', login);
     if (isNaN(created)) return false;
-
     return created > login;
   }
 

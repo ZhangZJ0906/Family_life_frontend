@@ -24,29 +24,8 @@
             [selected]="selectedCategory === cat.name"
           >
             <span class="chip-icon">
-              @switch (cat.name) {
-                @case ("食品") {
-                  🥬
-                }
-                @case ("藥品") {
-                  💊
-                }
-                @case ("日用品") {
-                  🧴
-                }
-                @case ("訂閱") {
-                  💳
-                }
-                @case ("清潔用品") {
-                  🧽
-                }
-                @case ("保固") {
-                  🛡️
-                }
-                @default {}
-              }
+              {{categoryIconMap[cat.name]}}
             </span>
-
             {{ cat.name }}
           </mat-chip-option>
         }
