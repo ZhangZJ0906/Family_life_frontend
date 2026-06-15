@@ -44,7 +44,7 @@ export class LoginComponent {
           icon: 'error',
           title: '登入失敗',
           text: 'Email 或密碼不正確',
-          confirmButtonText: '確認',
+          // confirmButtonText: '確認',
         });
 
         return;
