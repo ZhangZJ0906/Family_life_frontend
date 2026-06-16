@@ -20,12 +20,15 @@
       }
     </div>
 
-    <div class="header-actions">
-      <button mat-stroked-button type="button" (click)="loadItems()" [disabled]="isLoading">
-        <mat-icon>refresh</mat-icon>
-        重新整理
-      </button>
-    </div>
+    @if (isEditPage) {
+      <div class="header-actions">
+        <button mat-stroked-button type="button" (click)="loadItems()" [disabled]="isLoading">
+          <mat-icon>refresh</mat-icon>
+          重新整理
+        </button>
+      </div>
+    }
+
   </section>
 
   <section class="add-panel table-card" aria-label="新增購物項目">

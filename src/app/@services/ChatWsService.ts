@@ -24,11 +24,8 @@ export class ChatWsService {
       this.client = new Client({
 
         brokerURL: 'ws://localhost:8080/ws',
-<<<<<<< HEAD
 
         // brokerURL: 'wss://mic-rugby-designers-programmers.trycloudflare.com/ws',
-=======
->>>>>>> origin/ZJ
 
         reconnectDelay: 5000
 

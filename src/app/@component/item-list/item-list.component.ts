@@ -153,11 +153,6 @@ export class ItemListComponent {
     this.currentGroupId = groupId;
     if (groupId == null) groupId = 0;
     this.getLoginItemPageTime().then(() => {
-<<<<<<< HEAD
-
-
-=======
->>>>>>> origin/ZJ
       this.getUserGroupData(groupId);
     });
   }

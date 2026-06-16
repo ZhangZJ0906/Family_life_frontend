@@ -306,31 +306,6 @@ resetMobilePage(): void {
   deleteById() {
   const selectedIds = this.selection.selected.map((item) => item.id);
 
-<<<<<<< HEAD
-      if (!result.isConfirmed) return;
-      this.http
-        .postApi('expense/deleteInfo', payLoad)
-        .subscribe({
-          next: (res: any) => {
-            if (res.code != 200) {
-              Swal.fire({
-                title: '刪除錯誤',
-                text: res.message || 'server error',
-                icon: 'error',
-              });
-              return;
-            }
-            Swal.fire({
-              title: '刪除成功',
-              icon: 'success',
-              timer: 1500,
-              showConfirmButton: false,
-            });
-            this.selection.clear();
-            this.getExpense(this.currentUserId, true);
-          },
-          error: (err) =>
-=======
   if (selectedIds.length === 0) {
     Swal.fire({
       title: '提醒',
@@ -363,13 +338,12 @@ resetMobilePage(): void {
     this.showLoading('刪除中...');
 
     this.http
-      .postApi(this.basicUrl + 'expense/deleteInfo', payLoad)
+      .postApi('expense/deleteInfo', payLoad)
       .subscribe({
         next: (res: any) => {
           Swal.close();
 
           if (res.code != 200) {
->>>>>>> origin/ZJ
             Swal.fire({
               title: '刪除錯誤',
               text: res.message || 'server error',

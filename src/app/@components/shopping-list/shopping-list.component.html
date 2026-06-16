@@ -310,9 +310,26 @@
             {{ getPurchaseProgressText(selectedStatsList.id) }}
           </p>
         </div>
-        <button mat-icon-button type="button" aria-label="關閉" (click)="closeStatsDialog()">
-          <mat-icon>close</mat-icon>
-        </button>
+
+        <div class="header-actions">
+          <button
+            mat-icon-button
+            type="button"
+            aria-label="下載統計資料"
+            (click)="downloadStats(selectedStatsList)"
+          >
+            <mat-icon>download</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            type="button"
+            aria-label="關閉"
+            (click)="closeStatsDialog()"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
       </div>
 
       <section class="summary-grid dialog-summary-grid" aria-label="購物項目統計">
