@@ -189,6 +189,7 @@ export class ItemListAddDialogComponent implements OnInit {
       quantity: prefill.quantity ?? this.item.quantity,
       purchaseDate: prefill.purchaseDate ?? this.item.purchaseDate,
       unit: (prefill.unit ?? this.item.unit) || '',
+      created_by_id: prefill.assignedUserId ?? this.item.created_by_id,
     };
   }
 
@@ -287,20 +288,17 @@ export class ItemListAddDialogComponent implements OnInit {
       title: '請選擇預設物品圖片',
       width: 'min(720px, 95vw)', // 讓 md grid 有足夠空間
       html: `
-<div style="overflow-x: hidden;">   <!-- ✅ 包一層擋掉 row 負 margin -->
-
+<div style="overflow-x: hidden;">
       <div id="chip-bar"
            style="display:flex; flex-wrap:wrap; gap:8px;
                   justify-content:center; margin-bottom:16px;">
         ${chipsHtml}
       </div>
-
       <div style="max-height:400px; overflow-y:auto; overflow-x:hidden; padding:4px;">
         <div id="default-img-container" class="row g-3">
           ${renderImages(defaultCategory)}
         </div>
       </div>
-
     </div>
     `,
       showConfirmButton: false,
@@ -480,7 +478,7 @@ export class ItemListAddDialogComponent implements OnInit {
     if (this.selectedFile) {
       formData.append('avatar', this.selectedFile);
     }
-    this.http.postApi(this.basicUrl + 'item/add', formData).subscribe({
+    this.http.postApi('item/add', formData).subscribe({
       next: (res: any) => {
         Swal.close();
         if (res.code != 200) {
@@ -524,7 +522,7 @@ export class ItemListAddDialogComponent implements OnInit {
     this.showLoading('新增物品與記帳中...');
 
     this.http
-      .postApi(this.basicUrl + 'expense/addInfo', expensePayload)
+      .postApi('expense/addInfo', expensePayload)
       .subscribe({
         next: (res: any) => {
           Swal.close();
@@ -614,7 +612,7 @@ export class ItemListAddDialogComponent implements OnInit {
     if (this.selectedFile) {
       formData.append('avatar', this.selectedFile);
     }
-    this.http.postApi(this.basicUrl + 'subscription/add', formData).subscribe({
+    this.http.postApi('subscription/add', formData).subscribe({
       next: (res: any) => {
         Swal.close();
         if (res.code != 200) {
@@ -638,7 +636,7 @@ export class ItemListAddDialogComponent implements OnInit {
         };
 
         this.http
-          .postApi(this.basicUrl + 'expense/addInfo', expensePayload)
+          .postApi('expense/addInfo', expensePayload)
           .subscribe({
             next: (expRes: any) => {
               if (expRes.code != 200) {
@@ -727,7 +725,7 @@ export class ItemListAddDialogComponent implements OnInit {
     if (this.selectedFile) {
       formData.append('avatar', this.selectedFile);
     }
-    this.http.postApi(this.basicUrl + 'warranty/add', formData).subscribe({
+    this.http.postApi('warranty/add', formData).subscribe({
       next: (res: any) => {
         Swal.close();
         if (res.code != 200) {
@@ -750,7 +748,7 @@ export class ItemListAddDialogComponent implements OnInit {
         };
 
         this.http
-          .postApi(this.basicUrl + 'expense/addInfo', expensePayload)
+          .postApi('expense/addInfo', expensePayload)
           .subscribe({
             next: (expRes: any) => {
               if (expRes.code != 200) {
@@ -853,7 +851,7 @@ export class ItemListAddDialogComponent implements OnInit {
       formData.append('avatar', this.selectedFile);
     }
 
-    this.http.postApi(this.basicUrl + 'medicine/add', formData).subscribe({
+    this.http.postApi('medicine/add', formData).subscribe({
       next: (res: any) => {
         Swal.close();
         if (res.code != 200) {
@@ -873,7 +871,7 @@ export class ItemListAddDialogComponent implements OnInit {
         };
 
         this.http
-          .postApi(this.basicUrl + 'expense/addInfo', expensePayload)
+          .postApi('expense/addInfo', expensePayload)
           .subscribe({
             next: (expRes: any) => {
               if (expRes.code != 200) {

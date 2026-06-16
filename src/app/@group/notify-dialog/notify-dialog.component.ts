@@ -13,6 +13,7 @@ import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 
 import { NotifyService } from '../../@services/NotifyService';
+import { environment } from '../../@models/user.model';
 import { Calendar } from '@fullcalendar/core/index.js';
 
 @Component({
@@ -93,7 +94,7 @@ export class NotifyDialogComponent implements OnInit {
   getNotify() {
     this.isLoading = true;
     this.http.get<any>(
-      `http://localhost:8080/family_life/get_notify?user_id=${this.user_id}`
+      `${environment.apiUrl}/family_life/get_notify?user_id=${this.user_id}`
     ).subscribe({
       next: (res) => {
 
@@ -151,7 +152,7 @@ export class NotifyDialogComponent implements OnInit {
     this.showLoading('標記已讀中...');
 
     this.http.post(
-      `http://localhost:8080/family_life/read_notify?notify_id=${n.id}`,
+      `${environment.apiUrl}/family_life/read_notify?notify_id=${n.id}`,
       {}
     ).subscribe({
       next: () => {
@@ -181,7 +182,7 @@ export class NotifyDialogComponent implements OnInit {
 
 
     this.http.post(
-      'http://localhost:8080/family_life/read_all_notify',
+      `${environment.apiUrl}/family_life/read_all_notify`,
       { ids: unreadIds }
     ).subscribe({
       next: () => {
@@ -209,7 +210,7 @@ export class NotifyDialogComponent implements OnInit {
     this.showLoading('刪除中...');
 
     this.http.post(
-      'http://localhost:8080/family_life/delete_all_isReadNotify',
+      `${environment.apiUrl}/family_life/delete_all_isReadNotify`,
       { ids }
     ).subscribe({
       next: () => {
@@ -244,7 +245,7 @@ export class NotifyDialogComponent implements OnInit {
       this.showLoading('刪除中...');
 
       this.http.post(
-        `http://localhost:8080/family_life/delete_notify?notify_id=${n.id}`,
+        `${environment.apiUrl}/family_life/delete_notify?notify_id=${n.id}`,
         {}
       ).subscribe({
         next: () => {
@@ -282,7 +283,7 @@ export class NotifyDialogComponent implements OnInit {
     this.showLoading('處理中...');
 
     this.http.post(
-      `http://localhost:8080/family_life/accept_join_group?user_id=${this.user_id}&group_id=${n.targetGroupId}&notify_id=${n.id}`,
+      `${environment.apiUrl}/family_life/accept_join_group?user_id=${this.user_id}&group_id=${n.targetGroupId}&notify_id=${n.id}`,
       {}
     ).subscribe({
       next: () => {
@@ -304,7 +305,7 @@ export class NotifyDialogComponent implements OnInit {
     this.showLoading('處理中...');
 
     this.http.post(
-      `http://localhost:8080/family_life/reject_join_group?user_id=${this.user_id}&group_id=${n.targetGroupId}&notify_id=${n.id}`,
+      `${environment.apiUrl}/family_life/reject_join_group?user_id=${this.user_id}&group_id=${n.targetGroupId}&notify_id=${n.id}`,
       {}
     ).subscribe({
       next: () => {

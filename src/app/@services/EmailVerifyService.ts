@@ -8,7 +8,9 @@ import Swal from 'sweetalert2';
 })
 export class EmailVerifyService {
 
-  private baseUrl = 'http://localhost:8080/users';
+  // private baseUrl = 'http://localhost:8080/users';
+  private baseUrl = '/api';
+
 
   constructor(private http: HttpClient) {}
 

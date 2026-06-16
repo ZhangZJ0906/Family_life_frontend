@@ -81,7 +81,6 @@ export class HomePageComponent implements OnInit {
   getExpenseGroups(): void {
     this.http
       .getApi(
-        this.basicUrl +
           `family_life/get_group_list?user_id=${this.currentUserId}`,
       )
       .subscribe({
@@ -191,7 +190,7 @@ export class HomePageComponent implements OnInit {
     // 畫面上的 0 是私人記帳，後端要吃 0，所以不帶 groupId
     const apiGroupId = this.currentGroupId === 0 ? 0 : this.currentGroupId;
     console.log('查詢首頁支出，groupId:', this.currentUserId);
-    let url = `${this.basicUrl}expense/getInfo?userId=${this.currentUserId}`;
+    let url = `expense/getInfo?userId=${this.currentUserId}`;
 
     if (apiGroupId !== null) {
       url += `&groupId=${apiGroupId}`;
@@ -235,7 +234,7 @@ export class HomePageComponent implements OnInit {
     // 1. 取得物品清單 (Items) -> 對應 /item/getItems
     this.http
       .getApi(
-        `${this.basicUrl}item/getItems?userId=${userId}&groupId=${groupId}`,
+        `item/getItems?userId=${userId}&groupId=${groupId}`,
       )
       .subscribe({
         next: (res: any) => {
@@ -271,7 +270,7 @@ export class HomePageComponent implements OnInit {
     // 2. 取得備用藥品 (Medicine) -> 對應 /medicine/getByGroup
     this.http
       .getApi(
-        `${this.basicUrl}medicine/getByGroup?userId=${userId}&groupId=${groupId}`,
+        `medicine/getByGroup?userId=${userId}&groupId=${groupId}`,
       )
       .subscribe({
         next: (res: any) => {
@@ -298,7 +297,7 @@ export class HomePageComponent implements OnInit {
     // 3. 取得定期訂閱 (Subscription) -> 對應 /subscription/getByGroup
     this.http
       .getApi(
-        `${this.basicUrl}subscription/getByGroup?userId=${userId}&groupId=${groupId}`,
+        `subscription/getByGroup?userId=${userId}&groupId=${groupId}`,
       )
       .subscribe({
         next: (res: any) => {
@@ -325,7 +324,7 @@ export class HomePageComponent implements OnInit {
     // 4. 取得保固到期 (Warranty) -> 對應 /warranty/getByGroup
     this.http
       .getApi(
-        `${this.basicUrl}warranty/getByGroup?userId=${userId}&groupId=${groupId}`,
+        `warranty/getByGroup?userId=${userId}&groupId=${groupId}`,
       )
       .subscribe({
         next: (res: any) => {

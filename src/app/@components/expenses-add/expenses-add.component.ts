@@ -137,7 +137,7 @@ export class ExpensesAddComponent {
    */
   getItemList(groupId: number | null, userId: number) {
     const resolvedGroupId = groupId ?? 0;
-    const url = `${this.basicUrl}item/getItems?userId=${userId}&groupId=${resolvedGroupId}`;
+    const url = `item/getItems?userId=${userId}&groupId=${resolvedGroupId}`;
 
     this.http.getApi(url).subscribe({
       next: (res: any) => {
@@ -186,8 +186,8 @@ export class ExpensesAddComponent {
       expenseDate: this.formatToBackendDate(formValues.expenseDate),
     };
     // console.log(payload);
-
-    this.http.postApi(this.basicUrl + 'expense/addInfo', payload).subscribe({
+this.showLoading('新增中...');
+    this.http.postApi( 'expense/addInfo', payload).subscribe({
       next: (res: any) => {
         if (res.code != 200) {
           Swal.fire({
@@ -229,4 +229,13 @@ export class ExpensesAddComponent {
   onCancel() {
     this.dialogRef.close(false);
   }
+    private showLoading(message = '載入中...'): void {
+      Swal.fire({
+        title: message,
+        text: '請稍候',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => Swal.showLoading(),
+      });
+    }
 }

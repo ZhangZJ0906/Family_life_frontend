@@ -572,8 +572,8 @@ mat-paginator {
 /* 群組名稱 */
 .selected-group span,
 .group-option span {
-  font-size: 16px;
-  font-weight: 700;
+ font-size: 15px;
+  font-weight: 800;
   color: #111827;
 
   white-space: nowrap;
@@ -891,73 +891,459 @@ mat-paginator {
   height: 22px;
 }
 
-/* 小螢幕排版 */
-@media (max-width: 1400px) {
-   .item-header-card {
-    grid-template-columns: 1fr;
-    gap: 18px;
+/* =========================================================
+   平板版：標題、分類、群組、搜尋改成直向排列
+   ========================================================= */
+@media (min-width: 769px) and (max-width: 1200px) {
+
+
+  .item-page {
+    padding: 24px !important;
+  }
+   /* 上方白色區塊改成單欄排列 */
+  .item-header-card {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+    padding: 26px !important;
+    overflow: visible !important;
   }
 
+
+  /* 標題區 */
+  .item-title {
+    width: 100%;
+  }
+
+   /* 分類按鈕可換行 */
   .header-filter {
-    justify-content: flex-start;
+    width: 110% !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+    overflow: visible !important;
   }
 
 
-
-
-  .group-select {
-    width: 220px;
+   .header-filter mat-chip-listbox {
+    width: 100% !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    overflow: visible !important;
   }
 
-  .header-filter mat-chip-listbox {
-    margin: 0;
-    width: 100%;
-    max-width: 100%;
+
+   .header-filter mat-chip-option {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
   }
 
+
+   /* 重點：切換群組 + 搜尋框水平排列 */
   .header-right {
-    width: 100%;
-    justify-content: flex-end;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    justify-content: space-between !important;
+    gap: 14px !important;
+    flex-wrap: nowrap !important;
   }
 
-  .group-select,
+
+ .group-select,
   .search-field {
-    width: 210px;
+    width: calc(50% - 7px) !important;
+    min-width: 0 !important;
+    height: 72px !important;
+    margin: 0 !important;
+    flex: 1 1 0 !important;
+  }
+
+    /* 表格卡片不要裁切水平捲軸 */
+   .table-card {
+    overflow: hidden !important;
   }
 
 
+  /* Material 欄位高度 */
+   .group-select ::ng-deep .mat-mdc-text-field-wrapper,
+  .search-field ::ng-deep .mat-mdc-text-field-wrapper {
+    height: 72px !important;
+    border-radius: 12px !important;
+  }
+
+  .group-select ::ng-deep .mat-mdc-form-field-infix,
+  .search-field ::ng-deep .mat-mdc-form-field-infix {
+    min-height: 72px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+    .group-select ::ng-deep .mat-mdc-form-field-flex,
+  .search-field ::ng-deep .mat-mdc-form-field-flex {
+    height: 72px !important;
+    align-items: center !important;
+  }
+
+/* 移除底部空白 */
+.group-select ::ng-deep .mat-mdc-form-field-subscript-wrapper,
+.search-field ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  display: none !important;
+}
+   /* 重點：表格水平滑動 */
+  .table-card .table-responsive {
+    width: 100% !important;
+    display: block !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* 重點：表格不要被壓縮，超出就左右滑動 */
+  .table-card .table-responsive table {
+    width: 1050px !important;
+    min-width: 1050px !important;
+    max-width: none !important;
+  }
+
+  th.mat-mdc-header-cell,
+  td.mat-mdc-cell {
+    padding: 18px 14px !important;
+    white-space: nowrap !important;
+  }
 
 
+  /* 到期日、狀態欄位不要被壓太窄 */
+  td.mat-mdc-cell .status-badge,
+  td.mat-mdc-cell .quantity-badge {
+    white-space: nowrap;
+  }
 }
 
-@media (max-width: 768px) {
-  .item-page {
-    padding: 16px;
+
+/* =========================================================
+   手機版：表格改卡片列表
+   ========================================================= */
+@media (max-width: 767px) {
+
+    .item-page {
+    padding: 16px !important;
   }
 
-  .item-header-card {
-    padding: 20px;
+
+   /* 上方白色卡片改成直向，不讓內容被擠壓 */
+   .item-header-card {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+    padding: 22px !important;
+    overflow: visible !important;
   }
 
-  .header-right {
-    flex-direction: column;
-    align-items: stretch;
+   /* 標題區滿版 */
+  .item-title {
+    width: 100% !important;
+  }
+   .title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+   .title-row h2 {
+    font-size: 30px;
+    line-height: 1.2;
+    margin: 0;
   }
 
-  .group-select,
-  .search-field {
+ .item-title p {
+    font-size: 15px;
+    line-height: 1.6;
+    margin-top: 8px;
+  }
+
+
+   .title-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+
+/* 手機分類：兩欄整齊排列 */
+.header-filter {
+  width: 100% !important;
+  margin-bottom: 18px !important;
+  overflow: visible !important;
+}
+
+.header-filter::-webkit-scrollbar {
+  display: none;
+}
+
+.header-filter mat-chip-listbox {
+  width: 100% !important;
+}
+
+.header-filter ::ng-deep .mdc-evolution-chip-set__chips {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 10px !important;
+  width: 100% !important;
+}
+
+
+.header-filter mat-chip-option,
+.header-filter ::ng-deep .mat-mdc-chip-option {
+  width: 100% !important;
+  justify-content: center !important;
+  min-height: 38px !important;
+  border-radius: 10px !important;
+}
+
+/* 手機：群組 + 搜尋同一排 */
+.header-right {
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px !important;
+  align-items: stretch !important;
+}
+
+  /* 兩個欄位各佔一半 */
+.group-select,
+.search-field {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 62px !important;
+  margin: 0 !important;
+}
+
+/* 手機版頭像縮小 */
+.group-avatar {
+  width: 30px;
+  height: 30px;
+}
+
+/* 搜尋框文字縮小 */
+.search-field input {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* 搜尋 icon 縮小 */
+.search-field mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+/* Material 外框高度 */
+  .group-select ::ng-deep .mat-mdc-text-field-wrapper,
+.search-field ::ng-deep .mat-mdc-text-field-wrapper {
+  height: 62px !important;
+  border-radius: 12px !important;
+}
+
+
+ .group-select ::ng-deep .mat-mdc-form-field-infix,
+.search-field ::ng-deep .mat-mdc-form-field-infix {
+  min-height: 62px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+
+  /* 內容垂直置中 */
+.group-select ::ng-deep .mat-mdc-form-field-flex,
+.search-field ::ng-deep .mat-mdc-form-field-flex {
+  height: 62px !important;
+  align-items: center !important;
+}
+
+  /* 手機卡片列表外層 */
+  .item-mobile-list {
+    margin-top: 20px;
+  }
+
+  /* 單張物品卡片 */
+  .item-mobile-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    padding: 18px;
+    margin-bottom: 18px;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
+  }
+
+  .selected-mobile-card {
+    background: #eef4ff;
+    border-color: #bcd0ff;
+  }
+
+  /* 卡片上方：日期、名稱、價格 */
+  .mobile-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #edf0f3;
+  }
+
+  .mobile-date {
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+
+  .mobile-item-name {
+    margin: 0;
+    color: #111827;
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1.35;
+  }
+
+  .mobile-price {
+    color: #d85c5c;
+    font-size: 20px;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+
+  /* 卡片中間：圖片 + 資訊 */
+  .mobile-card-main {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    gap: 14px;
+    padding: 16px 0;
+    border-bottom: 1px solid #edf0f3;
+  }
+
+  .mobile-image-box {
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-item-img {
     width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
-   .custom-paginator {
-    padding-right: 90px;
+  .mobile-item-empty-img {
+    width: 100%;
+    height: 100%;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
+  .mobile-item-empty-img mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .mobile-info-list {
+    min-width: 0;
+  }
+
+  .mobile-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .mobile-info-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .mobile-info-row span {
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .mobile-info-row strong {
+    color: #111827;
+    font-size: 15px;
+    font-weight: 800;
+    text-align: right;
+  }
+
+  .mobile-remind-row {
+    align-items: flex-start;
+  }
+
+  .mobile-remind-row strong {
+    color: #64748b;
+    line-height: 1.5;
+  }
+
+  /* 卡片底部 */
+  .mobile-card-actions {
+    padding-top: 12px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .mobile-action-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* 手機 loading / empty */
+  .mobile-loading-card,
+  .mobile-empty-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    padding: 28px;
+    text-align: center;
+    color: #64748b;
+    font-weight: 700;
+  }
+
+  .mobile-empty-card mat-icon {
+    font-size: 42px;
+    width: 42px;
+    height: 42px;
+    margin-bottom: 8px;
+  }
+
+  /* 手機右下角按鈕 */
   .fab-container {
     right: 20px;
-    bottom: 86px;
+    bottom: 24px;
   }
 
+  .fab-container button {
+    width: 58px;
+    height: 58px;
+  }
 
+  /* 手機版不顯示 paginator */
+ .custom-paginator {
+    display: none !important;
+  }
 
 }

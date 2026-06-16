@@ -101,7 +101,7 @@ ngOnInit(): void {
 }
 private loadUserInfo(): void {
   this.http.getApi(
-    `${this.http.basicUrl}users/get_user_info?userId=${this.userId}`
+    `users/get_user_info?userId=${this.userId}`
   ).subscribe({
     next: (res: any) => {
       this.userAvatar = res.avatar || this.defaultUserAvatar;
@@ -245,7 +245,7 @@ getGroupLabel(groupId: number | null): string {
 
   // 使用跟物品清單相同的群組 API
   this.http
-    .getApi(`${this.http.basicUrl}family_life/get_group_list?user_id=${this.userId}`)
+    .getApi(`family_life/get_group_list?user_id=${this.userId}`)
     .subscribe({
       next: (res: any) => {
         if (!res.groupList) {
@@ -486,7 +486,8 @@ getGroupLabel(groupId: number | null): string {
           quantity: item.quantity,
           unit: '個',
           purchaseDate: this.getTodayDate(),
-          groupId: list.group_id ?? 0
+          groupId: list.group_id ?? 0,
+          assignedUserId: item.userId  // 👈 新增這行
         }
       }
     });
@@ -602,7 +603,7 @@ getGroupLabel(groupId: number | null): string {
 
   private deleteMatchedItemListItem(list: ShoppingList, item: PurchaseItemVo, onDeleted: () => void): void {
     const groupId = list.group_id ?? 0; //TODO: 後端購物清單項目改為必帶groupId後，這裡就不需要再判斷一次了
-    const url = `${this.http.basicUrl}item/getItems?userId=${this.userId}&groupId=${groupId}`;
+    const url = `item/getItems?userId=${this.userId}&groupId=${groupId}`;
 
     // let url = `${this.http.basicUrl}item/getItems?userId=${this.userId}`;
     // if (list.group_id !== null) {
@@ -624,7 +625,7 @@ getGroupLabel(groupId: number | null): string {
           return;
         }
 
-        this.http.postApi(`${this.http.basicUrl}item/delete`, [matchedItem.id]).subscribe({
+        this.http.postApi(`item/delete`, [matchedItem.id]).subscribe({
           next: (deleteRes: any) => {
             if (deleteRes.code !== 200) {
               this.errorMessage = deleteRes.message ?? '刪除物品清單項目失敗';
@@ -750,7 +751,7 @@ getGroupLabel(groupId: number | null): string {
 
     this.loadingMembersByGroupId[groupId] = true;
 
-    this.http.getApi(`${this.http.basicUrl}family_life/get_members?group_id=${groupId}`).subscribe({
+    this.http.getApi(`family_life/get_members?group_id=${groupId}`).subscribe({
       next: (res: any) => {
         this.membersByGroupId[groupId] = res.groupMembersList ?? [];
         this.loadingMembersByGroupId[groupId] = false;
@@ -801,7 +802,7 @@ getGroupLabel(groupId: number | null): string {
 
   /* 載入item list*/
   private loadItemMetadata(groupId = 0): void {
-    const url = `${this.http.basicUrl}item/getItems?userId=${this.userId}&groupId=${groupId}`;
+    const url = `item/getItems?userId=${this.userId}&groupId=${groupId}`;
 
     this.http.getApi(url).subscribe({
       next: (res: any) => {

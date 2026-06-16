@@ -6,21 +6,34 @@ import { Client } from '@stomp/stompjs';
 })
 export class ChatWsService {
 
+  private connected = false;
+
   private client!: Client;
 
+  private subscribedGroups = new Set<number>();
   connect(): Promise<void> {
+const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+
+    if (this.connected) {
+      return Promise.resolve();
+    }
+
 
     return new Promise((resolve) => {
 
       this.client = new Client({
 
-        brokerURL: 'ws://localhost:8080/ws',
+        // brokerURL: 'ws://localhost:8081/ws',
+
+        brokerURL: `${protocol}${window.location.host}/ws`,
 
         reconnectDelay: 5000
 
       });
 
       this.client.onConnect = () => {
+
+        this.connected = true;
 
         console.log('WebSocket Connected');
 
@@ -33,9 +46,39 @@ export class ChatWsService {
 
   subscribe(groupId: number, callback: Function) {
 
+    console.log("訂閱聊天室", groupId);
+
+    if (this.subscribedGroups.has(groupId)) {
+      return;
+    }
+
+    this.subscribedGroups.add(groupId);
+
     this.client.subscribe(
       `/topic/group/${groupId}`,
-      (msg) => callback(JSON.parse(msg.body))
+      (msg) => {
+
+        console.log("收到WS", msg.body);
+
+        callback(
+          JSON.parse(msg.body)
+        );
+
+      }
+    );
+  }
+
+  subscribeOnline(callback: Function) {
+
+    this.client.subscribe(
+      '/topic/group/global',
+      (msg) => {
+
+        callback(
+          JSON.parse(msg.body)
+        );
+
+      }
     );
 
   }

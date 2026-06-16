@@ -9,3 +9,10 @@ export interface User {
   created_at?: string;
   updated_at?: string;
 }
+
+export const environment = {
+  production: false,
+  apiUrl: '/api'
+  //  apiUrl: 'http://localhost:8080'
+
+};

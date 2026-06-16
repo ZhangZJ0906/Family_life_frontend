@@ -112,7 +112,7 @@
   </section>
 
   <!-- 表格卡片 -->
-  <section class="table-card">
+  <section class="table-card item-table-desktop d-none d-md-block">
     <div class="table-responsive">
 
       <!-- 🔥 loading overlay -->
@@ -453,7 +453,154 @@
       class="custom-paginator"
     >
     </mat-paginator>
-    <!-- 右下角浮動按鈕 -->
+
+  </section>
+
+  <!-- 手機版：物品卡片列表 -->
+<section class="item-mobile-list d-block d-md-none">
+
+  <!-- loading -->
+  @if (isLoading) {
+    <div class="mobile-loading-card">
+      ⏳ 載入中...
+    </div>
+  }
+
+  <!-- 沒有資料 -->
+  @if (!isLoading && dataSource.filteredData.length === 0) {
+    <div class="mobile-empty-card">
+      <mat-icon>inventory_2</mat-icon>
+      <p>目前沒有物品資料</p>
+    </div>
+  }
+
+  <!-- 手機卡片 -->
+  @for (element of dataSource.filteredData; track element.id) {
+    <div
+      class="item-mobile-card"
+      [class.selected-mobile-card]="selection.isSelected(element)"
+    >
+
+      <!-- 上方：日期 / 價格 -->
+      <div class="mobile-card-top">
+        <div>
+          <div class="mobile-date">
+            {{ element.expireOrEndDate || element.expireDate || element.warrantyEndDate || element.nextBillingDate || '無到期日' }}
+          </div>
+
+          <h3 class="mobile-item-name">
+            {{ element.name || element.productName || '未命名物品' }}
+          </h3>
+        </div>
+
+        <div class="mobile-price">
+          {{ element.price | currency: "TWD" : "symbol" : "1.0-0" }}
+        </div>
+      </div>
+
+      <!-- 中間：圖片 + 主要資訊 -->
+      <div class="mobile-card-main">
+
+        <!-- 圖片 -->
+        <div class="mobile-image-box">
+          @if (element.avatar && element.avatar.trim() !== '') {
+            <img
+              [src]="getItemAvatar(element)"
+              alt="物品圖片"
+              class="mobile-item-img"
+              (click)="openImagePreview(element, $event)"
+            />
+          } @else {
+            <div class="mobile-item-empty-img">
+              <mat-icon>inventory_2</mat-icon>
+            </div>
+          }
+        </div>
+
+        <!-- 資訊 -->
+        <div class="mobile-info-list">
+
+          <div class="mobile-info-row">
+            <span>目前數量</span>
+            <strong>
+              {{ element.quantity || 0 }} {{ element.unit || '' }}
+            </strong>
+          </div>
+
+          <div class="mobile-info-row">
+            <span>單價</span>
+            <strong>
+              {{ element.unitPrice | currency: "TWD" : "symbol" : "1.0-0" }}
+            </strong>
+          </div>
+
+          <div class="mobile-info-row">
+            <span>狀態</span>
+            <strong>
+              <span
+                class="status-badge"
+                [class.status-normal]="element.status === '正常'"
+                [class.status-expired]="element.status === '已到期'"
+                [class.status-soon]="element.status === '即將到期'"
+                [class.status-low]="element.status === '庫存不足'"
+                [class.status-trial]="element.status === '試用中'"
+                [class.status-warning]="
+                  element.status === '試用即將結束' ||
+                  element.status === '即將扣款'
+                "
+                [class.status-danger]="element.status === '已逾期扣款'"
+              >
+                {{ element.status || '正常' }}
+              </span>
+            </strong>
+          </div>
+
+          @if (element.remindMessage) {
+            <div class="mobile-info-row mobile-remind-row">
+              <span>提醒</span>
+              <strong>{{ element.remindMessage }}</strong>
+            </div>
+          }
+
+        </div>
+      </div>
+
+      <!-- 下方：勾選 / 通知 / 編輯 -->
+      <div class="mobile-card-actions">
+
+        <mat-checkbox
+          color="primary"
+          (click)="onRowCheckboxClick($event, element)"
+          [checked]="selection.isSelected(element)"
+        >
+          選取
+        </mat-checkbox>
+
+        <div class="mobile-action-right">
+          <button mat-icon-button type="button">
+            <mat-icon>
+              {{ element.notify ? "notifications_active" : "notifications_off" }}
+            </mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            color="primary"
+            type="button"
+            (click)="openEditDialog(element)"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  }
+
+</section>
+
+<!-- 右下角浮動按鈕 -->
     <div class="fab-container">
       <!-- 有勾選資料時顯示刪除按鈕 -->
       @if (selection.selected.length > 0) {
@@ -473,7 +620,6 @@
         <mat-icon>add</mat-icon>
       </button>
     </div>
-  </section>
 
   @if (imagePreviewVisible) {
   <div class="image-preview-backdrop" (click)="closeImagePreview()">
