@@ -52,7 +52,7 @@
           <div class="left">
 
             <img class="avatar"
-                [src]="group.avatar || 'assets/default-avatar.png'">
+                [src]="getAvatarUrl(group.avatar) || 'assets/default-avatar.png'">
 
             <div class="info">
               <div class="name">
