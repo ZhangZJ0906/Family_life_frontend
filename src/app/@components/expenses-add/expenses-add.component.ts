@@ -69,7 +69,7 @@ export class ExpensesAddComponent {
     this.initForm();
     this.watchFormChanges(); // 啟動欄位連動監聽器
     const groupId = this.currentGroupId ?? 0;
-    this.expenseForm.get('selectedEnvId')?.setValue(groupId);
+
     this.onEnvChange(groupId); // 觸發拉物品清單
   }
 
@@ -79,7 +79,7 @@ export class ExpensesAddComponent {
   initForm() {
     this.expenseForm = this.fb.group({
       // selectedEnvId: [null, Validators.required], // 記帳環境控制項 (0:個人, >0:群組ID)
-      selectedEnvId: [null], // 記帳環境控制項 (0:個人, >0:群組ID)
+
       expenseDate: ['', Validators.required],
       price: [null, [Validators.required, Validators.min(0)]],
       categoryId: [null, Validators.required],
@@ -88,12 +88,7 @@ export class ExpensesAddComponent {
       note: [''], // ✅ 還原成純備註
     });
   }
-  get currentGroupName(): string {
-    return (
-      this.userGroups.find((g) => g.groupId === this.data.currentGroupId)
-        ?.groupName ?? '私人記帳'
-    );
-  }
+
   /**
    * 監聽表單欄位聯動
    */
