@@ -498,6 +498,17 @@
   color: #2f80ed;
 }
 
+.task {
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.task:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  background: inherit; /* 保持原本的背景色 */
+}
+
 /* =========================================================
    平板版：記帳環境在左，目前月份在右
    桌機版、手機版不影響

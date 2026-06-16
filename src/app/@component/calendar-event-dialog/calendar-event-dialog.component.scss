@@ -108,6 +108,23 @@ textarea {
   font-size: 16px;
 }
 
+.field-with-error {
+  display: flex;
+  flex-direction: column;
+}
+
+.field-with-error mat-form-field {
+  width: 100%;
+}
+
+.time-error-text {
+  margin-top: -12px;
+  padding-left: 16px;
+  color: #d32f2f;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 /* 手機版改成單欄 */
 @media (max-width: 720px) {
   .event-dialog {

@@ -162,23 +162,33 @@
         </mat-form-field>
 
         <!-- 結束時間 -->
-        <mat-form-field appearance="outline">
-          <mat-label>結束時間</mat-label>
-          <input
-            matInput
-            [matTimepicker]="endTimePicker"
-            [(ngModel)]="form.endTime"
-            name="endTime"
-            required
-            #endTimeRef="ngModel"
-          />
-          <mat-timepicker-toggle matIconSuffix [for]="endTimePicker"></mat-timepicker-toggle>
-          <mat-timepicker #endTimePicker></mat-timepicker>
+        <div class="field-with-error">
+          <mat-form-field appearance="outline">
+            <mat-label>結束時間</mat-label>
 
-          @if (endTimeRef.invalid && endTimeRef.touched) {
-            <mat-error>結束時間不可為空</mat-error>
+            <input
+              matInput
+              [matTimepicker]="endTimePicker"
+              [(ngModel)]="form.endTime"
+              name="endTime"
+              required
+              #endTimeRef="ngModel"
+            />
+
+            <mat-timepicker-toggle matIconSuffix [for]="endTimePicker"></mat-timepicker-toggle>
+            <mat-timepicker #endTimePicker></mat-timepicker>
+
+            @if (endTimeRef.invalid && endTimeRef.touched) {
+              <mat-error>結束時間不可為空</mat-error>
+            }
+          </mat-form-field>
+
+          @if (isEndBeforeStart()) {
+            <div class="time-error-text">
+              結束時間不可早於開始時間
+            </div>
           }
-        </mat-form-field>
+        </div>
 
         <!-- 提醒時間 -->
         <mat-form-field appearance="outline" class="full-width">

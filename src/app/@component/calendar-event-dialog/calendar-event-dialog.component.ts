@@ -342,4 +342,27 @@ toggleSelectAllMembers(event: MouseEvent): void {
     (id) => id !== this.SELECT_ALL_VALUE
   );
 }
+
+isEndBeforeStart(): boolean {
+  if (
+    !this.form.eventDate ||
+    !this.form.eventTime ||
+    !this.form.endDate ||
+    !this.form.endTime
+  ) {
+    return false;
+  }
+
+  const startDateTime = this.combineDateAndTime(
+    this.form.eventDate,
+    this.form.eventTime,
+  );
+
+  const endDateTime = this.combineDateAndTime(
+    this.form.endDate,
+    this.form.endTime,
+  );
+
+  return new Date(endDateTime).getTime() < new Date(startDateTime).getTime();
+}
 }

@@ -71,6 +71,7 @@ export class ShoppingListComponent implements OnInit {
   itemsByListId: Record<number, PurchaseItemVo[]> = {};
   membersByGroupId: Record<number, GroupMember[]> = {};
   loadingMembersByGroupId: Record<number, boolean> = {};
+  private loadingItemListIds = new Set<number>();
 
   isLoading = false;
   isCreating = false;
@@ -214,15 +215,16 @@ getGroupLabel(groupId: number | null): string {
     this.selectedStatsList = null;
   }
 
-  loadLists(): void {
+  loadLists(refreshItems = false): void {
     this.isLoading = true;
     this.errorMessage = '';
 
     this.shoppingService.getLists(this.userId).subscribe({
       next: (res) => {
         this.lists = res ?? [];
+        this.removeStaleItemCache(this.lists);
         this.isLoading = false;
-        this.loadItemsForLists(this.lists);
+        this.loadItemsForLists(this.lists, refreshItems);
       },
       error: (err) => {
         console.error(err);
@@ -581,7 +583,7 @@ getGroupLabel(groupId: number | null): string {
           timer: 900,
           showConfirmButton: false,
         });
-        this.loadItemsForList(list.id);
+        this.loadItemsForList(list.id, true);
       },
       error: (err) => {
         console.error(err);
@@ -663,28 +665,81 @@ getGroupLabel(groupId: number | null): string {
     });
   }
 
-  private loadItemsForLists(lists: ShoppingList[]): void {
-    lists.forEach((list) => {
-      this.loadItemsForList(list.id);
+  // private loadItemsForLists(lists: ShoppingList[], force = false): void {
+  //   lists.forEach((list) => {
+  //     this.loadItemsForList(list.id, force);
 
-      if (list.group_id !== null) {
-        this.loadGroupMembers(list.group_id);
+  //     if (list.group_id !== null) {
+  //       this.loadGroupMembers(list.group_id);
+  //     }
+  //   });
+  // }
+
+  private loadItemsForLists(lists: ShoppingList[], force = false): void {
+    const listIds = lists
+      .map((list) => list.id)
+      .filter((listId) => force || !this.itemsByListId[listId]);
+
+    if (listIds.length === 0) {
+      return;
+    }
+
+    listIds.forEach((listId) => {
+      this.loadingItemsByListId[listId] = true;
+    });
+
+    this.shoppingService.getItemsBatch(listIds).subscribe({
+      next: (itemsMap) => {
+        listIds.forEach((listId) => {
+          this.itemsByListId[listId] = itemsMap[listId] ?? [];
+          this.loadingItemsByListId[listId] = false;
+        });
+      },
+      error: (err) => {
+        console.error(err);
+        listIds.forEach((listId) => {
+          this.itemsByListId[listId] = [];
+          this.loadingItemsByListId[listId] = false;
+        });
       }
     });
   }
 
-  private loadItemsForList(listId: number): void {
+
+  private loadItemsForList(listId: number, force = false): void {
+    if (!force && this.itemsByListId[listId]) {
+      return;
+    }
+
+    if (this.loadingItemListIds.has(listId)) {
+      return;
+    }
+
+    this.loadingItemListIds.add(listId);
     this.loadingItemsByListId[listId] = true;
 
     this.shoppingService.getItems(listId).subscribe({
       next: (items) => {
         this.itemsByListId[listId] = items ?? [];
         this.loadingItemsByListId[listId] = false;
+        this.loadingItemListIds.delete(listId);
       },
       error: (err) => {
         console.error(err);
         this.itemsByListId[listId] = [];
         this.loadingItemsByListId[listId] = false;
+        this.loadingItemListIds.delete(listId);
+      }
+    });
+  }
+
+  private removeStaleItemCache(lists: ShoppingList[]): void {
+    const visibleListIds = new Set(lists.map((list) => String(list.id)));
+
+    Object.keys(this.itemsByListId).forEach((listId) => {
+      if (!visibleListIds.has(listId)) {
+        delete this.itemsByListId[Number(listId)];
+        delete this.loadingItemsByListId[Number(listId)];
       }
     });
   }

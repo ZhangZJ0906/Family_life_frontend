@@ -1,4 +1,5 @@
-import { DefaultImage } from "./interfaceList";
+
+import { DefaultImage,addItem } from './interfaceList';
 
 //預設圖片
 export const DEFAULT_IMAGES: DefaultImage[] = [
@@ -201,4 +202,104 @@ export const CATEGORY_ICON_MAP: Record<string, string> = {
   訂閱: '💳',
   清潔用品: '🧽',
   保固: '🛡️',
+};
+//item List table 設定
+export enum TableMode {
+  Item = 'item',
+  Subscription = 'subscription',
+  Warranty = 'warranty',
+  Medicine = 'medicine',
+  GlobalSearch = 'global',
+}
+export const COLUMN_CONFIG: Record<TableMode, string[]> = {
+  [TableMode.Item]: [
+    'select',
+    'name',
+    'quantity',
+    'unitPrice',
+    'price',
+    'expireDate',
+    'status',
+    'avatar',
+    'notify',
+    'actions',
+  ],
+  [TableMode.Subscription]: [
+    'select',
+    'name',
+    'price',
+    'billingCycle',
+    'trialEndDate',
+    'nextBillingDate',
+    'status',
+    'avatar',
+    'notify',
+    'actions',
+  ],
+  [TableMode.Warranty]: [
+    'select',
+    'productName',
+    'price',
+    'brand',
+    'model',
+    'serialNumber',
+    'purchaseDate',
+    'warrantyEndDate',
+    'status',
+    'avatar',
+    'notify',
+    'actions',
+  ],
+  [TableMode.Medicine]: [
+    'select',
+    'name',
+    'medicineType',
+    'quantity',
+    'price',
+    'expireDate',
+    'usageMethod',
+    'status',
+    'avatar',
+    'notify',
+    'actions',
+  ],
+  [TableMode.GlobalSearch]: [
+    'select',
+    '_typeName',
+    'name',
+    'price',
+    'expireOrEndDate',
+    'status',
+    'avatar',
+    'actions',
+  ],
+};
+
+export const DEFAULT_ITEM: addItem = {
+  created_by_id: 1,
+  groupId: 1,
+  locationId: 1,
+  categoryId: 1,
+  name: '',
+  quantity: null,
+  unit: '',
+  unitPrice: null,
+  price: null,
+  safeQuantity: null,
+  purchaseDate: '',
+  expireDate: '',
+  notify: true,
+  note: '',
+  billingCycle: '每月',
+  trialEndDate: '',
+  nextBillingDate: '',
+  brand: '',
+  model: '',
+  serialNumber: '',
+  warrantyEndDate: '',
+  storeName: '',
+  medicineType: '',
+  dosage: '',
+  usageMethod: '',
+  source: '',
 };
