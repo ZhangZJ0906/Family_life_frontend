@@ -915,36 +915,35 @@ export class ItemListComponent {
     });
   }
   //圖片顯示
-  getItemAvatar(element: any): string {
-    // 1. 防呆：如果 element 沒傳入或根本沒有圖片欄位
-    if (!element || !element.avatar || element.avatar.trim() === '') {
-      return 'assets/default-avatar.png';
-    }
-
-    const avatarStr = element.avatar.trim();
-
-    // 2. 如果已經是 Base64 或是完整的 http 網址，直接回傳（不可進行全字串 encodeURIComponent）
-    if (
-      avatarStr.startsWith('data:') ||
-      avatarStr.startsWith('http://') ||
-      avatarStr.startsWith('https://')
-    ) {
-      return avatarStr;
-    }
-
-    // 3. 如果後端給的路徑已經包含了 "uploads/"，先把它拿掉，避免重複疊加
-    let fileName = avatarStr;
-    if (fileName.startsWith('uploads/')) {
-      fileName = fileName.replace('uploads/', '');
-    }
-
-    // 4. 只針對「純檔名」部分進行 URL 編碼，防止中文與空白破圖
-    const safeFileName = encodeURIComponent(fileName);
-
-    // return `${this.basicUrl}uploads/${safeFileName}`;
-    return `uploads/${safeFileName}`;
-
+ getItemAvatar(element: any): string {
+  if (!element || !element.avatar || element.avatar.trim() === '') {
+    return 'assets/default-avatar.png';
   }
+
+  const avatarStr = element.avatar.trim();
+
+  // 已經是完整 URL 直接回傳（舊資料相容）
+  if (
+    avatarStr.startsWith('data:') ||
+    avatarStr.startsWith('http://') ||
+    avatarStr.startsWith('https://')
+  ) {
+    return avatarStr;
+  }
+
+  // 相對路徑處理
+  let fileName = avatarStr;
+  if (fileName.startsWith('/uploads/')) {
+    fileName = fileName.replace('/uploads/', '');
+  } else if (fileName.startsWith('uploads/')) {
+    fileName = fileName.replace('uploads/', '');
+  }
+
+  const safeFileName = encodeURIComponent(fileName);
+
+  // ✅ 加上當前 host，手機、外網都能正確顯示
+  return `${window.location.origin}/uploads/${safeFileName}`;
+}
 
   // 開啟圖片預覽
   openImagePreview(element: any, event: MouseEvent): void {

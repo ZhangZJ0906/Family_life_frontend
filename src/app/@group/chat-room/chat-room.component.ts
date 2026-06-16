@@ -1,19 +1,11 @@
-import {
-  Component,
-  OnInit,
-  ViewChild,
-  ElementRef
-} from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 
-import {
-  MAT_DIALOG_DATA,
-  MatDialogRef
-} from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { Inject } from '@angular/core';
 
@@ -23,20 +15,16 @@ import { AfterViewChecked } from '@angular/core';
 
 import { NgZone } from '@angular/core';
 import { environment } from '../../@models/user.model';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-chat-room',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    DragDropModule
-  ],
+  imports: [CommonModule, FormsModule, DragDropModule],
   templateUrl: './chat-room.component.html',
-  styleUrl: './chat-room.component.scss'
+  styleUrl: './chat-room.component.scss',
 })
-export class ChatRoomComponent implements OnInit,  AfterViewChecked {
-
+export class ChatRoomComponent implements OnInit, AfterViewChecked {
   @ViewChild('scrollBox') scrollBox!: ElementRef;
 
   groupId!: number;
@@ -58,11 +46,10 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
     private dialogRef: MatDialogRef<ChatRoomComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private authService: AuthService,
-    private zone: NgZone
+    private zone: NgZone,
   ) {}
 
   async ngOnInit() {
-
     this.groupName = this.data.groupName;
 
     this.userId = this.authService.currentUser()?.user_id ?? 0;
@@ -72,45 +59,36 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
     // 歷史訊息
     this.loadMessages();
 
-
     // WebSocket
     await this.ws.connect();
 
-    this.ws.subscribe(
-      this.groupId,
-      (msg: any) => {
+    this.ws.subscribe(this.groupId, (msg: any) => {
+      this.zone.run(() => {
+        switch (msg.type) {
+          case 'ONLINE':
+            this.onlineCount = msg.count;
+            break;
 
-        this.zone.run(() => {
+          case 'MESSAGE':
+            this.messages = [...this.messages, msg];
+            break;
 
-          switch (msg.type) {
+          case 'IMAGE':
+            this.messages = [...this.messages, msg];
+            break;
 
-            case 'ONLINE':
-              this.onlineCount = msg.count;
-              break;
-
-            case 'MESSAGE':
-              this.messages = [...this.messages, msg];
-              break;
-
-            case 'IMAGE':
-              this.messages = [...this.messages, msg];
-              break;
-
-            case 'READ':
-              this.updateReadCount(msg);
-              break;
-
-          }
-       });
-        setTimeout(() => {
-          this.scrollToBottom();
-        }, 50);
-      }
-    );
+          case 'READ':
+            this.updateReadCount(msg);
+            break;
+        }
+      });
+      setTimeout(() => {
+        this.scrollToBottom();
+      }, 50);
+    });
   }
 
   ngAfterViewChecked() {
-
     if (this.hasLoaded) {
       this.scrollToBottom();
       this.hasLoaded = false; // ⭐ 只做一次
@@ -118,12 +96,9 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
   }
 
   loadMessages() {
-
     this.isLoadingMessages = true;
 
-    this.http.get<any>(
-      `${environment.apiUrl}/chat/${this.groupId}`
-    ).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/chat/${this.groupId}`).subscribe({
       next: (res) => {
         this.messages = res.messages ?? [];
 
@@ -136,12 +111,11 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
       },
       error: () => {
         this.isLoadingMessages = false;
-      }
+      },
     });
   }
 
   sendMessage() {
-
     if (!this.message.trim()) {
       return;
     }
@@ -149,7 +123,7 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
     this.ws.sendMessage({
       groupId: this.groupId,
       senderId: this.userId,
-      message: this.message
+      message: this.message,
     });
 
     this.message = '';
@@ -160,7 +134,6 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
   }
 
   onImageSelected(event: any) {
-
     const file = event.target.files[0];
 
     if (!file) return;
@@ -171,15 +144,20 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
     formData.append('groupId', this.groupId.toString());
     formData.append('senderId', this.userId.toString());
 
-    this.http.post(
-      `${environment.apiUrl}/chat/upload`,
-      formData
-    ).subscribe();
+    this.http.post(`${environment.apiUrl}/chat/upload`, formData).subscribe({
+      next(res) {},
+      error: (err) => {
+        Swal.fire({
+          title: '圖片上船失敗',
+          text: err.message,
+          icon: 'error',
+        });
+      },
+    });
   }
 
   updateReadCount(msg: any) {
-
-    const target = this.messages.find(m => m.id === msg.messageId);
+    const target = this.messages.find((m) => m.id === msg.messageId);
 
     if (target) {
       target.readCount = msg.readCount;
@@ -187,10 +165,12 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
   }
 
   markRead() {
-    this.http.post(
-      `${environment.apiUrl}/chat/read/${this.groupId}?userId=${this.userId}`,
-      {}
-    ).subscribe();
+    this.http
+      .post(
+        `${environment.apiUrl}/chat/read/${this.groupId}?userId=${this.userId}`,
+        {},
+      )
+      .subscribe();
   }
 
   scrollToBottom() {
