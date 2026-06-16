@@ -1,7 +1,6 @@
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import {
   DropDownGroupList,
-  Item,
   LocationAndCategory,
 } from './../../common/interfaceList';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,7 +11,6 @@ import {
 } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-
 import { SelectionModel } from '@angular/cdk/collections';
 import { Component, inject, ViewChild } from '@angular/core';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -25,24 +23,14 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { ItemListAddDialogComponent } from '../item-list-add-dialog/item-list-add-dialog.component';
 import { ItemListEditDialogComponent } from '../item-list-edit-dialog/item-list-edit-dialog.component';
-import {
-  MatSelect,
-  MatOption,
-  MatSelectModule,
-} from '@angular/material/select';
+import { MatSelectModule } from '@angular/material/select';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../@services/auth.service';
 import { forkJoin, Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { CATEGORY_ICON_MAP, COLUMN_CONFIG, TableMode } from '../../common/item.const';
 
-export enum TableMode {
-  Item = 'item',
-  Subscription = 'subscription',
-  Warranty = 'warranty',
-  Medicine = 'medicine',
-  GlobalSearch = 'global',
-}
 @Component({
   selector: 'app-item-list',
   imports: [
@@ -70,72 +58,8 @@ export class ItemListComponent {
   // ─── 模式管理 ─────────────────────────────────────────────
   currentMode: TableMode = TableMode.Item;
   readonly TableMode = TableMode; // 讓 HTML 模板可以用 enum
-
-  // 各模式對應表格欄位（取代五個 xxxDisplayedColumns 屬性）
-  readonly columnConfig: Record<TableMode, string[]> = {
-    [TableMode.Item]: [
-      'select',
-      'name',
-      'quantity',
-      'unitPrice',
-      'price',
-      'expireDate',
-      'status',
-      'avatar',
-      'notify',
-      'actions',
-    ],
-    [TableMode.Subscription]: [
-      'select',
-      'name',
-      'price',
-      'billingCycle',
-      'trialEndDate',
-      'nextBillingDate',
-      'status',
-      'avatar',
-      'notify',
-      'actions',
-    ],
-    [TableMode.Warranty]: [
-      'select',
-      'productName',
-      'price',
-      'brand',
-      'model',
-      'serialNumber',
-      'purchaseDate',
-      'warrantyEndDate',
-      'status',
-      'avatar',
-      'notify',
-      'actions',
-    ],
-    [TableMode.Medicine]: [
-      'select',
-      'name',
-      'medicineType',
-      'quantity',
-      'price',
-      'expireDate',
-      'usageMethod',
-      'status',
-      'avatar',
-      'notify',
-      'actions',
-    ],
-    [TableMode.GlobalSearch]: [
-      'select',
-      '_typeName',
-      'name',
-      'price',
-      'expireOrEndDate',
-      'status',
-      'avatar',
-      'actions',
-    ],
-  };
-
+  readonly columnConfig = COLUMN_CONFIG; //各模式對應表格欄位（取代五個 xxxDisplayedColumns 屬性）
+  readonly categoryIconMap = CATEGORY_ICON_MAP; // 分類Icon
   // ─── 頁面狀態 ──────────────────────────────────────────────
   basicUrl!: string;
   selectedCategory = '全部';
@@ -146,7 +70,6 @@ export class ItemListComponent {
   currentUserId: any;
   lastSelectedRow: any = null;
   currentUserAvatar = 'assets/default-avatar.png'; //預設群組投向
-
   isLoading = true;
 
   //上次登入時間
@@ -169,6 +92,10 @@ export class ItemListComponent {
   selection = new SelectionModel<any>(true, []);
   dataSource = new MatTableDataSource<any>([]);
 
+  // 手機版分頁
+  mobilePageIndex = 0;
+  mobilePageSize = 3;
+
   // 圖片預覽狀態
   imagePreviewVisible = false;
   previewImageUrl = '';
@@ -185,9 +112,8 @@ export class ItemListComponent {
   ) {
     this.basicUrl = this.http.basicUrl;
     this.currentUserId = this.authService.currentUser()?.user_id ?? 0;
-    // 目前登入者自己的頭像，私人物品使用
     this.currentUserAvatar =
-      this.authService.currentUser()?.avatar || 'assets/default-avatar.png';
+      this.authService.currentUser()?.avatar || 'assets/default-avatar.png'; // 目前登入者自己的頭像，私人物品使用
   }
 
   ngOnInit() {
@@ -202,36 +128,66 @@ export class ItemListComponent {
     this.dataSource.sort = this.sort;
 
     this.dataSource.sortingDataAccessor = (item, property) => {
-      switch (property) {
-        case 'expireDate':
-        case 'expireOrEndDate':
-        case 'warrantyEndDate':
-        case 'nextBillingDate':
-        case 'nextBillingDate':
-        case 'trialEndDate':
-        case 'purchaseDate':
-          const dateStr =
-            item.expireDate ||
-            item.expireOrEndDate ||
-            item.warrantyEndDate ||
-            item.nextBillingDate ||
-            item.trialEndDate ||
-            item.purchaseDate;
-          return dateStr ? new Date(dateStr).getTime() : 0;
-        default:
-          return item[property];
+      // 定義哪些欄位需要轉換成時間戳記排序
+      const dateFields = [
+        'expireDate',
+        'expireOrEndDate',
+        'warrantyEndDate',
+        'nextBillingDate',
+        'trialEndDate',
+        'purchaseDate',
+      ];
+
+      if (dateFields.includes(property)) {
+        // 精準取得當前排序欄位的值，而不是永遠拿第一個有值的日期
+        const dateStr = item[property];
+        return dateStr ? new Date(dateStr).getTime() : 0;
+      } else {
+        return item[property];
       }
     };
   }
 
   initData(groupId: number) {
+    this.showLoading('載入中物品清單中...'); // ← 加這行
     this.currentGroupId = groupId;
     if (groupId == null) groupId = 0;
     this.getLoginItemPageTime().then(() => {
-
-
       this.getUserGroupData(groupId);
     });
+  }
+  // ─── 表格 ─────────────────────────────────────────────────
+  get mobileItems(): any[] {
+    const data = this.dataSource.filteredData || [];
+    const start = this.mobilePageIndex * this.mobilePageSize;
+    return data.slice(start, start + this.mobilePageSize);
+  }
+
+  get mobileTotalPages(): number {
+    const total = this.dataSource.filteredData?.length || 0;
+    return Math.ceil(total / this.mobilePageSize);
+  }
+
+  get mobileCurrentPage(): number {
+    return this.mobileTotalPages === 0 ? 0 : this.mobilePageIndex + 1;
+  }
+
+  nextMobilePage(): void {
+    if (this.mobilePageIndex < this.mobileTotalPages - 1) {
+      this.mobilePageIndex++;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  prevMobilePage(): void {
+    if (this.mobilePageIndex > 0) {
+      this.mobilePageIndex--;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  resetMobilePage(): void {
+    this.mobilePageIndex = 0;
   }
   // 自動根據當前模式回傳欄位（取代可寫的 displayedColumns 屬性）
   get displayedColumns(): string[] {
@@ -273,6 +229,7 @@ export class ItemListComponent {
   };
   private refreshTableData(newData: any[]) {
     this.dataSource.data = newData;
+    this.resetMobilePage();
     setTimeout(() => {
       this.dataSource.sort = this.sort;
       this.dataSource.paginator = this.paginator;
@@ -565,9 +522,11 @@ export class ItemListComponent {
           this.dataSource.paginator?.firstPage();
 
           this.isLoading = false; // 🔥 關閉
+          Swal.close(); // ← 加這行
         },
         error: (err: any) => {
           this.isLoading = false; // 🔥 一定要關
+          Swal.close(); // ← 加這行
           Swal.fire({
             title: '錯誤',
             text: err.message || 'Server error',
@@ -940,12 +899,9 @@ export class ItemListComponent {
   isNewItem(createdTime: string | Date, createdBy: number): boolean {
     if (createdBy == this.currentUserId) return false;
     if (!createdTime || !this.lastLoginTime) return false;
-
     const created = new Date(createdTime).getTime();
     const login = this.lastLoginTime.getTime();
-
     if (isNaN(created)) return false;
-
     return created > login;
   }
 

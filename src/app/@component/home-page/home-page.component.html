@@ -122,44 +122,68 @@
     <section class="summary-grid row g-3 flex-fill">
 
       <div class="col-12 col-md-6 d-flex">
-        <div class="summary-card flex-fill">
+        <div
+          class="summary-card flex-fill"
+          role="button"
+          tabindex="0"
+          [class.active-summary]="selectedPriorityType === 'item'"
+          (click)="selectPriorityType('item')"
+        >
           <div class="summary-text">
             <span class="card-label">即將到期食材</span>
             <h2>{{ expiringFoodCount }}</h2>
-            <p>7 天內到期</p>
+            <p class="card-label">7 天內到期</p>
           </div>
           <div class="summary-icon food-icon">🥬</div>
         </div>
       </div>
 
       <div class="col-12 col-md-6 d-flex">
-        <div class="summary-card flex-fill">
+        <div
+          class="summary-card flex-fill"
+          role="button"
+          tabindex="0"
+          [class.active-summary]="selectedPriorityType === 'medicine'"
+          (click)="selectPriorityType('medicine')"
+        >
           <div class="summary-text">
             <span class="card-label">藥品提醒</span>
             <h2>{{ medicineReminderCount }}</h2>
-            <p>需要補充</p>
+            <p class="card-label">需要補充</p>
           </div>
           <div class="summary-icon medicine-icon">💊</div>
         </div>
       </div>
 
       <div class="col-12 col-md-6 d-flex">
-        <div class="summary-card flex-fill">
+        <div
+          class="summary-card flex-fill"
+          role="button"
+          tabindex="0"
+          [class.active-summary]="selectedPriorityType === 'warranty'"
+          (click)="selectPriorityType('warranty')"
+        >
           <div class="summary-text">
             <span class="card-label">保固到期</span>
             <h2>{{ warrantyExpiringCount }}</h2>
-            <p>本月到期</p>
+            <p class="card-label">本月到期</p>
           </div>
           <div class="summary-icon warranty-icon">🧾</div>
         </div>
       </div>
 
       <div class="col-12 col-md-6 d-flex">
-        <div class="summary-card flex-fill">
+        <div
+          class="summary-card flex-fill"
+          role="button"
+          tabindex="0"
+          [class.active-summary]="selectedPriorityType === 'subscription'"
+          (click)="selectPriorityType('subscription')"
+        >
           <div class="summary-text">
             <span class="card-label">訂閱續扣</span>
             <h2>{{ subscriptionReminderCount }}</h2>
-            <p>近期扣款</p>
+            <p class="card-label">近期扣款</p>
           </div>
           <div class="summary-icon sub-icon">💳</div>
         </div>
@@ -174,9 +198,16 @@
       <h3>今日優先處理</h3>
 
       <div class="priority-list">
-        @if (priorityTasks.length > 0) {
-          @for (task of priorityTasks; track task.id) {
-            <div class="task" [ngClass]="task.levelClass">
+        @if (filteredPriorityTasks.length > 0) {
+          @for (task of filteredPriorityTasks; track task.id) {
+            <div
+              class="task"
+              [ngClass]="task.levelClass"
+              role="button"
+              tabindex="0"
+              title="點擊標記為已處理"
+              (click)="confirmTaskDone(task)"
+              >
               <div>
                 <h4>{{ task.title }}</h4>
                 <p>{{ task.description }}</p>

@@ -10,6 +10,9 @@ import Swal from 'sweetalert2';
 
 interface PriorityTask {
   id: string;
+  sourceType: 'item' | 'medicine' | 'warranty' | 'subscription';
+  sourceId: number;
+
   title: string;
   description: string;
   level: number;
@@ -49,6 +52,7 @@ export class HomePageComponent implements OnInit {
   warrantyList: any[] = [];
   // 物品位置對照表
   locationMap: { [key: number]: string } = {};
+  selectedPriorityType: 'all' | 'item' | 'medicine' | 'warranty' | 'subscription' = 'all';
 
   constructor(private http: HttpClientService) {
     this.basicUrl = this.http.basicUrl;
@@ -391,6 +395,8 @@ export class HomePageComponent implements OnInit {
       if (status === '已到期') {
         tasks.push({
           id: `item-expired-${item.id}`,
+          sourceType: 'item',
+          sourceId: item.id,
           title: `${name} 已到期`,
           description: `${this.getRemainText(item.expireDate)}｜${this.getItemLocationText(item)}`,
           level: 3,
@@ -402,6 +408,8 @@ export class HomePageComponent implements OnInit {
       if (status === '即將到期') {
         tasks.push({
           id: `item-soon-${item.id}`,
+          sourceType: 'item',
+          sourceId: item.id,
           title: `${name} 即將到期`,
           description: `${this.getRemainText(item.expireDate)}｜${this.getItemLocationText(item)}`,
           level: 3,
@@ -413,6 +421,8 @@ export class HomePageComponent implements OnInit {
       if (status === '庫存不足') {
         tasks.push({
           id: `item-low-${item.id}`,
+          sourceType: 'item',
+          sourceId: item.id,
           title: `${name} 庫存不足`,
           description: `目前數量 ${item.quantity ?? 0} ${item.unit || ''}`,
           level: 2,
@@ -430,6 +440,8 @@ export class HomePageComponent implements OnInit {
       if (status === '已到期') {
         tasks.push({
           id: `medicine-expired-${item.id}`,
+          sourceType: 'medicine',
+          sourceId: item.id,
           title: `${name} 已到期`,
           description: `${this.getRemainText(item.expireDate)}｜藥品`,
           level: 3,
@@ -441,6 +453,8 @@ export class HomePageComponent implements OnInit {
       if (status === '即將到期') {
         tasks.push({
           id: `medicine-soon-${item.id}`,
+          sourceType: 'medicine',
+          sourceId: item.id,
           title: `${name} 即將到期`,
           description: `${this.getRemainText(item.expireDate)}｜藥品`,
           level: 2,
@@ -452,6 +466,8 @@ export class HomePageComponent implements OnInit {
       if (status === '庫存不足') {
         tasks.push({
           id: `medicine-low-${item.id}`,
+          sourceType: 'medicine',
+          sourceId: item.id,
           title: `${name} 庫存不足`,
           description: `目前數量 ${item.quantity ?? 0}`,
           level: 2,
@@ -474,12 +490,16 @@ export class HomePageComponent implements OnInit {
           level: 2,
           levelText: '中',
           levelClass: 'warning',
+          sourceType: 'warranty',
+          sourceId: item.id,
         });
       }
 
       if (status === '即將到期') {
         tasks.push({
           id: `warranty-soon-${item.id}`,
+          sourceType: 'warranty',
+          sourceId: item.id,
           title: `${name} 保固即將到期`,
           description: `${this.getRemainText(item.warrantyEndDate)}｜保固`,
           level: 2,
@@ -497,6 +517,8 @@ export class HomePageComponent implements OnInit {
       if (status === '已逾期扣款') {
         tasks.push({
           id: `subscription-overdue-${item.id}`,
+          sourceType: 'subscription',
+          sourceId: item.id,
           title: `${name} 已逾期扣款`,
           description: `${this.getRemainText(item.nextBillingDate)}｜NT$${item.price ?? 0}`,
           level: 3,
@@ -508,6 +530,8 @@ export class HomePageComponent implements OnInit {
       if (status === '即將扣款') {
         tasks.push({
           id: `subscription-soon-${item.id}`,
+          sourceType: 'subscription',
+          sourceId: item.id,
           title: `${name} 即將續扣`,
           description: `${this.getRemainText(item.nextBillingDate)}｜NT$${item.price ?? 0}`,
           level: 1,
@@ -519,6 +543,8 @@ export class HomePageComponent implements OnInit {
       if (status === '試用即將結束') {
         tasks.push({
           id: `subscription-trial-${item.id}`,
+          sourceType: 'subscription',
+          sourceId: item.id,
           title: `${name} 試用即將結束`,
           description: `${this.getRemainText(item.trialEndDate)}｜訂閱`,
           level: 2,
@@ -605,4 +631,116 @@ get expiredTotalCount(): number {
 
     return '未設定位置';
   }
+
+  // 處理刪除完成的共用邏輯
+  private handleDeleteDone(res: any): void {
+  Swal.close();
+
+  if (res.code !== 200) {
+    Swal.fire({
+      title: '處理失敗',
+      text: res.message || '刪除失敗',
+      icon: 'error',
+    });
+    return;
+  }
+
+  Swal.fire({
+    title: '已處理',
+    text: '該項目已從清單刪除',
+    icon: 'success',
+    timer: 1200,
+    showConfirmButton: false,
+  });
+
+  this.loadAllCategoriesData();
+  this.getHomeMonthlyExpense();
+}
+
+// 處理刪除失敗的共用邏輯
+private handleDeleteError(err: any): void {
+  Swal.close();
+
+  Swal.fire({
+    title: '處理失敗',
+    text: err.error?.message || err.message || 'Server error',
+    icon: 'error',
+  });
+}
+
+  // 刪除優先處理任務
+  private deletePriorityTask(task: PriorityTask): void {
+  Swal.fire({
+    title: '處理中...',
+    text: '請稍候',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    didOpen: () => Swal.showLoading(),
+  });
+
+  // 一般物品：後端是批次 POST
+  if (task.sourceType === 'item') {
+    this.http
+      .postApi(
+        `${this.basicUrl}item/delete?userId=${this.currentUserId}`,
+        [task.sourceId]
+      )
+      .subscribe({
+        next: (res: any) => this.handleDeleteDone(res),
+        error: (err) => this.handleDeleteError(err),
+      });
+
+    return;
+  }
+
+  // 訂閱 / 保固 / 藥品：後端是 DELETE，不是 GET
+  const deleteUrlMap: Record<'medicine' | 'warranty' | 'subscription', string> = {
+    medicine: 'medicine/delete',
+    warranty: 'warranty/delete',
+    subscription: 'subscription/delete',
+  };
+
+  const endpoint = deleteUrlMap[task.sourceType];
+
+  this.http
+    .deleteApi(
+      `${this.basicUrl}${endpoint}?id=${task.sourceId}&userId=${this.currentUserId}`
+    )
+    .subscribe({
+      next: (res: any) => this.handleDeleteDone(res),
+      error: (err) => this.handleDeleteError(err),
+    });
+}
+//
+  confirmTaskDone(task: PriorityTask): void {
+  Swal.fire({
+    title: '是否已處理？',
+    text: `確定要將「${task.title}」標記為已處理並刪除嗎？`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: '已處理，刪除',
+    cancelButtonText: '取消',
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#64748b',
+  }).then((result) => {
+    if (!result.isConfirmed) return;
+
+    this.deletePriorityTask(task);
+  });
+}
+
+//篩選
+selectPriorityType(type: 'all' | 'item' | 'medicine' | 'warranty' | 'subscription'): void {
+  this.selectedPriorityType = type;
+}
+
+get filteredPriorityTasks(): PriorityTask[] {
+  if (this.selectedPriorityType === 'all') {
+    return this.priorityTasks;
+  }
+
+  return this.priorityTasks.filter(
+    (task) => task.sourceType === this.selectedPriorityType
+  );
+}
 }

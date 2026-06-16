@@ -1,41 +1,45 @@
-<div class="dialog-container">
+<div class="dialog-container container-fluid">
 
   <!-- Header -->
-  <div class="dialog-header">
+  <div class="dialog-header row g-2 align-items-start">
 
-    <div>
+    <div class="col">
       <h2>{{ data.group.groupName }}</h2>
 
-      <div class="group-info-row">
+      <div class="group-info-row row g-2 align-items-center">
 
-        <p class="group-id">
-          群組ID：{{ data.group.groupId }}
-        </p>
+        <div class="col-12 col-md-auto">
+          <p class="group-id">
+            群組ID：{{ data.group.groupId }}
+          </p>
+        </div>
 
-        <div class="invite-code-box">
+        <div class="col-12 col-md-auto">
+          <div class="invite-code-box">
+            <span>
+              邀請碼：{{ data.group.inviteCode }}
+            </span>
 
-          <span>
-            邀請碼：{{ data.group.inviteCode }}
-          </span>
-
-          <button
-            class="copy-btn"
-            (click)="copyInviteCode()"
-          >
-            複製
-          </button>
-
+            <button
+              class="copy-btn"
+              (click)="copyInviteCode()"
+            >
+              複製
+            </button>
+          </div>
         </div>
 
       </div>
     </div>
 
-    <button
-      class="close-btn"
-      (click)="closeDialog()"
-    >
-      ✕
-    </button>
+    <div class="col-auto">
+      <button
+        class="close-btn"
+        (click)="closeDialog()"
+      >
+        ✕
+      </button>
+    </div>
 
   </div>
 
@@ -76,58 +80,41 @@
     <div *ngIf="!isLoadingMembers">
 
     <div
-      class="member-card"
-      *ngFor="let member of members"
-    >
+        class="member-card row g-2 align-items-center"
+        *ngFor="let member of members"
+      >
 
-      <div class="member-left">
+        <div class="member-left col">
 
-        <img
-          class="avatar"
-          [src]="member.avatar || 'assets/default-avatar.png'"
-        >
+          <img
+            class="avatar"
+            [src]="member.avatar || 'assets/default-avatar.png'"
+          >
 
-        <div>
+          <div class="member-text">
+            <div class="member-name">
+              {{ member.user_name }}
+            </div>
 
-          <div class="member-name">
-            {{ member.user_name }}
-          </div>
-
-          <div class="member-role">
-            Email: {{ member.email }}
+            <div class="member-role">
+              Email: {{ member.email }}
+            </div>
           </div>
 
         </div>
 
-      </div>
+        <div class="member-actions col-auto">
 
-      <div class="member-actions">
+          <button
+            class="remove-btn"
+            (click)="removeMember(member)"
+          >
+            {{ member.user_id != data.userId ? '踢出群組' : '退出群組' }}
+          </button>
 
-        <!-- <button
-          *ngIf="member.publicInventory == 0"
-          disabled
-          class="check-btn"
-        >
-          個人清單
-        </button> -->
-
-        <!-- <button
-          *ngIf="member.publicInventory == 1"
-          class="check-btn"
-        >
-          個人清單
-        </button> -->
-
-        <button
-          class="remove-btn"
-          (click)="removeMember(member)"
-        >
-          {{ member.user_id != data.userId ? '踢出群組' : '退出群組' }}
-        </button>
+        </div>
 
       </div>
-
-    </div>
 
     </div>
 
@@ -149,19 +136,18 @@
     <div *ngIf="!isLoadingInvited">
 
     <div
-      class="member-card"
+      class="member-card row g-2 align-items-center"
       *ngFor="let member of invited_members"
     >
 
-      <div class="member-left">
+      <div class="member-left col">
 
         <img
           class="avatar"
           [src]="member.avatar || 'assets/default-avatar.png'"
         >
 
-        <div>
-
+        <div class="member-text">
           <div class="member-name">
             {{ member.name }}
           </div>
@@ -169,12 +155,9 @@
           <div class="member-role">
             Email: {{ member.email }}
           </div>
-
         </div>
 
       </div>
-
-    </div>
 
     </div>
 

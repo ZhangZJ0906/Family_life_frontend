@@ -665,8 +665,33 @@ mat-paginator {
 /* 圖片欄位 */
 .avatar-column {
   width: 76px;
-  text-align: center;
+  text-align: left !important;
+  padding-left: 0 !important;
+  padding-right: 20px !important;
+}
+/* 狀態欄右邊不要留太多空間 */
+th.mat-column-status,
+td.mat-column-status {
+  padding-right: 0px !important;
+  padding-left: 4px !important;
+}
 
+/* 圖片欄往左靠，但圖片不超出欄位 */
+th.mat-column-avatar,
+td.mat-column-avatar,
+th.avatar-column,
+td.avatar-column {
+  width: 90px;
+  text-align: left !important;
+  padding-left: 4px !important;
+  padding-right: 0 !important;
+  overflow: visible !important;
+}
+
+/* 實際圖片 / 預設圖片都不要用 translateX */
+.avatar-preview-box,
+.item-avatar-empty {
+  transform: none !important;
 }
 
 /* Ant Design Upload 類似外層 */
@@ -756,6 +781,7 @@ mat-paginator {
   background: #f8fafc;
   color: #64748b;
   border: 1px solid #e5e7eb;
+  transform: none !important;
 }
 
 .item-avatar-empty mat-icon {
@@ -1026,6 +1052,10 @@ mat-paginator {
    手機版：表格改卡片列表
    ========================================================= */
 @media (max-width: 767px) {
+
+  .expense-paginator {
+    display: none !important;
+  }
 
     .item-page {
     padding: 16px !important;
@@ -1309,6 +1339,7 @@ mat-paginator {
     display: flex;
     align-items: center;
     gap: 6px;
+    margin-right: 38px;
   }
 
   /* 手機 loading / empty */
@@ -1345,5 +1376,71 @@ mat-paginator {
  .custom-paginator {
     display: none !important;
   }
+
+  /* 手機版分頁 */
+.mobile-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+
+  padding: 14px;
+  margin: 20px 0 90px;
+
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
+}
+
+.mobile-page-btn {
+  height: 42px;
+  min-width: 104px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #eef3ff;
+  color: #2f5fe5;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  cursor: pointer;
+}
+
+.mobile-page-btn mat-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+}
+
+.mobile-page-btn:disabled {
+  background: #f1f5f9;
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.mobile-page-info {
+  min-width: 56px;
+  height: 42px;
+
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #111827;
+
+  font-size: 14px;
+  font-weight: 900;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 }

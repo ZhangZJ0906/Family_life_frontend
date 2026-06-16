@@ -322,10 +322,14 @@ export class NotifyDialogComponent implements OnInit {
   // 🔥 導頁
   // ========================
   goItemList(n: any) {
+    this.dialogRef.close();
+
     this.router.navigate(['/itemList', n.sendUserId]);
   }
 
   goCalendar(n: any) {
+    this.dialogRef.close();
+
     this.router.navigate(['/calendar', n.sendUserId]);
   }
 
