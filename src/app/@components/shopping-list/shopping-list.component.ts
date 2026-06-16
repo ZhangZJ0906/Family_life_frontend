@@ -107,7 +107,7 @@ ngOnInit(): void {
 }
 private loadUserInfo(): void {
   this.http.getApi(
-    `${this.http.basicUrl}users/get_user_info?userId=${this.userId}`
+    `users/get_user_info?userId=${this.userId}`
   ).subscribe({
     next: (res: any) => {
       this.userAvatar = res.avatar || this.defaultUserAvatar;
@@ -252,7 +252,7 @@ getGroupLabel(groupId: number | null): string {
 
   // 使用跟物品清單相同的群組 API
   this.http
-    .getApi(`${this.http.basicUrl}family_life/get_group_list?user_id=${this.userId}`)
+    .getApi(`family_life/get_group_list?user_id=${this.userId}`)
     .subscribe({
       next: (res: any) => {
         if (!res.groupList) {
@@ -610,7 +610,7 @@ getGroupLabel(groupId: number | null): string {
 
   private deleteMatchedItemListItem(list: ShoppingList, item: PurchaseItemVo, onDeleted: () => void): void {
     const groupId = list.group_id ?? 0; //TODO: 後端購物清單項目改為必帶groupId後，這裡就不需要再判斷一次了
-    const url = `${this.http.basicUrl}item/getItems?userId=${this.userId}&groupId=${groupId}`;
+    const url = `item/getItems?userId=${this.userId}&groupId=${groupId}`;
 
     // let url = `${this.http.basicUrl}item/getItems?userId=${this.userId}`;
     // if (list.group_id !== null) {
@@ -632,7 +632,7 @@ getGroupLabel(groupId: number | null): string {
           return;
         }
 
-        this.http.postApi(`${this.http.basicUrl}item/delete`, [matchedItem.id]).subscribe({
+        this.http.postApi(`item/delete`, [matchedItem.id]).subscribe({
           next: (deleteRes: any) => {
             if (deleteRes.code !== 200) {
               this.errorMessage = deleteRes.message ?? '刪除物品清單項目失敗';
@@ -758,7 +758,7 @@ getGroupLabel(groupId: number | null): string {
 
     this.loadingMembersByGroupId[groupId] = true;
 
-    this.http.getApi(`${this.http.basicUrl}family_life/get_members?group_id=${groupId}`).subscribe({
+    this.http.getApi(`family_life/get_members?group_id=${groupId}`).subscribe({
       next: (res: any) => {
         this.membersByGroupId[groupId] = res.groupMembersList ?? [];
         this.loadingMembersByGroupId[groupId] = false;
@@ -809,7 +809,7 @@ getGroupLabel(groupId: number | null): string {
 
   /* 載入item list*/
   private loadItemMetadata(groupId = 0): void {
-    const url = `${this.http.basicUrl}item/getItems?userId=${this.userId}&groupId=${groupId}`;
+    const url = `item/getItems?userId=${this.userId}&groupId=${groupId}`;
 
     this.http.getApi(url).subscribe({
       next: (res: any) => {
@@ -910,6 +910,60 @@ prevMobilePage(): void {
 // 行動版切換群組或狀態時重置頁數
 resetMobilePage(): void {
   this.mobilePageIndex = 0;
+}
+
+//下載清單
+downloadStats(list: ShoppingList): void {
+  const totalCount = this.getTotalCount(list.id);
+
+  if (totalCount === 0) {
+    Swal.fire({
+      icon: 'warning',
+      title: '請先新增物品',
+      text: '此購物清單目前沒有任何項目可下載',
+      confirmButtonText: '確認'
+    });
+
+    return;
+  }
+  const items = this.getItems(list.id);
+
+  const csvRows: string[] = [];
+
+  csvRows.push(`清單名稱,${list.title}`);
+  csvRows.push(`群組,${this.getGroupLabel(list.group_id)}`);
+  csvRows.push(`完成率,${this.getProgressPercent(list.id)}%`);
+  csvRows.push('');
+
+  csvRows.push(
+    '品項,分類,數量,指派人,狀態,購買日期'
+  );
+
+  items.forEach(item => {
+    csvRows.push([
+      item.item,
+      this.getCategoryName(item.categoryId),
+      item.quantity,
+      this.getMemberName(list.group_id, item.userId),
+      item.check ? '已完成' : '未完成',
+      item.checkDate ?? ''
+    ].join(','));
+  });
+
+  const blob = new Blob(
+    ['\ufeff' + csvRows.join('\n')],
+    { type: 'text/csv;charset=utf-8;' }
+  );
+
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${list.title}_購物統計_${this.getTodayDate()}.csv`;
+
+  link.click();
+
+  URL.revokeObjectURL(url);
 }
 
 }
