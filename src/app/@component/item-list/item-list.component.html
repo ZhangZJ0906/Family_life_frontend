@@ -454,7 +454,7 @@
   }
 
   <!-- 手機卡片 -->
-  @for (element of dataSource.filteredData; track element.id) {
+  @for (element of mobileItems; track element.id) {
     <div
       class="item-mobile-card"
       [class.selected-mobile-card]="selection.isSelected(element)"
