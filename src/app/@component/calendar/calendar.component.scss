@@ -666,50 +666,209 @@
   }
 }
 
-/* RWD：手機 */
+/* ================================
+   Calendar Mobile RWD
+================================ */
 @media (max-width: 768px) {
   .calendar-page {
-    padding: 16px;
+    padding: 14px;
   }
 
   .calendar-header-card {
     padding: 22px;
-    border-radius: 18px;
+    border-radius: 20px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .calendar-title {
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .title-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    font-size: 26px;
   }
 
   .calendar-title h2 {
-    font-size: 26px;
+    font-size: 28px;
+    line-height: 1.25;
   }
 
   .calendar-title p {
     font-size: 14px;
+    line-height: 1.5;
   }
 
   .calendar-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  align-items: stretch;
+}
 
-  .calendar-group-select,
-  .add-btn {
-    width: 100%;
-  }
+.calendar-group-select {
+  width: 100%;
+  height: 60px;
+  margin-bottom: 0;
+}
+
+.calendar-group-select ::ng-deep .mat-mdc-text-field-wrapper {
+  height: 60px !important;
+}
+
+.calendar-group-select ::ng-deep .mat-mdc-form-field-flex {
+  height: 60px !important;
+  align-items: center !important;
+}
+
+.calendar-group-select ::ng-deep .mat-mdc-form-field-infix {
+  min-height: 60px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  display: flex;
+  align-items: center;
+}
+
+.calendar-selected-group {
+  gap: 8px;
+}
+
+.calendar-group-avatar {
+  width: 34px;
+  height: 34px;
+}
+
+.calendar-selected-group span {
+  max-width: 90px;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.add-btn {
+  width: 100%;
+  height: 60px;
+  min-width: 0;
+  padding: 0 12px;
+  border-radius: 16px;
+  font-size: 17px;
+  white-space: nowrap;
+  gap: 8px;
+}
+
+.add-btn mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+}
 
   .calendar-main-card {
     padding: 16px;
-    border-radius: 18px;
+    border-radius: 20px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
   }
 
+  /* FullCalendar toolbar 手機直排 */
   :host ::ng-deep .fc .fc-toolbar {
+    display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  /* 上一頁 / 下一頁 / today 同排 */
+  :host ::ng-deep .fc .fc-toolbar-chunk:nth-child(1) {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    order: 1;
+  }
+
+  /* 標題在第二排 */
+  :host ::ng-deep .fc .fc-toolbar-chunk:nth-child(2) {
+    order: 2;
+  }
+
+  /* month / week 在第三排 */
+  :host ::ng-deep .fc .fc-toolbar-chunk:nth-child(3) {
+    display: flex;
+    justify-content: center;
+    order: 3;
   }
 
   :host ::ng-deep .fc .fc-toolbar-title {
-    font-size: 24px;
+    font-size: 26px;
+    text-align: center;
+    line-height: 1.3;
   }
 
+  :host ::ng-deep .fc .fc-button {
+    padding: 10px 16px !important;
+    font-size: 15px !important;
+    min-height: 44px;
+  }
+
+  /* 月曆手機版不要太高 */
   :host ::ng-deep .fc .fc-daygrid-day-frame {
-    min-height: 90px;
+    min-height: 74px;
+  }
+
+  :host ::ng-deep .fc .fc-col-header-cell {
+    padding: 10px 0;
+  }
+
+  :host ::ng-deep .fc .fc-col-header-cell-cushion {
+    font-size: 14px;
+  }
+
+  :host ::ng-deep .fc .fc-daygrid-day-number {
+    font-size: 14px;
+    padding: 6px;
+  }
+
+  :host ::ng-deep .fc .fc-event {
+    font-size: 11px;
+    padding: 2px 4px;
+    border-radius: 6px;
+  }
+}
+
+/* 手機版 week 檢視：用橫向滑動，不硬擠 */
+@media (max-width: 768px) {
+  :host ::ng-deep .fc .fc-timeGridWeek-view {
+    min-width: 720px;
+  }
+
+  :host ::ng-deep .fc .fc-timeGridWeek-view .fc-col-header-cell-cushion {
+    font-size: 13px;
+    white-space: normal;
+    line-height: 1.4;
+  }
+
+  :host ::ng-deep .fc .fc-timegrid-slot {
+    height: 48px;
+  }
+
+  :host ::ng-deep .fc .fc-timegrid-slot-label {
+    font-size: 13px;
+  }
+
+  :host ::ng-deep .fc .fc-timegrid-axis-cushion,
+  :host ::ng-deep .fc .fc-timegrid-axis-frame {
+    font-size: 13px;
+  }
+
+  :host ::ng-deep .fc .fc-timegrid-event {
+    font-size: 12px;
+    padding: 3px 4px;
   }
 }

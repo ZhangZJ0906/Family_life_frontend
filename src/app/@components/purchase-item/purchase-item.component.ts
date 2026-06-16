@@ -114,7 +114,7 @@ export class PurchaseItemComponent implements OnInit {
   }
 
   loadCategories(): void {
-    this.http.getApi(`${this.http.basicUrl}categories/get`).subscribe({
+    this.http.getApi(`categories/get`).subscribe({
       next: (res: any) => {
         if (res.code !== 200) {
           Swal.fire({

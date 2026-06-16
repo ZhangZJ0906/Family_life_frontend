@@ -25,7 +25,7 @@ import Swal from 'sweetalert2';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
 import { ActivatedRoute } from '@angular/router';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-expense-tracker',
@@ -46,6 +46,7 @@ import { MatPaginator } from '@angular/material/paginator';
     TopbarComponent,
     MatSort,
     MatSortHeader,
+    MatPaginatorModule,
   ],
   templateUrl: './expenses.component.html',
   styleUrl: './expenses.component.scss',
@@ -60,6 +61,42 @@ export class ExpensesComponent {
   currentUserAvatar = 'assets/default-avatar.png';
   categoryMap: LocationAndCategory[] = [];
   dataSource = new MatTableDataSource<ExpenseRecord>([]);
+  // 手機版分頁
+mobilePageIndex = 0;
+mobilePageSize = 3;
+
+get mobileExpenses(): ExpenseRecord[] {
+  const data = this.dataSource.filteredData || [];
+  const start = this.mobilePageIndex * this.mobilePageSize;
+  return data.slice(start, start + this.mobilePageSize);
+}
+
+get mobileTotalPages(): number {
+  const total = this.dataSource.filteredData?.length || 0;
+  return Math.ceil(total / this.mobilePageSize);
+}
+
+get mobileCurrentPage(): number {
+  return this.mobileTotalPages === 0 ? 0 : this.mobilePageIndex + 1;
+}
+
+nextMobilePage(): void {
+  if (this.mobilePageIndex < this.mobileTotalPages - 1) {
+    this.mobilePageIndex++;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+prevMobilePage(): void {
+  if (this.mobilePageIndex > 0) {
+    this.mobilePageIndex--;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+resetMobilePage(): void {
+  this.mobilePageIndex = 0;
+}
   selection = new SelectionModel<ExpenseRecord>(true, []);
   expense: ExpenseRecord[] = [];
   itemMap: { [key: number]: any } = {};
@@ -267,54 +304,76 @@ export class ExpensesComponent {
   }
 
   deleteById() {
-    const selectedIds = this.selection.selected.map((item) => item.id);
-    const payLoad = {
-      id: selectedIds,
-      userId: this.currentUserId,
-    };
-    Swal.fire({
-      title: '確定要刪除嗎？',
-      text: `您選中了 ${selectedIds.length} 筆，刪除後將無法還原！`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: '是的，刪除！',
-      cancelButtonText: '取消',
-    }).then((result) => {
-      this.showLoading('刪除中...');
+  const selectedIds = this.selection.selected.map((item) => item.id);
 
-      if (!result.isConfirmed) return;
-      this.http
-        .postApi('expense/deleteInfo', payLoad)
-        .subscribe({
-          next: (res: any) => {
-            if (res.code != 200) {
-              Swal.fire({
-                title: '刪除錯誤',
-                text: res.message || 'server error',
-                icon: 'error',
-              });
-              return;
-            }
-            Swal.fire({
-              title: '刪除成功',
-              icon: 'success',
-              timer: 1500,
-              showConfirmButton: false,
-            });
-            this.selection.clear();
-            this.getExpense(this.currentUserId, true);
-          },
-          error: (err) =>
+  if (selectedIds.length === 0) {
+    Swal.fire({
+      title: '提醒',
+      text: '請先選取要刪除的資料',
+      icon: 'warning',
+    });
+    return;
+  }
+
+  const payLoad = {
+    id: selectedIds,
+    userId: this.currentUserId,
+    groupId: this.currentGroupId ?? 0,
+  };
+
+  console.log('delete payload:', payLoad);
+
+  Swal.fire({
+    title: '確定要刪除嗎？',
+    text: `您選中了 ${selectedIds.length} 筆，刪除後將無法還原！`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: '是的，刪除！',
+    cancelButtonText: '取消',
+  }).then((result) => {
+    if (!result.isConfirmed) return;
+
+    this.showLoading('刪除中...');
+
+    this.http
+      .postApi('expense/deleteInfo', payLoad)
+      .subscribe({
+        next: (res: any) => {
+          Swal.close();
+
+          if (res.code != 200) {
             Swal.fire({
               title: '刪除錯誤',
-              text: err.message,
+              text: res.message || 'server error',
               icon: 'error',
-            }),
-        });
-    });
-  }
+            });
+            return;
+          }
+
+          Swal.fire({
+            title: '刪除成功',
+            icon: 'success',
+            timer: 1500,
+            showConfirmButton: false,
+          });
+
+          this.selection.clear();
+          this.getExpense(this.currentUserId, true);
+        },
+        error: (err) => {
+          Swal.close();
+
+          Swal.fire({
+            title: '刪除錯誤',
+            text: err.error?.message || err.message || '網路異常',
+            icon: 'error',
+          });
+        },
+      });
+  });
+}
 
   // ─── API ─────────────────────────────────────────────
   getCatgories() {
@@ -367,6 +426,7 @@ export class ExpensesComponent {
         this.dataSource.data = this.expense;
         this.dataSource.filter = JSON.stringify(this.filterValues);
         this.filteredExpense.set(this.dataSource.filteredData);
+        this.resetMobilePage();
       },
       error: (err) => {
         Swal.close();
@@ -388,6 +448,7 @@ export class ExpensesComponent {
     this.filterValues.category = categoryId;
     this.dataSource.filter = JSON.stringify(this.filterValues);
     this.filteredExpense.set(this.dataSource.filteredData);
+    this.resetMobilePage();
   }
 
   applyFilter(event: Event) {
@@ -396,6 +457,7 @@ export class ExpensesComponent {
       .toLowerCase();
     this.dataSource.filter = JSON.stringify(this.filterValues);
     this.filteredExpense.set(this.dataSource.filteredData);
+    this.resetMobilePage();
   }
 
   //抓取上次登入該page時間

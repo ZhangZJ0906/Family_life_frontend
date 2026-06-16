@@ -234,3 +234,164 @@
   50% { opacity: 0.4; }
   100% { opacity: 1; }
 }
+
+/* =========================
+   Mobile RWD
+========================= */
+@media (max-width: 576px) {
+  .dialog-container {
+    padding: 20px 18px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .dialog-header {
+    margin-bottom: 18px;
+  }
+
+  .dialog-header h2 {
+    font-size: 24px;
+    font-weight: 900;
+    margin: 0;
+    line-height: 1.25;
+  }
+
+  .group-info-row {
+    margin-top: 12px;
+    gap: 8px;
+  }
+
+  .group-id {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .invite-code-box {
+    width: 100%;
+    max-width: 220px;
+
+    display: grid;
+    grid-template-columns: 1fr 52px;
+    align-items: center;
+    gap: 8px;
+
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .invite-code-box span {
+    word-break: break-all;
+    line-height: 1.4;
+  }
+
+  .copy-btn {
+    width: 52px;
+    height: 46px;
+    padding: 0;
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  .close-btn {
+    font-size: 22px;
+    line-height: 1;
+    padding: 4px;
+  }
+
+  .tab-buttons {
+    gap: 10px;
+    margin: 14px 0;
+  }
+
+  .tab-buttons button {
+    padding: 10px 16px;
+    font-size: 15px;
+    font-weight: 800;
+  }
+
+  .member-list {
+    max-height: 390px;
+    gap: 10px;
+    padding-right: 4px;
+  }
+
+  .member-card {
+    width: 100%;
+    margin: 0;
+
+    padding: 10px 8px;
+    border-radius: 12px;
+
+    display: flex;
+    flex-wrap: nowrap;
+  }
+
+  .member-left {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .avatar {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    object-fit: cover;
+  }
+
+  .member-text {
+    min-width: 0;
+  }
+
+  .member-name {
+    font-size: 16px;
+    font-weight: 900;
+
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .member-role {
+    font-size: 13px;
+    line-height: 1.35;
+
+    word-break: break-all;
+    overflow-wrap: anywhere;
+    color: #777;
+  }
+
+  .member-actions {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .remove-btn {
+    width: 78px;
+    min-height: 48px;
+
+    padding: 6px 8px;
+    border-radius: 8px;
+
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.25;
+
+    white-space: normal;
+  }
+
+  .dialog-footer {
+    margin-top: 20px;
+    justify-content: flex-end;
+  }
+
+  .invite-btn {
+    min-width: 110px;
+    height: 46px;
+    font-size: 15px;
+    font-weight: 800;
+  }
+}

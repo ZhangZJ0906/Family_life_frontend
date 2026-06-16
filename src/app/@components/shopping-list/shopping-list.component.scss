@@ -9,6 +9,14 @@
   box-sizing: border-box;
 }
 
+.shopping-header-card,
+.lists-panel,
+.error-message {
+  width: min(100%, 66.666vw);
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .item-header-card,
 .table-card,
 .dialog {
@@ -473,6 +481,10 @@
   width: min(100%, 680px);
 }
 
+.stats-dialog .dialog-actions {
+  flex-shrink: 0;
+}
+
 .dialog-form {
   display: grid;
   gap: 14px;
@@ -489,27 +501,58 @@ mat-progress-bar {
   overflow: hidden;
 }
 
+/* =========================================================
+   Shopping List RWD override
+   ========================================================= */
+
+/* 平板 */
 @media (max-width: 900px) {
-  .item-header-card,
-  .panel-header {
+  .shopping-header-card,
+  .lists-panel,
+  .error-message {
+    width: 100%;
+  }
+
+  .item-header-card {
     grid-template-columns: 1fr;
     align-items: stretch;
   }
 
-  .panel-header,
-  .dialog-actions {
-    flex-direction: column;
+  .header-actions {
+    width: 100%;
   }
 
-  .header-actions,
+  .panel-header {
+    display: block !important;
+  }
+
   .list-filter {
-    justify-content: flex-start;
+    width: 100%;
   }
 }
 
+/* 手機 */
 @media (max-width: 768px) {
+  //new
+  .stats-dialog .dialog-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .stats-dialog .dialog-actions {
+    justify-content: flex-end;
+    width: 100%;
+    margin-top: 8px;
+  }
+  ///
+
   .item-page {
     padding: 16px;
+  }
+
+  .shopping-header-card,
+  .lists-panel {
+    width: 100%;
   }
 
   .item-header-card,
@@ -523,13 +566,208 @@ mat-progress-bar {
     font-size: 26px;
   }
 
-  .filter-field,
-  .header-actions button {
+  /* 重新整理 / 建立清單：手機保持平行，文字不直排 */
+.header-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
+.header-actions > div {
+  width: auto !important;
+  flex: 0 0 auto;
+  max-width: none;
+}
+
+.header-actions button {
+  width: auto !important;
+  min-width: 128px !important;
+  height: 42px;
+  padding: 0 14px !important;
+
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+  line-height: 1 !important;
+}
+
+  /* 我的清單標題區 */
+  .panel-header {
+    display: block !important;
+    margin-bottom: 16px;
+  }
+
+  .panel-header h2 {
+    margin-bottom: 14px;
+  }
+
+  /* 2筆 + 群組 + 狀態：手機同一排 */
+  .list-filter {
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
     width: 100%;
   }
 
-  .list-grid,
-  .summary-grid {
-    grid-template-columns: 1fr;
+  .list-filter > span {
+    white-space: nowrap;
+    font-size: 14px;
+    font-weight: 800;
   }
+
+  .filter-field,
+  .group-filter-field,
+  .status-filter-field {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 64px;
+  }
+
+  .group-select-trigger span,
+  .group-option-row span {
+    max-width: 82px;
+  }
+
+  /* 卡片不要跑版 */
+  .list-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px;
+  }
+
+  .list-card {
+    width: 100%;
+    min-width: 0;
+    min-height: 148px;
+    padding: 16px;
+    overflow: hidden;
+  }
+
+  .list-card-header {
+    align-items: flex-start;
+  }
+
+  .list-title {
+    min-width: 0;
+  }
+
+  .list-title strong {
+    font-size: 17px;
+    word-break: break-word;
+  }
+
+  .status-badge {
+    flex-shrink: 0;
+  }
+
+  /* 卡片底下功能按鈕 */
+  .list-actions {
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+    overflow: hidden;
+  }
+
+  .list-actions button {
+    min-width: 0 !important;
+    padding: 0 2px !important;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .list-actions mat-icon {
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+    margin-right: 2px;
+  }
+
+
+}
+
+/* 超小手機：如果四個按鈕太擠，就改成兩排 */
+@media (max-width: 390px) {
+  .list-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 8px;
+  }
+
+  .list-actions button {
+    height: 34px;
+  }
+}
+
+/* 手機清單分頁 */
+.mobile-list-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+
+  padding: 14px;
+  margin: 20px 0 4px;
+
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
+}
+
+.mobile-page-btn {
+  height: 42px;
+  min-width: 104px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #eef3ff;
+  color: #2f5fe5;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  cursor: pointer;
+}
+
+.mobile-page-btn mat-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+}
+
+.mobile-page-btn:disabled {
+  background: #f1f5f9;
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.mobile-page-info {
+  min-width: 56px;
+  height: 42px;
+
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #111827;
+
+  font-size: 14px;
+  font-weight: 900;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

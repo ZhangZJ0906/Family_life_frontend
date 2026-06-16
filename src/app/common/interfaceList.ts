@@ -25,6 +25,36 @@ export interface DefaultImage {
   url: string;
   category: string;
 }
+//新增物品 2026-06-16 by ZJ
+export interface addItem {
+  created_by_id: number;
+  groupId: number;
+  locationId: number;
+  categoryId: number;
+  name: string;
+  quantity: number | null;
+  unit: string;
+  unitPrice: number | null;
+  price: number | null;
+  safeQuantity: number | null;
+  purchaseDate: string;
+  expireDate: string;
+  notify: boolean;
+  note: string;
+  billingCycle: string;
+  trialEndDate: string;
+  nextBillingDate: string;
+  brand: string;
+  model: string;
+  serialNumber: string;
+  warrantyEndDate: string;
+  storeName: string;
+  medicineType: string;
+  dosage: string;
+  usageMethod: string;
+  source: string;
+}
+
 /*============================================== */
 /* 存放地點  && 分類  2026-05-12 by zj */
 export interface LocationAndCategory {
