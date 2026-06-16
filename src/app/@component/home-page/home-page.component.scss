@@ -328,6 +328,27 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+   cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.active-summary {
+  border-color: #3b63f6 !important;
+  background: #eef4ff !important;
+  box-shadow: 0 10px 24px rgba(59, 99, 246, 0.12);
+}
+
+.empty-priority {
+  cursor: default;
 }
 
 /* 統計文字區 */
@@ -338,8 +359,9 @@
 
 /* 統計標籤 */
 .card-label {
-  color: #7a7a7a;
-  font-size: 14px;
+  color: #050505;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 /* 統計數字 */
@@ -666,21 +688,36 @@
     white-space: nowrap;
   }
 
+   .summary-grid {
+    width: 100%;
+    height: auto !important;
+  }
+
+  .summary-grid > .col-12 {
+    display: flex;
+  }
+
   /* 統計卡片手機版高度 */
+   /* 手機四張統計卡片正常直排 */
   .summary-card {
     min-height: 150px;
+    position: relative;
+    z-index: 2;
+    cursor: pointer;
   }
 
-  /* 今日優先處理卡片 */
+
+  /* 今日優先處理不要往下硬推 200px */
   .priority-card {
     height: auto;
-    max-height: 520px;
     min-height: 360px;
-    padding: 24px 22px;
-    margin-top: 150px;
+    max-height: 520px;
+    padding: 30px 22px;
+    margin-top: 0 !important;
+    position: relative;
+    z-index: 1;
   }
 
-  /* 今日優先處理清單 */
   .priority-list {
     max-height: 400px;
     overflow-y: auto;

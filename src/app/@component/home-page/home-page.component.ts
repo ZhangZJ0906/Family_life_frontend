@@ -52,6 +52,7 @@ export class HomePageComponent implements OnInit {
   warrantyList: any[] = [];
   // 物品位置對照表
   locationMap: { [key: number]: string } = {};
+  selectedPriorityType: 'all' | 'item' | 'medicine' | 'warranty' | 'subscription' = 'all';
 
   constructor(private http: HttpClientService) {
     this.basicUrl = this.http.basicUrl;
@@ -726,5 +727,20 @@ private handleDeleteError(err: any): void {
 
     this.deletePriorityTask(task);
   });
+}
+
+//篩選
+selectPriorityType(type: 'all' | 'item' | 'medicine' | 'warranty' | 'subscription'): void {
+  this.selectedPriorityType = type;
+}
+
+get filteredPriorityTasks(): PriorityTask[] {
+  if (this.selectedPriorityType === 'all') {
+    return this.priorityTasks;
+  }
+
+  return this.priorityTasks.filter(
+    (task) => task.sourceType === this.selectedPriorityType
+  );
 }
 }
