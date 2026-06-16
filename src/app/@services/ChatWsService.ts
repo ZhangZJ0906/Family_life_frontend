@@ -23,7 +23,7 @@ export class ChatWsService {
 
       this.client = new Client({
 
-        brokerURL: 'ws://localhost:8081/ws',
+        brokerURL: 'ws://localhost:8080/ws',
 
         // brokerURL: 'wss://mic-rugby-designers-programmers.trycloudflare.com/ws',
 
