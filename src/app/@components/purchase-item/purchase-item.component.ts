@@ -114,7 +114,7 @@ export class PurchaseItemComponent implements OnInit {
   }
 
   loadCategories(): void {
-    this.http.getApi(`${this.http.basicUrl}categories/get`).subscribe({
+    this.http.getApi(`categories/get`).subscribe({
       next: (res: any) => {
         if (res.code !== 200) {
           Swal.fire({
@@ -549,7 +549,7 @@ export class PurchaseItemComponent implements OnInit {
 
     this.httpclient
       .get<any>(
-        `http://localhost:8080/family_life/get_members?group_id=${this.groupId}`,
+        `${this.http.basicUrl}/family_life/get_members?group_id=${this.groupId}`,
       )
       .subscribe({
         next: (res) => {

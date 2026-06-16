@@ -85,19 +85,19 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
           switch (msg.type) {
 
             case 'ONLINE':
-            this.onlineCount = msg.count;
-            break;
+              this.onlineCount = msg.count;
+              break;
 
             case 'MESSAGE':
-              this.messages.push(msg);
+              this.messages = [...this.messages, msg];
+              break;
+
+            case 'IMAGE':
+              this.messages = [...this.messages, msg];
               break;
 
             case 'READ':
               this.updateReadCount(msg);
-              break;
-
-            case 'IMAGE':
-              this.messages.push(msg);
               break;
 
           }

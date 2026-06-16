@@ -18,6 +18,8 @@ import { BrowserNotifyService } from '../../@services/BrowserNotifyService';
 import { NotificationSocketService } from '../../@services/NotificationSocketService';
 
 import { NotifyDialogComponent } from '../../@group/notify-dialog/notify-dialog.component';
+import { environment } from '../../@models/user.model';
+
 import Swal from 'sweetalert2';
 
 @Component({
@@ -182,7 +184,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
     this.http
       .get<any>(
-        `http://localhost:8080/family_life/get_notify?user_id=${this.user_id}`
+        `${environment.apiUrl}/family_life/get_notify?user_id=${this.user_id}`
       )
       .subscribe({
         next: (res) => {
@@ -240,7 +242,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
     this.http
       .get<any>(
-        `http://localhost:8080/users/get_user_info?userId=${this.user_id}`
+        `${environment.apiUrl}/users/get_user_info?userId=${this.user_id}`
       )
       .subscribe({
         next: (res) => {
@@ -257,7 +259,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
   // //船Mail
   // sendEmailTest(Email: string) {
   //   this.http.get(
-  //     `http://localhost:8080/users/test-mail?email=${Email}`,
+  //     `${environment.apiUrl}/users/test-mail?email=${Email}`,
   //     { responseType: 'text' }
   //   ).subscribe({
   //     next: (res) => {

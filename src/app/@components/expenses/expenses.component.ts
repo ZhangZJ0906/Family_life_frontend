@@ -338,7 +338,7 @@ resetMobilePage(): void {
     this.showLoading('刪除中...');
 
     this.http
-      .postApi(this.basicUrl + 'expense/deleteInfo', payLoad)
+      .postApi('expense/deleteInfo', payLoad)
       .subscribe({
         next: (res: any) => {
           Swal.close();
@@ -377,7 +377,7 @@ resetMobilePage(): void {
 
   // ─── API ─────────────────────────────────────────────
   getCatgories() {
-    this.http.getApi(this.basicUrl + 'categories/get').subscribe({
+    this.http.getApi('categories/get').subscribe({
       next: (res: any) => {
         if (res.code != 200) {
           Swal.fire({
@@ -409,7 +409,7 @@ resetMobilePage(): void {
     // const finalGroupId =
     //   groupId === undefined || groupId === null ? 0 : Number(groupId);
 
-    const url = `${this.basicUrl}expense/getInfo?userId=${userId}`;
+    const url = `expense/getInfo?userId=${userId}`;
     this.http.getApi(url).subscribe({
       next: (res: any) => {
         Swal.close();
@@ -465,7 +465,7 @@ resetMobilePage(): void {
     return new Promise((resolve) => {
       this.http
         .getApi(
-          `${this.basicUrl}expense/getLoginExpensePageTime?userId=${this.currentUserId}`,
+          `expense/getLoginExpensePageTime?userId=${this.currentUserId}`,
         )
         .subscribe({
           next: (res: any) => {

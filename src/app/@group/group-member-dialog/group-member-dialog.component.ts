@@ -5,6 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import Swal from 'sweetalert2';
 
 import { InviteDialogComponent } from '../invite-dialog/invite-dialog.component';
+import { environment } from '../../@models/user.model';
 
 import {
   MAT_DIALOG_DATA,
@@ -56,7 +57,7 @@ export class GroupMemberDialogComponent {
     const group_id = this.data.group.groupId;
 
     this.http.get<any>(
-      `http://localhost:8080/family_life/get_members?group_id=${group_id}`
+      `${environment.apiUrl}/family_life/get_members?group_id=${group_id}`
     ).subscribe({
 
       next: (res) => {
@@ -86,7 +87,7 @@ export class GroupMemberDialogComponent {
     this.isLoadingInvited = true;
 
     this.http.get<any>(
-      `http://localhost:8080/family_life/get_invited_members?group_id=${group_id}`
+      `${environment.apiUrl}/family_life/get_invited_members?group_id=${group_id}`
     ).subscribe({
 
       next: (res) => {
@@ -153,7 +154,7 @@ export class GroupMemberDialogComponent {
       if (result.isConfirmed) {
 
         this.http.delete(
-          `http://localhost:8080/family_life/delete_group_member/${group_id}/${user_id}`
+          `${environment.apiUrl}/family_life/delete_group_member/${group_id}/${user_id}`
         ).subscribe({
 
           next: () => {

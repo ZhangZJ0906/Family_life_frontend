@@ -60,6 +60,10 @@ export class GroupPageComponent{
 
   ngOnInit(): void {
     this.user_id = this.authService.currentUser()?.user_id ?? 0;
+    if (!this.user_id) {
+      console.error('user not ready');
+      return;
+    }
     this.getGroup();
     this.getUnreadNotifyCount();
   }
@@ -67,7 +71,7 @@ export class GroupPageComponent{
   getUnreadNotifyCount() {
 
     this.http.get<any>(
-      `http://localhost:8080/family_life/get_notify?user_id=${this.user_id}`
+      `${environment.apiUrl}/family_life/get_notify?user_id=${this.user_id}`
     ).subscribe({
 
       next: (res) => {
@@ -226,8 +230,14 @@ export class GroupPageComponent{
           }
         });
 
+        // this.http.post(
+        //   'http://localhost:8080/family_life/join',
+        //   {
+        //     inviteCode: invite_code,
+        //     userId: Number(this.user_id)
+        //   }
         this.http.post(
-          'http://localhost:8080/family_life/join',
+          `${environment.apiUrl}/family_life/join`,
           {
             inviteCode: invite_code,
             userId: Number(this.user_id)
@@ -351,7 +361,7 @@ export class GroupPageComponent{
 
         // ✅ 呼叫後端 create API
         this.http.post(
-          'http://localhost:8080/family_life/create',
+          `${environment.apiUrl}/family_life/create`,
           {
             groupName: groupName,
             createBy: Number(this.user_id)
@@ -584,7 +594,7 @@ export class GroupPageComponent{
 
 
         this.http.post(
-          'http://localhost:8080/family_life/update_group',
+          `${environment.apiUrl}/family_life/update_group`,
           formData
         ).subscribe({
 
@@ -639,7 +649,7 @@ export class GroupPageComponent{
         });
 
         this.http.delete(
-          `http://localhost:8080/family_life/delete_group/${group_id}`,
+          `${environment.apiUrl}/family_life/delete_group/${group_id}`,
         ).subscribe({
 
           next: (res: any) => {

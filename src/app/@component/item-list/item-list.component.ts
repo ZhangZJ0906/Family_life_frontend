@@ -317,7 +317,9 @@ export class ItemListComponent {
       const { _type, selectedFile, ...payload } = result;
       payload.userId = this.currentUserId;
 
-      const url = this.basicUrl + (this.updateApiMap[_type] ?? 'item/update');
+      // const url = this.basicUrl + (this.updateApiMap[_type] ?? 'item/update');
+      const url = (this.updateApiMap[_type] ?? 'item/update');
+
       this.showLoading('更新中...');
 
       // 將原本的 JSON payload 封裝成 Blob 並宣告為 application/json
@@ -366,9 +368,13 @@ export class ItemListComponent {
 
   // ─── API：取得群組列表 ────────────────────────────────────
   getUserGroupData(groupId: any) {
+    // this.http
+    //   .getApi(
+    //     `${this.basicUrl}family_life/get_group_list?user_id=${this.currentUserId}`,
+    //   )
     this.http
       .getApi(
-        `${this.basicUrl}family_life/get_group_list?user_id=${this.currentUserId}`,
+        `family_life/get_group_list?user_id=${this.currentUserId}`,
       )
       .subscribe({
         next: (res: any) => {
@@ -425,9 +431,13 @@ export class ItemListComponent {
 
     this.currentMode = mode;
 
+    // this.http
+    //   .getApi(
+    //     `${this.basicUrl}${endpoint}?groupId=${groupId}&userId=${this.currentUserId}`,
+    //   )
     this.http
       .getApi(
-        `${this.basicUrl}${endpoint}?groupId=${groupId}&userId=${this.currentUserId}`,
+        `${endpoint}?groupId=${groupId}&userId=${this.currentUserId}`,
       )
       .subscribe({
         next: (res: any) => {
@@ -478,9 +488,13 @@ export class ItemListComponent {
       return;
     }
 
+    // this.http
+    //   .getApi(
+    //     `${this.basicUrl}item/getItems?userId=${this.currentUserId}&groupId=${groupId}`,
+    //   )
     this.http
       .getApi(
-        `${this.basicUrl}item/getItems?userId=${this.currentUserId}&groupId=${groupId}`,
+        `item/getItems?userId=${this.currentUserId}&groupId=${groupId}`,
       )
       .subscribe({
         next: (res: any) => {
@@ -533,9 +547,13 @@ export class ItemListComponent {
     ] as const;
     modes.forEach((mode) => {
       const endpoint = this.fetchEndpointMap[mode]!;
+      // this.http
+      //   .getApi(
+      //     `${this.basicUrl}${endpoint}?groupId=${groupId}&userId=${this.currentUserId}`,
+      //   )
       this.http
         .getApi(
-          `${this.basicUrl}${endpoint}?groupId=${groupId}&userId=${this.currentUserId}`,
+          `${endpoint}?groupId=${groupId}&userId=${this.currentUserId}`,
         )
         .subscribe({
           next: (res: any) => {
@@ -636,9 +654,14 @@ export class ItemListComponent {
       // 一般物品：批次 POST 刪除
       if (this.currentMode === TableMode.Item) {
         this.showLoading('刪除中...');
+        // this.http
+        //   .postApi(
+        //     `${this.basicUrl}item/delete?userId=${this.currentUserId}`,
+        //     selectedIds,
+        //   )
         this.http
           .postApi(
-            `${this.basicUrl}item/delete?userId=${this.currentUserId}`,
+            `item/delete?userId=${this.currentUserId}`,
             selectedIds,
           )
           .subscribe({
@@ -674,9 +697,13 @@ export class ItemListComponent {
       let completedCount = 0;
 
       selectedIds.forEach((id) => {
+        // this.http
+        //   .deleteApi(
+        //     `${this.basicUrl}${endpoint}?id=${id}&userId=${this.currentUserId}`,
+        //   )
         this.http
           .deleteApi(
-            `${this.basicUrl}${endpoint}?id=${id}&userId=${this.currentUserId}`,
+            `${endpoint}?id=${id}&userId=${this.currentUserId}`,
           )
           .subscribe({
             next: (res: any) => {
@@ -727,9 +754,14 @@ export class ItemListComponent {
     // 一般物品：批次 POST
     if (groups['item']?.length) {
       requests.push(
+        // this.http
+        //   .postApi(
+        //     `${this.basicUrl}item/delete?userId=${this.currentUserId}`,
+        //     groups['item'],
+        //   )
         this.http
           .postApi(
-            `${this.basicUrl}item/delete?userId=${this.currentUserId}`,
+            `item/delete?userId=${this.currentUserId}`,
             groups['item'],
           )
           .pipe(catchError((err) => of({ code: 500, message: err.message }))),
@@ -742,9 +774,13 @@ export class ItemListComponent {
       if (!endpoint || !groups[type]?.length) return;
       groups[type].forEach((id: number) => {
         requests.push(
+          // this.http
+          //   .deleteApi(
+          //     `${this.basicUrl}${endpoint}?id=${id}&userId=${this.currentUserId}`,
+          //   )
           this.http
             .deleteApi(
-              `${this.basicUrl}${endpoint}?id=${id}&userId=${this.currentUserId}`,
+              `${endpoint}?id=${id}&userId=${this.currentUserId}`,
             )
             .pipe(catchError((err) => of({ code: 500, message: err.message }))),
         );
@@ -841,9 +877,13 @@ export class ItemListComponent {
   //抓取上次登入該page時間
   getLoginItemPageTime(): Promise<void> {
     return new Promise((resolve) => {
+      // this.http
+      //   .getApi(
+      //     `${this.basicUrl}item/getLoginItemPageTime?userId=${this.currentUserId}`,
+      //   )
       this.http
         .getApi(
-          `${this.basicUrl}item/getLoginItemPageTime?userId=${this.currentUserId}`,
+          `item/getLoginItemPageTime?userId=${this.currentUserId}`,
         )
         .subscribe({
           next: (res: any) => {
@@ -901,7 +941,9 @@ export class ItemListComponent {
     // 4. 只針對「純檔名」部分進行 URL 編碼，防止中文與空白破圖
     const safeFileName = encodeURIComponent(fileName);
 
-    return `${this.basicUrl}uploads/${safeFileName}`;
+    // return `${this.basicUrl}uploads/${safeFileName}`;
+    return `uploads/${safeFileName}`;
+
   }
 
   // 開啟圖片預覽

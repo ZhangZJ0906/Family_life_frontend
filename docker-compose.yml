@@ -1,0 +1,15 @@
+services:
+  frontend-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    restart: always
+    networks:
+      - family_net # 💡 加入網路
+
+networks:
+  family_net:
+    external: true
+    name: family_shared_network # 💡 指定連去後端建好的那個網路
