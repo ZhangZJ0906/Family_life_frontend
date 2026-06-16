@@ -15,14 +15,14 @@ import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { LocationAndCategory } from '../../common/interfaceList';
+import { addItem, LocationAndCategory } from '../../common/interfaceList';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { HttpClientService } from '../../@services/http-client.service';
 import Swal from 'sweetalert2';
 import { AuthService } from '../../@services/auth.service';
-import { CATEGORY_ICON_MAP, DEFAULT_IMAGES } from '../../common/item.const';
+import { CATEGORY_ICON_MAP, DEFAULT_IMAGES, DEFAULT_ITEM } from '../../common/item.const';
 
 @Component({
   selector: 'app-item-list-add-dialog',
@@ -52,61 +52,7 @@ export class ItemListAddDialogComponent implements OnInit {
   selectedFile: File | null = null; //圖片
   basicUrl!: string;
   group: any[] = [];
-  item: {
-    created_by_id: number;
-    groupId: number;
-    locationId: number;
-    categoryId: number;
-    name: string;
-    quantity: number | null;
-    unit: string;
-    unitPrice: number | null;
-    price: number | null;
-    safeQuantity: number | null;
-    purchaseDate: string;
-    expireDate: string;
-    notify: boolean;
-    note: string;
-    billingCycle: string;
-    trialEndDate: string;
-    nextBillingDate: string;
-    brand: string;
-    model: string;
-    serialNumber: string;
-    warrantyEndDate: string;
-    storeName: string;
-    medicineType: string;
-    dosage: string;
-    usageMethod: string;
-    source: string;
-  } = {
-    created_by_id: 1,
-    groupId: 1,
-    locationId: 1,
-    categoryId: 1,
-    name: '',
-    quantity: null,
-    unit: '',
-    unitPrice: null,
-    price: null,
-    safeQuantity: null,
-    purchaseDate: '',
-    expireDate: '',
-    notify: true,
-    note: '',
-    billingCycle: '每月',
-    trialEndDate: '',
-    nextBillingDate: '',
-    brand: '',
-    model: '',
-    serialNumber: '',
-    warrantyEndDate: '',
-    storeName: '',
-    medicineType: '',
-    dosage: '',
-    usageMethod: '',
-    source: '',
-  };
+  item: addItem = { ...DEFAULT_ITEM };
 
   defaultImages = DEFAULT_IMAGES;
 
@@ -462,6 +408,10 @@ export class ItemListAddDialogComponent implements OnInit {
     }
     if ((payload.quantity ?? 0) < 0) {
       this.showError('數量不能小於 0');
+      return;
+    }
+    if (this.item.safeQuantity !== null && this.item.safeQuantity < 0) {
+      this.showError('安全庫存量不能小於 0');
       return;
     }
 
@@ -824,7 +774,10 @@ export class ItemListAddDialogComponent implements OnInit {
       this.showError('請選擇藥品單位');
       return;
     }
-    // ✅ 補上 purchaseDate 驗證（原本缺少）
+    if (this.item.safeQuantity !== null && this.item.safeQuantity < 0) {
+      this.showError('安全庫存量不能小於 0');
+      return;
+    }
     if (!payload.purchaseDate) {
       this.showError('請選擇購買日期');
       return;

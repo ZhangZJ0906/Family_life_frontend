@@ -1,5 +1,5 @@
 
-import { DefaultImage } from './interfaceList';
+import { DefaultImage,addItem } from './interfaceList';
 
 //預設圖片
 export const DEFAULT_IMAGES: DefaultImage[] = [
@@ -273,4 +273,33 @@ export const COLUMN_CONFIG: Record<TableMode, string[]> = {
     'avatar',
     'actions',
   ],
+};
+
+export const DEFAULT_ITEM: addItem = {
+  created_by_id: 1,
+  groupId: 1,
+  locationId: 1,
+  categoryId: 1,
+  name: '',
+  quantity: null,
+  unit: '',
+  unitPrice: null,
+  price: null,
+  safeQuantity: null,
+  purchaseDate: '',
+  expireDate: '',
+  notify: true,
+  note: '',
+  billingCycle: '每月',
+  trialEndDate: '',
+  nextBillingDate: '',
+  brand: '',
+  model: '',
+  serialNumber: '',
+  warrantyEndDate: '',
+  storeName: '',
+  medicineType: '',
+  dosage: '',
+  usageMethod: '',
+  source: '',
 };
