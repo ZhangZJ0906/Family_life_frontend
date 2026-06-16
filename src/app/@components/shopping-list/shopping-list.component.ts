@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
@@ -37,7 +37,6 @@ interface GroupMember {
 
 type StatusFilter = 'unfinished' | 'completed';
 type GroupFilter = number | 0 | 'all';
-
 
 
 @Component({
@@ -84,11 +83,6 @@ export class ShoppingListComponent implements OnInit {
   selectedGroupId: number | null = null;
   selectedStatsList: ShoppingList | null = null;
   userAvatar = 'assets/images/default-user.png';
-
-  isMobileView = window.innerWidth <= 768;
-
-  mobilePageIndex = 0;
-  mobilePageSize = 3;
 
   constructor(
     private readonly authService: AuthService,
@@ -228,7 +222,6 @@ getGroupLabel(groupId: number | null): string {
     this.shoppingService.getLists(this.userId).subscribe({
       next: (res) => {
         this.lists = res ?? [];
-        this.resetMobilePage();
         this.removeStaleItemCache(this.lists);
         this.isLoading = false;
         this.loadItemsForLists(this.lists, refreshItems);
@@ -493,8 +486,7 @@ getGroupLabel(groupId: number | null): string {
           quantity: item.quantity,
           unit: '個',
           purchaseDate: this.getTodayDate(),
-          groupId: list.group_id ?? 0,
-          assignedUserId: item.userId  // 👈 新增這行
+          groupId: list.group_id ?? 0
         }
       }
     });
@@ -612,7 +604,7 @@ getGroupLabel(groupId: number | null): string {
     const groupId = list.group_id ?? 0; //TODO: 後端購物清單項目改為必帶groupId後，這裡就不需要再判斷一次了
     const url = `item/getItems?userId=${this.userId}&groupId=${groupId}`;
 
-    // let url = `${this.http.basicUrl}item/getItems?userId=${this.userId}`;
+    // let url = `item/getItems?userId=${this.userId}`;
     // if (list.group_id !== null) {
     //   url += `&groupId=${list.group_id}`;
     // }
@@ -857,113 +849,57 @@ getGroupLabel(groupId: number | null): string {
     ];
   }
 
-  // 監聽視窗大小變化，切換行動版與桌面版
-@HostListener('window:resize')
-onWindowResize(): void {
-  const nextIsMobile = window.innerWidth <= 768;
+  //下載清單
+  downloadStats(list: ShoppingList): void {
+    const totalCount = this.getTotalCount(list.id);
 
-  if (nextIsMobile !== this.isMobileView) {
-    this.isMobileView = nextIsMobile;
-    this.resetMobilePage();
-  }
-}
+    if (totalCount === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: '請先新增物品',
+        text: '此購物清單目前沒有任何項目可下載',
+        confirmButtonText: '確認'
+      });
 
-// 行動版分頁顯示
-get displayLists(): ShoppingList[] {
-  if (!this.isMobileView) {
-    return this.filteredLists;
-  }
+      return;
+    }
+    const items = this.getItems(list.id);
 
-  const start = this.mobilePageIndex * this.mobilePageSize;
-  return this.filteredLists.slice(start, start + this.mobilePageSize);
-}
+    const csvRows: string[] = [];
 
-// 計算行動版總頁數
-get mobileTotalPages(): number {
-  return Math.max(
-    1,
-    Math.ceil(this.filteredLists.length / this.mobilePageSize)
-  );
-}
+    csvRows.push(`清單名稱,${list.title}`);
+    csvRows.push(`群組,${this.getGroupLabel(list.group_id)}`);
+    csvRows.push(`完成率,${this.getProgressPercent(list.id)}%`);
+    csvRows.push('');
 
-// 計算行動版目前頁數（從1開始）
-get mobileCurrentPage(): number {
-  return this.filteredLists.length === 0 ? 0 : this.mobilePageIndex + 1;
-}
+    csvRows.push(
+      '品項,分類,數量,指派人,狀態,購買日期'
+    );
 
-// 行動版下一頁
-nextMobilePage(): void {
-  if (this.mobilePageIndex < this.mobileTotalPages - 1) {
-    this.mobilePageIndex++;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-}
-
-// 行動版上一頁
-prevMobilePage(): void {
-  if (this.mobilePageIndex > 0) {
-    this.mobilePageIndex--;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-}
-
-// 行動版切換群組或狀態時重置頁數
-resetMobilePage(): void {
-  this.mobilePageIndex = 0;
-}
-
-//下載清單
-downloadStats(list: ShoppingList): void {
-  const totalCount = this.getTotalCount(list.id);
-
-  if (totalCount === 0) {
-    Swal.fire({
-      icon: 'warning',
-      title: '請先新增物品',
-      text: '此購物清單目前沒有任何項目可下載',
-      confirmButtonText: '確認'
+    items.forEach(item => {
+      csvRows.push([
+        item.item,
+        this.getCategoryName(item.categoryId),
+        item.quantity,
+        this.getMemberName(list.group_id, item.userId),
+        item.check ? '已完成' : '未完成',
+        item.checkDate ?? ''
+      ].join(','));
     });
 
-    return;
+    const blob = new Blob(
+      ['\ufeff' + csvRows.join('\n')],
+      { type: 'text/csv;charset=utf-8;' }
+    );
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${list.title}_購物統計_${this.getTodayDate()}.csv`;
+
+    link.click();
+
+    URL.revokeObjectURL(url);
   }
-  const items = this.getItems(list.id);
-
-  const csvRows: string[] = [];
-
-  csvRows.push(`清單名稱,${list.title}`);
-  csvRows.push(`群組,${this.getGroupLabel(list.group_id)}`);
-  csvRows.push(`完成率,${this.getProgressPercent(list.id)}%`);
-  csvRows.push('');
-
-  csvRows.push(
-    '品項,分類,數量,指派人,狀態,購買日期'
-  );
-
-  items.forEach(item => {
-    csvRows.push([
-      item.item,
-      this.getCategoryName(item.categoryId),
-      item.quantity,
-      this.getMemberName(list.group_id, item.userId),
-      item.check ? '已完成' : '未完成',
-      item.checkDate ?? ''
-    ].join(','));
-  });
-
-  const blob = new Blob(
-    ['\ufeff' + csvRows.join('\n')],
-    { type: 'text/csv;charset=utf-8;' }
-  );
-
-  const url = URL.createObjectURL(blob);
-
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `${list.title}_購物統計_${this.getTodayDate()}.csv`;
-
-  link.click();
-
-  URL.revokeObjectURL(url);
-}
-
 }
