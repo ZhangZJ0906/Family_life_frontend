@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 
 @Injectable({
@@ -11,24 +12,10 @@ export class EmailVerifyService {
 
   constructor(private http: HttpClient) {}
 
-  verifyExpire = 300; // 5 分鐘
-  resendCooldown = 60;
-
-  verifyCountdown = 0;
-  resendCountdown = 0;
-
-  private verifyTimer?: ReturnType<typeof setInterval>;
-  private resendTimer?: ReturnType<typeof setInterval>;
-
   /**
    * 發送驗證碼
    */
   sendVerifyCode(email: string, onSuccess: () => void, onError?: () => void): void {
-
-    if (this.resendCountdown > 0) {
-      Swal.fire(`請 ${this.resendCountdown} 秒後再重新發送`, '', 'info');
-      return;
-    }
 
     Swal.fire({
       title: '正在送驗證碼到你的 Gmail...',
@@ -43,11 +30,7 @@ export class EmailVerifyService {
     ).subscribe({
       next: () => {
         Swal.close();
-
-        this.startVerifyCountdown();
-        this.startResendCooldown();
-
-        Swal.fire('驗證碼已送出', `驗證碼 ${this.verifyExpire / 60} 分鐘內有效`, 'success');
+        Swal.fire('驗證碼已送出', '', 'success');
         this.showVerifyDialog(email, onSuccess);
       },
       error: (err) => {
@@ -63,117 +46,100 @@ export class EmailVerifyService {
    * 驗證 code dialog
    */
   private showVerifyDialog(email: string, onSuccess: () => void): void {
+
+    const cooldownTime = 60;
+    let timerInterval: ReturnType<typeof setInterval> | undefined;
+
     Swal.fire({
       title: '輸入驗證碼',
-      html: `
-        <input id="verify-code" class="swal2-input" placeholder="請輸入驗證碼">
-        <p style="font-size: 13px; color: #64748b;">
-          驗證碼 ${Math.ceil(this.verifyCountdown / 60)} 分鐘內有效
-        </p>
-        <button id="resend-code" class="swal2-confirm swal2-styled" type="button"
-          ${this.resendCountdown > 0 ? 'disabled' : ''}>
-          ${this.resendCountdown > 0 ? `${this.resendCountdown} 秒後重新發送` : '重新發送驗證碼'}
-        </button>
-      `,
+      html: `驗證碼將在 <b id="verify-countdown">${cooldownTime}</b> 秒後失效`,
+      input: 'text',
+      inputPlaceholder: '請輸入驗證碼',
+
+      timer: cooldownTime * 100,
+      timerProgressBar: true,
+
       showCancelButton: true,
       confirmButtonText: '驗證',
       cancelButtonText: '取消',
+
+      allowOutsideClick: false,
+
       didOpen: () => {
-        const resendButton = document.getElementById('resend-code');
+        const countdownElement = Swal.getHtmlContainer()?.querySelector('#verify-countdown');
+        const cancelButton = Swal.getCancelButton();
 
-        resendButton?.addEventListener('click', () => {
-          Swal.close();
-          this.sendVerifyCode(email, onSuccess);
-        });
+        timerInterval = setInterval(() => {
+          const timerLeft = Swal.getTimerLeft();
+
+          if (countdownElement && timerLeft !== undefined) {
+            countdownElement.textContent = Math.ceil(
+              timerLeft / 1000
+            ).toString();
+          }
+
+          if (cooldownTime <= 0) {
+          clearInterval(timerInterval);
+
+          // 隱藏倒數提示文字
+          const cooldownText = document.getElementById('cooldown-text');
+          if (cooldownText) cooldownText.style.display = 'none';
+
+          // 啟用取消按鈕，並將文字改成「重新發送」
+          if (cancelButton) {
+            cancelButton.disabled = false;
+            cancelButton.textContent = '重新發送驗證碼';
+            cancelButton.style.backgroundColor = '#6e7881'; // 調整成顯眼的按鈕顏色
+            cancelButton.style.color = '#fff';
+          }
+        }
+
+        }, 900);
       },
-      preConfirm: () => {
-        const input = document.getElementById('verify-code') as HTMLInputElement;
-        const code = input?.value?.trim();
 
+      // willClose: () => {
+      //   if (timerInterval) {
+      //     clearInterval(timerInterval);
+      //   }
+      // },
+      preConfirm: (code) => {
         if (!code) {
           Swal.showValidationMessage('請輸入驗證碼');
-          return false;
         }
-
-        if (this.verifyCountdown <= 0) {
-          Swal.showValidationMessage('驗證碼已過期，請重新發送');
-          return false;
-        }
-
         return code;
       }
     }).then((result) => {
+
       if (!result.isConfirmed) return;
 
-      this.verifyCode(email, result.value, onSuccess);
-    });
-  }
+      Swal.fire({
+        title: '驗證中...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
 
-  private startVerifyCountdown(): void {
-    clearInterval(this.verifyTimer);
+      this.http.post(
+        `${this.baseUrl}/verify?email=${email}&code=${result.value}`,
+        {},
+        { responseType: 'text' }
+      ).subscribe({
+        next: (res: any) => {
 
-    this.verifyCountdown = this.verifyExpire;
+          Swal.close();
 
-    this.verifyTimer = setInterval(() => {
-      this.verifyCountdown--;
-
-      if (this.verifyCountdown <= 0) {
-        clearInterval(this.verifyTimer);
-        this.verifyCountdown = 0;
-      }
-    }, 1000);
-  }
-
-  private startResendCooldown(): void {
-    clearInterval(this.resendTimer);
-
-    this.resendCountdown = this.resendCooldown;
-
-    this.resendTimer = setInterval(() => {
-      this.resendCountdown--;
-
-      if (this.resendCountdown <= 0) {
-        clearInterval(this.resendTimer);
-        this.resendCountdown = 0;
-      }
-    }, 1000);
-  }
-
-  private clearTimers(): void {
-    clearInterval(this.verifyTimer);
-    clearInterval(this.resendTimer);
-    this.verifyCountdown = 0;
-    this.resendCountdown = 0;
-  }
-
-  private verifyCode(email: string, code: string, onSuccess: () => void): void {
-    Swal.fire({
-      title: '驗證中...',
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading()
-    });
-
-    this.http.post(
-      `${this.baseUrl}/verify?email=${email}&code=${code}`,
-      {},
-      { responseType: 'text' }
-    ).subscribe({
-      next: (res: any) => {
-        Swal.close();
-
-        if (res === '驗證成功') {
-          this.clearTimers();
-          onSuccess();
-        } else {
+          if (res === '驗證成功') {
+            // Swal.fire('驗證成功', '', 'success');
+            onSuccess(); // ← 成功 callback
+          } else {
+            Swal.fire('驗證失敗', '', 'error');
+          }
+        },
+        error: (err) => {
+          Swal.close();
+          console.error(err);
           Swal.fire('驗證失敗', '', 'error');
         }
-      },
-      error: (err) => {
-        Swal.close();
-        console.error(err);
-        Swal.fire('驗證失敗', '', 'error');
-      }
+      });
     });
   }
-
 }
