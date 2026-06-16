@@ -1102,37 +1102,53 @@ td.avatar-column {
   }
 
 
-/* 手機分類：兩欄整齊排列 */
+/* 手機分類：改成水平滑動 */
 .header-filter {
   width: 100% !important;
   margin-bottom: 18px !important;
-  overflow: visible !important;
+
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
 
 .header-filter::-webkit-scrollbar {
   display: none;
 }
 
+
 .header-filter mat-chip-listbox {
-  width: 100% !important;
+  width: max-content !important;
+  min-width: 100% !important;
 }
 
+
+
 .header-filter ::ng-deep .mdc-evolution-chip-set__chips {
-  display: grid !important;
-  grid-template-columns: repeat(2, 1fr) !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
   gap: 10px !important;
-  width: 100% !important;
+
+  width: max-content !important;
+  min-width: 100% !important;
 }
 
 
 .header-filter mat-chip-option,
 .header-filter ::ng-deep .mat-mdc-chip-option {
-  width: 100% !important;
-  justify-content: center !important;
-  min-height: 38px !important;
-  border-radius: 10px !important;
-}
+  flex: 0 0 auto !important;
 
+  width: auto !important;
+  min-width: 80px !important;
+  min-height: 38px !important;
+
+  justify-content: center !important;
+  border-radius: 10px !important;
+
+  white-space: nowrap !important;
+}
 /* 手機：群組 + 搜尋同一排 */
 .header-right {
   width: 100% !important;

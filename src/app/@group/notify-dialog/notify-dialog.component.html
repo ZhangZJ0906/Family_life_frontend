@@ -1,20 +1,20 @@
-<div class="dialog-container">
+<div class="dialog-container container-fluid">
 
-  <div class="header-bar">
-
-    <h2 class="title">我的通知</h2>
-
-    <div class="top-actions">
-
-      <button class="action-btn" (click)="markAllAsRead()">
-        全部已讀
-      </button>
-
-      <button class="action-btn danger" (click)="deleteRead()">
-        刪除已讀
-      </button>
-
+  <div class="header-bar row g-2 align-items-center">
+    <div class="col-12 col-sm">
+      <h2 class="title">我的通知</h2>
     </div>
+      <div class="top-actions col-12 col-sm-auto">
+
+        <button class="action-btn" (click)="markAllAsRead()">
+          全部已讀
+        </button>
+
+        <button class="action-btn danger" (click)="deleteRead()">
+          刪除已讀
+        </button>
+
+      </div>
 
   </div>
 
