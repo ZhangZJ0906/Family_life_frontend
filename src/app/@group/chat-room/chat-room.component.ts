@@ -172,7 +172,7 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
     formData.append('senderId', this.userId.toString());
 
     this.http.post(
-      '${environment.apiUrl}/chat/upload',
+      `${environment.apiUrl}/chat/upload`,
       formData
     ).subscribe();
   }

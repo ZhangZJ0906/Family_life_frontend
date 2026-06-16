@@ -187,7 +187,7 @@ export class ExpensesAddComponent {
     };
     // console.log(payload);
 this.showLoading('新增中...');
-    this.http.postApi(this.basicUrl + 'expense/addInfo', payload).subscribe({
+    this.http.postApi( 'expense/addInfo', payload).subscribe({
       next: (res: any) => {
         if (res.code != 200) {
           Swal.fire({
