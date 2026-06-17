@@ -547,3 +547,72 @@ mat-progress-bar {
     grid-template-columns: 1fr;
   }
 }
+<<<<<<< HEAD
+=======
+
+/* 手機清單分頁 */
+.mobile-list-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+
+  padding: 14px;
+  margin: 20px 0 4px;
+
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
+}
+
+.mobile-page-btn {
+  height: 42px;
+  min-width: 104px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #eef3ff;
+  color: #2f5fe5;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  cursor: pointer;
+}
+
+.mobile-page-btn mat-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+}
+
+.mobile-page-btn:disabled {
+  background: #f1f5f9;
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.mobile-page-info {
+  min-width: 56px;
+  height: 42px;
+
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #111827;
+
+  font-size: 14px;
+  font-weight: 900;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+>>>>>>> origin/ZJ

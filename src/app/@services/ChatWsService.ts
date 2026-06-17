@@ -11,8 +11,8 @@ export class ChatWsService {
   private client!: Client;
 
   private subscribedGroups = new Set<number>();
-
   connect(): Promise<void> {
+const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
 
     if (this.connected) {
       return Promise.resolve();
@@ -23,9 +23,13 @@ export class ChatWsService {
 
       this.client = new Client({
 
+<<<<<<< HEAD
         brokerURL: 'ws://localhost:8081/ws',
+=======
+        // brokerURL: 'ws://localhost:8081/ws',
+>>>>>>> origin/ZJ
 
-        // brokerURL: 'wss://mic-rugby-designers-programmers.trycloudflare.com/ws',
+        brokerURL: `${protocol}${window.location.host}/ws`,
 
         reconnectDelay: 5000
 

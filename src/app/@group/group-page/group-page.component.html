@@ -45,10 +45,12 @@
 
         <div class="card-list">
 
+          <!-- loading -->
           <div class="loading-state" *ngIf="isLoading">
             ⏳ 載入中...
           </div>
 
+          <!-- empty -->
           <div class="loading-state" *ngIf="!isLoading && pagedGroups.length === 0">
             📭 沒有群組資料
           </div>
@@ -57,10 +59,12 @@
 
             <div class="group-card" *ngFor="let group of pagedGroups">
 
+              <!-- 左側 -->
               <div class="left">
                 <img
                   class="avatar"
-                  [src]="group.avatar || 'assets/default-avatar.png'"
+                  [src]="getAvatarUrl(group.avatar) || 'assets/default-avatar.png'"
+                  alt="群組頭像"
                 />
 
                 <div class="info">
@@ -74,6 +78,7 @@
                 </div>
               </div>
 
+              <!-- 右側 -->
               <div class="right">
                 <button class="btn chat" (click)="openChatRoom(group)">
                   聊天
@@ -98,12 +103,17 @@
 
         </div>
 
+        <!-- 分頁 -->
         <div class="pagination">
-          <button (click)="prevPage()" [disabled]="currentPage === 1">‹</button>
+          <button (click)="prevPage()" [disabled]="currentPage === 1">
+            ‹
+          </button>
 
           <span>{{ currentPage }} / {{ totalPages }}</span>
 
-          <button (click)="nextPage()" [disabled]="currentPage === totalPages">›</button>
+          <button (click)="nextPage()" [disabled]="currentPage === totalPages">
+            ›
+          </button>
         </div>
 
       </div>

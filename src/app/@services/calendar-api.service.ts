@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { HttpClientService } from './@services/http-client.service';
+import { HttpClientService } from './http-client.service';
 
 export interface CalendarEventReq {
   groupId?: number;
@@ -19,6 +19,11 @@ export class CalendarApiService {
 
   private baseUrl = 'http://localhost:8081/calendar';
   // private baseUrl = 'https://labels-biz-sheep-concerning.trycloudflare.com/calendar';
+<<<<<<< HEAD:src/app/calendar-api.service.ts
+=======
+  // private baseUrl = '/api/calendar';
+
+>>>>>>> origin/ZJ:src/app/@services/calendar-api.service.ts
   constructor(private http: HttpClient) {}
 
   getByGroup(groupId: number): Observable<any> {

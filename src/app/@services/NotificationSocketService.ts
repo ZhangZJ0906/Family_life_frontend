@@ -12,13 +12,18 @@ export class NotificationSocketService {
   private unreadCountSubject = new Subject<number>();
 
   unreadCount$ = this.unreadCountSubject.asObservable();
-
   connect(userId: number) {
+const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
 
     this.client = new Client({
 
+<<<<<<< HEAD
       brokerURL: 'ws://localhost:8081/ws',
 
+=======
+      // brokerURL: 'ws://localhost:8080/ws',
+    brokerURL: `${protocol}${window.location.host}/ws`,
+>>>>>>> origin/ZJ
       reconnectDelay: 5000,
 
       debug: (str: any) => {
