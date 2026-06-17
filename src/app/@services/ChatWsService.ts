@@ -23,11 +23,7 @@ const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
 
       this.client = new Client({
 
-<<<<<<< HEAD
-        // brokerURL: 'ws://localhost:8080/ws',
-=======
         // brokerURL: 'ws://localhost:8081/ws',
->>>>>>> origin/ZJ
 
         brokerURL: `${protocol}${window.location.host}/ws`,
 
