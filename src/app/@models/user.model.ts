@@ -12,7 +12,7 @@ export interface User {
 
 export const environment = {
   production: false,
-  // apiUrl: '/api'
-  apiUrl: 'http://localhost:8081'
+  apiUrl: '/api'
+  // apiUrl: 'http://localhost:8081'
 
 };
