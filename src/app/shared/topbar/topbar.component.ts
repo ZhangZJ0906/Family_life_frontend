@@ -260,9 +260,11 @@ export class TopbarComponent implements OnInit, OnDestroy {
         },
       });
   };
-  //獲取圖片 用 
-  getAvatar(avatar: string) {
-    return environment.apiUrl + avatar;
+  //獲取圖片 用
+  getAvatar(avatar: string): string {
+    if (!avatar) return 'default.png';
+    if (avatar.startsWith('http')) return avatar; // 舊資料相容
+    return window.location.origin + avatar; // 自動補上當前 host
   }
   // //船Mail
   // sendEmailTest(Email: string) {

@@ -682,7 +682,7 @@ private handleDeleteError(err: any): void {
   if (task.sourceType === 'item') {
     this.http
       .postApi(
-        `${this.basicUrl}item/delete?userId=${this.currentUserId}`,
+        `item/delete?userId=${this.currentUserId}`,
         [task.sourceId]
       )
       .subscribe({
@@ -703,13 +703,13 @@ private handleDeleteError(err: any): void {
   const endpoint = deleteUrlMap[task.sourceType];
 
   this.http
-    .deleteApi(
-      `${this.basicUrl}${endpoint}?id=${task.sourceId}&userId=${this.currentUserId}`
-    )
-    .subscribe({
-      next: (res: any) => this.handleDeleteDone(res),
-      error: (err) => this.handleDeleteError(err),
-    });
+  .deleteApi(
+    `${endpoint}?id=${task.sourceId}&userId=${this.currentUserId}`
+  )
+  .subscribe({
+    next: (res: any) => this.handleDeleteDone(res),
+    error: (err) => this.handleDeleteError(err),
+  });
 }
 //
   confirmTaskDone(task: PriorityTask): void {

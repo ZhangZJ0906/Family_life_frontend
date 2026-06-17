@@ -1,4 +1,8 @@
-<div class="chat-container" cdkDrag cdkDragRootElement=".cdk-overlay-pane">
+<div
+  class="chat-container"
+  cdkDrag
+  cdkDragRootElement=".cdk-overlay-pane"
+>
 
   <div class="chat-header">
 
@@ -12,22 +16,35 @@
 
   </div>
 
-  <button class="close-btn" (click)="closeChat()">
+  <button
+    class="close-btn"
+    (click)="closeChat()"
+  >
     ✕
   </button>
 
-  <div class="chat-body" #scrollBox>
+  <div
+    class="chat-body"
+    #scrollBox
+  >
 
-    <!-- 🔥 Loading -->
-    <div class="loading-box" *ngIf="isLoadingMessages">
+    <!-- Loading -->
+    <div
+      class="loading-box"
+      *ngIf="isLoadingMessages"
+    >
       <div class="spinner"></div>
-      <div class="loading-text">載入聊天中...</div>
+      <div class="loading-text">
+        載入聊天中...
+      </div>
     </div>
 
+    <!-- 訊息 -->
     <div
       *ngFor="let msg of messages"
       class="message"
       [ngClass]="msg.senderId === userId ? 'me' : 'other'"
+      (contextmenu)="!msg.recalled && openContextMenu($event, msg)"
     >
 
       <img
@@ -41,57 +58,184 @@
           {{ msg.senderName }}
         </div>
 
-        <div class="content">
-          {{ msg.message }}
+        <!-- 已收回 -->
+        <div
+          *ngIf="msg.recalled"
+          class="recalled-message"
+        >
+          此訊息已收回
         </div>
 
-        <!-- 🔥 圖片 -->
+        <!-- 回覆 -->
+        <div
+          class="reply-preview"
+          *ngIf="msg.replyMessage"
+        >
+
+          <div class="reply-name">
+            {{ msg.replyMessage.senderName }}
+          </div>
+
+          <div class="reply-text">
+            {{ msg.replyMessage.message }}
+          </div>
+
+        </div>
+        <!-- 正常訊息 -->
+        <div
+          *ngIf="
+            editingId !== msg.id &&
+            !msg.recalled
+          "
+          class="content"
+        >
+
+          {{ msg.message }}
+
+          <span
+            class="edited-tag"
+            *ngIf="msg.edited"
+          >
+            (已編輯)
+          </span>
+
+        </div>
+
+        <!-- 圖片 -->
         <img
-          *ngIf="msg.type === 'IMAGE'"
+          *ngIf="
+            msg.type === 'IMAGE' &&
+            !msg.recalled
+          "
           [src]="msg.imageUrl"
           class="chat-image"
         />
+    <div *ngFor="let msg of messages" class="message" [ngClass]="msg.senderId === userId ? 'me' : 'other'">
 
+      <img class="avatar" [src]="getAvatar(msg.senderAvatar) || 'assets/default-avatar.png'" />
+
+      <!-- 圖片 -->
+      <div *ngIf="msg.type === 'IMAGE'" class="image-message-wrapper">
+        <div class="sender">{{ msg.senderName }}</div>
+        <img [src]="getAvatar(msg.imageUrl)" class="chat-image" />
         <div class="time">
+
           {{ msg.createTime | date:'HH:mm' }}
 
-          <!-- ✔ 已讀 -->
-          <span class="read-status" *ngIf="msg.senderId === userId">
-            <ng-container *ngIf="msg.readCount > 0; else sent">
+          <span
+            class="read-status"
+            *ngIf="msg.senderId === userId"
+          >
+
+            <ng-container
+              *ngIf="
+                msg.readCount > 0;
+                else sent
+              "
+            >
               已讀 {{ msg.readCount }}
             </ng-container>
 
             <ng-template #sent>
               已送出
             </ng-template>
+
+          </span>
+
+        </div>
+      </div>
+
+      <!-- text -->
+      <div *ngIf="msg.type !== 'IMAGE'" class="bubble">
+        <div class="sender">{{ msg.senderName }}</div>
+        <div class="content">{{ msg.message }}</div>
+        <div class="time">
+          {{ msg.createTime | date:'HH:mm' }}
+          <span class="read-status" *ngIf="msg.senderId === userId">
+            <ng-container *ngIf="msg.readCount > 0; else sent">已讀 {{ msg.readCount }}</ng-container>
+            <ng-template #sent>已送出</ng-template>
           </span>
         </div>
-
       </div>
 
     </div>
 
   </div>
 
+  <div
+    class="reply-box"
+    *ngIf="replyMessage"
+  >
+
+    <div class="reply-header">
+      回覆 {{ replyMessage.senderName }}
+    </div>
+
+    <div class="reply-content">
+      {{ replyMessage.message }}
+    </div>
+
+    <button
+      class="close-reply"
+      (click)="replyMessage = null"
+    >
+      ✕
+    </button>
+
+  </div>
+
   <div class="chat-footer">
 
-    <!-- 📎 圖片按鈕 -->
     <label class="img-btn">
       📷
-      <input type="file" hidden (change)="onImageSelected($event)">
+      <input
+        type="file"
+        hidden
+        (change)="onImageSelected($event)"
+      >
     </label>
-
 
     <input
       [(ngModel)]="message"
       placeholder="輸入訊息..."
     >
 
-    <button
-      (click)="sendMessage()"
-    >
+    <button (click)="sendMessage()">
       發送
     </button>
+
+  </div>
+
+  <!-- 右鍵選單 -->
+  <div
+    *ngIf="showMenu"
+    class="context-menu"
+    [style.left.px]="menuX"
+    [style.top.px]="menuY"
+    (click)="$event.stopPropagation()"
+  >
+
+    <div
+      class="menu-item"
+      (click)="copyMessage()"
+    >
+      📋 複製
+    </div>
+
+    <div
+      class="menu-item"
+      (click)="replyFromMenu()"
+    >
+      ↩️ 回覆
+    </div>
+
+    <div
+      class="menu-item danger"
+      *ngIf="selectedMessage?.senderId === userId && canRecall(selectedMessage)"
+      (click)="recallMessageFromMenu()"
+    >
+      ↩️ 收回
+    </div>
 
   </div>
 

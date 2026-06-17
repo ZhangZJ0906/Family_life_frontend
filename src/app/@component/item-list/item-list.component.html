@@ -47,7 +47,7 @@
               <div class="selected-group">
                 <img
                   class="group-avatar"
-                  [src]="group.avatar || 'assets/default-avatar.png'"
+                  [src]="getAvatar(group.avatar) || 'assets/default-avatar.png'"
                   alt="群組頭像"
                 />
 
@@ -64,7 +64,7 @@
               <div class="group-option">
                 <img
                   class="group-avatar"
-                  [src]="group.avatar || 'assets/default-avatar.png'"
+                  [src]="getAvatar(group.avatar) || 'assets/default-avatar.png'"
                   alt="群組頭像"
                 />
 
