@@ -30,6 +30,10 @@ import Swal from 'sweetalert2';
 })
 export class ChatRoomComponent implements OnInit, AfterViewChecked {
   @ViewChild('scrollBox') scrollBox!: ElementRef;
+  @HostListener('window:resize')
+  onResize() {
+    this.isMobile = window.innerWidth <= 600;
+  }
 
   groupId!: number;
   userId!: number;
@@ -72,8 +76,12 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
     private zone: NgZone,
   ) {}
 
+  isMobile = false;
+
   async ngOnInit() {
     this.groupName = this.data.groupName;
+
+    this.isMobile = this.data.isMobile ?? window.innerWidth <= 600;
 
     this.userId =
       this.authService.currentUser()?.user_id ?? 0;
