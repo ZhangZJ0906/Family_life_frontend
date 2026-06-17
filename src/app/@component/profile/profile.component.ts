@@ -70,6 +70,7 @@ export class ProfileComponent implements CanComponentDeactivate {
   getAvatar(avatar: string): string {
     if (!avatar) return 'default.png';
     if (avatar.startsWith('http')) return avatar; // 舊資料相容
+    console.log("avatar:", window.location.origin + avatar)
     return window.location.origin + avatar; // 自動補上當前 host
   }
 
