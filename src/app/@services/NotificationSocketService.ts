@@ -17,7 +17,7 @@ export class NotificationSocketService {
 
     this.client = new Client({
 
-      brokerURL: 'ws://localhost:8080/ws',
+      brokerURL: 'ws://localhost:8081/ws',
 
       reconnectDelay: 5000,
 

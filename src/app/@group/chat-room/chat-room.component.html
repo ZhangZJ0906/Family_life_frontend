@@ -1,4 +1,8 @@
-<div class="chat-container" cdkDrag cdkDragRootElement=".cdk-overlay-pane">
+<div
+  class="chat-container"
+  cdkDrag
+  cdkDragRootElement=".cdk-overlay-pane"
+>
 
   <div class="chat-header">
 
@@ -12,22 +16,35 @@
 
   </div>
 
-  <button class="close-btn" (click)="closeChat()">
+  <button
+    class="close-btn"
+    (click)="closeChat()"
+  >
     ✕
   </button>
 
-  <div class="chat-body" #scrollBox>
+  <div
+    class="chat-body"
+    #scrollBox
+  >
 
-    <!-- 🔥 Loading -->
-    <div class="loading-box" *ngIf="isLoadingMessages">
+    <!-- Loading -->
+    <div
+      class="loading-box"
+      *ngIf="isLoadingMessages"
+    >
       <div class="spinner"></div>
-      <div class="loading-text">載入聊天中...</div>
+      <div class="loading-text">
+        載入聊天中...
+      </div>
     </div>
 
+    <!-- 訊息 -->
     <div
       *ngFor="let msg of messages"
       class="message"
       [ngClass]="msg.senderId === userId ? 'me' : 'other'"
+      (contextmenu)="openContextMenu($event, msg)"
     >
 
       <img
@@ -41,30 +58,99 @@
           {{ msg.senderName }}
         </div>
 
-        <div class="content">
-          {{ msg.message }}
+        <!-- 已收回 -->
+        <div
+          *ngIf="msg.recalled"
+          class="content recalled"
+        >
+          此訊息已收回
         </div>
 
-        <!-- 🔥 圖片 -->
+        <!-- 編輯模式 -->
+        <div
+          *ngIf="
+            editingId === msg.id &&
+            !msg.recalled
+          "
+        >
+
+          <input
+            [(ngModel)]="editingMessage"
+            class="edit-input"
+          />
+
+          <div class="edit-actions">
+
+            <button
+              (click)="saveEdit(msg)"
+            >
+              儲存
+            </button>
+
+            <button
+              (click)="cancelEdit()"
+            >
+              取消
+            </button>
+
+          </div>
+
+        </div>
+
+        <!-- 正常訊息 -->
+        <div
+          *ngIf="
+            editingId !== msg.id &&
+            !msg.recalled
+          "
+          class="content"
+        >
+
+          {{ msg.message }}
+
+          <span
+            class="edited-tag"
+            *ngIf="msg.edited"
+          >
+            (已編輯)
+          </span>
+
+        </div>
+
+        <!-- 圖片 -->
         <img
-          *ngIf="msg.type === 'IMAGE'"
+          *ngIf="
+            msg.type === 'IMAGE' &&
+            !msg.recalled
+          "
           [src]="msg.imageUrl"
           class="chat-image"
         />
 
         <div class="time">
+
           {{ msg.createTime | date:'HH:mm' }}
 
-          <!-- ✔ 已讀 -->
-          <span class="read-status" *ngIf="msg.senderId === userId">
-            <ng-container *ngIf="msg.readCount > 0; else sent">
+          <span
+            class="read-status"
+            *ngIf="msg.senderId === userId"
+          >
+
+            <ng-container
+              *ngIf="
+                msg.readCount > 0;
+                else sent
+              "
+            >
               已讀 {{ msg.readCount }}
             </ng-container>
 
             <ng-template #sent>
               已送出
             </ng-template>
+
           </span>
+
         </div>
 
       </div>
@@ -75,12 +161,14 @@
 
   <div class="chat-footer">
 
-    <!-- 📎 圖片按鈕 -->
     <label class="img-btn">
       📷
-      <input type="file" hidden (change)="onImageSelected($event)">
+      <input
+        type="file"
+        hidden
+        (change)="onImageSelected($event)"
+      >
     </label>
-
 
     <input
       [(ngModel)]="message"
@@ -92,6 +180,40 @@
     >
       發送
     </button>
+
+  </div>
+
+  <!-- 右鍵選單 -->
+  <div
+    *ngIf="showMenu"
+    class="context-menu"
+    [style.left.px]="menuX"
+    [style.top.px]="menuY"
+    (click)="$event.stopPropagation()"
+  >
+
+    <div
+      class="menu-item"
+      (click)="copyMessage()"
+    >
+      📋 複製
+    </div>
+
+    <div
+      class="menu-item"
+      *ngIf="selectedMessage?.senderId === userId"
+      (click)="startEditFromMenu()"
+    >
+      ✏️ 編輯
+    </div>
+
+    <div
+      class="menu-item danger"
+      *ngIf="selectedMessage?.senderId === userId"
+      (click)="recallMessageFromMenu()"
+    >
+      ↩️ 收回
+    </div>
 
   </div>
 
