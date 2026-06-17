@@ -80,6 +80,9 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
 
     this.groupId = this.data.groupId;
 
+    console.log('目前聊天室 groupId =', this.groupId);
+    console.log('目前 userId =', this.userId);
+
     this.loadMessages();
 
     // WebSocket
@@ -158,7 +161,12 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
     this.http.get<any>(`${environment.apiUrl}/chat/${this.groupId}`).subscribe({
       next: (res) => {
         this.messages = res.messages ?? [];
-console.log(this.messages)
+        console.log(this.messages)
+
+        console.log('收到訊息筆數 =', this.messages.length);
+        console.log('第一筆 id =', this.messages[0]?.id);
+        console.log('最後一筆 id =', this.messages[this.messages.length - 1]?.id);
+        console.log('最後一筆訊息 =', this.messages[this.messages.length - 1]);
         this.markRead();
 
         this.hasLoaded = true;
