@@ -67,11 +67,36 @@ export class ProfileComponent implements CanComponentDeactivate {
   ) {}
 
   user_id = 0;
+<<<<<<< HEAD
   getAvatar(avatar: string): string {
     if (!avatar) return 'default.png';
     if (avatar.startsWith('http')) return avatar; // 舊資料相容
     console.log("avatar:", window.location.origin + avatar)
     return window.location.origin + avatar; // 自動補上當前 host
+=======
+  getAvatar(avatar?: string | null): string {
+    if (!avatar || avatar.trim() === '') {
+      return 'assets/default-avatar.png';
+    }
+
+    if (avatar.startsWith('http://localhost:8081')) {
+      return avatar.replace('http://localhost:8081', window.location.origin + '/api');
+    }
+
+    if (avatar.startsWith('http://localhost:8080')) {
+      return avatar.replace('http://localhost:8080', window.location.origin + '/api');
+    }
+
+    if (avatar.startsWith('http')) {
+      return avatar;
+    }
+
+    if (avatar.startsWith('/')) {
+      return window.location.origin + '/api' + avatar;
+    }
+
+    return window.location.origin + '/api/' + avatar;
+>>>>>>> origin/feature-calendar
   }
 
   ngOnInit(): void {

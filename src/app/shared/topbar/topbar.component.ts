@@ -261,11 +261,29 @@ export class TopbarComponent implements OnInit, OnDestroy {
       });
   };
   //獲取圖片 用
-  getAvatar(avatar: string): string {
-    if (!avatar) return 'default.png';
-    if (avatar.startsWith('http')) return avatar; // 舊資料相容
-    return window.location.origin + avatar; // 自動補上當前 host
+  getAvatar(avatar?: string | null): string {
+  if (!avatar || avatar.trim() === '') {
+    return 'assets/default-avatar.png';
   }
+
+  if (avatar.startsWith('http://localhost:8081')) {
+    return avatar.replace('http://localhost:8081', window.location.origin + '/api');
+  }
+
+  if (avatar.startsWith('http://localhost:8080')) {
+    return avatar.replace('http://localhost:8080', window.location.origin + '/api');
+  }
+
+  if (avatar.startsWith('http')) {
+    return avatar;
+  }
+
+  if (avatar.startsWith('/')) {
+    return window.location.origin + '/api' + avatar;
+  }
+
+  return window.location.origin + '/api/' + avatar;
+}
   // //船Mail
   // sendEmailTest(Email: string) {
   //   this.http.get(
