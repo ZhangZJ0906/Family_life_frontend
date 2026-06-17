@@ -419,7 +419,7 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
     });
   }
 
-  //超過2分鐘不可收回
+  //超過一天不可收回
   canRecall(msg: any): boolean {
 
     if (msg.recalled) {
@@ -429,9 +429,10 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
     const created =
       new Date(msg.createTime).getTime();
 
-    return (
-      Date.now() - created
-    ) < 2 * 60 * 1000;
+    const diffDays =
+      (Date.now() - created) / (1000 * 60 * 60 * 24);
+
+    return diffDays < 1; // ⭐ 2天內可收回
   }
 
   // =====================
