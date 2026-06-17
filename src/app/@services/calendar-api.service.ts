@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { HttpClientService } from './@services/http-client.service';
+import { HttpClientService } from './http-client.service';
 
 export interface CalendarEventReq {
   groupId?: number;
@@ -17,9 +17,9 @@ export interface CalendarEventReq {
 })
 export class CalendarApiService {
 
-  // private baseUrl = 'http://localhost:8080/calendar';
+  private baseUrl = 'http://localhost:8081/calendar';
   // private baseUrl = 'https://labels-biz-sheep-concerning.trycloudflare.com/calendar';
-  private baseUrl = '/api';
+  // private baseUrl = '/api/calendar';
 
   constructor(private http: HttpClient) {}
 

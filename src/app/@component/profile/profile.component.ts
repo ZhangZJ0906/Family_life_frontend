@@ -14,16 +14,16 @@ import { map } from 'rxjs';
 import { CanComponentDeactivate } from '../../@guard/pending-changes.guard';
 import { EmailVerifyService } from './../../@services/EmailVerifyService';
 import { HttpClientService } from '../../@services/http-client.service';
+import { environment } from '../../@models/user.model';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
   imports: [TopbarComponent, RouterLink, CommonModule, FormsModule],
   templateUrl: './profile.component.html',
-  styleUrl: './profile.component.scss'
+  styleUrl: './profile.component.scss',
 })
 export class ProfileComponent implements CanComponentDeactivate {
-
   // 使用者名稱
   userName = 'Jack';
 
@@ -67,7 +67,9 @@ export class ProfileComponent implements CanComponentDeactivate {
   ) {}
 
   user_id = 0;
-
+  getAvatar(avatar: string) {
+    return environment.apiUrl + avatar;
+  }
   ngOnInit(): void {
     //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
     //Add 'implements OnInit' to the class.
@@ -77,20 +79,16 @@ export class ProfileComponent implements CanComponentDeactivate {
     // console.log(this.authService);
   }
 
-  getSelfInfo(){
-    this.http.getApi(
-      `users/get_user_info?userId=${this.user_id}`
-    ).subscribe({
-
+  getSelfInfo() {
+    this.http.getApi(`users/get_user_info?userId=${this.user_id}`).subscribe({
       next: (res: any) => {
-
         this.userName = res.name;
         this.email = res.email;
         this.endDateNotify = res.notifyByEndDate;
         this.emailNotify = res.notifyByEmail;
         this.avatarUrl = res.avatar;
         this.emailVerify = res.emailVerify;
-        console.log(res.notifyByEmail)
+        console.log(res.notifyByEmail);
 
         //共享userInfo
         this.notifySettingService.setName(res.name);
@@ -100,70 +98,58 @@ export class ProfileComponent implements CanComponentDeactivate {
 
       error: (err) => {
         console.log(err);
-      }
-
+      },
     });
-
   }
 
   getGroup() {
-
     this.isLoading = true;
 
     this.user_id = this.authService.currentUser()?.user_id ?? 0;
 
-    console.log("userId: " + this.user_id);
+    console.log('userId: ' + this.user_id);
 
     // this.http.get<any>(
     //   `http://localhost:8080/family_life/get_group_list?user_id=${this.user_id}`
     // )
-    this.http.getApi(
-      `family_life/get_group_list?user_id=${this.user_id}`
-    ).subscribe({
+    this.http
+      .getApi(`family_life/get_group_list?user_id=${this.user_id}`)
+      .subscribe({
+        next: (res: any) => {
+          this.groups = res.groupList;
 
-      next: (res: any) => {
+          res.groupList.forEach((group: any, index: number) => {
+            this.publicInventoryObj[group.groupId] =
+              !!res.publicInventory[index];
+          });
 
-        this.groups = res.groupList;
+          this.isLoading = false;
 
-        res.groupList.forEach((group: any, index: number) => {
-          this.publicInventoryObj[group.groupId] = !!res.publicInventory[index];
-        });
+          console.log('list001:', this.publicInventoryObj[22]);
+        },
 
-        this.isLoading = false;
-
-        console.log("list001:", this.publicInventoryObj[22]);
-      },
-
-      error: (err) => {
-        this.isLoading = false;
-        console.log(err);
-      }
-
-    });
-
+        error: (err) => {
+          this.isLoading = false;
+          console.log(err);
+        },
+      });
   }
 
   truncateName(name: string): string {
     if (!name) return '';
 
-    return name.length > 8
-      ? name.substring(0, 8) + '....'
-      : name;
+    return name.length > 8 ? name.substring(0, 8) + '....' : name;
   }
 
-  copyInviteCode(n :any) {
-
-    navigator.clipboard.writeText(
-      n.inviteCode
-    );
+  copyInviteCode(n: any) {
+    navigator.clipboard.writeText(n.inviteCode);
 
     Swal.fire({
       icon: 'success',
       title: '邀請碼已複製',
       timer: 1200,
-      showConfirmButton: false
+      showConfirmButton: false,
     });
-
   }
 
   // 開啟修改資料彈窗
@@ -233,8 +219,12 @@ export class ProfileComponent implements CanComponentDeactivate {
 
       didOpen: () => {
         // ⭐ 即時預覽頭像
-        const input = document.getElementById('avatarInput') as HTMLInputElement;
-        const preview = document.getElementById('avatarPreview') as HTMLImageElement;
+        const input = document.getElementById(
+          'avatarInput',
+        ) as HTMLInputElement;
+        const preview = document.getElementById(
+          'avatarPreview',
+        ) as HTMLImageElement;
         const fileName = document.getElementById('fileName');
 
         input?.addEventListener('change', () => {
@@ -250,9 +240,13 @@ export class ProfileComponent implements CanComponentDeactivate {
       },
 
       preConfirm: () => {
-        const userName = (document.getElementById('editUserName') as HTMLInputElement).value.trim();
+        const userName = (
+          document.getElementById('editUserName') as HTMLInputElement
+        ).value.trim();
         // const email = (document.getElementById('editEmail') as HTMLInputElement).value.trim();
-        const file = (document.getElementById('avatarInput') as HTMLInputElement).files?.[0];
+        const file = (
+          document.getElementById('avatarInput') as HTMLInputElement
+        ).files?.[0];
 
         if (!userName) {
           Swal.showValidationMessage('使用者名稱不可為空');
@@ -277,9 +271,9 @@ export class ProfileComponent implements CanComponentDeactivate {
         return {
           userName,
           // email,
-          file
+          file,
         };
-      }
+      },
     }).then((result) => {
       if (!result.isConfirmed || !result.value) return;
 
@@ -300,15 +294,15 @@ export class ProfileComponent implements CanComponentDeactivate {
         icon: 'success',
         title: '修改成功',
         timer: 1200,
-        showConfirmButton: false
+        showConfirmButton: false,
       });
     });
   }
 
-  saveAll(){
-    const payload = this.groups.map(g => ({
+  saveAll() {
+    const payload = this.groups.map((g) => ({
       groupId: g.groupId,
-      publicInventory: this.publicInventoryObj[g.groupId] ?? false
+      publicInventory: this.publicInventoryObj[g.groupId] ?? false,
     }));
 
     const formData = new FormData();
@@ -316,23 +310,22 @@ export class ProfileComponent implements CanComponentDeactivate {
     formData.append(
       'userInfo',
       new Blob(
-        [JSON.stringify({
-          userId: this.user_id,
-          userName: this.userName,
-          email: this.email,
-          notifyByEndDate: this.endDateNotify,
-          notifyByEmail: this.emailNotify
-        })],
-        { type: 'application/json' }
-      )
+        [
+          JSON.stringify({
+            userId: this.user_id,
+            userName: this.userName,
+            email: this.email,
+            notifyByEndDate: this.endDateNotify,
+            notifyByEmail: this.emailNotify,
+          }),
+        ],
+        { type: 'application/json' },
+      ),
     );
 
     formData.append(
       'publicInventoryList',
-      new Blob(
-        [JSON.stringify(payload)],
-        { type: 'application/json' }
-      )
+      new Blob([JSON.stringify(payload)], { type: 'application/json' }),
     );
 
     // 有選新頭像時才送 avatar
@@ -345,24 +338,21 @@ export class ProfileComponent implements CanComponentDeactivate {
       allowOutsideClick: false,
       didOpen: () => {
         Swal.showLoading();
-      }
+      },
     });
 
     // this.http.post(
     //   'http://localhost:8080/users/update_info',
     //   formData
     // )
-    this.http.postApi(
-      'users/update_info',
-      formData
-    ).subscribe({
+    this.http.postApi('users/update_info', formData).subscribe({
       next: (res: any) => {
         if (res.code !== 200) {
-          Swal.close()
+          Swal.close();
           Swal.fire({
             icon: 'error',
             title: '儲存失敗',
-            text: res.message || '資料更新失敗'
+            text: res.message || '資料更新失敗',
           });
           return;
         }
@@ -374,7 +364,7 @@ export class ProfileComponent implements CanComponentDeactivate {
           timer: 1000,
           showConfirmButton: false,
           toast: true,
-          position: 'top-end'
+          position: 'top-end',
         });
 
         //共享info
@@ -396,20 +386,19 @@ export class ProfileComponent implements CanComponentDeactivate {
       },
 
       error: (err) => {
-        Swal.close()
+        Swal.close();
         Swal.fire({
           icon: 'error',
           title: '失敗',
-          text: err.error?.message || '伺服器發生錯誤'
+          text: err.error?.message || '伺服器發生錯誤',
         });
 
         console.log(err);
-      }
+      },
     });
   }
 
   canDeactivate(): Promise<boolean> | boolean {
-
     if (!this.isDirty) {
       return true;
     }
@@ -420,10 +409,9 @@ export class ProfileComponent implements CanComponentDeactivate {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: '離開',
-      cancelButtonText: '留在此頁'
-    }).then(result => {
+      cancelButtonText: '留在此頁',
+    }).then((result) => {
       return result.isConfirmed;
     });
   }
-
 }

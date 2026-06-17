@@ -15,7 +15,7 @@
 
                 <div class="avatar-section">
                   <div class="avatar-large">
-                    <img *ngIf="avatarUrl; else textAvatar" [src]="avatarUrl" alt="頭像">
+                    <img *ngIf="avatarUrl; else textAvatar" [src]="getAvatar(avatarUrl)" alt="頭像">
 
                     <ng-template #textAvatar>
                       {{ avatarText }}

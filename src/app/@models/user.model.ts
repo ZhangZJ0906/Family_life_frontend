@@ -13,6 +13,10 @@ export interface User {
 export const environment = {
   production: false,
   // apiUrl: '/api'
+<<<<<<< HEAD
    apiUrl: 'http://localhost:8081'
+=======
+  apiUrl: 'http://localhost:8081'
+>>>>>>> origin/ZJ
 
 };

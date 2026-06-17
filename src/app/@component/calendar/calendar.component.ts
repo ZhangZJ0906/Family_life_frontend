@@ -3,7 +3,7 @@ import { FullCalendarModule } from '@fullcalendar/angular';
 import { CalendarOptions, EventClickArg } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
-import { CalendarApiService } from '../../calendar-api.service';
+import { CalendarApiService } from '../../@services/calendar-api.service';
 import Swal from 'sweetalert2';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
 // import { RouterLink } from '@angular/router';
