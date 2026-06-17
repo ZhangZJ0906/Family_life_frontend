@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Client } from '@stomp/stompjs';
+import { environment } from '../@models/user.model';
 
 @Injectable({
   providedIn: 'root'

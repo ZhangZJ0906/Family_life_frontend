@@ -409,3 +409,26 @@
 
 //   margin-left: 5px;
 // }
+.image-message-wrapper {
+  background: transparent; // ✅ 不要藍色背景
+  padding: 0;
+  max-width: 70%;
+
+  .sender {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 4px;
+  }
+
+  .chat-image {
+    max-width: 100%;
+    border-radius: 8px;
+    display: block;
+  }
+
+  .time {
+    font-size: 11px;
+    color: #999;
+    margin-top: 4px;
+  }
+}
