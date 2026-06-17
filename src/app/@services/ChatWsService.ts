@@ -12,7 +12,7 @@ export class ChatWsService {
 
   private subscribedGroups = new Set<number>();
   connect(): Promise<void> {
-const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+  const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
 
     if (this.connected) {
       return Promise.resolve();
@@ -23,9 +23,9 @@ const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
 
       this.client = new Client({
 
-        // brokerURL: 'ws://localhost:8081/ws',
+        brokerURL: 'ws://localhost:8081/ws',
 
-        brokerURL: `${protocol}${window.location.host}/ws`,
+        // brokerURL: `${protocol}${window.location.host}/ws`,
 
         reconnectDelay: 5000
 

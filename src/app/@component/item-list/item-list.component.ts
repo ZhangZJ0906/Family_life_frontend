@@ -942,7 +942,7 @@ export class ItemListComponent {
   const safeFileName = encodeURIComponent(fileName);
 
   // ✅ 加上當前 host，手機、外網都能正確顯示
-  return `${window.location.origin}/uploads/${safeFileName}`;
+  return `${this.basicUrl}/uploads/${safeFileName}`;
 }
 
   // 開啟圖片預覽

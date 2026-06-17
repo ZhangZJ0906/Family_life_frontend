@@ -44,7 +44,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
   user_id = 0;
 
   //使用者名字
-  user_name = "";
+  user_name = '';
 
   // 未讀通知數量，預設 0，避免畫面出現 undefined
   unreadCount = 0;
@@ -59,9 +59,9 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
   //email通知
   NotifyByEmail!: boolean;
-  Email = "";
+  Email = '';
 
-  destroy$ = new Subject<void>();//避免重複傳送
+  destroy$ = new Subject<void>(); //避免重複傳送
   lastUnreadCount = 0;
 
   constructor(
@@ -71,28 +71,35 @@ export class TopbarComponent implements OnInit, OnDestroy {
     private notifyService: NotifyService,
     private browserNotify: BrowserNotifyService,
     private socketService: NotificationSocketService,
-    private notifySettingService: NotifySettingService //共享userInfo
-
+    private notifySettingService: NotifySettingService, //共享userInfo
   ) {
-    this.notifySettingService.nameSubject$.pipe(takeUntil(this.destroy$)).subscribe(value => {
-      this.user_name = value;
-    });
+    this.notifySettingService.nameSubject$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((value) => {
+        this.user_name = value;
+      });
 
-    this.notifySettingService.emailSubject$.pipe(takeUntil(this.destroy$)).subscribe(value => {
-      this.Email = value;
-    });
+    this.notifySettingService.emailSubject$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((value) => {
+        this.Email = value;
+      });
 
-    this.notifySettingService.notifyByEndDate$.pipe(takeUntil(this.destroy$)).subscribe(value => {
-      this.NotifyByEndDate = value;
+    this.notifySettingService.notifyByEndDate$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((value) => {
+        this.NotifyByEndDate = value;
 
-      if (value) {
-        this.browserNotify.requestPermission();
-      }
-    });
+        if (value) {
+          this.browserNotify.requestPermission();
+        }
+      });
 
-    this.notifySettingService.notifyByEmail$.pipe(takeUntil(this.destroy$)).subscribe(value => {
-      this.NotifyByEmail = value;
-    });
+    this.notifySettingService.notifyByEmail$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((value) => {
+        this.NotifyByEmail = value;
+      });
 
     // console.log("NE: ", this.NotifyByEndDate)
 
@@ -103,17 +110,17 @@ export class TopbarComponent implements OnInit, OnDestroy {
     // 取得目前登入使用者
     const currentUser = this.authService.currentUser();
 
-    this.socketService.unreadCount$.subscribe(count => {
+    this.socketService.unreadCount$.subscribe((count) => {
       this.unreadCount = count;
       this.notifyService.setUnreadCount(count);
 
-      console.log("count: ", count)
+      console.log('count: ', count);
 
       if (count > 0 && this.NotifyByEndDate) {
-        console.log("success ");
+        console.log('success ');
         this.browserNotify.send(
           '家庭系統通知',
-          `${this.user_name}目前有 ${count} 則未讀通知`
+          `${this.user_name}目前有 ${count} 則未讀通知`,
         );
       }
 
@@ -166,13 +173,11 @@ export class TopbarComponent implements OnInit, OnDestroy {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: '登出',
-      cancelButtonText: '取消'
+      cancelButtonText: '取消',
     }).then((result) => {
-
       if (result.isConfirmed) {
         this.authService.logout();
       }
-
     });
   }
 
@@ -184,7 +189,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
     this.http
       .get<any>(
-        `${environment.apiUrl}/family_life/get_notify?user_id=${this.user_id}`
+        `${environment.apiUrl}/family_life/get_notify?user_id=${this.user_id}`,
       )
       .subscribe({
         next: (res) => {
@@ -242,7 +247,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
     this.http
       .get<any>(
-        `${environment.apiUrl}/users/get_user_info?userId=${this.user_id}`
+        `${environment.apiUrl}/users/get_user_info?userId=${this.user_id}`,
       )
       .subscribe({
         next: (res) => {
@@ -255,7 +260,12 @@ export class TopbarComponent implements OnInit, OnDestroy {
         },
       });
   };
-
+  //獲取圖片 用
+  getAvatar(avatar: string): string {
+    if (!avatar) return 'default.png';
+    if (avatar.startsWith('http')) return avatar; // 舊資料相容
+    return window.location.origin + avatar; // 自動補上當前 host
+  }
   // //船Mail
   // sendEmailTest(Email: string) {
   //   this.http.get(
@@ -270,5 +280,4 @@ export class TopbarComponent implements OnInit, OnDestroy {
   //     }
   //   });
   // }
-
 }

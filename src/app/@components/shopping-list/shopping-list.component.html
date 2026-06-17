@@ -10,32 +10,15 @@
       <!-- <p class="subtitle">勾選購買時會先新增到物品清單，儲存成功後才標記為已購買。</p> -->
     </div>
 
-    <div class="header-actions row g-2 justify-content-md-end">
-      <div class="col-6 col-md-auto">
-        <button
-          mat-stroked-button
-          class="w-100"
-          type="button"
-          (click)="loadLists()"
-          [disabled]="isLoading"
-        >
-          <mat-icon>refresh</mat-icon>
-          重新整理
-        </button>
-      </div>
-
-      <div class="col-6 col-md-auto">
-        <button
-          mat-raised-button
-          color="primary"
-          class="w-100"
-          type="button"
-          (click)="openCreateDialog()"
-        >
-          <mat-icon>add</mat-icon>
-          建立清單
-        </button>
-      </div>
+    <div class="header-actions">
+      <!-- <button mat-stroked-button type="button" (click)="loadLists()" [disabled]="isLoading">
+        <mat-icon>refresh</mat-icon>
+        重新整理
+      </button> -->
+      <button mat-raised-button color="primary" type="button" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon>
+        建立清單
+      </button>
     </div>
   </section>
 
@@ -54,11 +37,10 @@
   <mat-label>群組</mat-label>
 
   <mat-select
-  name="groupFilter"
-  [(ngModel)]="groupFilter"
-  aria-label="群組篩選"
-  (selectionChange)="resetMobilePage()"
->
+    name="groupFilter"
+    [(ngModel)]="groupFilter"
+    aria-label="群組篩選"
+  >
     <!-- 下拉關閉時，顯示目前選到的頭像 + 名稱 -->
     <mat-select-trigger>
       @if (getSelectedGroupOption(groupFilter); as group) {
@@ -112,7 +94,6 @@
             name="statusFilter"
             [(ngModel)]="statusFilter"
             aria-label="清單狀態篩選"
-            (selectionChange)="resetMobilePage()"
           >
             <mat-option value="unfinished">未完成</mat-option>
             <mat-option value="completed">已完成</mat-option>
@@ -135,7 +116,7 @@
 
     @if (!isLoading && filteredLists.length > 0) {
       <div class="list-grid">
-        @for (list of displayLists; track list.id) {
+        @for (list of filteredLists; track list.id) {
           <mat-card class="list-card" [class.is-completed]="isListCompleted(list.id)">
             <header class="list-card-header">
               <div class="list-title">
@@ -160,10 +141,10 @@
                 統計與勾選
               </button>
 
-              <button mat-button type="button" [routerLink]="['/purchase-item', list.id]">
+              <!-- <button mat-button type="button" [routerLink]="['/purchase-item', list.id]">
                 <mat-icon>add</mat-icon>
                 新增
-              </button>
+              </button> -->
 
               <button mat-button type="button" [routerLink]="['/edit-item', list.id]">
                 <mat-icon>edit</mat-icon>
@@ -174,38 +155,15 @@
                 <mat-icon>delete</mat-icon>
                 刪除
               </button>
+
+              <button mat-button color="primary" type="button" class="download-button" (click)="downloadStats(list)">
+                <mat-icon>download</mat-icon>
+                下載
+              </button>
             </div>
           </mat-card>
         }
       </div>
-
-      @if (isMobileView && filteredLists.length > mobilePageSize) {
-        <div class="mobile-list-pager">
-          <button
-            type="button"
-            class="mobile-page-btn"
-            [disabled]="mobilePageIndex === 0"
-            (click)="prevMobilePage()"
-          >
-            <mat-icon>chevron_left</mat-icon>
-            上一頁
-          </button>
-
-          <div class="mobile-page-info">
-            {{ mobileCurrentPage }} / {{ mobileTotalPages }}
-          </div>
-
-          <button
-            type="button"
-            class="mobile-page-btn"
-            [disabled]="mobilePageIndex >= mobileTotalPages - 1"
-            (click)="nextMobilePage()"
-          >
-            下一頁
-            <mat-icon>chevron_right</mat-icon>
-          </button>
-        </div>
-      }
     }
   </section>
 </main>
@@ -310,26 +268,9 @@
             {{ getPurchaseProgressText(selectedStatsList.id) }}
           </p>
         </div>
-
-        <div class="header-actions">
-          <button
-            mat-icon-button
-            type="button"
-            aria-label="下載統計資料"
-            (click)="downloadStats(selectedStatsList)"
-          >
-            <mat-icon>download</mat-icon>
-          </button>
-
-          <button
-            mat-icon-button
-            type="button"
-            aria-label="關閉"
-            (click)="closeStatsDialog()"
-          >
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
+        <button mat-icon-button type="button" aria-label="關閉" (click)="closeStatsDialog()">
+          <mat-icon>close</mat-icon>
+        </button>
       </div>
 
       <section class="summary-grid dialog-summary-grid" aria-label="購物項目統計">
