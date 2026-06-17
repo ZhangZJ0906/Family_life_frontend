@@ -101,7 +101,7 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
     this.http.get<any>(`${environment.apiUrl}/chat/${this.groupId}`).subscribe({
       next: (res) => {
         this.messages = res.messages ?? [];
-
+console.log(this.messages)
         this.markRead();
 
         this.hasLoaded = true; // ⭐ 關鍵
@@ -148,7 +148,7 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
       next(res) {},
       error: (err) => {
         Swal.fire({
-          title: '圖片上船失敗',
+          title: '圖片上傳失敗',
           text: err.message,
           icon: 'error',
         });
@@ -184,5 +184,8 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
 
   closeChat() {
     this.dialogRef.close();
+  }
+  getAvatar(avatar:string){
+return environment.apiUrl+avatar
   }
 }

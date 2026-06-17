@@ -24,49 +24,34 @@
       <div class="loading-text">載入聊天中...</div>
     </div>
 
-    <div
-      *ngFor="let msg of messages"
-      class="message"
-      [ngClass]="msg.senderId === userId ? 'me' : 'other'"
-    >
+    <div *ngFor="let msg of messages" class="message" [ngClass]="msg.senderId === userId ? 'me' : 'other'">
 
-      <img
-        class="avatar"
-        [src]="msg.senderAvatar || 'assets/default-avatar.png'"
-      />
+      <img class="avatar" [src]="getAvatar(msg.senderAvatar) || 'assets/default-avatar.png'" />
 
-      <div class="bubble">
-
-        <div class="sender">
-          {{ msg.senderName }}
-        </div>
-
-        <div class="content">
-          {{ msg.message }}
-        </div>
-
-        <!-- 🔥 圖片 -->
-        <img
-          *ngIf="msg.type === 'IMAGE'"
-          [src]="msg.imageUrl"
-          class="chat-image"
-        />
-
+      <!-- 圖片 -->
+      <div *ngIf="msg.type === 'IMAGE'" class="image-message-wrapper">
+        <div class="sender">{{ msg.senderName }}</div>
+        <img [src]="getAvatar(msg.imageUrl)" class="chat-image" />
         <div class="time">
           {{ msg.createTime | date:'HH:mm' }}
-
-          <!-- ✔ 已讀 -->
           <span class="read-status" *ngIf="msg.senderId === userId">
-            <ng-container *ngIf="msg.readCount > 0; else sent">
-              已讀 {{ msg.readCount }}
-            </ng-container>
-
-            <ng-template #sent>
-              已送出
-            </ng-template>
+            <ng-container *ngIf="msg.readCount > 0; else sent">已讀 {{ msg.readCount }}</ng-container>
+            <ng-template #sent>已送出</ng-template>
           </span>
         </div>
+      </div>
 
+      <!-- text -->
+      <div *ngIf="msg.type !== 'IMAGE'" class="bubble">
+        <div class="sender">{{ msg.senderName }}</div>
+        <div class="content">{{ msg.message }}</div>
+        <div class="time">
+          {{ msg.createTime | date:'HH:mm' }}
+          <span class="read-status" *ngIf="msg.senderId === userId">
+            <ng-container *ngIf="msg.readCount > 0; else sent">已讀 {{ msg.readCount }}</ng-container>
+            <ng-template #sent>已送出</ng-template>
+          </span>
+        </div>
       </div>
 
     </div>
@@ -82,14 +67,9 @@
     </label>
 
 
-    <input
-      [(ngModel)]="message"
-      placeholder="輸入訊息..."
-    >
+    <input [(ngModel)]="message" placeholder="輸入訊息...">
 
-    <button
-      (click)="sendMessage()"
-    >
+    <button (click)="sendMessage()">
       發送
     </button>
 

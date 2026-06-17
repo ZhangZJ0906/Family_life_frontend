@@ -683,6 +683,8 @@ export class GroupPageComponent{
 getAvatarUrl(avatar: string): string {
   if (!avatar) return 'default.png';
   if (avatar.startsWith('http')) return avatar; // 舊資料相容
-  return environment.apiUrl+ avatar; // 自動補上當前 host
+  const url = environment.apiUrl + avatar;
+  // console.log(url)
+  return url ; // 自動補上當前 host
 }
 }
