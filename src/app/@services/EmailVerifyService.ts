@@ -39,7 +39,7 @@ export class EmailVerifyService {
     });
 
     this.http.post(
-      `${this.baseUrl}/send?email=${email}`,
+      `${this.baseUrl}/users/send?email=${email}`,
       {},
       { responseType: 'text' }
     ).subscribe({
