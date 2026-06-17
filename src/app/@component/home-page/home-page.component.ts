@@ -682,7 +682,7 @@ private handleDeleteError(err: any): void {
   if (task.sourceType === 'item') {
     this.http
       .postApi(
-        `${this.basicUrl}item/delete?userId=${this.currentUserId}`,
+        `/item/delete?userId=${this.currentUserId}`,
         [task.sourceId]
       )
       .subscribe({
@@ -695,21 +695,21 @@ private handleDeleteError(err: any): void {
 
   // 訂閱 / 保固 / 藥品：後端是 DELETE，不是 GET
   const deleteUrlMap: Record<'medicine' | 'warranty' | 'subscription', string> = {
-    medicine: 'medicine/delete',
-    warranty: 'warranty/delete',
-    subscription: 'subscription/delete',
+    medicine: '/medicine/delete',
+    warranty: '/warranty/delete',
+    subscription: '/subscription/delete',
   };
 
   const endpoint = deleteUrlMap[task.sourceType];
 
   this.http
-    .deleteApi(
-      `${this.basicUrl}${endpoint}?id=${task.sourceId}&userId=${this.currentUserId}`
-    )
-    .subscribe({
-      next: (res: any) => this.handleDeleteDone(res),
-      error: (err) => this.handleDeleteError(err),
-    });
+  .deleteApi(
+    `${endpoint}?id=${task.sourceId}&userId=${this.currentUserId}`
+  )
+  .subscribe({
+    next: (res: any) => this.handleDeleteDone(res),
+    error: (err) => this.handleDeleteError(err),
+  });
 }
 //
   confirmTaskDone(task: PriorityTask): void {
