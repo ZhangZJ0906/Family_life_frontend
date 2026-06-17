@@ -29,7 +29,11 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../@services/auth.service';
 import { forkJoin, Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { CATEGORY_ICON_MAP, COLUMN_CONFIG, TableMode } from '../../common/item.const';
+import {
+  CATEGORY_ICON_MAP,
+  COLUMN_CONFIG,
+  TableMode,
+} from '../../common/item.const';
 
 @Component({
   selector: 'app-item-list',
@@ -112,8 +116,10 @@ export class ItemListComponent {
   ) {
     this.basicUrl = this.http.basicUrl;
     this.currentUserId = this.authService.currentUser()?.user_id ?? 0;
+
     this.currentUserAvatar =
       this.authService.currentUser()?.avatar || 'assets/default-avatar.png'; // 目前登入者自己的頭像，私人物品使用
+    console.log('私人圖片', this.currentUserAvatar);
   }
 
   ngOnInit() {
@@ -318,7 +324,7 @@ export class ItemListComponent {
       payload.userId = this.currentUserId;
 
       // const url = this.basicUrl + (this.updateApiMap[_type] ?? 'item/update');
-      const url = (this.updateApiMap[_type] ?? 'item/update');
+      const url = this.updateApiMap[_type] ?? 'item/update';
 
       this.showLoading('更新中...');
 
@@ -373,9 +379,7 @@ export class ItemListComponent {
     //     `${this.basicUrl}family_life/get_group_list?user_id=${this.currentUserId}`,
     //   )
     this.http
-      .getApi(
-        `family_life/get_group_list?user_id=${this.currentUserId}`,
-      )
+      .getApi(`family_life/get_group_list?user_id=${this.currentUserId}`)
       .subscribe({
         next: (res: any) => {
           if (!res.groupList) {
@@ -386,7 +390,6 @@ export class ItemListComponent {
             });
             return;
           }
-
           // 使用 Profile 相同的群組資料格式
           // groupList 內應該有 groupId、groupName、avatar
           this.userGroups = res.groupList.map((group: any) => ({
@@ -394,12 +397,22 @@ export class ItemListComponent {
             groupName: group.groupName,
             avatar: group.avatar || 'assets/default-avatar.png',
           }));
+          const rawAvatar = this.currentUserAvatar || '';
+          let cleanAvatar = rawAvatar;
 
+          if (
+            rawAvatar.startsWith('http://') ||
+            rawAvatar.startsWith('https://')
+          ) {
+            const uploadsIndex = rawAvatar.indexOf('/uploads/');
+            cleanAvatar =
+              uploadsIndex !== -1 ? rawAvatar.substring(uploadsIndex) : '';
+          }
           // 私人物品固定放第一個，頭像用登入者自己的頭像
           this.userGroups.unshift({
             groupId: 0,
             groupName: '私人物品',
-            avatar: this.currentUserAvatar || 'assets/default-avatar.png',
+            avatar: cleanAvatar || 'assets/default-avatar.png',
           });
 
           this.getItemByGroupId(groupId);
@@ -436,9 +449,7 @@ export class ItemListComponent {
     //     `${this.basicUrl}${endpoint}?groupId=${groupId}&userId=${this.currentUserId}`,
     //   )
     this.http
-      .getApi(
-        `${endpoint}?groupId=${groupId}&userId=${this.currentUserId}`,
-      )
+      .getApi(`${endpoint}?groupId=${groupId}&userId=${this.currentUserId}`)
       .subscribe({
         next: (res: any) => {
           this.isLoading = false; // ✅ 關閉 loading
@@ -493,9 +504,7 @@ export class ItemListComponent {
     //     `${this.basicUrl}item/getItems?userId=${this.currentUserId}&groupId=${groupId}`,
     //   )
     this.http
-      .getApi(
-        `item/getItems?userId=${this.currentUserId}&groupId=${groupId}`,
-      )
+      .getApi(`item/getItems?userId=${this.currentUserId}&groupId=${groupId}`)
       .subscribe({
         next: (res: any) => {
           this.cachedData.item = res.items || [];
@@ -552,9 +561,7 @@ export class ItemListComponent {
       //     `${this.basicUrl}${endpoint}?groupId=${groupId}&userId=${this.currentUserId}`,
       //   )
       this.http
-        .getApi(
-          `${endpoint}?groupId=${groupId}&userId=${this.currentUserId}`,
-        )
+        .getApi(`${endpoint}?groupId=${groupId}&userId=${this.currentUserId}`)
         .subscribe({
           next: (res: any) => {
             (this.cachedData as Record<string, any[]>)[mode] = res.data || [];
@@ -660,10 +667,7 @@ export class ItemListComponent {
         //     selectedIds,
         //   )
         this.http
-          .postApi(
-            `item/delete?userId=${this.currentUserId}`,
-            selectedIds,
-          )
+          .postApi(`item/delete?userId=${this.currentUserId}`, selectedIds)
           .subscribe({
             next: (res: any) => {
               if (res.code !== 200) {
@@ -702,9 +706,7 @@ export class ItemListComponent {
         //     `${this.basicUrl}${endpoint}?id=${id}&userId=${this.currentUserId}`,
         //   )
         this.http
-          .deleteApi(
-            `${endpoint}?id=${id}&userId=${this.currentUserId}`,
-          )
+          .deleteApi(`${endpoint}?id=${id}&userId=${this.currentUserId}`)
           .subscribe({
             next: (res: any) => {
               if (res.code !== 200) {
@@ -760,10 +762,7 @@ export class ItemListComponent {
         //     groups['item'],
         //   )
         this.http
-          .postApi(
-            `item/delete?userId=${this.currentUserId}`,
-            groups['item'],
-          )
+          .postApi(`item/delete?userId=${this.currentUserId}`, groups['item'])
           .pipe(catchError((err) => of({ code: 500, message: err.message }))),
       );
     }
@@ -779,9 +778,7 @@ export class ItemListComponent {
           //     `${this.basicUrl}${endpoint}?id=${id}&userId=${this.currentUserId}`,
           //   )
           this.http
-            .deleteApi(
-              `${endpoint}?id=${id}&userId=${this.currentUserId}`,
-            )
+            .deleteApi(`${endpoint}?id=${id}&userId=${this.currentUserId}`)
             .pipe(catchError((err) => of({ code: 500, message: err.message }))),
         );
       });
@@ -882,9 +879,7 @@ export class ItemListComponent {
       //     `${this.basicUrl}item/getLoginItemPageTime?userId=${this.currentUserId}`,
       //   )
       this.http
-        .getApi(
-          `item/getLoginItemPageTime?userId=${this.currentUserId}`,
-        )
+        .getApi(`item/getLoginItemPageTime?userId=${this.currentUserId}`)
         .subscribe({
           next: (res: any) => {
             this.lastLoginTime = new Date(res);
@@ -914,36 +909,40 @@ export class ItemListComponent {
       didOpen: () => Swal.showLoading(),
     });
   }
+
+  getAvatar(avatar?: string) {
+    return this.basicUrl + avatar;
+  }
   //圖片顯示
- getItemAvatar(element: any): string {
-  if (!element || !element.avatar || element.avatar.trim() === '') {
-    return 'assets/default-avatar.png';
+  getItemAvatar(element: any): string {
+    if (!element || !element.avatar || element.avatar.trim() === '') {
+      return 'assets/default-avatar.png';
+    }
+
+    const avatarStr = element.avatar.trim();
+
+    // 已經是完整 URL 直接回傳（舊資料相容）
+    if (
+      avatarStr.startsWith('data:') ||
+      avatarStr.startsWith('http://') ||
+      avatarStr.startsWith('https://')
+    ) {
+      return avatarStr;
+    }
+
+    // 相對路徑處理
+    let fileName = avatarStr;
+    if (fileName.startsWith('/uploads/')) {
+      fileName = fileName.replace('/uploads/', '');
+    } else if (fileName.startsWith('uploads/')) {
+      fileName = fileName.replace('uploads/', '');
+    }
+
+    const safeFileName = encodeURIComponent(fileName);
+
+    // ✅ 加上當前 host，手機、外網都能正確顯示
+    return `${this.basicUrl}/uploads/${safeFileName}`;
   }
-
-  const avatarStr = element.avatar.trim();
-
-  // 已經是完整 URL 直接回傳（舊資料相容）
-  if (
-    avatarStr.startsWith('data:') ||
-    avatarStr.startsWith('http://') ||
-    avatarStr.startsWith('https://')
-  ) {
-    return avatarStr;
-  }
-
-  // 相對路徑處理
-  let fileName = avatarStr;
-  if (fileName.startsWith('/uploads/')) {
-    fileName = fileName.replace('/uploads/', '');
-  } else if (fileName.startsWith('uploads/')) {
-    fileName = fileName.replace('uploads/', '');
-  }
-
-  const safeFileName = encodeURIComponent(fileName);
-
-  // ✅ 加上當前 host，手機、外網都能正確顯示
-  return `${this.basicUrl}/uploads/${safeFileName}`;
-}
 
   // 開啟圖片預覽
   openImagePreview(element: any, event: MouseEvent): void {
