@@ -58,7 +58,7 @@ export class EmailVerifyService {
 
     const resendButton = Swal.getDenyButton();
     const countdownElement =
-      Swal.getHtmlContainer()?.querySelector('#verify-countdown');
+    Swal.getHtmlContainer()?.querySelector('#verify-countdown');
 
     if (resendButton) {
       resendButton.disabled = true;
