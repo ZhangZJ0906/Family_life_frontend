@@ -67,9 +67,12 @@ export class ProfileComponent implements CanComponentDeactivate {
   ) {}
 
   user_id = 0;
-  getAvatar(avatar: string) {
-    return environment.apiUrl + avatar;
+  getAvatar(avatar: string): string {
+    if (!avatar) return 'default.png';
+    if (avatar.startsWith('http')) return avatar; // 舊資料相容
+    return window.location.origin + avatar; // 自動補上當前 host
   }
+
   ngOnInit(): void {
     //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
     //Add 'implements OnInit' to the class.
@@ -88,7 +91,7 @@ export class ProfileComponent implements CanComponentDeactivate {
         this.emailNotify = res.notifyByEmail;
         this.avatarUrl = res.avatar;
         this.emailVerify = res.emailVerify;
-        console.log(res.notifyByEmail);
+        console.log(res.avatar);
 
         //共享userInfo
         this.notifySettingService.setName(res.name);

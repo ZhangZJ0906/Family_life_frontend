@@ -44,7 +44,7 @@
       *ngFor="let msg of messages"
       class="message"
       [ngClass]="msg.senderId === userId ? 'me' : 'other'"
-      (contextmenu)="openContextMenu($event, msg)"
+      (contextmenu)="!msg.recalled && openContextMenu($event, msg)"
     >
 
       <img
@@ -61,42 +61,26 @@
         <!-- 已收回 -->
         <div
           *ngIf="msg.recalled"
-          class="content recalled"
+          class="recalled-message"
         >
           此訊息已收回
         </div>
 
-        <!-- 編輯模式 -->
+        <!-- 回覆 -->
         <div
-          *ngIf="
-            editingId === msg.id &&
-            !msg.recalled
-          "
+          class="reply-preview"
+          *ngIf="msg.replyMessage"
         >
 
-          <input
-            [(ngModel)]="editingMessage"
-            class="edit-input"
-          />
+          <div class="reply-name">
+            {{ msg.replyMessage.senderName }}
+          </div>
 
-          <div class="edit-actions">
-
-            <button
-              (click)="saveEdit(msg)"
-            >
-              儲存
-            </button>
-
-            <button
-              (click)="cancelEdit()"
-            >
-              取消
-            </button>
-
+          <div class="reply-text">
+            {{ msg.replyMessage.message }}
           </div>
 
         </div>
-
         <!-- 正常訊息 -->
         <div
           *ngIf="
@@ -159,6 +143,28 @@
 
   </div>
 
+  <div
+    class="reply-box"
+    *ngIf="replyMessage"
+  >
+
+    <div class="reply-header">
+      回覆 {{ replyMessage.senderName }}
+    </div>
+
+    <div class="reply-content">
+      {{ replyMessage.message }}
+    </div>
+
+    <button
+      class="close-reply"
+      (click)="replyMessage = null"
+    >
+      ✕
+    </button>
+
+  </div>
+
   <div class="chat-footer">
 
     <label class="img-btn">
@@ -201,15 +207,14 @@
 
     <div
       class="menu-item"
-      *ngIf="selectedMessage?.senderId === userId"
-      (click)="startEditFromMenu()"
+      (click)="replyFromMenu()"
     >
-      ✏️ 編輯
+      ↩️ 回覆
     </div>
 
     <div
       class="menu-item danger"
-      *ngIf="selectedMessage?.senderId === userId"
+      *ngIf="selectedMessage?.senderId === userId && canRecall(selectedMessage)"
       (click)="recallMessageFromMenu()"
     >
       ↩️ 收回

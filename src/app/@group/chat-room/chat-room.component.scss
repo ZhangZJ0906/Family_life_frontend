@@ -326,6 +326,12 @@
   box-shadow: 0 5px 20px rgba(0,0,0,.2);
 }
 
+.recalled-message {
+  color: #999;
+  font-style: italic;
+  padding: 8px 12px;
+}
+
 .menu-item {
 
   padding: 12px 15px;
@@ -343,20 +349,49 @@
   color: #e53935;
 }
 
-.edit-input {
-
-  width: 100%;
-
-  padding: 6px;
+//回覆
+.reply-box {
+  background: #f5f5f5;
+  border-left: 4px solid #42a5f5;
+  padding: 8px;
+  margin-bottom: 8px;
+  position: relative;
 }
 
-.edit-actions {
+.reply-header {
+  font-size: 12px;
+  color: #1976d2;
+  font-weight: bold;
+}
 
-  display: flex;
+.reply-content {
+  font-size: 13px;
+  color: #555;
+}
 
-  gap: 5px;
+.close-reply {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+}
 
-  margin-top: 5px;
+.reply-preview {
+  background: rgba(0,0,0,.05);
+  border-left: 3px solid #42a5f5;
+  padding: 5px;
+  margin-bottom: 5px;
+  border-radius: 4px;
+}
+
+.reply-name {
+  font-size: 12px;
+  font-weight: bold;
+  color: #1976d2;
+}
+
+.reply-text {
+  font-size: 12px;
+  color: #666;
 }
 
 .recalled {
@@ -366,11 +401,11 @@
   font-style: italic;
 }
 
-.edited-tag {
+// .edited-tag {
 
-  color: #999;
+//   color: #999;
 
-  font-size: 11px;
+//   font-size: 11px;
 
-  margin-left: 5px;
-}
+//   margin-left: 5px;
+// }

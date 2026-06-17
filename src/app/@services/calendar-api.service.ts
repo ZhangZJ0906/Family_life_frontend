@@ -19,11 +19,8 @@ export class CalendarApiService {
 
   private baseUrl = 'http://localhost:8081/calendar';
   // private baseUrl = 'https://labels-biz-sheep-concerning.trycloudflare.com/calendar';
-<<<<<<< HEAD:src/app/calendar-api.service.ts
-=======
   // private baseUrl = '/api/calendar';
 
->>>>>>> origin/ZJ:src/app/@services/calendar-api.service.ts
   constructor(private http: HttpClient) {}
 
   getByGroup(groupId: number): Observable<any> {

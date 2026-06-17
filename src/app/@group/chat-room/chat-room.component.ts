@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import {
   Component,
   OnInit,
@@ -9,9 +8,6 @@ import {
   Inject,
   NgZone
 } from '@angular/core';
-=======
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
->>>>>>> origin/ZJ
 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -32,16 +28,8 @@ import Swal from 'sweetalert2';
   templateUrl: './chat-room.component.html',
   styleUrl: './chat-room.component.scss',
 })
-<<<<<<< HEAD
-export class ChatRoomComponent
-  implements OnInit, AfterViewChecked {
-
-  @ViewChild('scrollBox')
-  scrollBox!: ElementRef;
-=======
 export class ChatRoomComponent implements OnInit, AfterViewChecked {
   @ViewChild('scrollBox') scrollBox!: ElementRef;
->>>>>>> origin/ZJ
 
   groupId!: number;
   userId!: number;
@@ -68,12 +56,12 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
   selectedMessage: any = null;
 
   // =====================
-  // 編輯訊息
+  // 回覆訊息
   // =====================
 
   editingId?: number;
 
-  editingMessage = '';
+  replyMessage: any = null;
 
   constructor(
     private http: HttpClient,
@@ -94,10 +82,7 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
 
     this.loadMessages();
 
-<<<<<<< HEAD
-=======
     // WebSocket
->>>>>>> origin/ZJ
     await this.ws.connect();
 
     this.ws.subscribe(this.groupId, (msg: any) => {
@@ -115,78 +100,47 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
             this.messages = [...this.messages, msg];
             break;
 
-<<<<<<< HEAD
-            case 'ONLINE':
-              this.onlineCount = msg.count;
-              break;
+          case 'READ':
+            this.updateReadCount(msg);
+            break;
 
-            case 'MESSAGE':
-              this.messages = [
-                ...this.messages,
-                msg
-              ];
-              break;
+          case 'EDIT':
 
-            case 'IMAGE':
-              this.messages = [
-                ...this.messages,
-                msg
-              ];
-              break;
+            const editTarget =
+              this.messages.find(
+                m => m.id === msg.messageId
+              );
 
-            case 'READ':
-              this.updateReadCount(msg);
-              break;
+            if (editTarget) {
 
-            case 'EDIT':
+              editTarget.message = msg.message;
 
-              const editTarget =
-                this.messages.find(
-                  m => m.id === msg.messageId
-                );
+              editTarget.edited = true;
+            }
 
-              if (editTarget) {
+            break;
 
-                editTarget.message =
-                  msg.message;
+          case 'RECALL':
 
-                editTarget.edited = true;
-              }
+            const recallTarget =
+              this.messages.find(
+                m => m.id === msg.messageId
+              );
 
-              break;
+            if (recallTarget) {
 
-            case 'RECALL':
+              recallTarget.recalled = true;
+            }
 
-              const recallTarget =
-                this.messages.find(
-                  m => m.id === msg.messageId
-                );
-
-              if (recallTarget) {
-
-                recallTarget.recalled = true;
-              }
-
-              break;
-          }
-        });
+            break;
+        }
+      });
 
         setTimeout(() => {
           this.scrollToBottom();
         }, 50);
       }
     );
-=======
-          case 'READ':
-            this.updateReadCount(msg);
-            break;
-        }
-      });
-      setTimeout(() => {
-        this.scrollToBottom();
-      }, 50);
-    });
->>>>>>> origin/ZJ
   }
 
   ngAfterViewChecked() {
@@ -201,14 +155,7 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
   loadMessages() {
     this.isLoadingMessages = true;
 
-<<<<<<< HEAD
-    this.http.get<any>(
-      `${environment.apiUrl}/chat/${this.groupId}`
-    ).subscribe({
-
-=======
     this.http.get<any>(`${environment.apiUrl}/chat/${this.groupId}`).subscribe({
->>>>>>> origin/ZJ
       next: (res) => {
 
         this.messages =
@@ -237,6 +184,9 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
       groupId: this.groupId,
       senderId: this.userId,
       message: this.message,
+
+      replyId:
+        this.replyMessage?.id || null
     });
 
     this.message = '';
@@ -270,20 +220,6 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
       this.userId.toString()
     );
 
-<<<<<<< HEAD
-    this.http.post(
-      `${environment.apiUrl}/chat/upload`,
-      formData
-    ).subscribe();
-  }
-
-  updateReadCount(msg: any) {
-
-    const target =
-      this.messages.find(
-        m => m.id === msg.messageId
-      );
-=======
     this.http.post(`${environment.apiUrl}/chat/upload`, formData).subscribe({
       next(res) {},
       error: (err) => {
@@ -298,7 +234,6 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
 
   updateReadCount(msg: any) {
     const target = this.messages.find((m) => m.id === msg.messageId);
->>>>>>> origin/ZJ
 
     if (target) {
 
@@ -308,20 +243,11 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
   }
 
   markRead() {
-<<<<<<< HEAD
 
     this.http.post(
       `${environment.apiUrl}/chat/read/${this.groupId}?userId=${this.userId}`,
       {}
     ).subscribe();
-=======
-    this.http
-      .post(
-        `${environment.apiUrl}/chat/read/${this.groupId}?userId=${this.userId}`,
-        {},
-      )
-      .subscribe();
->>>>>>> origin/ZJ
   }
 
   scrollToBottom() {
@@ -402,53 +328,18 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
   }
 
   // =====================
-  // 編輯
+  // 回復
   // =====================
 
-  startEditFromMenu() {
+  replyFromMenu() {
 
     if (!this.selectedMessage) {
       return;
     }
 
+    this.replyMessage = this.selectedMessage;
+
     this.showMenu = false;
-
-    this.editingId =
-      this.selectedMessage.id;
-
-    this.editingMessage =
-      this.selectedMessage.message;
-  }
-
-  cancelEdit() {
-
-    this.editingId = undefined;
-
-    this.editingMessage = '';
-  }
-
-  saveEdit(msg: any) {
-
-    const text =
-      this.editingMessage.trim();
-
-    if (!text) {
-      return;
-    }
-
-    this.http.put(
-      `${environment.apiUrl}/chat/message/${msg.id}`,
-      {
-        message: text
-      }
-    ).subscribe(() => {
-
-      msg.message = text;
-
-      msg.edited = true;
-
-      this.cancelEdit();
-    });
   }
 
   // =====================
@@ -463,21 +354,84 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
 
     this.showMenu = false;
 
-    if (
-      !confirm(
-        '確定收回此訊息？'
-      )
-    ) {
-      return;
+    // =========================
+    // Step 1：確認
+    // =========================
+    Swal.fire({
+      title: '確定收回此訊息？',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: '收回',
+      cancelButtonText: '取消'
+    }).then((result) => {
+
+      if (!result.isConfirmed) {
+        return;
+      }
+
+      // =========================
+      // Step 2：loading
+      // =========================
+      Swal.fire({
+        title: '收回中...',
+        text: '請稍候',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      // =========================
+      // Step 3：API
+      // =========================
+      this.http.post(
+        `${environment.apiUrl}/chat/message/${this.selectedMessage.id}/recall`,
+        {}
+      ).subscribe({
+
+        next: () => {
+
+          // 關掉 loading
+          Swal.close();
+
+          // UI 更新
+          this.selectedMessage.recalled = true;
+
+          // Swal.fire({
+          //   title: '已收回',
+          //   icon: 'success',
+          //   timer: 1200,
+          //   showConfirmButton: false
+          // });
+        },
+
+        error: (err) => {
+
+          Swal.close();
+
+          Swal.fire({
+            title: '收回失敗',
+            text: err.message || '請稍後再試',
+            icon: 'error'
+          });
+        }
+      });
+    });
+  }
+
+  //超過2分鐘不可收回
+  canRecall(msg: any): boolean {
+
+    if (msg.recalled) {
+      return false;
     }
 
-    this.http.put(
-      `${environment.apiUrl}/chat/message/${this.selectedMessage.id}/recall`,
-      {}
-    ).subscribe(() => {
+    const created =
+      new Date(msg.createTime).getTime();
 
-      this.selectedMessage.recalled = true;
-    });
+    return (
+      Date.now() - created
+    ) < 2 * 60 * 1000;
   }
 
   // =====================
