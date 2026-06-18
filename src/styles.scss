@@ -147,3 +147,96 @@ body {
     border-radius: 0 !important;
   }
 }
+
+/* ============================= */
+/* 修改基本資料 SweetAlert RWD */
+/* ============================= */
+
+/* 桌機版 */
+.swal2-popup {
+  width: 620px !important;
+  max-width: calc(100vw - 32px) !important;
+  box-sizing: border-box !important;
+}
+
+.swal-form {
+  width: 500px;
+  max-width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.swal-row {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 20px;
+  margin-bottom: 22px;
+}
+
+.swal-row label {
+  text-align: right;
+  font-size: 18px;
+  font-weight: 600;
+  color: #4a4a4a;
+  white-space: nowrap;
+}
+
+.swal-row input.swal2-input {
+  width: 100% !important;
+  height: 54px;
+  margin: 0 !important;
+  box-sizing: border-box;
+  font-size: 20px;
+}
+
+/* 手機版 */
+@media (max-width: 600px) {
+  .swal2-popup {
+    width: calc(100vw - 32px) !important;
+    padding: 24px 18px !important;
+  }
+
+  .swal2-title {
+    font-size: 24px !important;
+    line-height: 1.3 !important;
+  }
+
+  .swal-form {
+    width: 100% !important;
+  }
+
+  .swal-row {
+    display: block;
+    margin-bottom: 18px;
+  }
+
+  .swal-row label {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .swal-row input.swal2-input {
+    width: 100% !important;
+    height: 48px;
+    font-size: 17px;
+  }
+
+  #avatarPreview {
+    width: 76px !important;
+    height: 76px !important;
+  }
+
+  .swal2-actions {
+    gap: 10px;
+    flex-wrap: nowrap !important;
+  }
+
+  .swal2-confirm,
+  .swal2-cancel {
+    min-width: 88px;
+  }
+}
