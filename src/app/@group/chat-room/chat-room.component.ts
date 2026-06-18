@@ -169,7 +169,7 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
   loadMessages() {
     this.isLoadingMessages = true;
 
-    this.http.get<any>(`${environment.apiUrl}/chat/${this.groupId}`).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/chat/${this.groupId}?userId=${this.userId}`).subscribe({
       next: (res) => {
         this.messages = res.messages ?? [];
         console.log(this.messages)
@@ -180,6 +180,9 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
         // console.log('最後一筆訊息 =', this.messages[this.messages.length - 1]);
 
         this.firstUnreadIndex = this.messages.findIndex(m => !m.readByMe);
+
+        console.log('firstUnreadIndex=', this.firstUnreadIndex);
+
         this.markRead();
 
         this.hasLoaded = true;
