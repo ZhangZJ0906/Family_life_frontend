@@ -60,6 +60,14 @@
         {{ unreadMap.update }}
       </span>
     </button>
+
+    <button [class.active]="filterType === 'chat'" (click)="filterType = 'chat'">
+      聊天紀錄
+
+      <span class="tab-badge" *ngIf="unreadMap.chat > 0">
+        {{ unreadMap.chat }}
+      </span>
+    </button>
   </div>
 
   <div class="notify-list">

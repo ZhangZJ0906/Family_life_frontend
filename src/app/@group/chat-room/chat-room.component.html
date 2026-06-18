@@ -47,102 +47,126 @@
     <!-- 訊息列表 -->
     <ng-container *ngIf="!isLoadingMessages">
 
-      <div
-        *ngFor="let msg of messages"
-        class="message"
-        [ngClass]="msg.senderId === userId ? 'me' : 'other'"
-        (contextmenu)="!msg.recalled && openContextMenu($event, msg)"
+      <ng-container
+        *ngFor="let msg of messages; let i = index"
       >
 
-        <!-- 頭像 -->
-        <img
-          class="avatar"
-          [src]="getAvatar(msg.senderAvatar)"
-          alt="avatar"
-        />
+        <!-- 日期分隔 -->
+        <div
+          class="date-divider"
+          *ngIf="isNewDate(msg, messages[i - 1])"
+        >
+          {{ formatDate(msg.createTime) }}
+        </div>
 
-        <!-- 訊息泡泡 -->
-        <div class="bubble">
+        <!-- 未讀分隔 -->
+        <div
+          class="unread-divider"
+          *ngIf="i === firstUnreadIndex"
+        >
+          以下為未讀訊息
+        </div>
 
-          <!-- 發送者 -->
-          <div class="sender">
-            {{ msg.senderName }}
-          </div>
+        <!-- 訊息 -->
+        <div
+          class="message"
+          [ngClass]="msg.senderId === userId ? 'me' : 'other'"
+          (contextmenu)="!msg.recalled && openContextMenu($event, msg)"
+        >
 
-          <!-- 已收回 -->
-          <div
-            *ngIf="msg.recalled"
-            class="recalled-message"
-          >
-            此訊息已收回
-          </div>
-
-          <!-- 回覆預覽 -->
-          <div
-            class="reply-preview"
-            *ngIf="msg.replyMessage && !msg.recalled"
-          >
-
-            <div class="reply-name">
-              {{ msg.replyMessage.senderName }}
-            </div>
-
-            <div class="reply-text">
-              {{ msg.replyMessage.message }}
-            </div>
-
-          </div>
-
-          <!-- 文字訊息 -->
-          <div
-            *ngIf="msg.type !== 'IMAGE' && !msg.recalled"
-            class="content"
-          >
-
-            {{ msg.message }}
-
-            <span
-              class="edited-tag"
-              *ngIf="msg.edited"
-            >
-              (已編輯)
-            </span>
-
-          </div>
-
-          <!-- 圖片訊息 -->
+          <!-- 頭像 -->
           <img
-            *ngIf="msg.type === 'IMAGE' && !msg.recalled"
-            [src]="msg.imageUrl"
-            class="chat-image"
-            alt="chat image"
+            class="avatar"
+            [src]="getAvatar(msg.senderAvatar)"
+            alt="avatar"
           />
 
-          <!-- 時間 / 已讀狀態 -->
-          <div class="time">
+          <!-- 訊息泡泡 -->
+          <div class="bubble">
 
-            {{ msg.createTime | date:'HH:mm' }}
+            <!-- 發送者 -->
+            <div class="sender">
+              {{ msg.senderName }}
+            </div>
 
-            <span
-              class="read-status"
-              *ngIf="msg.senderId === userId"
+            <!-- 已收回 -->
+            <div
+              *ngIf="msg.recalled"
+              class="recalled-message"
+            >
+              此訊息已收回
+            </div>
+
+            <!-- 回覆預覽 -->
+            <div
+              class="reply-preview"
+              *ngIf="msg.replyMessage && !msg.recalled"
             >
 
-              <ng-container *ngIf="msg.readCount > 0; else sent">
-                已讀 {{ msg.readCount }}
-              </ng-container>
+              <div class="reply-name">
+                {{ msg.replyMessage.senderName }}
+              </div>
 
-              <ng-template #sent>
-                已送出
-              </ng-template>
+              <div class="reply-text">
+                {{ msg.replyMessage.message }}
+              </div>
 
-            </span>
+            </div>
+
+            <!-- 文字訊息 -->
+            <div
+              *ngIf="msg.type !== 'IMAGE' && !msg.recalled"
+              class="content"
+            >
+
+              {{ msg.message }}
+
+              <span
+                class="edited-tag"
+                *ngIf="msg.edited"
+              >
+                (已編輯)
+              </span>
+
+            </div>
+
+            <!-- 圖片訊息 -->
+            <img
+              *ngIf="msg.type === 'IMAGE' && !msg.recalled"
+              [src]="msg.imageUrl"
+              class="chat-image"
+              alt="chat image"
+            />
+
+            <!-- 時間 / 已讀 -->
+            <div class="time">
+
+              {{ msg.createTime | date:'HH:mm' }}
+
+              <span
+                class="read-status"
+                *ngIf="msg.senderId === userId"
+              >
+
+                <ng-container
+                  *ngIf="msg.readCount > 0; else sent"
+                >
+                  已讀 {{ msg.readCount }}
+                </ng-container>
+
+                <ng-template #sent>
+                  已送出
+                </ng-template>
+
+              </span>
+
+            </div>
 
           </div>
 
         </div>
 
-      </div>
+      </ng-container>
 
     </ng-container>
 
