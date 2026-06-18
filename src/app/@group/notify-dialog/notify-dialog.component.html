@@ -60,6 +60,14 @@
         {{ unreadMap.update }}
       </span>
     </button>
+
+    <button [class.active]="filterType === 'chat'" (click)="filterType = 'chat'">
+      聊天紀錄
+
+      <span class="tab-badge" *ngIf="unreadMap.chat > 0">
+        {{ unreadMap.chat }}
+      </span>
+    </button>
   </div>
 
   <div class="notify-list">
@@ -161,6 +169,15 @@
         <ng-container *ngIf="n.type === 'expense'">
 
           <button class="view-btn" (click)="goExpense(n)">
+            查看
+          </button>
+
+        </ng-container>
+
+        <!-- chat -->
+        <ng-container *ngIf="n.type === 'chat'">
+
+          <button class="view-btn" (click)="openChatRoom({groupId: n.sendUserId, groupName: n.name})">
             查看
           </button>
 

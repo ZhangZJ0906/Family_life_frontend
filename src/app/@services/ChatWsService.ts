@@ -24,9 +24,9 @@ export class ChatWsService {
 
       this.client = new Client({
 
-        // brokerURL: 'ws://localhost:8081/ws',
+        brokerURL: 'ws://localhost:8081/ws',
 
-        brokerURL: `${protocol}${window.location.host}/ws`,
+        // brokerURL: `${protocol}${window.location.host}/ws`,
 
         reconnectDelay: 5000
 

@@ -48,6 +48,9 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
   hasLoaded = false;
   isLoadingMessages = true;
 
+  //未讀
+  firstUnreadIndex = -1;
+
   // =====================
   // 右鍵選單
   // =====================
@@ -104,15 +107,17 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
             break;
 
           case 'MESSAGE':
-            this.messages = [...this.messages, msg];
-            break;
-
           case 'IMAGE':
+
             this.messages = [...this.messages, msg];
+
+            this.calculateUnreadIndex(); // ⭐補這個
+
             break;
 
           case 'READ':
             this.updateReadCount(msg);
+            this.calculateUnreadIndex();
             break;
 
           case 'EDIT':
@@ -166,15 +171,20 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
   loadMessages() {
     this.isLoadingMessages = true;
 
-    this.http.get<any>(`${environment.apiUrl}/chat/${this.groupId}`).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/chat/${this.groupId}?userId=${this.userId}`).subscribe({
       next: (res) => {
         this.messages = res.messages ?? [];
         console.log(this.messages)
 
-        console.log('收到訊息筆數 =', this.messages.length);
-        console.log('第一筆 id =', this.messages[0]?.id);
-        console.log('最後一筆 id =', this.messages[this.messages.length - 1]?.id);
-        console.log('最後一筆訊息 =', this.messages[this.messages.length - 1]);
+        // console.log('收到訊息筆數 =', this.messages.length);
+        // console.log('第一筆 id =', this.messages[0]?.id);
+        // console.log('最後一筆 id =', this.messages[this.messages.length - 1]?.id);
+        // console.log('最後一筆訊息 =', this.messages[this.messages.length - 1]);
+
+        this.firstUnreadIndex = this.messages.findIndex(m => !m.readByMe);
+
+        console.log('firstUnreadIndex=', this.firstUnreadIndex);
+
         this.markRead();
 
         this.hasLoaded = true;
@@ -261,7 +271,15 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
     this.http.post(
       `${environment.apiUrl}/chat/read/${this.groupId}?userId=${this.userId}`,
       {}
-    ).subscribe();
+    ).subscribe(() => {
+
+      // ⭐ 很重要：重新計算未讀
+      this.messages.forEach(m => {
+        m.readByMe = true;
+      });
+
+      this.calculateUnreadIndex();
+    });
   }
 
   scrollToBottom() {
@@ -457,7 +475,41 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
 
     this.dialogRef.close();
   }
+
   getAvatar(avatar:string){
-return environment.apiUrl+avatar
+    return environment.apiUrl+avatar
+  }
+
+  //未讀+日期顯示
+  isNewDate(current: any, previous?: any): boolean {
+
+    if (!previous) {
+      return true;
+    }
+
+    const d1 = new Date(current.createTime);
+    const d2 = new Date(previous.createTime);
+
+    return (
+      d1.getFullYear() !== d2.getFullYear() ||
+      d1.getMonth() !== d2.getMonth() ||
+      d1.getDate() !== d2.getDate()
+    );
+  }
+
+  calculateUnreadIndex() {
+    this.firstUnreadIndex =
+      this.messages.findIndex(m => !m.readByMe);
+  }
+
+  formatDate(date: string): string {
+
+    const d = new Date(date);
+
+    return `${d.getFullYear()}/${
+      String(d.getMonth() + 1).padStart(2, '0')
+    }/${
+      String(d.getDate()).padStart(2, '0')
+    }`;
   }
 }
