@@ -20,11 +20,12 @@ import { ChatWsService } from '../../@services/ChatWsService';
 import { AuthService } from '../../@services/auth.service';
 import { environment } from '../../@models/user.model';
 import Swal from 'sweetalert2';
+import { MatIconModule } from "@angular/material/icon";
 
 @Component({
   selector: 'app-chat-room',
   standalone: true,
-  imports: [CommonModule, FormsModule, DragDropModule],
+  imports: [CommonModule, FormsModule, DragDropModule, MatIconModule],
   templateUrl: './chat-room.component.html',
   styleUrl: './chat-room.component.scss',
 })
@@ -47,6 +48,12 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
 
   hasLoaded = false;
   isLoadingMessages = true;
+  // 圖片預覽狀態
+  imagePreviewVisible = false;
+  previewImageUrl = '';
+  previewImageTitle = '';
+  previewScale = 1;
+  previewRotate = 0;
 
   //未讀
   firstUnreadIndex = -1;
@@ -86,8 +93,7 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
 
     this.isMobile = this.data.isMobile ?? window.innerWidth <= 600;
 
-    this.userId =
-      this.authService.currentUser()?.user_id ?? 0;
+    this.userId = this.authService.currentUser()?.user_id ?? 0;
 
     this.groupId = this.data.groupId;
 
@@ -119,14 +125,11 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
             break;
 
           case 'EDIT':
-
-            const editTarget =
-              this.messages.find(
-                m => m.id === msg.messageId
-              );
+            const editTarget = this.messages.find(
+              (m) => m.id === msg.messageId,
+            );
 
             if (editTarget) {
-
               editTarget.message = msg.message;
 
               editTarget.edited = true;
@@ -135,14 +138,11 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
             break;
 
           case 'RECALL':
-
-            const recallTarget =
-              this.messages.find(
-                m => m.id === msg.messageId
-              );
+            const recallTarget = this.messages.find(
+              (m) => m.id === msg.messageId,
+            );
 
             if (recallTarget) {
-
               recallTarget.recalled = true;
             }
 
@@ -150,16 +150,14 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
         }
       });
 
-        setTimeout(() => {
-          this.scrollToBottom();
-        }, 50);
-      }
-    );
+      setTimeout(() => {
+        this.scrollToBottom();
+      }, 50);
+    });
   }
 
   ngAfterViewChecked() {
     if (this.hasLoaded) {
-
       this.scrollToBottom();
 
       this.hasLoaded = false;
@@ -169,32 +167,35 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
   loadMessages() {
     this.isLoadingMessages = true;
 
-    this.http.get<any>(`${environment.apiUrl}/chat/${this.groupId}?userId=${this.userId}`).subscribe({
-      next: (res) => {
-        this.messages = res.messages ?? [];
-        console.log(this.messages)
+    this.http
+      .get<any>(
+        `${environment.apiUrl}/chat/${this.groupId}?userId=${this.userId}`,
+      )
+      .subscribe({
+        next: (res) => {
+          this.messages = res.messages ?? [];
+          console.log(this.messages);
 
-        // console.log('收到訊息筆數 =', this.messages.length);
-        // console.log('第一筆 id =', this.messages[0]?.id);
-        // console.log('最後一筆 id =', this.messages[this.messages.length - 1]?.id);
-        // console.log('最後一筆訊息 =', this.messages[this.messages.length - 1]);
+          // console.log('收到訊息筆數 =', this.messages.length);
+          // console.log('第一筆 id =', this.messages[0]?.id);
+          // console.log('最後一筆 id =', this.messages[this.messages.length - 1]?.id);
+          // console.log('最後一筆訊息 =', this.messages[this.messages.length - 1]);
 
-        this.firstUnreadIndex = this.messages.findIndex(m => !m.readByMe);
+          this.firstUnreadIndex = this.messages.findIndex((m) => !m.readByMe);
 
-        console.log('firstUnreadIndex=', this.firstUnreadIndex);
+          console.log('firstUnreadIndex=', this.firstUnreadIndex);
 
-        this.markRead();
+          this.markRead();
 
-        this.hasLoaded = true;
+          this.hasLoaded = true;
 
-        this.isLoadingMessages = false;
-      },
+          this.isLoadingMessages = false;
+        },
 
-      error: () => {
-
-        this.isLoadingMessages = false;
-      },
-    });
+        error: () => {
+          this.isLoadingMessages = false;
+        },
+      });
   }
 
   sendMessage() {
@@ -207,8 +208,7 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
       senderId: this.userId,
       message: this.message,
 
-      replyId:
-        this.replyMessage?.id || null
+      replyId: this.replyMessage?.id || null,
     });
 
     this.message = '';
@@ -227,20 +227,11 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
 
     const formData = new FormData();
 
-    formData.append(
-      'file',
-      file
-    );
+    formData.append('file', file);
 
-    formData.append(
-      'groupId',
-      this.groupId.toString()
-    );
+    formData.append('groupId', this.groupId.toString());
 
-    formData.append(
-      'senderId',
-      this.userId.toString()
-    );
+    formData.append('senderId', this.userId.toString());
 
     this.http.post(`${environment.apiUrl}/chat/upload`, formData).subscribe({
       next(res) {},
@@ -258,31 +249,27 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
     const target = this.messages.find((m) => m.id === msg.messageId);
 
     if (target) {
-
-      target.readCount =
-        msg.readCount;
+      target.readCount = msg.readCount;
     }
   }
 
   markRead() {
-
-    this.http.post(
-      `${environment.apiUrl}/chat/read/${this.groupId}?userId=${this.userId}`,
-      {}
-    ).subscribe();
+    this.http
+      .post(
+        `${environment.apiUrl}/chat/read/${this.groupId}?userId=${this.userId}`,
+        {},
+      )
+      .subscribe();
   }
 
   scrollToBottom() {
-
     if (!this.scrollBox) {
       return;
     }
 
-    const el =
-      this.scrollBox.nativeElement;
+    const el = this.scrollBox.nativeElement;
 
-    el.scrollTop =
-      el.scrollHeight;
+    el.scrollTop = el.scrollHeight;
   }
 
   // =====================
@@ -290,7 +277,6 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
   // =====================
 
   openContextMenu(event: MouseEvent, msg: any) {
-
     event.preventDefault();
     event.stopPropagation();
 
@@ -317,8 +303,7 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
 
     // ⭐關鍵：強制移到 body
     setTimeout(() => {
-      const menu =
-        document.querySelector('.context-menu') as HTMLElement;
+      const menu = document.querySelector('.context-menu') as HTMLElement;
 
       if (menu) {
         document.body.appendChild(menu);
@@ -328,7 +313,6 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
 
   @HostListener('document:click')
   closeMenu() {
-
     this.showMenu = false;
   }
 
@@ -337,14 +321,11 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
   // =====================
 
   copyMessage() {
-
     if (!this.selectedMessage) {
       return;
     }
 
-    navigator.clipboard.writeText(
-      this.selectedMessage.message
-    );
+    navigator.clipboard.writeText(this.selectedMessage.message);
 
     this.showMenu = false;
   }
@@ -354,7 +335,6 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
   // =====================
 
   replyFromMenu() {
-
     if (!this.selectedMessage) {
       return;
     }
@@ -369,7 +349,6 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
   // =====================
 
   recallMessageFromMenu() {
-
     if (!this.selectedMessage) {
       return;
     }
@@ -384,9 +363,8 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: '收回',
-      cancelButtonText: '取消'
+      cancelButtonText: '取消',
     }).then((result) => {
-
       if (!result.isConfirmed) {
         return;
       }
@@ -400,59 +378,55 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
         allowOutsideClick: false,
         didOpen: () => {
           Swal.showLoading();
-        }
+        },
       });
 
       // =========================
       // Step 3：API
       // =========================
-      this.http.post(
-        `${environment.apiUrl}/chat/message/${this.selectedMessage.id}/recall`,
-        {}
-      ).subscribe({
+      this.http
+        .post(
+          `${environment.apiUrl}/chat/message/${this.selectedMessage.id}/recall`,
+          {},
+        )
+        .subscribe({
+          next: () => {
+            // 關掉 loading
+            Swal.close();
 
-        next: () => {
+            // UI 更新
+            this.selectedMessage.recalled = true;
 
-          // 關掉 loading
-          Swal.close();
+            // Swal.fire({
+            //   title: '已收回',
+            //   icon: 'success',
+            //   timer: 1200,
+            //   showConfirmButton: false
+            // });
+          },
 
-          // UI 更新
-          this.selectedMessage.recalled = true;
+          error: (err) => {
+            Swal.close();
 
-          // Swal.fire({
-          //   title: '已收回',
-          //   icon: 'success',
-          //   timer: 1200,
-          //   showConfirmButton: false
-          // });
-        },
-
-        error: (err) => {
-
-          Swal.close();
-
-          Swal.fire({
-            title: '收回失敗',
-            text: err.message || '請稍後再試',
-            icon: 'error'
-          });
-        }
-      });
+            Swal.fire({
+              title: '收回失敗',
+              text: err.message || '請稍後再試',
+              icon: 'error',
+            });
+          },
+        });
     });
   }
 
   //超過一天不可收回
   canRecall(msg: any): boolean {
-
     if (msg.recalled) {
       return false;
     }
 
-    const created =
-      new Date(msg.createTime).getTime();
+    const created = new Date(msg.createTime).getTime();
 
-    const diffDays =
-      (Date.now() - created) / (1000 * 60 * 60 * 24);
+    const diffDays = (Date.now() - created) / (1000 * 60 * 60 * 24);
 
     return diffDays < 1; // ⭐ 2天內可收回
   }
@@ -462,17 +436,15 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
   // =====================
 
   closeChat() {
-
     this.dialogRef.close();
   }
 
-  getAvatar(avatar:string){
-    return environment.apiUrl+avatar
+  getAvatar(avatar: string) {
+    return environment.apiUrl + avatar;
   }
 
   //未讀+日期顯示
   isNewDate(current: any, previous?: any): boolean {
-
     if (!previous) {
       return true;
     }
@@ -488,13 +460,66 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
   }
 
   formatDate(date: string): string {
-
     const d = new Date(date);
 
-    return `${d.getFullYear()}/${
-      String(d.getMonth() + 1).padStart(2, '0')
-    }/${
-      String(d.getDate()).padStart(2, '0')
-    }`;
+    return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(
+      2,
+      '0',
+    )}/${String(d.getDate()).padStart(2, '0')}`;
+  }
+  // 開啟圖片預覽
+  openImagePreview(imageUrl: string, title: string = '圖片'): void {
+    if (!imageUrl) return;
+    this.previewImageUrl = imageUrl;
+    this.previewImageTitle = title;
+    this.previewScale = 1;
+    this.previewRotate = 0;
+    this.imagePreviewVisible = true;
+      // ⭐關鍵：強制移到 body（避免被 cdkDrag 的 transform 影響 fixed 定位）
+  setTimeout(() => {
+    const preview =
+      document.querySelector('.image-preview-overlay') as HTMLElement;
+
+    if (preview) {
+      document.body.appendChild(preview);
+    }
+  });
+  }
+
+  // 關閉圖片預覽
+  closeImagePreview(): void {
+    this.imagePreviewVisible = false;
+    this.previewImageUrl = '';
+    this.previewImageTitle = '';
+    this.previewScale = 1;
+    this.previewRotate = 0;
+  }
+
+  zoomIn(): void {
+    if (this.previewScale >= 3) return;
+    this.previewScale = Number((this.previewScale + 0.2).toFixed(1));
+  }
+
+  zoomOut(): void {
+    if (this.previewScale <= 0.4) return;
+    this.previewScale = Number((this.previewScale - 0.2).toFixed(1));
+  }
+
+  rotateLeft(): void {
+    this.previewRotate -= 90;
+  }
+
+  rotateRight(): void {
+    this.previewRotate += 90;
+  }
+
+  resetPreview(): void {
+    this.previewScale = 1;
+    this.previewRotate = 0;
+  }
+
+  onPreviewWheel(event: WheelEvent): void {
+    event.preventDefault();
+    event.deltaY < 0 ? this.zoomIn() : this.zoomOut();
   }
 }
