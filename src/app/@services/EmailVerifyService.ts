@@ -156,7 +156,7 @@ export class EmailVerifyService {
     });
 
     this.http.post(
-      `${this.baseUrl}/verify?email=${email}&code=${code}`,
+      `${this.baseUrl}/users/verify?email=${email}&code=${code}`,
       {},
       { responseType: 'text' }
     ).subscribe({

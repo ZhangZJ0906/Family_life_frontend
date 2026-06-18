@@ -1,128 +1,9 @@
 @if (!isForgotPwd) {
   <section class="auth-page container-fluid">
-  <div class="row auth-row justify-content-center align-items-center">
-
-
-    <!-- 左側圖片區 -->
-    <div class="col-12 col-md-6 col-lg-5 col-xl-4 brand-col">
-      <div class="brand-section">
-        <img
-          class="auth-hero-img"
-          src="images/auth-hero.png"
-          alt="家庭生活到期管家介紹圖"
-        />
-      </div>
-    </div>
-
-    <!-- 右側表單 -->
-    <div class="col-12 col-md-6 col-lg-4 col-xl-3 form-col">
-      <form class="auth-card login-card" (ngSubmit)="signIn()">
-      <div class="form-icon login-icon"><mat-icon>login</mat-icon></div>
-      <h1>登入</h1>
-      <p class="subtitle">歡迎回來！請輸入您的帳號密碼</p>
-
-      <label class="form-label">
-        Email
-        <div class="input-box">
-          <mat-icon>mail</mat-icon>
-          <input type="email" name="email" [(ngModel)]="email" autocomplete="email" placeholder="請輸入 Email" required />
-        </div>
-      </label>
-
-      <label class="form-label">
-        密碼
-        <div class="input-box">
-          <mat-icon>lock</mat-icon>
-          <input type="password" name="password" [(ngModel)]="password" autocomplete="current-password" placeholder="請輸入密碼" required />
-        </div>
-      </label>
-
-      <div class="option-row">
-        <label class="remember-box">
-          <input type="checkbox" checked />
-          <span>記住我</span>
-        </label>
-        <a (click)="forGotPwd()" style="cursor: pointer;">忘記密碼？</a>
-      </div>
-
-      @if (errorMessage) {
-        <p class="error">{{ errorMessage }}</p>
-      }
-
-      <button type="submit" class="login-btn">登入</button>
-      <p class="switch-text">
-        還沒有帳號？ <a class="register-link" [routerLink]="['/register']">立即註冊</a>
-      </p>
-    </form>
-    </div>
-  </div>
-</section>
-
-} @else if (isForgotPwd && !updatePwd) {
-  <section class="auth-page container-fluid">
     <div class="row auth-row justify-content-center align-items-center">
 
       <!-- 左側圖片區 -->
-      <div class="col-12 col-md-6 col-lg-5 brand-col">
-        <div class="brand-section">
-          <img class="auth-hero-img" src="images/auth-hero.png" alt="家庭生活到期管家介紹圖" />
-        </div>
-      </div>
-
-
-    <form class="auth-card login-card" (ngSubmit)="checkEmailFromBackend()">
-      <div class="form-icon login-icon"><mat-icon>mail</mat-icon></div>
-      <h1>忘記密碼</h1>
-      <p class="subtitle">請輸入您的 Email 進行驗證</p>
-
-      <label class="form-label">
-        您的 Email
-        <div class="input-box">
-          <mat-icon>mail</mat-icon>
-          <input type="email" name="checkEmail" [(ngModel)]="checkEmail" placeholder="請輸入 Email" required />
-        </div>
-      </label>
-
-      <button type="submit" class="login-btn">下一步</button>
-      <button type="button" class="login-btn mt-5" (click)="getBackToLogin()">返回登入</button>
-    </form>
-    </div>
-  </section>
-
-} @else if (isForgotPwd && updatePwd) {
-  <section class="auth-page container-fluid">
-    <div class="row auth-row justify-content-center align-items-center">
-
-      <!-- 左側圖片區 -->
-      <div class="col-12 col-md-6 col-lg-5 brand-col">
-        <div class="brand-section">
-          <img class="auth-hero-img" src="images/auth-hero.png" alt="家庭生活到期管家介紹圖" />
-        </div>
-      </div>
-
-    <form class="auth-card login-card" (ngSubmit)="updatePassword()">
-      <div class="form-icon login-icon"><mat-icon>lock_reset</mat-icon></div>
-      <h1>重設密碼</h1>
-      <p class="subtitle">Email: <strong style="color: #4f46e5;">{{ checkEmail }}</strong></p>
-
-      <label class="form-label">
-        新密碼
-        <div class="input-box">
-          <mat-icon>password</mat-icon>
-          <input type="password" name="newPassword" [(ngModel)]="newPassword" placeholder="請輸入新密碼 (至少6碼)" required />
-        </div>
-      </label>
-
-      <button type="submit" class="login-btn">確認修改</button>
-      <button type="button" class="login-btn mt-5" (click)="getBackToLogin()">取消並返回</button>
-    </form>
-    </div>
-  </section>
-} @else {
-  <section class="auth-page container-fluid">
-    <div class="row auth-row justify-content-center align-items-center">
-      <!-- 左側圖片區 -->
-      <div class="col-12 col-md-6 col-lg-5 brand-col">
+      <div class="col-12 col-md-6 col-lg-5 col-xl-4 brand-col">
         <div class="brand-section">
           <img
             class="auth-hero-img"
@@ -132,65 +13,188 @@
         </div>
       </div>
 
-    <!-- 右側登入表單 -->
-    <form class="auth-card login-card" (ngSubmit)="signIn()">
-      <div class="form-icon login-icon">
-        <mat-icon>login</mat-icon>
+      <!-- 右側登入表單 -->
+      <div class="col-12 col-md-6 col-lg-4 col-xl-3 form-col">
+        <form class="auth-card login-card" (ngSubmit)="signIn()">
+
+          <div class="form-icon login-icon">
+            <mat-icon>login</mat-icon>
+          </div>
+
+          <h1>登入</h1>
+          <p class="subtitle">歡迎回來！請輸入您的帳號密碼</p>
+
+          <label class="form-label">
+            Email
+            <div class="input-box">
+              <mat-icon>mail</mat-icon>
+              <input
+                type="email"
+                name="email"
+                [(ngModel)]="email"
+                autocomplete="email"
+                placeholder="請輸入 Email"
+                required
+              />
+            </div>
+          </label>
+
+          <label class="form-label">
+            密碼
+            <div class="input-box">
+              <mat-icon>lock</mat-icon>
+              <input
+                type="password"
+                name="password"
+                [(ngModel)]="password"
+                autocomplete="current-password"
+                placeholder="請輸入密碼"
+                required
+              />
+            </div>
+          </label>
+
+          <div class="option-row">
+            <label class="remember-box">
+              <input type="checkbox" checked />
+              <span>記住我</span>
+            </label>
+
+            <a (click)="forGotPwd()" style="cursor: pointer;">忘記密碼？</a>
+          </div>
+
+          @if (errorMessage) {
+            <p class="error">{{ errorMessage }}</p>
+          }
+
+          <button type="submit" class="login-btn">登入</button>
+
+          <p class="switch-text">
+            還沒有帳號？
+            <a class="register-link" [routerLink]="['/register']">立即註冊</a>
+          </p>
+
+        </form>
       </div>
 
-      <h1>登入</h1>
-      <p class="subtitle">歡迎回來！請輸入您的帳號密碼</p>
+    </div>
+  </section>
+}
 
-      <label class="form-label">
-        Email
-        <div class="input-box">
-          <mat-icon>mail</mat-icon>
-          <input
-            type="email"
-            name="email"
-            [(ngModel)]="email"
-            autocomplete="email"
-            placeholder="請輸入 Email"
-            required
+@else if (isForgotPwd && !updatePwd) {
+  <section class="auth-page container-fluid">
+    <div class="row auth-row justify-content-center align-items-center">
+
+      <!-- 左側圖片區 -->
+      <div class="col-12 col-md-6 col-lg-5 col-xl-4 brand-col">
+        <div class="brand-section">
+          <img
+            class="auth-hero-img"
+            src="images/auth-hero.png"
+            alt="家庭生活到期管家介紹圖"
           />
         </div>
-      </label>
-
-      <label class="form-label">
-        密碼
-        <div class="input-box">
-          <mat-icon>lock</mat-icon>
-          <input
-            type="password"
-            name="password"
-            [(ngModel)]="password"
-            autocomplete="current-password"
-            placeholder="請輸入密碼"
-            required
-          />
-        </div>
-      </label>
-
-      <div class="option-row">
-        <label class="remember-box">
-          <input type="checkbox" checked />
-          <span>記住我</span>
-        </label>
-
-        <a (click)="forGotPwd()">忘記密碼？</a>
       </div>
 
-      @if (errorMessage) {
-        <p class="error">{{ errorMessage }}</p>
-      }
+      <!-- 右側忘記密碼表單 -->
+      <div class="col-12 col-md-6 col-lg-4 col-xl-3 form-col">
+        <form class="auth-card login-card" (ngSubmit)="checkEmailFromBackend()">
 
-      <button type="submit" class="login-btn">登入</button>
+          <div class="form-icon login-icon">
+            <mat-icon>mail</mat-icon>
+          </div>
 
-      <p class="switch-text">
-        還沒有帳號？
-        <a class="register-link" [routerLink]="['/register']">立即註冊</a>
-      </p>
-    </form>
+          <h1>忘記密碼</h1>
+          <p class="subtitle">請輸入您的 Email 進行驗證</p>
+
+          <label class="form-label">
+            您的 Email
+            <div class="input-box">
+              <mat-icon>mail</mat-icon>
+              <input
+                type="email"
+                name="checkEmail"
+                [(ngModel)]="checkEmail"
+                placeholder="請輸入 Email"
+                required
+              />
+            </div>
+          </label>
+
+          <button type="submit" class="login-btn">下一步</button>
+
+          <button
+            type="button"
+            class="login-btn mt-5"
+            (click)="getBackToLogin()"
+          >
+            返回登入
+          </button>
+
+        </form>
+      </div>
+
+    </div>
+  </section>
+}
+
+@else if (isForgotPwd && updatePwd) {
+  <section class="auth-page container-fluid">
+    <div class="row auth-row justify-content-center align-items-center">
+
+      <!-- 左側圖片區 -->
+      <div class="col-12 col-md-6 col-lg-5 col-xl-4 brand-col">
+        <div class="brand-section">
+          <img
+            class="auth-hero-img"
+            src="images/auth-hero.png"
+            alt="家庭生活到期管家介紹圖"
+          />
+        </div>
+      </div>
+
+      <!-- 右側重設密碼表單 -->
+      <div class="col-12 col-md-6 col-lg-4 col-xl-3 form-col">
+        <form class="auth-card login-card" (ngSubmit)="updatePassword()">
+
+          <div class="form-icon login-icon">
+            <mat-icon>lock_reset</mat-icon>
+          </div>
+
+          <h1>重設密碼</h1>
+
+          <p class="subtitle">
+            Email:
+            <strong style="color: #4f46e5;">{{ checkEmail }}</strong>
+          </p>
+
+          <label class="form-label">
+            新密碼
+            <div class="input-box">
+              <mat-icon>password</mat-icon>
+              <input
+                type="password"
+                name="newPassword"
+                [(ngModel)]="newPassword"
+                placeholder="請輸入新密碼 (至少6碼)"
+                required
+              />
+            </div>
+          </label>
+
+          <button type="submit" class="login-btn">確認修改</button>
+
+          <button
+            type="button"
+            class="login-btn mt-5"
+            (click)="getBackToLogin()"
+          >
+            取消並返回
+          </button>
+
+        </form>
+      </div>
+
     </div>
   </section>
 }
