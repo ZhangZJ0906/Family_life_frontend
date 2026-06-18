@@ -276,48 +276,54 @@ export class GroupPageComponent{
   openChatRoom(group: any) {
     const groupId = group.groupId;
 
-    // ❌ 已經開過 → 不再開新視窗
+    // 已經開過 → 不再開新視窗
     if (this.chatDialogs.has(groupId)) {
-
       return;
     }
 
-    let offset = this.dialog.openDialogs.length * 30;
+    const isMobile = window.innerWidth <= 600;
+
+    const offset = this.dialog.openDialogs.length * 30;
 
     const dialogRef = this.dialog.open(ChatRoomComponent, {
-      position: {
-        bottom: `${offset}px`,
-        right: `${offset}px`
-      },
+      // 手機全螢幕不要 position；桌機才靠右下角
+      position: isMobile
+        ? {}
+        : {
+            bottom: `${offset}px`,
+            right: `${offset}px`
+          },
 
-      width: '420px',
-      height: '650px',
+      // 手機全螢幕；桌機固定大小
+      width: isMobile ? '100vw' : '420px',
+      height: isMobile ? '100dvh' : '650px',
 
-      panelClass: 'chat-dialog',
+      maxWidth: isMobile ? '100vw' : '95vw',
+      maxHeight: isMobile ? '100dvh' : '90vh',
+
+      panelClass: isMobile
+        ? ['chat-dialog', 'chat-dialog-mobile']
+        : ['chat-dialog'],
 
       data: {
         groupId: group.groupId,
-        groupName: group.groupName
+        groupName: group.groupName,
+        isMobile: isMobile
       },
 
-      // ⭐ 重點：允許多開
       disableClose: false,
 
-      // ⭐ 避免覆蓋（可選）
-      hasBackdrop: false,
+      // 手機建議有 backdrop，桌機多開才不要 backdrop
+      hasBackdrop: isMobile ? true : false,
 
-      // ⭐ 每個 dialog 都可獨立互動
       autoFocus: false
     });
 
-    // 👉 存起來
     this.chatDialogs.set(groupId, dialogRef);
 
-    // 👉 關閉時移除紀錄
     dialogRef.afterClosed().subscribe(() => {
       this.chatDialogs.delete(groupId);
     });
-
   }
 
   openCreateDialog() {
@@ -680,9 +686,27 @@ export class GroupPageComponent{
 
   }
 
-getAvatarUrl(avatar: string): string {
-  if (!avatar) return 'default.png';
-  if (avatar.startsWith('http')) return avatar; // 舊資料相容
-  return environment.apiUrl + avatar; // 自動補上當前 host
+getAvatarUrl(avatar?: string | null): string {
+  if (!avatar || avatar.trim() === '') {
+    return 'assets/default-avatar.png';
+  }
+
+  if (avatar.startsWith('http://localhost:8081')) {
+    return avatar.replace('http://localhost:8081', window.location.origin + '/api');
+  }
+
+  if (avatar.startsWith('http://localhost:8080')) {
+    return avatar.replace('http://localhost:8080', window.location.origin + '/api');
+  }
+
+  if (avatar.startsWith('http')) {
+    return avatar;
+  }
+
+  if (avatar.startsWith('/')) {
+    return window.location.origin + '/api' + avatar;
+  }
+
+  return window.location.origin + '/api/' + avatar;
 }
 }
