@@ -174,6 +174,15 @@
 
         </ng-container>
 
+        <!-- chat -->
+        <ng-container *ngIf="n.type === 'chat'">
+
+          <button class="view-btn" (click)="openChatRoom({groupId: n.sendUserId, groupName: n.name})">
+            查看
+          </button>
+
+        </ng-container>
+
         <button mat-icon-button class="delete-btn" (click)="deleteNotify(n)">
           <mat-icon>delete</mat-icon>
         </button>
