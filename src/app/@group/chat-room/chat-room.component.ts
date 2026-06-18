@@ -107,15 +107,17 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
             break;
 
           case 'MESSAGE':
-            this.messages = [...this.messages, msg];
-            break;
-
           case 'IMAGE':
+
             this.messages = [...this.messages, msg];
+
+            this.calculateUnreadIndex(); // ⭐補這個
+
             break;
 
           case 'READ':
             this.updateReadCount(msg);
+            this.calculateUnreadIndex();
             break;
 
           case 'EDIT':
@@ -269,7 +271,15 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
     this.http.post(
       `${environment.apiUrl}/chat/read/${this.groupId}?userId=${this.userId}`,
       {}
-    ).subscribe();
+    ).subscribe(() => {
+
+      // ⭐ 很重要：重新計算未讀
+      this.messages.forEach(m => {
+        m.readByMe = true;
+      });
+
+      this.calculateUnreadIndex();
+    });
   }
 
   scrollToBottom() {
@@ -485,6 +495,11 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
       d1.getMonth() !== d2.getMonth() ||
       d1.getDate() !== d2.getDate()
     );
+  }
+
+  calculateUnreadIndex() {
+    this.firstUnreadIndex =
+      this.messages.findIndex(m => !m.readByMe);
   }
 
   formatDate(date: string): string {
