@@ -122,13 +122,9 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
     this.isLoadingMessages = true;
 
     this.http.get<any>(
-<<<<<<< HEAD
-      `http://192.168.200.212:8080/chat/${this.groupId}`
-=======
       `${environment.apiUrl}/chat/${this.groupId}`
->>>>>>> origin/ZJ
     ).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.messages = res.messages ?? [];
 
         this.markRead();
@@ -176,11 +172,7 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
     formData.append('senderId', this.userId.toString());
 
     this.http.post(
-<<<<<<< HEAD
-      'http://192.168.200.212:8080/chat/upload',
-=======
-      '${environment.apiUrl}/chat/upload',
->>>>>>> origin/ZJ
+      `${environment.apiUrl}/chat/upload`,
       formData
     ).subscribe();
   }
@@ -196,11 +188,7 @@ export class ChatRoomComponent implements OnInit,  AfterViewChecked {
 
   markRead() {
     this.http.post(
-<<<<<<< HEAD
-      `http://192.168.200.212:8080/chat/read/${this.groupId}?userId=${this.userId}`,
-=======
       `${environment.apiUrl}/chat/read/${this.groupId}?userId=${this.userId}`,
->>>>>>> origin/ZJ
       {}
     ).subscribe();
   }
