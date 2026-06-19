@@ -372,7 +372,10 @@ export class ItemListEditDialogComponent implements OnInit {
         this.showError('請選擇藥品到期日期');
         return;
       }
-
+      if (this.item.safeQuantity < 0) {
+        this.showError('安全庫存不能小於0');
+        return;
+      }
       payload = {
         _type: 'medicine',
         id: this.item.id,
@@ -411,6 +414,10 @@ export class ItemListEditDialogComponent implements OnInit {
       }
       if (!this.item.expireDate) {
         this.showError('請選擇到期日期');
+        return;
+      }
+      if (this.item.safeQuantity < 0) {
+        this.showError('安全庫存不能小於0');
         return;
       }
 
@@ -605,7 +612,6 @@ export class ItemListEditDialogComponent implements OnInit {
         fileInput.value = '';
       }
     } catch (error) {
-      
       Swal.fire('錯誤', '無法載入預設圖片', 'error');
     }
   }

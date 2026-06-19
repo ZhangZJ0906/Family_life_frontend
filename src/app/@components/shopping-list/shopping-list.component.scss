@@ -9,6 +9,14 @@
   box-sizing: border-box;
 }
 
+.shopping-header-card,
+.lists-panel,
+.error-message {
+  width: min(100%, 66.666vw);
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .item-header-card,
 .table-card,
 .dialog {
@@ -490,6 +498,12 @@ mat-progress-bar {
 }
 
 @media (max-width: 900px) {
+  .shopping-header-card,
+  .lists-panel,
+  .error-message {
+    width: 100%;
+  }
+
   .item-header-card,
   .panel-header {
     grid-template-columns: 1fr;
@@ -531,5 +545,136 @@ mat-progress-bar {
   .list-grid,
   .summary-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* 手機清單分頁 */
+.mobile-list-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+
+  padding: 14px;
+  margin: 20px 0 4px;
+
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
+}
+
+.mobile-page-btn {
+  height: 42px;
+  min-width: 104px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #eef3ff;
+  color: #2f5fe5;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  cursor: pointer;
+}
+
+.mobile-page-btn mat-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+}
+
+.mobile-page-btn:disabled {
+  background: #f1f5f9;
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.mobile-page-info {
+  min-width: 56px;
+  height: 42px;
+
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #111827;
+
+  font-size: 14px;
+  font-weight: 900;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================= */
+/* 購物清單卡片手機版修正 */
+/* ============================= */
+
+.list-card,
+.list-title,
+.list-actions,
+.list-grid {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .list-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .list-card {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .list-card-header {
+    align-items: flex-start;
+  }
+
+  .list-title {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .list-title strong {
+    font-size: 18px;
+    line-height: 1.35;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  .status-badge {
+    flex-shrink: 0;
+  }
+
+  .list-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    white-space: normal;
+    overflow: hidden;
+  }
+
+  .list-actions button {
+    width: 100%;
+    min-width: 0;
+    padding: 0 6px;
+    justify-content: center;
+  }
+
+  .list-actions button .mat-icon,
+  .list-actions button mat-icon {
+    margin-right: 4px;
   }
 }

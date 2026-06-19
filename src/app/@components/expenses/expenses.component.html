@@ -7,7 +7,7 @@
     <div class="expense-title">
       <div class="title-icon">💳</div>
       <div>
-        <h3 class="fw-bold mb-0">家庭記帳系統</h3>
+        <h3 class="fw-bold mb-0">記帳系統</h3>
         <small class="text-muted">費用管理 Dashboard</small>
       </div>
     </div>
@@ -83,7 +83,7 @@
     <!-- 下拉選項 -->
     <!-- @for (g of userGroups; track g.groupId) {
 
-          
+
           <mat-option [value]="g.groupId">
             <div class="expense-group-option">
               <img class="expense-group-avatar" [src]="g.avatar || 'assets/default-avatar.png'" alt="群組頭像" />
@@ -197,12 +197,16 @@
         <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
       </table>
     </div>
+
+    <mat-paginator [pageSizeOptions]="[10, 20]" [pageSize]="10" showFirstLastButtons class="expense-paginator">
+    </mat-paginator>
+
   </section>
 
   <!-- 手機版列表：只在手機顯示 -->
   <section class="expense-mobile-list d-block d-md-none">
 
-    @for (e of dataSource.filteredData; track e.id) {
+    @for (e of mobileExpenses; track e.id) {
     <div class="expense-mobile-card">
 
       <!-- 上方：日期 + 金額 -->
@@ -247,7 +251,31 @@
       </div>
     </div>
     }
+
+
+    @if (dataSource.filteredData.length > mobilePageSize) {
+    <div class="mobile-pager">
+      <button type="button" class="mobile-page-btn" [disabled]="mobilePageIndex === 0" (click)="prevMobilePage()">
+        <mat-icon>chevron_left</mat-icon>
+        上一頁
+      </button>
+
+      <div class="mobile-page-info">
+        {{ mobileCurrentPage }} / {{ mobileTotalPages }}
+      </div>
+
+      <button type="button" class="mobile-page-btn" [disabled]="mobilePageIndex >= mobileTotalPages - 1"
+        (click)="nextMobilePage()">
+        下一頁
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+    }
   </section>
+
+
+
+
   <div class="fab-container">
 
     @if (selection.selected.length > 0) {
@@ -263,6 +291,3 @@
       <mat-icon>add</mat-icon>
     </button>
   </div>
-
-
-</div>

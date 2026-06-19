@@ -1,144 +1,143 @@
 <div class="profile-page">
-<app-topbar></app-topbar>
+  <app-topbar></app-topbar>
 
-<div class="profile-content">
-  <section class="profile-grid">
+  <div class="profile-content container-fluid">
+    <div class="row g-4 justify-content-center align-items-start">
 
-    <!-- 左上：個人資訊（合併卡） -->
-    <div class="profile-card profile-user-card">
+      <!-- 左欄：個人資訊 + 通知設定 -->
+      <div class="col-12 col-lg-8">
+        <div class="row g-4">
 
-      <div class="user-card-inner">
+          <!-- 個人資訊 -->
+          <div class="col-12">
+            <div class="profile-card profile-user-card">
+              <div class="user-card-inner">
 
-        <!-- 左：頭像 -->
-        <div class="avatar-section">
-          <div class="avatar-large">
-            <img *ngIf="avatarUrl; else textAvatar" [src]="avatarUrl" alt="頭像">
+                <div class="avatar-section">
+                  <div class="avatar-large">
+                    <img *ngIf="avatarUrl; else textAvatar" [src]="getAvatar(avatarUrl)" alt="頭像">
 
-            <ng-template #textAvatar>
-              {{ avatarText }}
-            </ng-template>
+                    <ng-template #textAvatar>
+                      {{ avatarText }}
+                    </ng-template>
+                  </div>
+                </div>
+
+                <div class="info-section">
+                  <h3 class="name">{{ userName }}</h3>
+                  <p class="email">{{ email }}</p>
+
+                  <button
+                    type="button"
+                    class="edit-avatar-btn"
+                    (click)="openEditDialog()"
+                  >
+                    更改資料
+                  </button>
+                </div>
+
+              </div>
+            </div>
           </div>
 
+          <!-- 通知設定 -->
+          <div class="col-12">
+            <div class="profile-card notify-card">
+              <h3>通知設定</h3>
 
-        </div>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h4>一般外部通知</h4>
+                  <p>群組邀請、群組更新、食材、藥品、保固、訂閱即將到期時通知</p>
+                </div>
 
-        <!-- 右：基本資料 -->
-        <div class="info-section">
+                <label class="switch">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="endDateNotify"
+                    (change)="isDirty = true"
+                  >
+                  <span class="slider"></span>
+                </label>
+              </div>
 
-          <h3 class="name">{{ userName }}</h3>
-          <p class="email">{{ email }}</p>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h4>Email 通知</h4>
+                  <p>透過 Email 接收重要提醒</p>
+                </div>
 
-          <!-- <div class="info-block">
-            <div class="info-row">
-              <span class="label">使用者名稱</span>
-              <span class="value">{{ userName }}</span>
+                <label class="switch">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="emailNotify"
+                    (change)="isDirty = true"
+                  >
+                  <span class="slider"></span>
+                </label>
+              </div>
             </div>
+          </div>
 
-            <div class="info-row">
-              <span class="label">Email</span>
-              <span class="value">{{ email }}</span>
+        </div>
+      </div>
+
+      <!-- 右欄：群組狀態 -->
+      <div class="col-12 col-lg-4">
+        <div class="profile-card group-card">
+          <div class="group-header">
+            <h3>群組狀態</h3>
+          </div>
+
+          <div *ngIf="isLoading" class="table-skeleton">
+            <div class="row skeleton-row" *ngFor="let i of [1,2,3,4,5]">
+              <div class="cell avatar"></div>
+              <div class="cell text"></div>
+              <div class="cell text short"></div>
             </div>
-          </div> -->
-          <button type="button"
-                  class="edit-avatar-btn"
-                  (click)="openEditDialog()">
-            更改資料
-          </button>
+          </div>
 
+          <div *ngIf="!isLoading" class="group-list">
+            <details class="group-accordion" *ngFor="let group of groups" open>
+              <summary>
+                <div class="group-summary-left">
+                  <img
+                    class="group-avatar"
+                    [src]="group.avatar || 'assets/default-avatar.png'"
+                  />
+
+                  <span class="group-name">
+                    {{ truncateName(group.groupName) }}
+                  </span>
+                </div>
+              </summary>
+
+              <div class="group-detail">
+                <div class="invite-row">
+                  <p class="invite-code">
+                    邀請碼：{{ group.inviteCode }}
+                  </p>
+
+                  <button
+                    class="copy-btn"
+                    type="button"
+                    (click)="copyInviteCode(group)"
+                  >
+                    複製
+                  </button>
+                </div>
+              </div>
+            </details>
+          </div>
         </div>
-
       </div>
 
     </div>
-
-    <!-- 右側：群組，往下跨兩列 -->
-<div class="profile-card group-card">
-  <div class="group-header">
-    <h3>群組狀態</h3>
   </div>
-
-  <!-- LOADING TABLE -->
-  <div *ngIf="isLoading" class="table-skeleton">
-    <div class="row skeleton-row" *ngFor="let i of [1,2,3,4,5]">
-      <div class="cell avatar"></div>
-      <div class="cell text"></div>
-      <div class="cell text short"></div>
-    </div>
-  </div>
-
-  <!-- REAL TABLE -->
-  <div *ngIf="!isLoading" class="group-list">
-    <details class="group-accordion" *ngFor="let group of groups" open>
-      <summary>
-        <div class="group-summary-left">
-          <img
-            class="group-avatar"
-            [src]="group.avatar || 'assets/default-avatar.png'"
-          />
-
-          <span class="group-name">
-            {{ truncateName(group.groupName) }}
-          </span>
-        </div>
-      </summary>
-
-      <div class="group-detail">
-        <div class="invite-row">
-          <p class="invite-code">
-            邀請碼：{{ group.inviteCode }}
-          </p>
-
-          <button
-            class="copy-btn"
-            type="button"
-            (click)="copyInviteCode(group)"
-          >
-            複製
-          </button>
-        </div>
-      </div>
-    </details>
-  </div>
-</div>
-
-
-    <!-- 左下：通知設定，橫跨頭像 + 基本資料 -->
-    <div class="profile-card notify-card">
-      <h3>通知設定</h3>
-
-      <div class="setting-item">
-        <div class="setting-info">
-          <h4>一般外部通知</h4>
-          <p>群組邀請、群組更新、食材、藥品、保固、訂閱即將到期時通知</p>
-        </div>
-
-        <label class="switch">
-          <input type="checkbox" [(ngModel)]="endDateNotify" (change)="isDirty = true">
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div class="setting-item">
-        <div class="setting-info">
-          <h4>Email 通知</h4>
-          <p>透過 Email 接收重要提醒</p>
-        </div>
-
-        <label class="switch">
-          <input type="checkbox" [(ngModel)]="emailNotify" (change)="isDirty = true">
-          <span class="slider"></span>
-        </label>
-      </div>
-    </div>
-
-  </section>
-</div>
-
 
   <div class="save-wrapper">
     <button class="save-btn" (click)="saveAll()">
       儲存資料
     </button>
   </div>
-
 </div>

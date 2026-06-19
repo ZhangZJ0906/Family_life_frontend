@@ -7,13 +7,17 @@ import {
 } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
 
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 
 import { NotifyService } from '../../@services/NotifyService';
+import { environment } from '../../@models/user.model';
 import { Calendar } from '@fullcalendar/core/index.js';
+
+import { ChatRoomComponent } from './../chat-room/chat-room.component';
 
 @Component({
   selector: 'app-notify-dialog',
@@ -43,7 +47,8 @@ export class NotifyDialogComponent implements OnInit {
     | 'calendar_self'
     | 'warring'
     | 'warring_self'
-    | 'update' = 'all';
+    | 'update'
+    | 'chat' = 'all';
 
   unreadMap = {
     all: 0,
@@ -55,7 +60,8 @@ export class NotifyDialogComponent implements OnInit {
     calendar_self: 0,
     warring: 0,
     warring_self: 0,
-    update: 0
+    update: 0,
+    chat: 0
   };
 
   isLoading = true;
@@ -65,6 +71,7 @@ export class NotifyDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private http: HttpClient,
     private router: Router,
+    private dialog: MatDialog,
     private notifyService: NotifyService
   ) {
     this.user_id = data.userId;
@@ -93,7 +100,7 @@ export class NotifyDialogComponent implements OnInit {
   getNotify() {
     this.isLoading = true;
     this.http.get<any>(
-      `http://localhost:8080/family_life/get_notify?user_id=${this.user_id}`
+      `${environment.apiUrl}/family_life/get_notify?user_id=${this.user_id}`
     ).subscribe({
       next: (res) => {
 
@@ -101,6 +108,8 @@ export class NotifyDialogComponent implements OnInit {
           ...n,
           isRead: Number(n.isRead)
         }));
+
+        console.log(res);
 
         this.calculateUnread();
         this.syncBadge();
@@ -131,6 +140,7 @@ export class NotifyDialogComponent implements OnInit {
     this.unreadMap.warring_self = list.filter(n => n.isRead !== 1 && n.type === 'warring_self').length;
     this.unreadMap.expense = list.filter(n => n.isRead !== 1 && n.type === 'expense').length;
     this.unreadMap.update = list.filter(n => n.isRead !== 1 && n.type === 'update').length;
+    this.unreadMap.chat = list.filter(n => n.isRead !== 1 && n.type === 'chat').length;
   }
 
   // ========================
@@ -151,7 +161,7 @@ export class NotifyDialogComponent implements OnInit {
     this.showLoading('標記已讀中...');
 
     this.http.post(
-      `http://localhost:8080/family_life/read_notify?notify_id=${n.id}`,
+      `${environment.apiUrl}/family_life/read_notify?notify_id=${n.id}`,
       {}
     ).subscribe({
       next: () => {
@@ -181,7 +191,7 @@ export class NotifyDialogComponent implements OnInit {
 
 
     this.http.post(
-      'http://localhost:8080/family_life/read_all_notify',
+      `${environment.apiUrl}/family_life/read_all_notify`,
       { ids: unreadIds }
     ).subscribe({
       next: () => {
@@ -209,7 +219,7 @@ export class NotifyDialogComponent implements OnInit {
     this.showLoading('刪除中...');
 
     this.http.post(
-      'http://localhost:8080/family_life/delete_all_isReadNotify',
+      `${environment.apiUrl}/family_life/delete_all_isReadNotify`,
       { ids }
     ).subscribe({
       next: () => {
@@ -244,7 +254,7 @@ export class NotifyDialogComponent implements OnInit {
       this.showLoading('刪除中...');
 
       this.http.post(
-        `http://localhost:8080/family_life/delete_notify?notify_id=${n.id}`,
+        `${environment.apiUrl}/family_life/delete_notify?notify_id=${n.id}`,
         {}
       ).subscribe({
         next: () => {
@@ -282,7 +292,7 @@ export class NotifyDialogComponent implements OnInit {
     this.showLoading('處理中...');
 
     this.http.post(
-      `http://localhost:8080/family_life/accept_join_group?user_id=${this.user_id}&group_id=${n.targetGroupId}&notify_id=${n.id}`,
+      `${environment.apiUrl}/family_life/accept_join_group?user_id=${this.user_id}&group_id=${n.targetGroupId}&notify_id=${n.id}`,
       {}
     ).subscribe({
       next: () => {
@@ -304,7 +314,7 @@ export class NotifyDialogComponent implements OnInit {
     this.showLoading('處理中...');
 
     this.http.post(
-      `http://localhost:8080/family_life/reject_join_group?user_id=${this.user_id}&group_id=${n.targetGroupId}&notify_id=${n.id}`,
+      `${environment.apiUrl}/family_life/reject_join_group?user_id=${this.user_id}&group_id=${n.targetGroupId}&notify_id=${n.id}`,
       {}
     ).subscribe({
       next: () => {
@@ -321,10 +331,14 @@ export class NotifyDialogComponent implements OnInit {
   // 🔥 導頁
   // ========================
   goItemList(n: any) {
+    this.dialogRef.close();
+
     this.router.navigate(['/itemList', n.sendUserId]);
   }
 
   goCalendar(n: any) {
+    this.dialogRef.close();
+
     this.router.navigate(['/calendar', n.sendUserId]);
   }
 
@@ -355,6 +369,62 @@ export class NotifyDialogComponent implements OnInit {
 
     return this.notifies.filter(n => n.type === this.filterType);
   }
+
+  //開啟聊天室
+  private chatDialogs = new Map<number, any>();
+
+  openChatRoom(group: any) {
+      const groupId = group.groupId;
+
+      // 已經開過 → 不再開新視窗
+      if (this.chatDialogs.has(groupId)) {
+        return;
+      }
+
+      const isMobile = window.innerWidth <= 600;
+
+      const offset = this.dialog.openDialogs.length * 30;
+
+      const dialogRef = this.dialog.open(ChatRoomComponent, {
+        // 手機全螢幕不要 position；桌機才靠右下角
+        position: isMobile
+          ? {}
+          : {
+              bottom: `${offset}px`,
+              right: `${offset}px`
+            },
+
+        // 手機全螢幕；桌機固定大小
+        width: isMobile ? '100vw' : '420px',
+        height: isMobile ? '100dvh' : '650px',
+
+        maxWidth: isMobile ? '100vw' : '95vw',
+        maxHeight: isMobile ? '100dvh' : '90vh',
+
+        panelClass: isMobile
+          ? ['chat-dialog', 'chat-dialog-mobile']
+          : ['chat-dialog'],
+
+        data: {
+          groupId: group.groupId,
+          groupName: group.groupName,
+          isMobile: isMobile
+        },
+
+        disableClose: false,
+
+        // 手機建議有 backdrop，桌機多開才不要 backdrop
+        hasBackdrop: isMobile ? true : false,
+
+        autoFocus: false
+      });
+
+      this.chatDialogs.set(groupId, dialogRef);
+
+      dialogRef.afterClosed().subscribe(() => {
+        this.chatDialogs.delete(groupId);
+      });
+    }
 
   // ========================
   // 🔥 close dialog

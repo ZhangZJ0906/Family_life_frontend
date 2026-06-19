@@ -53,22 +53,13 @@
    GRID
 ========================= */
 
-.profile-grid {
-  display: grid;
-  grid-template-columns: 320px 1fr 1fr;
-  grid-template-rows: 274px auto;
-  gap: 20px;
-}
+
 
 /* =========================
    USER CARD (LEFT TOP)
 ========================= */
 
-.profile-user-card {
-  grid-column: 1 / span 2;
-  grid-row: 1;
-  padding: 32px;
-}
+
 
 .user-card-inner {
   display: flex;
@@ -147,14 +138,7 @@
    GROUP CARD (RIGHT)
 ========================= */
 
-.group-card {
-  grid-column: 3;
-  grid-row: 1 / span 2;
-  padding: 20px;
-  height: 720px;
-  display: flex;
-  flex-direction: column;
-}
+
 
 .group-header {
   flex-shrink: 0;
@@ -208,6 +192,7 @@
 /* Group list */
 .group-list {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding-right: 6px;
 }
@@ -290,9 +275,23 @@
    NOTIFY CARD
 ========================= */
 
+.profile-content {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.profile-user-card {
+  padding: 32px;
+}
+
+.group-card {
+  padding: 20px;
+  height: 540px;
+  display: flex;
+  flex-direction: column;
+}
+
 .notify-card {
-  grid-column: 1 / span 2;
-  grid-row: 2;
   padding: 22px;
 }
 
@@ -380,14 +379,149 @@
    RWD
 ========================= */
 
-@media (max-width: 1100px) {
-  .profile-grid {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto;
+@media (max-width: 991px) {
+  .profile-page {
+    padding: 24px;
+  }
+
+  .profile-content {
+    max-width: 760px;
+  }
+
+  .profile-user-card {
+    padding: 30px;
+  }
+
+  .user-card-inner {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+
+  .avatar-large {
+    width: 140px;
+    height: 140px;
+  }
+
+  .group-card {
+    min-height: 260px;
+    max-height: 420px;
+  }
+
+  .notify-card {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 576px) {
+  .profile-page {
+    padding: 18px 14px;
+  }
+
+  .profile-content {
+    max-width: 100%;
   }
 
   .profile-card {
-    grid-column: 1 !important;
-    grid-row: auto !important;
+    border-radius: 20px;
+  }
+
+  .profile-user-card {
+    padding: 24px 20px;
+  }
+
+  .user-card-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    text-align: center;
+  }
+
+  .avatar-large {
+    width: 135px;
+    height: 135px;
+  }
+
+  .info-section {
+    height: auto;
+    align-items: center;
+  }
+
+  .info-section .name {
+    font-size: 30px;
+    margin-bottom: 6px;
+  }
+
+  .info-section .email {
+    font-size: 14px;
+    word-break: break-all;
+  }
+
+  .edit-avatar-btn {
+    width: auto;
+    min-width: 120px;
+    padding: 12px 18px;
+  }
+
+  .group-card {
+    padding: 22px 20px;
+    min-height: 360px;
+    max-height: none;
+  }
+
+  .group-header h3 {
+    font-size: 24px;
+  }
+
+  .group-accordion {
+    padding: 16px;
+  }
+
+  .invite-row {
+    align-items: center;
+    gap: 10px;
+  }
+
+  .invite-code {
+    font-size: 13px;
+    word-break: break-all;
+  }
+
+  .copy-btn {
+    padding: 8px 14px;
+  }
+
+  .notify-card {
+    padding: 22px 20px;
+  }
+
+  .setting-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .setting-info h4 {
+    font-size: 18px;
+  }
+
+  .setting-info p {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .switch {
+    align-self: flex-end;
+  }
+
+  .save-wrapper {
+    margin-top: 20px;
+  }
+
+  .save-btn {
+    width: 100%;
+    max-width: 280px;
+    height: 46px;
   }
 }

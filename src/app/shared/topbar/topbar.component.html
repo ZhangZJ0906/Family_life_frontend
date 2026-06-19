@@ -83,7 +83,7 @@
     </button>
 
     <div class="user-avatar">
-      <img *ngIf="avatarUrl; else defaultAvatar" [src]="avatarUrl" alt="使用者頭像" />
+      <img *ngIf="avatarUrl; else defaultAvatar" [src]="getAvatar(avatarUrl)" alt="使用者頭像" />
 
       <ng-template #defaultAvatar>
         J

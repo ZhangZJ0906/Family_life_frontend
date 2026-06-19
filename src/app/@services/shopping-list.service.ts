@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../@models/user.model';
 
 import {
   AddPurchaseItemReq,
@@ -16,8 +17,8 @@ import {
 })
 export class ShoppingListService {
   private readonly http = inject(HttpClient);
-  private readonly shoppingUrl = 'http://localhost:8080/shopping_lists';
-  private readonly groupUrl = 'http://localhost:8080/family_life';
+  private readonly shoppingUrl = environment.apiUrl + '/shopping_lists';
+  private readonly groupUrl = environment.apiUrl + '/family_life';
 
   getLists(userId: number): Observable<ShoppingList[]> {
     return this.http.get<ShoppingList[]>(this.shoppingUrl, {
@@ -92,5 +93,11 @@ export class ShoppingListService {
       null,
       { params: { listId, itemId, userId } }
     );
+  }
+
+  getItemsBatch(listIds: number[]): Observable<Record<number, PurchaseItemVo[]>> {
+    return this.http.get<Record<number, PurchaseItemVo[]>>(`${this.shoppingUrl}/items/batch`, {
+      params: { listIds: listIds.join(',') }
+    });
   }
 }

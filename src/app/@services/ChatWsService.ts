@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Client } from '@stomp/stompjs';
+import { environment } from '../@models/user.model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +12,8 @@ export class ChatWsService {
   private client!: Client;
 
   private subscribedGroups = new Set<number>();
-
   connect(): Promise<void> {
+  const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
 
     if (this.connected) {
       return Promise.resolve();
@@ -23,11 +24,9 @@ export class ChatWsService {
 
       this.client = new Client({
 
-<<<<<<< HEAD
-        brokerURL: 'ws://192.168.200.212:8080/ws',
-=======
-        brokerURL: 'wss://deposits-plymouth-diet-meetings.trycloudflare.com/ws',
->>>>>>> origin/ZJ
+        // brokerURL: 'ws://localhost:8081/ws',
+
+        brokerURL: `${protocol}${window.location.host}/ws`,
 
         reconnectDelay: 5000
 

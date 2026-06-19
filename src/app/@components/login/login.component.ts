@@ -44,7 +44,7 @@ export class LoginComponent {
           icon: 'error',
           title: '登入失敗',
           text: 'Email 或密碼不正確',
-          confirmButtonText: '確認',
+          // confirmButtonText: '確認',
         });
 
         return;
@@ -108,7 +108,8 @@ export class LoginComponent {
 
   checkEmailFromBackend() {
     this.http
-      .getApi(this.http.basicUrl + `users/checkEmail?email=${this.checkEmail}`)
+      // .getApi(this.http.basicUrl + `users/checkEmail?email=${this.checkEmail}`)
+      .getApi(`users/checkEmail?email=${this.checkEmail}`)
       .subscribe({
         next: (res: any) => {
           if (res.code != 200) {
@@ -151,7 +152,10 @@ export class LoginComponent {
     };
     console.log(payload)
 
-    this.http.postApi(this.http.basicUrl+'users/updatePassword', payload).subscribe({
+    this.http
+      // .postApi(this.http.basicUrl+'users/updatePassword', payload)
+      .postApi('users/updatePassword', payload)
+      .subscribe({
       next: (res: any) => {
         if (res.code != 200) {
           Swal.fire({
