@@ -171,15 +171,8 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
   loadMessages() {
     this.isLoadingMessages = true;
 
-<<<<<<< HEAD
-    this.http.get<any>(
-      `${environment.apiUrl}/chat/${this.groupId}`
-    ).subscribe({
-      next: (res: any) => {
-=======
     this.http.get<any>(`${environment.apiUrl}/chat/${this.groupId}?userId=${this.userId}`).subscribe({
       next: (res) => {
->>>>>>> origin/internet
         this.messages = res.messages ?? [];
         console.log(this.messages)
 
@@ -241,12 +234,6 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
       file
     );
 
-<<<<<<< HEAD
-    this.http.post(
-      `${environment.apiUrl}/chat/upload`,
-      formData
-    ).subscribe();
-=======
     formData.append(
       'groupId',
       this.groupId.toString()
@@ -267,7 +254,6 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
         });
       },
     });
->>>>>>> origin/internet
   }
 
   updateReadCount(msg: any) {
