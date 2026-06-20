@@ -181,8 +181,9 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
         // console.log('最後一筆 id =', this.messages[this.messages.length - 1]?.id);
         // console.log('最後一筆訊息 =', this.messages[this.messages.length - 1]);
 
-        this.firstUnreadIndex = this.messages.findIndex(m => !m.readByMe);
-
+        this.firstUnreadIndex = this.messages.findIndex(
+          m => m.senderId !== this.userId && !m.readByMe
+        );
         console.log('firstUnreadIndex=', this.firstUnreadIndex);
 
         this.markRead();
@@ -275,7 +276,9 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
 
       // ⭐ 很重要：重新計算未讀
       this.messages.forEach(m => {
-        m.readByMe = true;
+        if (m.senderId !== this.userId) {
+          m.readByMe = true;
+        }
       });
 
       this.calculateUnreadIndex();
@@ -519,8 +522,15 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
   }
 
   calculateUnreadIndex() {
+
+    const idx = this.messages.findIndex(
+      m =>
+        m.senderId !== this.userId &&
+        !m.readByMe
+    );
+
     this.firstUnreadIndex =
-      this.messages.findIndex(m => !m.readByMe);
+      idx >= 0 ? idx : -1;
   }
 
   formatDate(date: string): string {
