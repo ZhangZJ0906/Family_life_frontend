@@ -13,8 +13,18 @@
       <span>{{ groupName }}</span>
     </div>
 
-    <div class="online-badge">
-      🟢 {{ onlineCount }}
+    <div class="online-members" (click)="openMemberPanel()">
+      <div class="online-summary">
+        👥 {{ onlineCount }} 人在線
+      </div>
+
+      <div class="online-avatars">
+        <img
+          *ngFor="let user of membersWithStatus | slice:0:3"
+          [src]="getAvatar(user.avatar)"
+          class="online-avatar"
+        />
+      </div>
     </div>
 
     <button
@@ -259,6 +269,45 @@
       ↩️ 收回
     </div>
 
+  </div>
+
+  <!-- ⭐ 成員面板（放這裡） -->
+  <div class="member-panel" *ngIf="showMemberPanel">
+
+    <div class="panel-header">
+      <span>📋 成員狀態</span>
+      <button (click)="showMemberPanel = false">✕</button>
+    </div>
+
+    <div class="panel-body">
+
+      <!-- 在線 -->
+      <div class="panel-section">
+        <div class="section-title">
+          🟢 在線 ({{ onlineMembers.length }})
+        </div>
+
+        <div class="member" *ngFor="let m of onlineMembers">
+          <img [src]="getAvatar(m.avatar)" />
+          <span class="name">{{ m.name || m.email }}</span>
+          <span class="dot online"></span>
+        </div>
+      </div>
+
+      <!-- 離線 -->
+      <div class="panel-section">
+        <div class="section-title">
+          ⚪ 離線 ({{ offlineMembers.length }})
+        </div>
+
+        <div class="member" *ngFor="let m of offlineMembers">
+          <img [src]="getAvatar(m.avatar)" />
+          <span class="name">{{ m.name || m.email }}</span>
+          <span class="dot offline"></span>
+        </div>
+      </div>
+
+    </div>
   </div>
 
 </div>
