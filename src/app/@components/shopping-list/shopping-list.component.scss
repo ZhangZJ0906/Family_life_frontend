@@ -613,3 +613,68 @@ mat-progress-bar {
   align-items: center;
   justify-content: center;
 }
+
+/* ============================= */
+/* 購物清單卡片手機版修正 */
+/* ============================= */
+
+.list-card,
+.list-title,
+.list-actions,
+.list-grid {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .list-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .list-card {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .list-card-header {
+    align-items: flex-start;
+  }
+
+  .list-title {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .list-title strong {
+    font-size: 18px;
+    line-height: 1.35;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  .status-badge {
+    flex-shrink: 0;
+  }
+
+  .list-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    white-space: normal;
+    overflow: hidden;
+  }
+
+  .list-actions button {
+    width: 100%;
+    min-width: 0;
+    padding: 0 6px;
+    justify-content: center;
+  }
+
+  .list-actions button .mat-icon,
+  .list-actions button mat-icon {
+    margin-right: 4px;
+  }
+}

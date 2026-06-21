@@ -80,6 +80,8 @@ export class CalendarComponent {
   };
   routeGroupId: number = 0;
 
+  assignedUserIdsCache = new Map<string, number[]>();
+
 
   // 關閉活動資訊卡
 hideEventTooltip(): void {
@@ -199,7 +201,9 @@ onWindowScroll(): void {
   ngOnInit() {
     const now = new Date();
     this.getLoginCalendarPageTime();
-    sessionStorage.setItem('calendar-last-view', now.toISOString());
+    this.http
+    .postApi(`calendar/recordLoginCalendarPageTime?userId=${this.createdBy}`, {})
+    .subscribe();
   }
 
   getGroupMembers(groupId: number): void {
@@ -313,27 +317,30 @@ isSelectedGroup(groupId: number): boolean {
 
 
 // 從後端查詢目前登入者在某個群組中的行事曆事件
-async loadCalendarEvents(groupId: number | null, userId: number): Promise<void>  {
+async loadCalendarEvents(
+  groupId: number | null,
+  userId: number,
+  showLoading: boolean = true
+): Promise<void>  {
   const realGroupId = groupId == null ? 0 : Number(groupId);
 
-  // 👉 開 loading
-  Swal.fire({
-    title: '載入行事曆中...',
-    allowOutsideClick: false,
-    didOpen: () => {
-      Swal.showLoading();
-    }
-  });
+  if (showLoading) {
+    Swal.fire({
+      title: '載入行事曆中...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  }
 
-  // 重點：
-  // 不要打 calendar/group/1
-  // 因為後端目前沒有 @GetMapping("/group/{groupId}")
-  const url =
-    `calendar/getByGroup?groupId=${realGroupId}&userId=${userId}`;
+  const url = `calendar/getByGroup?groupId=${realGroupId}&userId=${userId}`;
 
   this.http.getApi(url).subscribe({
     next: (res: any) => {
-      Swal.close(); // ✅ 關掉 loading
+      if (showLoading) {
+        Swal.close();
+      }
 
       if (res.code !== 200) {
         Swal.fire({
@@ -343,6 +350,8 @@ async loadCalendarEvents(groupId: number | null, userId: number): Promise<void> 
         });
         return;
       }
+
+      this.assignedUserIdsCache.clear();
 
       const fullCalendarEvents = (res.data ?? []).map((item: any) => ({
         id: String(item.id),
@@ -356,10 +365,7 @@ async loadCalendarEvents(groupId: number | null, userId: number): Promise<void> 
           groupId: item.groupId,
           assignedUserId: item.assignedUserId,
           createdTime: item.createdAt,
-
-          // 同一批活動的識別碼
           eventBatchId: item.eventBatchId,
-
         },
       }));
 
@@ -370,7 +376,9 @@ async loadCalendarEvents(groupId: number | null, userId: number): Promise<void> 
     },
 
     error: (err) => {
-      Swal.close(); // ❗記得錯誤也要關
+      if (showLoading) {
+        Swal.close();
+      }
 
       Swal.fire({
         icon: 'error',
@@ -493,14 +501,16 @@ const payload = {
         return;
       }
 
-        Swal.fire({
-        icon: 'success',
-        title: '新增成功',
-        timer: 900,
-        showConfirmButton: false,
-      }).then(() => {
-        this.loadCalendarEvents(groupId, this.createdBy);
-      });
+      Swal.fire({
+      icon: 'success',
+      title: '新增成功',
+      timer: 900,
+      showConfirmButton: false,
+      toast: true,
+      position: 'top-end',
+    });
+
+    this.loadCalendarEvents(groupId, this.createdBy);
     },
 
     error: (err) => {
@@ -519,9 +529,13 @@ getBatchAssignedUserIds(
   eventBatchId: string,
   fallbackUserId: number
 ): Promise<number[]> {
-  // 沒有批次 ID 時，退回目前這筆活動的 assignedUserId
   if (!eventBatchId) {
     return Promise.resolve([fallbackUserId]);
+  }
+
+  const cached = this.assignedUserIdsCache.get(eventBatchId);
+  if (cached) {
+    return Promise.resolve(cached);
   }
 
   const url = `calendar/batchAssignedUsers?eventBatchId=${eventBatchId}`;
@@ -534,7 +548,11 @@ getBatchAssignedUserIds(
           return;
         }
 
-        resolve((res.data ?? []).map((id: any) => Number(id)));
+        const ids = (res.data ?? []).map((id: any) => Number(id));
+
+        this.assignedUserIdsCache.set(eventBatchId, ids);
+
+        resolve(ids);
       },
       error: () => {
         resolve([fallbackUserId]);
@@ -652,14 +670,16 @@ const assignedUserIds = await this.getBatchAssignedUserIds(
 
           Swal.close();
 
-          Swal.fire({
+         Swal.fire({
           icon: 'success',
           title: '修改成功',
           timer: 900,
           showConfirmButton: false,
-        }).then(() => {
-          this.loadCalendarEvents(groupId, this.createdBy);
+          toast: true,
+          position: 'top-end',
         });
+
+        this.loadCalendarEvents(groupId, this.createdBy);
         },
 
         error: (err) => {
@@ -742,14 +762,16 @@ const assignedUserIds = await this.getBatchAssignedUserIds(
               return;
             }
 
-            Swal.fire({
+           Swal.fire({
             icon: 'success',
             title: '刪除成功',
             timer: 900,
             showConfirmButton: false,
-          }).then(() => {
-            this.loadCalendarEvents(groupId, this.createdBy);
+            toast: true,
+            position: 'top-end',
           });
+
+          this.loadCalendarEvents(groupId, this.createdBy);
           },
 
          error: (err) => {
@@ -777,6 +799,18 @@ async handleEventDrop(info: any): Promise<void> {
   const notifyBefore = info.event.extendedProps['notifyBefore'] || 60;
 
   const eventBatchId = info.event.extendedProps['eventBatchId'];
+  if (!eventBatchId) {
+  info.revert();
+
+  Swal.fire({
+    icon: 'error',
+    title: '移動失敗',
+    text: '此活動缺少批次識別碼，請重新整理後再試',
+    confirmButtonText: '確認',
+  });
+
+  return;
+}
 
   const fallbackAssignedUserId =
     info.event.extendedProps['assignedUserId'] ?? this.createdBy;
@@ -845,13 +879,19 @@ async handleEventDrop(info: any): Promise<void> {
 
   Swal.close();
 
+setTimeout(() => {
   Swal.fire({
     icon: 'question',
     title: '確認移動活動？',
     text: `是否將「${title}」移動到新的日期？`,
     showCancelButton: true,
+    showConfirmButton: true,
     confirmButtonText: '確認',
     cancelButtonText: '取消',
+    showLoaderOnConfirm: false,
+    didOpen: () => {
+      Swal.hideLoading();
+    },
   }).then((result) => {
     if (!result.isConfirmed) {
       info.revert();
@@ -880,7 +920,6 @@ async handleEventDrop(info: any): Promise<void> {
           : assignedUserIds[0],
     };
 
-    // 送出 API 時顯示 loading
     Swal.fire({
       title: '移動活動中...',
       allowOutsideClick: false,
@@ -912,9 +951,11 @@ async handleEventDrop(info: any): Promise<void> {
           title: '移動成功',
           timer: 900,
           showConfirmButton: false,
-        }).then(() => {
-          this.loadCalendarEvents(this.currentGroupId, this.createdBy);
+          toast: true,
+          position: 'top-end',
         });
+
+        this.loadCalendarEvents(this.currentGroupId, this.createdBy, false);
       },
 
       error: (err) => {
@@ -930,6 +971,7 @@ async handleEventDrop(info: any): Promise<void> {
       },
     });
   });
+}, 80);
 }
   // 滑鼠移到活動上時，顯示活動資訊卡
 async handleEventMouseEnter(info: any): Promise<void> {

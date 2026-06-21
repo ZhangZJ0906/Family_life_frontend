@@ -113,15 +113,17 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
             break;
 
           case 'MESSAGE':
-            this.messages = [...this.messages, msg];
-            break;
-
           case 'IMAGE':
+
             this.messages = [...this.messages, msg];
+
+            this.calculateUnreadIndex(); // ⭐補這個
+
             break;
 
           case 'READ':
             this.updateReadCount(msg);
+            this.calculateUnreadIndex();
             break;
 
           case 'EDIT':
@@ -254,12 +256,19 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
   }
 
   markRead() {
-    this.http
-      .post(
-        `${environment.apiUrl}/chat/read/${this.groupId}?userId=${this.userId}`,
-        {},
-      )
-      .subscribe();
+
+    this.http.post(
+      `${environment.apiUrl}/chat/read/${this.groupId}?userId=${this.userId}`,
+      {}
+    ).subscribe(() => {
+
+      // ⭐ 很重要：重新計算未讀
+      this.messages.forEach(m => {
+        m.readByMe = true;
+      });
+
+      this.calculateUnreadIndex();
+    });
   }
 
   scrollToBottom() {
@@ -439,8 +448,29 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
     this.dialogRef.close();
   }
 
-  getAvatar(avatar: string) {
-    return environment.apiUrl + avatar;
+  getAvatar(avatar?: string | null): string {
+    // console.log('getAvatar', avatar);
+    if (!avatar || avatar.trim() === '') {
+      return 'assets/default-avatar.png';
+    }
+
+    if (avatar.startsWith('http://localhost:8081')) {
+      return avatar.replace('http://localhost:8081', window.location.origin + '/api');
+    }
+
+    if (avatar.startsWith('http://localhost:8080')) {
+      return avatar.replace('http://localhost:8080', window.location.origin + '/api');
+    }
+
+    if (avatar.startsWith('http')) {
+      return avatar;
+    }
+
+    if (avatar.startsWith('/')) {
+      return window.location.origin + '/api' + avatar;
+    }
+
+    return window.location.origin + '/api/' + avatar;
   }
 
   //未讀+日期顯示
@@ -457,6 +487,11 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
       d1.getMonth() !== d2.getMonth() ||
       d1.getDate() !== d2.getDate()
     );
+  }
+
+  calculateUnreadIndex() {
+    this.firstUnreadIndex =
+      this.messages.findIndex(m => !m.readByMe);
   }
 
   formatDate(date: string): string {
