@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Client } from '@stomp/stompjs';
-import { environment } from '../@models/user.model';
+import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +12,7 @@ export class ChatWsService {
 
   private subscribedGroups = new Set<number>();
   connect(): Promise<void> {
-  const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
 
     if (this.connected) {
       return Promise.resolve();
@@ -84,6 +83,41 @@ export class ChatWsService {
 
   }
 
+  private subscriptions = new Map<number, StompSubscription>();
+
+  // =========================
+  // UNSUBSCRIBE SINGLE GROUP
+  // =========================
+  unsubscribe(groupId: number) {
+
+    const sub = this.subscriptions.get(groupId);
+
+    if (sub) {
+      sub.unsubscribe();
+      this.subscriptions.delete(groupId);
+    }
+
+    this.subscribedGroups.delete(groupId);
+  }
+
+  // =========================
+  // DISCONNECT ALL (🔥 logout 用)
+  // =========================
+  disconnect() {
+
+    console.log('WS disconnect');
+
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions.clear();
+    this.subscribedGroups.clear();
+
+    if (this.client?.connected) {
+      this.client.deactivate();
+    }
+
+    this.connected = false;
+  }
+
   sendMessage(payload: any) {
 
     this.client.publish({
@@ -94,7 +128,7 @@ export class ChatWsService {
   }
 
   enterRoom(groupId: number, userId: number) {
-
+    console.log("UID: ", userId + "is enterroom");
     this.client.publish({
       destination: '/app/chat.enter',
       body: JSON.stringify({
@@ -106,7 +140,7 @@ export class ChatWsService {
   }
 
   leaveRoom(groupId: number, userId: number) {
-
+        console.log("UID: ", userId + "is leaveroom");
     this.client.publish({
       destination: '/app/chat.leave',
       body: JSON.stringify({
@@ -115,6 +149,20 @@ export class ChatWsService {
       })
     });
 
+  }
+
+  //判斷是否死了
+  sendHeartbeat(groupId: number, userId: number) {
+
+    if (!this.client?.connected) return;
+
+    this.client.publish({
+      destination: '/app/chat.heartbeat',
+      body: JSON.stringify({
+        groupId,
+        userId
+      })
+    });
   }
 
 }
