@@ -7,7 +7,7 @@ import {
   HostListener,
   AfterViewChecked,
   Inject,
-  NgZone
+  NgZone,
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -21,7 +21,7 @@ import { ChatWsService } from '../../@services/ChatWsService';
 import { AuthService } from '../../@services/auth.service';
 import { environment } from '../../@models/user.model';
 import Swal from 'sweetalert2';
-import { MatIconModule } from "@angular/material/icon";
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-chat-room',
@@ -30,8 +30,7 @@ import { MatIconModule } from "@angular/material/icon";
   templateUrl: './chat-room.component.html',
   styleUrl: './chat-room.component.scss',
 })
-export class ChatRoomComponent implements OnInit, OnDestroy{
-
+export class ChatRoomComponent implements OnInit, OnDestroy {
   @ViewChild('scrollBox') scrollBox!: ElementRef;
 
   groupId!: number;
@@ -91,14 +90,6 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
     this.isMobile = this.data.isMobile ?? window.innerWidth <= 600;
 
     this.userId = this.authService.currentUser()?.user_id ?? 0;
-<<<<<<< HEAD
-
-    this.groupId = this.data.groupId;
-
-    console.log('目前聊天室 groupId =', this.groupId);
-    console.log('目前 userId =', this.userId);
-=======
->>>>>>> origin/DavidHomeComputer
 
     this.getMember();
     this.loadMessages();
@@ -110,9 +101,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
 
     this.ws.subscribe(this.groupId, (msg: any) => {
       this.zone.run(() => {
-
         switch (msg.type) {
-
           case 'ONLINE':
             this.onlineCount = msg.count;
             this.onlineUsers = msg.users || [];
@@ -131,47 +120,16 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
             break;
 
           case 'EDIT':
-<<<<<<< HEAD
-            const editTarget = this.messages.find(
-              (m) => m.id === msg.messageId,
-            );
-
-            if (editTarget) {
-              editTarget.message = msg.message;
-
-              editTarget.edited = true;
-            }
-
-            break;
-
-          case 'RECALL':
-            const recallTarget = this.messages.find(
-              (m) => m.id === msg.messageId,
-            );
-
-            if (recallTarget) {
-              recallTarget.recalled = true;
-            }
-
-=======
             this.applyEdit(msg);
             break;
 
           case 'RECALL':
             this.applyRecall(msg);
->>>>>>> origin/DavidHomeComputer
             break;
         }
-
       });
 
-<<<<<<< HEAD
-      setTimeout(() => {
-        this.scrollToBottom();
-      }, 50);
-=======
       setTimeout(() => this.scrollToBottom(), 50);
->>>>>>> origin/DavidHomeComputer
     });
   }
 
@@ -224,14 +182,14 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
     if (avatar.startsWith('http://localhost:8081')) {
       return avatar.replace(
         'http://localhost:8081',
-        window.location.origin + '/api'
+        window.location.origin + '/api',
       );
     }
 
     if (avatar.startsWith('http://localhost:8080')) {
       return avatar.replace(
         'http://localhost:8080',
-        window.location.origin + '/api'
+        window.location.origin + '/api',
       );
     }
 
@@ -247,24 +205,24 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
   }
 
   getMember() {
-    this.http.get<any>(
-      `${environment.apiUrl}/family_life/get_members?group_id=${this.groupId}`
-    ).subscribe(res => {
-      this.allMembers = res.groupMembersList ?? [];
-      this.buildMemberStatus();
-    });
+    this.http
+      .get<any>(
+        `${environment.apiUrl}/family_life/get_members?group_id=${this.groupId}`,
+      )
+      .subscribe((res) => {
+        this.allMembers = res.groupMembersList ?? [];
+        this.buildMemberStatus();
+      });
   }
 
   buildMemberStatus() {
     if (!Array.isArray(this.allMembers)) return;
 
-    const onlineIds = new Set(
-      this.onlineUsers.map(u => this.getUserId(u))
-    );
+    const onlineIds = new Set(this.onlineUsers.map((u) => this.getUserId(u)));
 
-    this.membersWithStatus = this.allMembers.map(m => ({
+    this.membersWithStatus = this.allMembers.map((m) => ({
       ...m,
-      isOnline: onlineIds.has(this.getUserId(m))
+      isOnline: onlineIds.has(this.getUserId(m)),
     }));
   }
 
@@ -273,11 +231,11 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
   }
 
   get onlineMembers() {
-    return this.membersWithStatus.filter(m => m.isOnline);
+    return this.membersWithStatus.filter((m) => m.isOnline);
   }
 
   get offlineMembers() {
-    return this.membersWithStatus.filter(m => !m.isOnline);
+    return this.membersWithStatus.filter((m) => !m.isOnline);
   }
 
   // =========================
@@ -286,7 +244,6 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
   loadMessages() {
     this.isLoadingMessages = true;
 
-<<<<<<< HEAD
     this.http
       .get<any>(
         `${environment.apiUrl}/chat/${this.groupId}?userId=${this.userId}`,
@@ -294,49 +251,20 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
       .subscribe({
         next: (res) => {
           this.messages = res.messages ?? [];
-          console.log(this.messages);
 
-          // console.log('收到訊息筆數 =', this.messages.length);
-          // console.log('第一筆 id =', this.messages[0]?.id);
-          // console.log('最後一筆 id =', this.messages[this.messages.length - 1]?.id);
-          // console.log('最後一筆訊息 =', this.messages[this.messages.length - 1]);
-
-          this.firstUnreadIndex = this.messages.findIndex((m) => !m.readByMe);
-
-          console.log('firstUnreadIndex=', this.firstUnreadIndex);
-=======
-    this.http.get<any>(
-      `${environment.apiUrl}/chat/${this.groupId}?userId=${this.userId}`
-    ).subscribe({
-      next: (res) => {
-        this.messages = res.messages ?? [];
-
-        this.firstUnreadIndex = this.messages.findIndex(
-          m => m.senderId !== this.userId && !m.readByMe
-        );
->>>>>>> origin/DavidHomeComputer
+          this.firstUnreadIndex = this.messages.findIndex(
+            (m) => m.senderId !== this.userId && !m.readByMe,
+          );
 
           this.markRead();
 
-<<<<<<< HEAD
           this.hasLoaded = true;
-
           this.isLoadingMessages = false;
         },
-
         error: () => {
           this.isLoadingMessages = false;
         },
       });
-=======
-        this.hasLoaded = true;
-        this.isLoadingMessages = false;
-      },
-      error: () => {
-        this.isLoadingMessages = false;
-      }
-    });
->>>>>>> origin/DavidHomeComputer
   }
 
   sendMessage() {
@@ -346,12 +274,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
       groupId: this.groupId,
       senderId: this.userId,
       message: this.message,
-<<<<<<< HEAD
-
       replyId: this.replyMessage?.id || null,
-=======
-      replyId: this.replyMessage?.id || null
->>>>>>> origin/DavidHomeComputer
     });
 
     this.message = '';
@@ -386,54 +309,34 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
     });
   }
 
-<<<<<<< HEAD
-  updateReadCount(msg: any) {
-    const target = this.messages.find((m) => m.id === msg.messageId);
-
-    if (target) {
-      target.readCount = msg.readCount;
-    }
-  }
-=======
->>>>>>> origin/DavidHomeComputer
-
   // =========================
   // READ
   // =========================
   markRead() {
-    this.http.post(
-      `${environment.apiUrl}/chat/read/${this.groupId}?userId=${this.userId}`,
-      {}
-    ).subscribe(() => {
-      this.messages.forEach(m => {
-        if (m.senderId !== this.userId) {
-          m.readByMe = true;
-        }
-      });
+    this.http
+      .post(
+        `${environment.apiUrl}/chat/read/${this.groupId}?userId=${this.userId}`,
+        {},
+      )
+      .subscribe(() => {
+        this.messages.forEach((m) => {
+          if (m.senderId !== this.userId) {
+            m.readByMe = true;
+          }
+        });
 
-      this.calculateUnreadIndex();
-    });
+        this.calculateUnreadIndex();
+      });
   }
 
-<<<<<<< HEAD
-  scrollToBottom() {
-    if (!this.scrollBox) {
-      return;
-    }
-
-    const el = this.scrollBox.nativeElement;
-
-    el.scrollTop = el.scrollHeight;
-=======
   updateReadCount(msg: any) {
-    const target = this.messages.find(m => m.id === msg.messageId);
+    const target = this.messages.find((m) => m.id === msg.messageId);
     if (target) target.readCount = msg.readCount;
->>>>>>> origin/DavidHomeComputer
   }
 
   calculateUnreadIndex() {
     const idx = this.messages.findIndex(
-      m => m.senderId !== this.userId && !m.readByMe
+      (m) => m.senderId !== this.userId && !m.readByMe,
     );
 
     this.firstUnreadIndex = idx >= 0 ? idx : -1;
@@ -443,7 +346,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
   // RECALL
   // =========================
   private applyEdit(msg: any) {
-    const target = this.messages.find(m => m.id === msg.messageId);
+    const target = this.messages.find((m) => m.id === msg.messageId);
     if (target) {
       target.message = msg.message;
       target.edited = true;
@@ -451,7 +354,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
   }
 
   private applyRecall(msg: any) {
-    const target = this.messages.find(m => m.id === msg.messageId);
+    const target = this.messages.find((m) => m.id === msg.messageId);
     if (target) target.recalled = true;
   }
 
@@ -480,11 +383,10 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
   formatDate(date: string): string {
     const d = new Date(date);
 
-    return `${d.getFullYear()}/${
-      String(d.getMonth() + 1).padStart(2, '0')
-    }/${
-      String(d.getDate()).padStart(2, '0')
-    }`;
+    return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(
+      2,
+      '0',
+    )}/${String(d.getDate()).padStart(2, '0')}`;
   }
 
   //右鍵選單
@@ -527,15 +429,8 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
     this.showMenu = false;
   }
 
-
   copyMessage() {
-<<<<<<< HEAD
-    if (!this.selectedMessage) {
-      return;
-    }
-=======
     if (!this.selectedMessage) return;
->>>>>>> origin/DavidHomeComputer
 
     navigator.clipboard.writeText(this.selectedMessage.message);
 
@@ -543,13 +438,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
   }
 
   replyFromMenu() {
-<<<<<<< HEAD
-    if (!this.selectedMessage) {
-      return;
-    }
-=======
     if (!this.selectedMessage) return;
->>>>>>> origin/DavidHomeComputer
 
     this.replyMessage = this.selectedMessage;
 
@@ -566,13 +455,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
   }
 
   recallMessageFromMenu() {
-<<<<<<< HEAD
-    if (!this.selectedMessage) {
-      return;
-    }
-=======
     if (!this.selectedMessage) return;
->>>>>>> origin/DavidHomeComputer
 
     this.showMenu = false;
 
@@ -583,27 +466,14 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
       confirmButtonText: '收回',
       cancelButtonText: '取消',
     }).then((result) => {
-<<<<<<< HEAD
-      if (!result.isConfirmed) {
-        return;
-      }
-=======
-
       if (!result.isConfirmed) return;
->>>>>>> origin/DavidHomeComputer
 
       Swal.fire({
         title: '收回中...',
         allowOutsideClick: false,
-<<<<<<< HEAD
-        didOpen: () => {
-          Swal.showLoading();
-        },
+        didOpen: () => Swal.showLoading(),
       });
 
-      // =========================
-      // Step 3：API
-      // =========================
       this.http
         .post(
           `${environment.apiUrl}/chat/message/${this.selectedMessage.id}/recall`,
@@ -611,18 +481,17 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
         )
         .subscribe({
           next: () => {
-            // 關掉 loading
             Swal.close();
 
-            // UI 更新
-            this.selectedMessage.recalled = true;
+            const target = this.messages.find(
+              (m) => m.id === this.selectedMessage.id,
+            );
 
-            // Swal.fire({
-            //   title: '已收回',
-            //   icon: 'success',
-            //   timer: 1200,
-            //   showConfirmButton: false
-            // });
+            if (target) {
+              target.recalled = true;
+            }
+
+            this.selectedMessage.recalled = true;
           },
 
           error: (err) => {
@@ -638,81 +507,6 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
     });
   }
 
-  //超過一天不可收回
-  canRecall(msg: any): boolean {
-    if (msg.recalled) {
-      return false;
-    }
-
-    const created = new Date(msg.createTime).getTime();
-
-    const diffDays = (Date.now() - created) / (1000 * 60 * 60 * 24);
-
-    return diffDays < 1; // ⭐ 2天內可收回
-  }
-
-  // =====================
-  // 關閉聊天室
-  // =====================
-
-  closeChat() {
-    this.dialogRef.close();
-  }
-
-  getAvatar(avatar?: string | null): string {
-    // console.log('getAvatar', avatar);
-    if (!avatar || avatar.trim() === '') {
-      return 'assets/default-avatar.png';
-    }
-
-    if (avatar.startsWith('http://localhost:8081')) {
-      return avatar.replace('http://localhost:8081', window.location.origin + '/api');
-    }
-
-    if (avatar.startsWith('http://localhost:8080')) {
-      return avatar.replace('http://localhost:8080', window.location.origin + '/api');
-    }
-
-    if (avatar.startsWith('http')) {
-      return avatar;
-    }
-
-    if (avatar.startsWith('/')) {
-      return window.location.origin + '/api' + avatar;
-    }
-
-    return window.location.origin + '/api/' + avatar;
-  }
-
-  //未讀+日期顯示
-  isNewDate(current: any, previous?: any): boolean {
-    if (!previous) {
-      return true;
-    }
-
-    const d1 = new Date(current.createTime);
-    const d2 = new Date(previous.createTime);
-
-    return (
-      d1.getFullYear() !== d2.getFullYear() ||
-      d1.getMonth() !== d2.getMonth() ||
-      d1.getDate() !== d2.getDate()
-    );
-  }
-
-  calculateUnreadIndex() {
-    this.firstUnreadIndex =
-      this.messages.findIndex(m => !m.readByMe);
-  }
-
-  formatDate(date: string): string {
-    const d = new Date(date);
-
-    return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(
-      2,
-      '0',
-    )}/${String(d.getDate()).padStart(2, '0')}`;
-  }
   // 開啟圖片預覽
   openImagePreview(imageUrl: string, title: string = '圖片'): void {
     if (!imageUrl) return;
@@ -721,15 +515,16 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
     this.previewScale = 1;
     this.previewRotate = 0;
     this.imagePreviewVisible = true;
-      // ⭐關鍵：強制移到 body（避免被 cdkDrag 的 transform 影響 fixed 定位）
-  setTimeout(() => {
-    const preview =
-      document.querySelector('.image-preview-overlay') as HTMLElement;
+    // ⭐關鍵：強制移到 body（避免被 cdkDrag 的 transform 影響 fixed 定位）
+    setTimeout(() => {
+      const preview = document.querySelector(
+        '.image-preview-overlay',
+      ) as HTMLElement;
 
-    if (preview) {
-      document.body.appendChild(preview);
-    }
-  });
+      if (preview) {
+        document.body.appendChild(preview);
+      }
+    });
   }
 
   // 關閉圖片預覽
@@ -768,39 +563,4 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
     event.preventDefault();
     event.deltaY < 0 ? this.zoomIn() : this.zoomOut();
   }
-=======
-        didOpen: () => Swal.showLoading()
-      });
-
-      this.http.post(
-        `${environment.apiUrl}/chat/message/${this.selectedMessage.id}/recall`,
-        {}
-      ).subscribe({
-        next: () => {
-          Swal.close();
-
-          const target = this.messages.find(
-            m => m.id === this.selectedMessage.id
-          );
-
-          if (target) {
-            target.recalled = true;
-          }
-
-          this.selectedMessage.recalled = true;
-        },
-
-        error: (err) => {
-          Swal.close();
-
-          Swal.fire({
-            title: '收回失敗',
-            text: err.message || '請稍後再試',
-            icon: 'error'
-          });
-        }
-      });
-    });
-  }
->>>>>>> origin/DavidHomeComputer
 }
