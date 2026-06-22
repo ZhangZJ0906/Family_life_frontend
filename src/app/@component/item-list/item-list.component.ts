@@ -107,6 +107,7 @@ export class ItemListComponent {
   previewScale = 1;
   previewRotate = 0;
 
+
   constructor(
     private http: HttpClientService,
     private authService: AuthService,
@@ -544,7 +545,7 @@ export class ItemListComponent {
         },
       });
 
-    this.router.navigate(['/itemList', groupId]);
+    // this.router.navigate(['/itemList', groupId]);
   }
 
   // 背景靜默載入訂閱 / 保固 / 藥品資料（供全域搜尋使用）
