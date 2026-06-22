@@ -285,7 +285,7 @@ export const DEFAULT_ITEM: addItem = {
   unit: '',
   unitPrice: null,
   price: null,
-  safeQuantity: null,
+  safeQuantity: 0,
   purchaseDate: '',
   expireDate: '',
   notify: true,

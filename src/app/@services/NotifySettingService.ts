@@ -10,9 +10,13 @@ export class NotifySettingService {
   private nameSubject = new BehaviorSubject<string>('');
   nameSubject$ = this.nameSubject.asObservable();
 
-  //Email
+  // Email
   private emailSubject = new BehaviorSubject<string>('');
   emailSubject$ = this.emailSubject.asObservable();
+
+  // 頭像圖片
+  private avatarSubject = new BehaviorSubject<string>('assets/default-avatar.png');
+  avatarSubject$ = this.avatarSubject.asObservable();
 
   // 到期通知
   private notifyByEndDateSubject = new BehaviorSubject<boolean>(true);
@@ -27,9 +31,14 @@ export class NotifySettingService {
     this.nameSubject.next(value);
   }
 
-  // 更新Email
+  // 更新 Email
   setEmail(value: string) {
     this.emailSubject.next(value);
+  }
+
+  // 更新頭像
+  setAvatar(value: string) {
+    this.avatarSubject.next(value);
   }
 
   // 更新到期通知

@@ -111,8 +111,10 @@ export class ProfileComponent implements CanComponentDeactivate {
         this.emailVerify = res.emailVerify;
         console.log(res.avatar);
 
-        //共享userInfo
+        // 共享 userInfo
         this.notifySettingService.setName(res.name);
+        this.notifySettingService.setEmail(res.email);
+        this.notifySettingService.setAvatar(this.avatarUrl);
         this.notifySettingService.setNotifyByEndDate(res.notifyByEndDate);
         this.notifySettingService.setNotifyByEmail(res.notifyByEmail);
       },
@@ -306,6 +308,7 @@ export class ProfileComponent implements CanComponentDeactivate {
       if (result.value.file) {
         this.file = result.value.file;
         this.avatarUrl = URL.createObjectURL(this.file);
+        this.notifySettingService.setAvatar(this.avatarUrl);
       }
 
       this.notifySettingService.setName(this.userName);

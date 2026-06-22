@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
@@ -99,6 +99,63 @@ ngOnInit(): void {
   this.loadLists();
   this.loadItemMetadata();
 }
+
+// 判斷是否為手機裝置（寬度小於等於768px）
+isMobile = window.innerWidth <= 768;
+
+mobilePageIndex = 0;
+readonly mobilePageSize = 3;
+
+// 監聽視窗大小變化，更新 isMobile 狀態
+@HostListener('window:resize')
+onResize(): void {
+  const nextIsMobile = window.innerWidth <= 768;
+
+  if (this.isMobile !== nextIsMobile) {
+    this.isMobile = nextIsMobile;
+    this.mobilePageIndex = 0;
+  }
+}
+
+// 根據目前是否為手機裝置，決定要顯示哪些清單
+get visibleLists(): ShoppingList[] {
+  if (!this.isMobile) {
+    return this.filteredLists;
+  }
+
+  const start = this.mobilePageIndex * this.mobilePageSize;
+  return this.filteredLists.slice(start, start + this.mobilePageSize);
+}
+
+// 計算手機分頁總頁數
+get mobileTotalPages(): number {
+  return Math.max(1, Math.ceil(this.filteredLists.length / this.mobilePageSize));
+}
+
+// 是否顯示手機分頁控制
+get showMobilePager(): boolean {
+  return this.isMobile && this.filteredLists.length > this.mobilePageSize;
+}
+
+// 手機分頁控制
+prevMobilePage(): void {
+  if (this.mobilePageIndex > 0) {
+    this.mobilePageIndex--;
+  }
+}
+
+// 手機分頁控制
+nextMobilePage(): void {
+  if (this.mobilePageIndex < this.mobileTotalPages - 1) {
+    this.mobilePageIndex++;
+  }
+}
+
+// 在非手機裝置切換篩選條件時，重置手機分頁到第一頁
+resetMobilePage(): void {
+  this.mobilePageIndex = 0;
+}
+
 private loadUserInfo(): void {
   this.http.getApi(
     `users/get_user_info?userId=${this.userId}`

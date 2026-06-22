@@ -11,8 +11,14 @@
 
 .header-bar {
   flex-shrink: 0;
-}
 
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+
+  margin-bottom: 20px;
+}
 .tabs {
   flex-shrink: 0;
 }
@@ -43,39 +49,35 @@
   font-size: 14px;
 }
 
-.header-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
+
 
 .top-actions {
   display: flex;
   gap: 10px;
   align-items: center;
+  margin-bottom: 0;
 }
 
 .title {
   font-size: 18px;
   font-weight: 600;
   margin: 0;
-
 }
 
 .top-actions {
   display: flex;
   gap: 10px;
-  margin-bottom: 10px;
+  align-items: center;
+  margin-bottom: 0;
 }
 
 .action-btn {
-  margin-top: 15px;
-  padding: 6px 12px;
+  padding: 8px 14px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   background: #eee;
+  font-size: 15px;
 }
 
 .action-btn:hover {
@@ -278,6 +280,55 @@
   color: #999;
 }
 
+.close-btn {
+  width: 46px;
+  height: 46px;
+
+  border: none;
+  border-radius: 50%;
+  background: #f1f3f5;
+  color: #4b5563;
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+  line-height: 1;
+
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.close-btn:hover {
+  background: #e5e7eb;
+  color: #111827;
+  transform: translateY(-1px);
+}
+
+.close-btn:active {
+  transform: translateY(0);
+}
+
+
+
+.close-btn mat-icon {
+  width: 24px;
+  height: 24px;
+
+  font-size: 24px;
+  line-height: 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 0;
+  padding: 0;
+  transform: translateY(1px);
+}
+
 /* =========================
    Notify Dialog Mobile RWD
 ========================= */
@@ -289,17 +340,26 @@
     box-sizing: border-box;
   }
 
-  .header-bar {
+   .header-bar {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "title close"
+      "actions actions";
+    gap: 12px;
+    align-items: center;
     margin-bottom: 14px;
   }
 
+
   .title {
+    grid-area: title;
     font-size: 22px;
     font-weight: 900;
-    margin: 0;
   }
 
-  .top-actions {
+   .top-actions {
+    grid-area: actions;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
@@ -307,15 +367,10 @@
     margin-bottom: 0;
   }
 
-  .action-btn {
-    width: 100%;
+ .close-btn {
+    grid-area: close;
+    width: 42px;
     height: 42px;
-    margin-top: 0;
-    padding: 0 10px;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 800;
-    white-space: nowrap;
   }
 
   /* 分類 Tabs：手機改成橫向滑動 */
