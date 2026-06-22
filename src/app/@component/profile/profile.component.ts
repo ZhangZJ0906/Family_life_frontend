@@ -25,10 +25,10 @@ import { environment } from '../../@models/user.model';
 })
 export class ProfileComponent implements CanComponentDeactivate {
   // 使用者名稱
-  userName = 'Jack';
+  userName = '載入名字中...';
 
   // Email
-  email = 'jack@example.com';
+  email = '載入 Email 中...';
 
   // 頭像預設文字
   avatarText = 'U';
@@ -57,6 +57,9 @@ export class ProfileComponent implements CanComponentDeactivate {
   emailVerify = false;
 
   isLoading = false;
+
+  // 個人頭像載入中
+isAvatarLoading = true;
 
   constructor(
     // private http: HttpClient,
@@ -101,30 +104,33 @@ export class ProfileComponent implements CanComponentDeactivate {
   }
 
   getSelfInfo() {
-    this.http.getApi(`users/get_user_info?userId=${this.user_id}`).subscribe({
-      next: (res: any) => {
-        this.userName = res.name;
-        this.email = res.email;
-        this.endDateNotify = res.notifyByEndDate;
-        this.emailNotify = res.notifyByEmail;
-        this.avatarUrl = res.avatar;
-        this.emailVerify = res.emailVerify;
-        console.log(res.avatar);
+  this.isAvatarLoading = true;
 
-        // 共享 userInfo
-        this.notifySettingService.setName(res.name);
-        this.notifySettingService.setEmail(res.email);
-        this.notifySettingService.setAvatar(this.avatarUrl);
-        this.notifySettingService.setNotifyByEndDate(res.notifyByEndDate);
-        this.notifySettingService.setNotifyByEmail(res.notifyByEmail);
-      },
+  this.http.getApi(`users/get_user_info?userId=${this.user_id}`).subscribe({
+    next: (res: any) => {
+      this.userName = res.name;
+      this.email = res.email;
+      this.endDateNotify = res.notifyByEndDate;
+      this.emailNotify = res.notifyByEmail;
+      this.avatarUrl = res.avatar;
+      this.emailVerify = res.emailVerify;
 
-      error: (err) => {
-        console.log(err);
-      },
-    });
-  }
+      // 共享 userInfo
+      this.notifySettingService.setName(res.name);
+      this.notifySettingService.setEmail(res.email);
+      this.notifySettingService.setAvatar(this.avatarUrl);
+      this.notifySettingService.setNotifyByEndDate(res.notifyByEndDate);
+      this.notifySettingService.setNotifyByEmail(res.notifyByEmail);
 
+      this.isAvatarLoading = false;
+    },
+
+    error: (err) => {
+      console.log(err);
+      this.isAvatarLoading = false;
+    },
+  });
+}
   getGroup() {
     this.isLoading = true;
 
