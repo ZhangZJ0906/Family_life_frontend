@@ -543,7 +543,7 @@ export class ItemListComponent {
         },
       });
 
-    this.router.navigate(['/itemList', groupId]);
+    // this.router.navigate(['/itemList', groupId]);
   }
 
   // 背景靜默載入訂閱 / 保固 / 藥品資料（供全域搜尋使用）
