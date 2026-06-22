@@ -83,12 +83,22 @@
     </button>
 
     <div class="user-avatar">
-      <img *ngIf="avatarUrl; else defaultAvatar" [src]="getAvatar(avatarUrl)" alt="使用者頭像" />
+  <div *ngIf="isAvatarLoading" class="avatar-loading">
+    <span class="avatar-spinner"></span>
+  </div>
 
-      <ng-template #defaultAvatar>
-        J
-      </ng-template>
-    </div>
+  <ng-container *ngIf="!isAvatarLoading">
+    <img
+      *ngIf="avatarUrl; else defaultAvatar"
+      [src]="getAvatar(avatarUrl)"
+      alt="使用者頭像"
+    />
+
+    <ng-template #defaultAvatar>
+      <mat-icon class="default-avatar-icon">person</mat-icon>
+    </ng-template>
+  </ng-container>
+</div>
 
     <button class="logout-btn" type="button" (click)="logout()">
       <mat-icon>logout</mat-icon>

@@ -15,11 +15,21 @@
 
                 <div class="avatar-section">
                   <div class="avatar-large">
-                    <img *ngIf="avatarUrl; else textAvatar" [src]="getAvatar(avatarUrl)" alt="頭像">
+                    <div *ngIf="isAvatarLoading" class="avatar-loading">
+                      <span class="loading-spinner"></span>
+                    </div>
 
-                    <ng-template #textAvatar>
-                      {{ avatarText }}
-                    </ng-template>
+                    <ng-container *ngIf="!isAvatarLoading">
+                      <img
+                        *ngIf="avatarUrl; else textAvatar"
+                        [src]="getAvatar(avatarUrl)"
+                        alt="頭像"
+                      >
+
+                      <ng-template #textAvatar>
+                        {{ avatarText }}
+                      </ng-template>
+                    </ng-container>
                   </div>
                 </div>
 
