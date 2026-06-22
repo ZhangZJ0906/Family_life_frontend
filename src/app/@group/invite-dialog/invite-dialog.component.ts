@@ -53,6 +53,13 @@ export class InviteDialogComponent {
       Swal.fire("請輸入使用者Email !!!!!");
     }
     else{
+      Swal.fire({
+        title: '邀請中...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
       this.http.post(
         `${environment.apiUrl}/family_life/invite`,
         {
@@ -64,6 +71,7 @@ export class InviteDialogComponent {
       ).subscribe({
         next: (res: any) => {
           console.log(res);
+          Swal.close();
           if(res.message == "this id is exist in this group"){
             Swal.fire({
               icon: 'error',
@@ -87,11 +95,16 @@ export class InviteDialogComponent {
               icon: 'success',
               title: `已邀請，等對方接受`
             });
+
+            this.dialogRef.close({
+              success: true,
+              email: this.userEmail
+            });
           }
         },
         error: (err) => {
           console.log(err);
-
+          Swal.close();
           Swal.fire({
             icon: 'error',
             title: '建立失敗'
@@ -101,7 +114,6 @@ export class InviteDialogComponent {
     }
 
 
-    this.dialogRef.close(true);
   }
 
   closeDialog() {

@@ -153,6 +153,14 @@ export class GroupMemberDialogComponent {
 
       if (result.isConfirmed) {
 
+        Swal.fire({
+          title: '移除中...',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
         this.http.delete(
           `${environment.apiUrl}/family_life/delete_group_member/${group_id}/${user_id}`
         ).subscribe({
@@ -199,7 +207,7 @@ export class GroupMemberDialogComponent {
 
     dialogRef.afterClosed().subscribe((result) => {
 
-      if(result){
+      if (result?.success) {
         this.getInvitedMemembers();
       }
 
