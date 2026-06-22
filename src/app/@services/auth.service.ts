@@ -3,10 +3,7 @@ import { computed, Injectable, signal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment, User } from '../@models/user.model';
 import { Router } from '@angular/router';
-
-
-
-
+import { Subject } from 'rxjs';
 
 const STORAGE_KEY = 'family-life-current-user';
 
@@ -34,13 +31,17 @@ export class AuthService {
     return this.http.get(`${this.userUrl}/login`, { params });
   }
 
+  logout$ = new Subject<void>();
+
   logout(): void {
-  this.currentUserSignal.set(null);
+    this.currentUserSignal.set(null);
 
     sessionStorage.removeItem(STORAGE_KEY);
     sessionStorage.removeItem('isLogin');
     sessionStorage.removeItem('loginUser');
 
+    // 🔥 通知所有訂閱者
+    this.logout$.next();
     this.router.navigate(['/login']);
   }
 

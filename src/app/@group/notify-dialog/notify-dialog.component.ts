@@ -296,11 +296,13 @@ export class NotifyDialogComponent implements OnInit {
       {}
     ).subscribe({
       next: () => {
+        Swal.close();
         this.calculateUnread();
         this.syncBadge();
         Swal.fire('已加入該群組', '', 'success');
       },
       error: () => {
+        Swal.close();
         Swal.fire('加入失敗', '', 'error');
       }
     });
@@ -318,10 +320,12 @@ export class NotifyDialogComponent implements OnInit {
       {}
     ).subscribe({
       next: () => {
+        Swal.close();
         this.calculateUnread();
         this.syncBadge();
       },
       error: () => {
+        Swal.close();
         Swal.fire('失敗', '', 'error');
       }
     });

@@ -120,7 +120,6 @@ export class ItemListComponent {
 
     this.currentUserAvatar =
       this.authService.currentUser()?.avatar || 'assets/default-avatar.png'; // 目前登入者自己的頭像，私人物品使用
-    console.log('私人圖片', this.currentUserAvatar);
   }
 
   ngOnInit() {
@@ -662,11 +661,6 @@ export class ItemListComponent {
       // 一般物品：批次 POST 刪除
       if (this.currentMode === TableMode.Item) {
         this.showLoading('刪除中...');
-        // this.http
-        //   .postApi(
-        //     `${this.basicUrl}item/delete?userId=${this.currentUserId}`,
-        //     selectedIds,
-        //   )
         this.http
           .postApi(`item/delete?userId=${this.currentUserId}`, selectedIds)
           .subscribe({
@@ -702,10 +696,6 @@ export class ItemListComponent {
       let completedCount = 0;
 
       selectedIds.forEach((id) => {
-        // this.http
-        //   .deleteApi(
-        //     `${this.basicUrl}${endpoint}?id=${id}&userId=${this.currentUserId}`,
-        //   )
         this.http
           .deleteApi(`${endpoint}?id=${id}&userId=${this.currentUserId}`)
           .subscribe({
