@@ -229,6 +229,19 @@
 /* =========================================================
    群組卡片列表
    ========================================================= */
+//沒群組
+.state-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 240px;
+  width: 100%;
+  color: #999;
+  font-size: 15px;
+  gap: 8px;
+}
+
 .card-list {
   display: flex;
   flex-direction: column;

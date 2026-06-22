@@ -22,6 +22,7 @@ import { AuthService } from '../../@services/auth.service';
 import { environment } from '../../@models/user.model';
 import Swal from 'sweetalert2';
 import { MatIconModule } from '@angular/material/icon';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-chat-room',
@@ -71,6 +72,9 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
   previewRotate = 0;
 
   isMobile = false;
+
+  //登出關聊天室
+  private logoutSub?: Subscription;
 
   constructor(
     private http: HttpClient,
@@ -131,6 +135,11 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
 
       setTimeout(() => this.scrollToBottom(), 50);
     });
+
+    //登出關閉聊天室
+    this.logoutSub = this.authService.logout$.subscribe(() => {
+      this.forceCloseChat();
+    });
   }
 
   ngAfterViewChecked() {
@@ -145,6 +154,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
   // DESTROY
   // =========================
   ngOnDestroy() {
+    this.logoutSub?.unsubscribe();
     this.leaveRoom();
   }
 
@@ -156,6 +166,19 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
   private leaveRoom() {
     this.isActiveRoom = false;
     this.ws.leaveRoom(this.groupId, this.userId);
+  }
+
+  private forceCloseChat() {
+    this.isActiveRoom = false;
+
+    // 1. 離開 WS 房間
+    this.ws.leaveRoom(this.groupId, this.userId);
+
+    // 2. 關 WS 連線（很重要）
+    this.ws.disconnect?.();
+
+    // 3. 關 dialog
+    this.dialogRef.close();
   }
 
   // =========================
@@ -507,6 +530,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
     });
   }
 
+  //圖片預覽
   // 開啟圖片預覽
   openImagePreview(imageUrl: string, title: string = '圖片'): void {
     if (!imageUrl) return;
