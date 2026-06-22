@@ -1,6 +1,7 @@
 import {
   Component,
   OnInit,
+  OnDestroy,
   ViewChild,
   ElementRef,
   HostListener,
@@ -29,22 +30,37 @@ import { MatIconModule } from "@angular/material/icon";
   templateUrl: './chat-room.component.html',
   styleUrl: './chat-room.component.scss',
 })
-export class ChatRoomComponent implements OnInit, AfterViewChecked {
+export class ChatRoomComponent implements OnInit, OnDestroy{
+
   @ViewChild('scrollBox') scrollBox!: ElementRef;
-  @HostListener('window:resize')
-  onResize() {
-    this.isMobile = window.innerWidth <= 600;
-  }
 
   groupId!: number;
   userId!: number;
   groupName!: string;
 
   message = '';
-
   messages: any[] = [];
 
-  onlineCount!: number;
+  // ===== online state =====
+  isActiveRoom = true;
+  onlineCount = 0;
+  onlineUsers: any[] = [];
+  allMembers: any[] = [];
+  membersWithStatus: any[] = [];
+
+  showMemberPanel = false;
+
+  // ===== unread =====
+  firstUnreadIndex = -1;
+
+  // ===== context menu =====
+  showMenu = false;
+  menuX = 0;
+  menuY = 0;
+  selectedMessage: any = null;
+
+  // ===== reply =====
+  replyMessage: any = null;
 
   hasLoaded = false;
   isLoadingMessages = true;
@@ -55,27 +71,7 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
   previewScale = 1;
   previewRotate = 0;
 
-  //未讀
-  firstUnreadIndex = -1;
-
-  // =====================
-  // 右鍵選單
-  // =====================
-
-  showMenu = false;
-
-  menuX = 0;
-  menuY = 0;
-
-  selectedMessage: any = null;
-
-  // =====================
-  // 回覆訊息
-  // =====================
-
-  editingId?: number;
-
-  replyMessage: any = null;
+  isMobile = false;
 
   constructor(
     private http: HttpClient,
@@ -86,39 +82,47 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
     private zone: NgZone,
   ) {}
 
-  isMobile = false;
-
+  // =========================
+  // INIT
+  // =========================
   async ngOnInit() {
     this.groupName = this.data.groupName;
-
+    this.groupId = this.data.groupId;
     this.isMobile = this.data.isMobile ?? window.innerWidth <= 600;
 
     this.userId = this.authService.currentUser()?.user_id ?? 0;
+<<<<<<< HEAD
 
     this.groupId = this.data.groupId;
 
     console.log('目前聊天室 groupId =', this.groupId);
     console.log('目前 userId =', this.userId);
+=======
+>>>>>>> origin/DavidHomeComputer
 
+    this.getMember();
     this.loadMessages();
 
-    // WebSocket
     await this.ws.connect();
+
+    // ⭐ ONLY HERE join room
+    this.ws.enterRoom(this.groupId, this.userId);
 
     this.ws.subscribe(this.groupId, (msg: any) => {
       this.zone.run(() => {
+
         switch (msg.type) {
+
           case 'ONLINE':
             this.onlineCount = msg.count;
+            this.onlineUsers = msg.users || [];
+            this.buildMemberStatus();
             break;
 
           case 'MESSAGE':
           case 'IMAGE':
-
             this.messages = [...this.messages, msg];
-
-            this.calculateUnreadIndex(); // ⭐補這個
-
+            this.calculateUnreadIndex();
             break;
 
           case 'READ':
@@ -127,6 +131,7 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
             break;
 
           case 'EDIT':
+<<<<<<< HEAD
             const editTarget = this.messages.find(
               (m) => m.id === msg.messageId,
             );
@@ -148,13 +153,25 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
               recallTarget.recalled = true;
             }
 
+=======
+            this.applyEdit(msg);
+            break;
+
+          case 'RECALL':
+            this.applyRecall(msg);
+>>>>>>> origin/DavidHomeComputer
             break;
         }
+
       });
 
+<<<<<<< HEAD
       setTimeout(() => {
         this.scrollToBottom();
       }, 50);
+=======
+      setTimeout(() => this.scrollToBottom(), 50);
+>>>>>>> origin/DavidHomeComputer
     });
   }
 
@@ -166,9 +183,110 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
     }
   }
 
+  // =========================
+  // DESTROY
+  // =========================
+  ngOnDestroy() {
+    this.leaveRoom();
+  }
+
+  closeChat() {
+    this.leaveRoom();
+    this.dialogRef.close();
+  }
+
+  private leaveRoom() {
+    this.isActiveRoom = false;
+    this.ws.leaveRoom(this.groupId, this.userId);
+  }
+
+  // =========================
+  // WINDOW RESIZE ONLY
+  // =========================
+  @HostListener('window:resize')
+  onResize() {
+    this.isMobile = window.innerWidth <= 600;
+  }
+
+  // =========================
+  // MEMBER
+  // =========================
+  openMemberPanel() {
+    this.showMemberPanel = true;
+    this.buildMemberStatus();
+  }
+
+  getAvatar(avatar?: string | null): string {
+    if (!avatar || avatar.trim() === '') {
+      return 'assets/default-avatar.png';
+    }
+
+    if (avatar.startsWith('http://localhost:8081')) {
+      return avatar.replace(
+        'http://localhost:8081',
+        window.location.origin + '/api'
+      );
+    }
+
+    if (avatar.startsWith('http://localhost:8080')) {
+      return avatar.replace(
+        'http://localhost:8080',
+        window.location.origin + '/api'
+      );
+    }
+
+    if (avatar.startsWith('http')) {
+      return avatar;
+    }
+
+    if (avatar.startsWith('/')) {
+      return window.location.origin + '/api' + avatar;
+    }
+
+    return window.location.origin + '/api/' + avatar;
+  }
+
+  getMember() {
+    this.http.get<any>(
+      `${environment.apiUrl}/family_life/get_members?group_id=${this.groupId}`
+    ).subscribe(res => {
+      this.allMembers = res.groupMembersList ?? [];
+      this.buildMemberStatus();
+    });
+  }
+
+  buildMemberStatus() {
+    if (!Array.isArray(this.allMembers)) return;
+
+    const onlineIds = new Set(
+      this.onlineUsers.map(u => this.getUserId(u))
+    );
+
+    this.membersWithStatus = this.allMembers.map(m => ({
+      ...m,
+      isOnline: onlineIds.has(this.getUserId(m))
+    }));
+  }
+
+  getUserId(obj: any): number {
+    return obj.userId ?? obj.user_id ?? obj.id;
+  }
+
+  get onlineMembers() {
+    return this.membersWithStatus.filter(m => m.isOnline);
+  }
+
+  get offlineMembers() {
+    return this.membersWithStatus.filter(m => !m.isOnline);
+  }
+
+  // =========================
+  // MESSAGES
+  // =========================
   loadMessages() {
     this.isLoadingMessages = true;
 
+<<<<<<< HEAD
     this.http
       .get<any>(
         `${environment.apiUrl}/chat/${this.groupId}?userId=${this.userId}`,
@@ -186,9 +304,21 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
           this.firstUnreadIndex = this.messages.findIndex((m) => !m.readByMe);
 
           console.log('firstUnreadIndex=', this.firstUnreadIndex);
+=======
+    this.http.get<any>(
+      `${environment.apiUrl}/chat/${this.groupId}?userId=${this.userId}`
+    ).subscribe({
+      next: (res) => {
+        this.messages = res.messages ?? [];
+
+        this.firstUnreadIndex = this.messages.findIndex(
+          m => m.senderId !== this.userId && !m.readByMe
+        );
+>>>>>>> origin/DavidHomeComputer
 
           this.markRead();
 
+<<<<<<< HEAD
           this.hasLoaded = true;
 
           this.isLoadingMessages = false;
@@ -198,26 +328,35 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
           this.isLoadingMessages = false;
         },
       });
+=======
+        this.hasLoaded = true;
+        this.isLoadingMessages = false;
+      },
+      error: () => {
+        this.isLoadingMessages = false;
+      }
+    });
+>>>>>>> origin/DavidHomeComputer
   }
 
   sendMessage() {
-    if (!this.message.trim()) {
-      return;
-    }
+    if (!this.message.trim()) return;
 
     this.ws.sendMessage({
       groupId: this.groupId,
       senderId: this.userId,
       message: this.message,
+<<<<<<< HEAD
 
       replyId: this.replyMessage?.id || null,
+=======
+      replyId: this.replyMessage?.id || null
+>>>>>>> origin/DavidHomeComputer
     });
 
     this.message = '';
 
-    setTimeout(() => {
-      this.scrollToBottom();
-    }, 200);
+    setTimeout(() => this.scrollToBottom(), 200);
   }
 
   onImageSelected(event: any) {
@@ -247,6 +386,7 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
     });
   }
 
+<<<<<<< HEAD
   updateReadCount(msg: any) {
     const target = this.messages.find((m) => m.id === msg.messageId);
 
@@ -254,23 +394,28 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
       target.readCount = msg.readCount;
     }
   }
+=======
+>>>>>>> origin/DavidHomeComputer
 
+  // =========================
+  // READ
+  // =========================
   markRead() {
-
     this.http.post(
       `${environment.apiUrl}/chat/read/${this.groupId}?userId=${this.userId}`,
       {}
     ).subscribe(() => {
-
-      // ⭐ 很重要：重新計算未讀
       this.messages.forEach(m => {
-        m.readByMe = true;
+        if (m.senderId !== this.userId) {
+          m.readByMe = true;
+        }
       });
 
       this.calculateUnreadIndex();
     });
   }
 
+<<<<<<< HEAD
   scrollToBottom() {
     if (!this.scrollBox) {
       return;
@@ -279,12 +424,70 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
     const el = this.scrollBox.nativeElement;
 
     el.scrollTop = el.scrollHeight;
+=======
+  updateReadCount(msg: any) {
+    const target = this.messages.find(m => m.id === msg.messageId);
+    if (target) target.readCount = msg.readCount;
+>>>>>>> origin/DavidHomeComputer
   }
 
-  // =====================
-  // 右鍵選單
-  // =====================
+  calculateUnreadIndex() {
+    const idx = this.messages.findIndex(
+      m => m.senderId !== this.userId && !m.readByMe
+    );
 
+    this.firstUnreadIndex = idx >= 0 ? idx : -1;
+  }
+
+  // =========================
+  // RECALL
+  // =========================
+  private applyEdit(msg: any) {
+    const target = this.messages.find(m => m.id === msg.messageId);
+    if (target) {
+      target.message = msg.message;
+      target.edited = true;
+    }
+  }
+
+  private applyRecall(msg: any) {
+    const target = this.messages.find(m => m.id === msg.messageId);
+    if (target) target.recalled = true;
+  }
+
+  // =========================
+  // UI
+  // =========================
+  scrollToBottom() {
+    if (!this.scrollBox) return;
+    const el = this.scrollBox.nativeElement;
+    el.scrollTop = el.scrollHeight;
+  }
+
+  isNewDate(current: any, previous?: any): boolean {
+    if (!previous) return true;
+
+    const d1 = new Date(current.createTime);
+    const d2 = new Date(previous.createTime);
+
+    return (
+      d1.getFullYear() !== d2.getFullYear() ||
+      d1.getMonth() !== d2.getMonth() ||
+      d1.getDate() !== d2.getDate()
+    );
+  }
+
+  formatDate(date: string): string {
+    const d = new Date(date);
+
+    return `${d.getFullYear()}/${
+      String(d.getMonth() + 1).padStart(2, '0')
+    }/${
+      String(d.getDate()).padStart(2, '0')
+    }`;
+  }
+
+  //右鍵選單
   openContextMenu(event: MouseEvent, msg: any) {
     event.preventDefault();
     event.stopPropagation();
@@ -307,7 +510,6 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
 
     this.menuX = x;
     this.menuY = y;
-
     this.showMenu = true;
 
     // ⭐關鍵：強制移到 body
@@ -325,48 +527,55 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
     this.showMenu = false;
   }
 
-  // =====================
-  // 複製
-  // =====================
 
   copyMessage() {
+<<<<<<< HEAD
     if (!this.selectedMessage) {
       return;
     }
+=======
+    if (!this.selectedMessage) return;
+>>>>>>> origin/DavidHomeComputer
 
     navigator.clipboard.writeText(this.selectedMessage.message);
 
     this.showMenu = false;
   }
 
-  // =====================
-  // 回復
-  // =====================
-
   replyFromMenu() {
+<<<<<<< HEAD
     if (!this.selectedMessage) {
       return;
     }
+=======
+    if (!this.selectedMessage) return;
+>>>>>>> origin/DavidHomeComputer
 
     this.replyMessage = this.selectedMessage;
 
     this.showMenu = false;
   }
 
-  // =====================
-  // 收回
-  // =====================
+  canRecall(msg: any): boolean {
+    if (!msg || msg.recalled) return false;
+
+    const created = new Date(msg.createTime).getTime();
+    const diffHours = (Date.now() - created) / (1000 * 60 * 60);
+
+    return diffHours < 24; // 24 小時內可收回
+  }
 
   recallMessageFromMenu() {
+<<<<<<< HEAD
     if (!this.selectedMessage) {
       return;
     }
+=======
+    if (!this.selectedMessage) return;
+>>>>>>> origin/DavidHomeComputer
 
     this.showMenu = false;
 
-    // =========================
-    // Step 1：確認
-    // =========================
     Swal.fire({
       title: '確定收回此訊息？',
       icon: 'warning',
@@ -374,17 +583,19 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
       confirmButtonText: '收回',
       cancelButtonText: '取消',
     }).then((result) => {
+<<<<<<< HEAD
       if (!result.isConfirmed) {
         return;
       }
+=======
 
-      // =========================
-      // Step 2：loading
-      // =========================
+      if (!result.isConfirmed) return;
+>>>>>>> origin/DavidHomeComputer
+
       Swal.fire({
         title: '收回中...',
-        text: '請稍候',
         allowOutsideClick: false,
+<<<<<<< HEAD
         didOpen: () => {
           Swal.showLoading();
         },
@@ -557,4 +768,39 @@ export class ChatRoomComponent implements OnInit, AfterViewChecked {
     event.preventDefault();
     event.deltaY < 0 ? this.zoomIn() : this.zoomOut();
   }
+=======
+        didOpen: () => Swal.showLoading()
+      });
+
+      this.http.post(
+        `${environment.apiUrl}/chat/message/${this.selectedMessage.id}/recall`,
+        {}
+      ).subscribe({
+        next: () => {
+          Swal.close();
+
+          const target = this.messages.find(
+            m => m.id === this.selectedMessage.id
+          );
+
+          if (target) {
+            target.recalled = true;
+          }
+
+          this.selectedMessage.recalled = true;
+        },
+
+        error: (err) => {
+          Swal.close();
+
+          Swal.fire({
+            title: '收回失敗',
+            text: err.message || '請稍後再試',
+            icon: 'error'
+          });
+        }
+      });
+    });
+  }
+>>>>>>> origin/DavidHomeComputer
 }

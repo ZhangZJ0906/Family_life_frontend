@@ -93,4 +93,28 @@ export class ChatWsService {
 
   }
 
+  enterRoom(groupId: number, userId: number) {
+
+    this.client.publish({
+      destination: '/app/chat.enter',
+      body: JSON.stringify({
+        groupId,
+        userId
+      })
+    });
+
+  }
+
+  leaveRoom(groupId: number, userId: number) {
+
+    this.client.publish({
+      destination: '/app/chat.leave',
+      body: JSON.stringify({
+        groupId,
+        userId
+      })
+    });
+
+  }
+
 }
