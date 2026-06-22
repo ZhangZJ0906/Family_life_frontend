@@ -78,7 +78,7 @@ export class RegisterComponent {
     const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
 
     if (!gmailRegex.test(this.email)) {
-      return '請輸入正確的 Gmail 信箱';
+      return '請輸入正確的 Email 信箱';
     }
 
     return '';
@@ -88,10 +88,10 @@ export class RegisterComponent {
 
     this.errorMessage = '';
 
-    if (!this.emailVerified) {
-      this.errorMessage = '請先完成 Email 驗證';
-      return;
-    }
+    // if (!this.emailVerified) {
+    //   this.errorMessage = '請先完成 Email 驗證';
+    //   return;
+    // }
 
     this.authService.register({
       userName: this.name,

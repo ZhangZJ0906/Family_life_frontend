@@ -35,7 +35,7 @@ interface GroupMember {
   avatar?: string;
 }
 
-type StatusFilter = 'unfinished' | 'completed';
+type StatusFilter = 'unfinished' | 'completed' | 'all';
 type GroupFilter = number | 0 | 'all';
 
 
@@ -177,7 +177,9 @@ private loadUserInfo(): void {
   get filteredLists(): ShoppingList[] {
     return this.lists.filter((list) => {
       const matchesStatus =
-        this.statusFilter === 'completed'
+        this.statusFilter === 'all'
+          ? true
+          : this.statusFilter === 'completed'
           ? this.isListCompleted(list.id)
           : !this.isListCompleted(list.id);
 

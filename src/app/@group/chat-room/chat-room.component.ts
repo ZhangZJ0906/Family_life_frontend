@@ -73,6 +73,9 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
 
   isMobile = false;
 
+  //死了判斷
+  heartbeatTimer: any;
+
   //登出關聊天室
   private logoutSub?: Subscription;
 
@@ -102,6 +105,8 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
 
     // ⭐ ONLY HERE join room
     this.ws.enterRoom(this.groupId, this.userId);
+
+    this.startHeartbeat();
 
     this.ws.subscribe(this.groupId, (msg: any) => {
       this.zone.run(() => {
@@ -150,15 +155,28 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
     }
   }
 
+  //判斷是否死了
+  private startHeartbeat() {
+    this.heartbeatTimer = setInterval(() => {
+      this.ws.sendHeartbeat(this.groupId, this.userId);
+    }, 10000); // 每 10 秒一次
+  }
+
   // =========================
   // DESTROY
   // =========================
   ngOnDestroy() {
     this.logoutSub?.unsubscribe();
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+    }
     this.leaveRoom();
   }
 
   closeChat() {
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+    }
     this.leaveRoom();
     this.dialogRef.close();
   }
