@@ -626,6 +626,10 @@ mat-progress-bar {
   box-sizing: border-box;
 }
 
+.mobile-list-pager {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .list-grid {
     grid-template-columns: minmax(0, 1fr);
@@ -676,5 +680,9 @@ mat-progress-bar {
   .list-actions button .mat-icon,
   .list-actions button mat-icon {
     margin-right: 4px;
+  }
+
+   .mobile-list-pager {
+    display: flex;
   }
 }
