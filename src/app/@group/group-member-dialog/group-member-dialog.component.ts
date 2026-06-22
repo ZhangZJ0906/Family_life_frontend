@@ -172,7 +172,12 @@ export class GroupMemberDialogComponent {
               title: '已移除成員'
             });
 
-            this.getGroupMember();
+            if(isSelf){
+              this.dialogRef.close({ refreshed: true });
+            }
+            else{
+              this.getGroupMember();
+            }
 
           },
 

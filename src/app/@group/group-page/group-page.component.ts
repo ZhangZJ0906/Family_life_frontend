@@ -188,15 +188,20 @@ export class GroupPageComponent{
   }
 
   openMemberDialog(group: any, user_id: any) {
-
-    this.dialog.open(GroupMemberDialogComponent, {
+    const dialogRef = this.dialog.open(GroupMemberDialogComponent, {
       width: '500px',
       data: {
-        group: group,
+        group,
         userId: user_id
       }
     });
 
+    dialogRef.afterClosed().subscribe(result => {
+      // 如果 dialog 有做「退出/變動」
+      if (result?.refreshed) {
+        this.getGroup(); // ← 重新抓群組列表
+      }
+    });
   }
 
   joinGroupDialog() {
