@@ -15,11 +15,12 @@ import { CanComponentDeactivate } from '../../@guard/pending-changes.guard';
 import { EmailVerifyService } from './../../@services/EmailVerifyService';
 import { HttpClientService } from '../../@services/http-client.service';
 import { environment } from '../../@models/user.model';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [TopbarComponent, RouterLink, CommonModule, FormsModule],
+  imports: [TopbarComponent, RouterLink, CommonModule, FormsModule,   MatIconModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
 })
@@ -183,150 +184,197 @@ isAvatarLoading = true;
 
   // 開啟修改資料彈窗
   openEditDialog(): void {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const avatarPreviewHtml =
+    this.avatarUrl && this.avatarUrl.trim() !== ''
+      ? `
+        <img
+          id="avatarPreviewImg"
+          src="${this.getAvatar(this.avatarUrl)}"
+          style="
+            width:90px;
+            height:90px;
+            border-radius:50%;
+            object-fit:cover;
+            border:2px solid #eee;
+            display:block;
+            margin:0 auto;
+          "
+        />
+      `
+      : `
+        <div
+          id="avatarPreviewDefault"
+          style="
+            width:90px;
+            height:90px;
+            border-radius:50%;
+            background:#2f5fb8;
+            color:white;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            border:2px solid #eee;
+            margin:0 auto;
+          "
+        >
+          <span
+            class="material-icons"
+            style="
+              font-size:52px;
+              width:52px;
+              height:52px;
+              line-height:52px;
+            "
+          >
+            person
+          </span>
+        </div>
+      `;
 
-    Swal.fire({
-      title: '修改基本資料',
+  Swal.fire({
+    title: '修改基本資料',
 
-      html: `
-        <div class="swal-form">
+    html: `
+      <div class="swal-form">
 
-          <!-- 頭像預覽 + 上傳 -->
-          <div style="text-align:center; margin-bottom:16px;">
-            <img id="avatarPreview"
-                src="${this.avatarUrl || ''}"
-                style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:2px solid #eee;" />
+        <div style="text-align:center; margin-bottom:16px;">
+         <div
+            id="avatarPreviewBox"
+            style="
+              width:100%;
+              display:flex;
+              align-items:center;
+              justify-content:center;
+            "
+          >
+            ${avatarPreviewHtml}
+          </div>
+          <div style="margin-top:12px;">
+            <label
+              for="avatarInput"
+              style="
+                display:inline-block;
+                padding:8px 16px;
+                background:#2f80ed;
+                color:white;
+                border-radius:10px;
+                cursor:pointer;
+                font-weight:600;
+              ">
+              選擇圖片
+            </label>
 
-            <div style="margin-top:12px;">
-              <label
-                for="avatarInput"
-                style="
-                  display:inline-block;
-                  padding:8px 16px;
-                  background:#2f80ed;
-                  color:white;
-                  border-radius:10px;
-                  cursor:pointer;
-                  font-weight:600;
-                ">
-                選擇圖片
-              </label>
+            <input
+              id="avatarInput"
+              type="file"
+              accept="image/*"
+              style="display:none;"
+            />
 
-              <input
-                id="avatarInput"
-                type="file"
-                accept="image/*"
-                style="display:none;"
-              />
-
-              <div
-                id="fileName"
-                style="
-                  margin-top:8px;
-                  font-size:13px;
-                  color:#666;
-                ">
-                尚未選擇圖片
-              </div>
+            <div
+              id="fileName"
+              style="
+                margin-top:8px;
+                font-size:13px;
+                color:#666;
+              ">
+              尚未選擇圖片
             </div>
           </div>
-
-
-          <div class="swal-row">
-            <label>使用者名稱</label>
-            <input id="editUserName"
-                  class="swal2-input"
-                  value="${this.userName}">
-          </div>
-
         </div>
-      `,
 
-      showCancelButton: true,
-      confirmButtonText: '修改',
-      cancelButtonText: '取消',
+        <div class="swal-row">
+          <label>使用者名稱</label>
+          <input
+            id="editUserName"
+            class="swal2-input"
+            value="${this.userName}"
+          >
+        </div>
 
-      didOpen: () => {
-        // ⭐ 即時預覽頭像
-        const input = document.getElementById(
-          'avatarInput',
-        ) as HTMLInputElement;
-        const preview = document.getElementById(
-          'avatarPreview',
-        ) as HTMLImageElement;
-        const fileName = document.getElementById('fileName');
+      </div>
+    `,
 
-        input?.addEventListener('change', () => {
-          const file = input.files?.[0];
-          if (file) {
-            preview.src = URL.createObjectURL(file);
+    showCancelButton: true,
+    confirmButtonText: '修改',
+    cancelButtonText: '取消',
 
-            if (fileName) {
-              fileName.textContent = file.name;
-            }
+    didOpen: () => {
+      const input = document.getElementById('avatarInput') as HTMLInputElement;
+      const previewBox = document.getElementById('avatarPreviewBox');
+      const fileName = document.getElementById('fileName');
+
+      input?.addEventListener('change', () => {
+        const file = input.files?.[0];
+
+        if (file) {
+          const previewUrl = URL.createObjectURL(file);
+
+          if (previewBox) {
+            previewBox.innerHTML = `
+              <img
+                id="avatarPreviewImg"
+                src="${previewUrl}"
+                style="
+                  width:90px;
+                  height:90px;
+                  border-radius:50%;
+                  object-fit:cover;
+                  border:2px solid #eee;
+                  display:block;
+                  margin:0 auto;
+                "
+              />
+            `;
           }
-        });
-      },
 
-      preConfirm: () => {
-        const userName = (
-          document.getElementById('editUserName') as HTMLInputElement
-        ).value.trim();
-        // const email = (document.getElementById('editEmail') as HTMLInputElement).value.trim();
-        const file = (
-          document.getElementById('avatarInput') as HTMLInputElement
-        ).files?.[0];
-
-        if (!userName) {
-          Swal.showValidationMessage('使用者名稱不可為空');
-          return false;
+          if (fileName) {
+            fileName.textContent = file.name;
+          }
         }
+      });
+    },
 
-        // if (!email) {
-        //   Swal.showValidationMessage('Email 不可為空');
-        //   return false;
-        // }
+    preConfirm: () => {
+      const userName = (
+        document.getElementById('editUserName') as HTMLInputElement
+      ).value.trim();
 
-        // if (!emailPattern.test(email)) {
-        //   Swal.showValidationMessage('Email 格式錯誤');
-        //   return false;
-        // }
+      const file = (
+        document.getElementById('avatarInput') as HTMLInputElement
+      ).files?.[0];
 
-        // if (email === "familyLifeTest123456@gmail.com") {
-        //   Swal.showValidationMessage('這是官方 email!!');
-        //   return false;
-        // }
-
-        return {
-          userName,
-          // email,
-          file,
-        };
-      },
-    }).then((result) => {
-      if (!result.isConfirmed || !result.value) return;
-
-      // 更新資料
-      this.userName = result.value.userName;
-      // this.email = result.value.email;
-
-      // ⭐ 如果有新頭像
-      if (result.value.file) {
-        this.file = result.value.file;
-        this.avatarUrl = URL.createObjectURL(this.file);
-        this.notifySettingService.setAvatar(this.avatarUrl);
+      if (!userName) {
+        Swal.showValidationMessage('使用者名稱不可為空');
+        return false;
       }
 
-      this.notifySettingService.setName(this.userName);
-      this.isDirty = true;
+      return {
+        userName,
+        file,
+      };
+    },
+  }).then((result) => {
+    if (!result.isConfirmed || !result.value) return;
 
-      Swal.fire({
-        icon: 'success',
-        title: '修改成功',
-        timer: 1200,
-        showConfirmButton: false,
-      });
+    this.userName = result.value.userName;
+
+    if (result.value.file) {
+      this.file = result.value.file;
+      this.avatarUrl = URL.createObjectURL(this.file);
+      this.notifySettingService.setAvatar(this.avatarUrl);
+    }
+
+    this.notifySettingService.setName(this.userName);
+    this.isDirty = true;
+
+    Swal.fire({
+      icon: 'success',
+      title: '修改成功',
+      timer: 1200,
+      showConfirmButton: false,
     });
+  });
   }
 
   saveAll() {
