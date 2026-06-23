@@ -1,0 +1,58 @@
+<h2 mat-dialog-title>輸入驗證碼</h2>
+
+<mat-dialog-content class="verify-dialog-content">
+  <p class="verify-hint">
+    驗證碼已寄到 {{ data.email }}
+  </p>
+
+  <div class="countdown-row" [class.is-expired]="verifyExpired">
+    <span>驗證碼有效時間</span>
+    @if (!verifyExpired) {
+      <strong>
+        <countdown [config]="verifyConfig" (event)="handleVerifyCountdown($event)" />
+      </strong>
+    } @else {
+      <strong>已過期</strong>
+    }
+  </div>
+
+  <mat-form-field appearance="outline" class="verify-field">
+    <mat-label>驗證碼</mat-label>
+    <input
+      matInput
+      type="text"
+      inputmode="numeric"
+      maxlength="6"
+      [(ngModel)]="code"
+      placeholder="請輸入 6 位數驗證碼"
+      autocomplete="one-time-code"
+      (keyup.enter)="submit()"
+    />
+  </mat-form-field>
+
+  @if (errorMessage) {
+    <p class="verify-error">{{ errorMessage }}</p>
+  }
+
+  <button
+    mat-button
+    type="button"
+    class="resend-button"
+    [disabled]="resendLocked"
+    (click)="resend()"
+  >
+    @if (resendLocked) {
+      <span>
+        <countdown [config]="resendConfig" (event)="handleResendCountdown($event)" />
+        秒後重新發送
+      </span>
+    } @else {
+      <span>重新發送驗證碼</span>
+    }
+  </button>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close type="button">取消</button>
+  <button mat-raised-button color="primary" type="button" (click)="submit()">驗證</button>
+</mat-dialog-actions>

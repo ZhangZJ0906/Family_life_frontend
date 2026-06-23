@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { User } from '../../@models/user.model';
+import { environment, User } from '../../@models/user.model';
 import { AuthService } from '../../@services/auth.service';
 import { MatIconModule } from '@angular/material/icon';
 import { HttpClientService } from '../../@services/http-client.service';
@@ -32,7 +32,7 @@ export class LoginComponent {
     private readonly emailVerifyService: EmailVerifyService,
     private readonly http: HttpClientService,
 
-  ) {}
+  ) {console.log(environment.apiUrl);}
 
   signIn(): void {
   this.authService.login(this.email, this.password).subscribe({
@@ -44,7 +44,7 @@ export class LoginComponent {
           icon: 'error',
           title: '登入失敗',
           text: 'Email 或密碼不正確',
-          // confirmButtonText: '確認',
+          confirmButtonText: '確認',
         });
 
         return;
@@ -74,8 +74,8 @@ export class LoginComponent {
         icon: 'success',
         title: '登入成功',
         text: `歡迎回來，${res.name}`,
-        confirmButtonText: '確認',
-        showConfirmButton: true,
+        showConfirmButton: false,
+        timer: 800,
       }).then(() => {
         this.router.navigate(['/home-page']);
       });

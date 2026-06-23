@@ -1,0 +1,56 @@
+.verify-dialog-content {
+  width: min(420px, calc(100vw - 64px));
+  display: grid;
+  gap: 14px;
+}
+
+.verify-hint {
+  margin: 0;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.countdown-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 14px;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 800;
+}
+
+.countdown-row.is-expired {
+  border-color: #fecaca;
+  background: #fff1f2;
+  color: #be123c;
+}
+
+.verify-field {
+  width: 100%;
+}
+
+.verify-error {
+  margin: 0;
+  color: #dc2626;
+  font-weight: 800;
+}
+
+.resend-button {
+  justify-self: start;
+  padding-inline: 0;
+}
+
+@media (max-width: 768px) {
+  .verify-dialog-content {
+    width: 100%;
+  }
+
+  .countdown-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
