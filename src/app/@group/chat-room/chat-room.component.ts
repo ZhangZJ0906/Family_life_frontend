@@ -104,19 +104,14 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
 
     await this.ws.connect();
 
-    // ⭐ ONLY HERE join room
-    this.ws.enterRoom(this.groupId, this.userId);
-
-    this.startHeartbeat();
-
     this.ws.subscribe(this.groupId, (msg: any) => {
       this.zone.run(() => {
 
         switch (msg.type) {
 
           case 'ONLINE':
-            this.onlineCount = msg.count;
-            this.onlineUsers = msg.users || [];
+            this.onlineUsers = [...(msg.users || [])];
+            this.onlineCount = this.onlineUsers.length;
             this.buildMemberStatus();
             break;
 
@@ -144,6 +139,14 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
 
       setTimeout(() => this.scrollToBottom(), 50);
     });
+
+    // console.log("收到WS:", msg);
+
+    // this.ws.subscribe(this.groupId, callback);
+
+    this.ws.enterRoom(this.groupId, this.userId);
+
+    this.startHeartbeat();
 
     //登出關閉聊天室
     this.logoutSub = this.authService.logout$.subscribe(() => {
@@ -191,6 +194,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
   private leaveRoom() {
     this.isActiveRoom = false;
     this.ws.leaveRoom(this.groupId, this.userId);
+    this.ws.unsubscribe(this.groupId);
   }
 
   private forceCloseChat() {
