@@ -548,7 +548,19 @@ getBatchAssignedUserIds(
           return;
         }
 
-        const ids = (res.data ?? []).map((id: any) => Number(id));
+        let ids = (res.data ?? []).map((id: any) => Number(id));
+
+        if (this.currentGroupId !== 0) {
+          const activeMemberIds = this.groupMemberList.map((member: any) =>
+            Number(member.user_id ?? member.userId)
+          );
+
+          ids = ids.filter((id: number) => activeMemberIds.includes(id));
+        }
+
+        if (ids.length === 0) {
+          ids = [fallbackUserId];
+        }
 
         this.assignedUserIdsCache.set(eventBatchId, ids);
 
