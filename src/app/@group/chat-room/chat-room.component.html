@@ -146,8 +146,6 @@
               [src]="msg.imageUrl"
               class="chat-image"
               alt="chat image"
-                (click)="$event.stopPropagation(); openImagePreview(msg.imageUrl, msg.senderName)"
-
             />
 
             <!-- 時間 / 已讀 -->
@@ -312,41 +310,4 @@
     </div>
   </div>
 
-</div>
-<!-- 圖片預覽 -->
-<div class="image-preview-backdrop" *ngIf="imagePreviewVisible" (click)="closeImagePreview()">
-  <div class="image-preview-panel" (click)="$event.stopPropagation()">
-
-    <button type="button" class="preview-close-btn" (click)="closeImagePreview()">
-      <mat-icon>close</mat-icon>
-    </button>
-
-    <div class="image-preview-stage">
-      <img [src]="previewImageUrl" [alt]="previewImageTitle" class="preview-main-img" [style.transform]="
-          'scale(' + previewScale + ') rotate(' + previewRotate + 'deg)'
-        " (wheel)="onPreviewWheel($event)" />
-    </div>
-
-    <div class="preview-toolbar">
-      <button type="button" (click)="zoomOut()">
-        <mat-icon>zoom_out</mat-icon>
-      </button>
-
-      <button type="button" (click)="zoomIn()">
-        <mat-icon>zoom_in</mat-icon>
-      </button>
-
-      <button type="button" (click)="rotateLeft()">
-        <mat-icon>rotate_left</mat-icon>
-      </button>
-
-      <button type="button" (click)="rotateRight()">
-        <mat-icon>rotate_right</mat-icon>
-      </button>
-
-      <button type="button" (click)="resetPreview()">
-        <mat-icon>restart_alt</mat-icon>
-      </button>
-    </div>
-  </div>
 </div>

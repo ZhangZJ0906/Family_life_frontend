@@ -73,6 +73,9 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
 
   isMobile = false;
 
+  //死了判斷
+  heartbeatTimer: any;
+
   //登出關聊天室
   private logoutSub?: Subscription;
 
@@ -100,15 +103,20 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
 
     await this.ws.connect();
 
+<<<<<<< HEAD
+=======
     // ⭐ ONLY HERE join room
     this.ws.enterRoom(this.groupId, this.userId);
 
+    this.startHeartbeat();
+
+>>>>>>> origin/ZJ
     this.ws.subscribe(this.groupId, (msg: any) => {
       this.zone.run(() => {
         switch (msg.type) {
           case 'ONLINE':
-            this.onlineCount = msg.count;
-            this.onlineUsers = msg.users || [];
+            this.onlineUsers = [...(msg.users || [])];
+            this.onlineCount = this.onlineUsers.length;
             this.buildMemberStatus();
             break;
 
@@ -136,6 +144,14 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
       setTimeout(() => this.scrollToBottom(), 50);
     });
 
+    // console.log("收到WS:", msg);
+
+    // this.ws.subscribe(this.groupId, callback);
+
+    this.ws.enterRoom(this.groupId, this.userId);
+
+    this.startHeartbeat();
+
     //登出關閉聊天室
     this.logoutSub = this.authService.logout$.subscribe(() => {
       this.forceCloseChat();
@@ -150,15 +166,36 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
     }
   }
 
+  //判斷是否死了
+  private startHeartbeat() {
+<<<<<<< HEAD
+
+    this.heartbeatTimer = setInterval(() => {
+
+      this.ws.sendHeartbeat(this.groupId, this.userId);
+
+=======
+    this.heartbeatTimer = setInterval(() => {
+      this.ws.sendHeartbeat(this.groupId, this.userId);
+>>>>>>> origin/ZJ
+    }, 10000); // 每 10 秒一次
+  }
+
   // =========================
   // DESTROY
   // =========================
   ngOnDestroy() {
     this.logoutSub?.unsubscribe();
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+    }
     this.leaveRoom();
   }
 
   closeChat() {
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+    }
     this.leaveRoom();
     this.dialogRef.close();
   }
@@ -166,6 +203,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
   private leaveRoom() {
     this.isActiveRoom = false;
     this.ws.leaveRoom(this.groupId, this.userId);
+    this.ws.unsubscribe(this.groupId);
   }
 
   private forceCloseChat() {

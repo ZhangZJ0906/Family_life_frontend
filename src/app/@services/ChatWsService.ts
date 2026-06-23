@@ -37,6 +37,7 @@ export class ChatWsService {
 
         console.log('WebSocket Connected');
 
+
         resolve();
       };
 
@@ -54,7 +55,7 @@ export class ChatWsService {
 
     this.subscribedGroups.add(groupId);
 
-    this.client.subscribe(
+    const sub = this.client.subscribe(
       `/topic/group/${groupId}`,
       (msg) => {
 
@@ -66,6 +67,9 @@ export class ChatWsService {
 
       }
     );
+
+    // ⭐ 存起來
+    this.subscriptions.set(groupId, sub);
   }
 
   subscribeOnline(callback: Function) {
