@@ -7,7 +7,7 @@ import {
   HostListener,
   AfterViewChecked,
   Inject,
-  NgZone
+  NgZone,
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -21,7 +21,7 @@ import { ChatWsService } from '../../@services/ChatWsService';
 import { AuthService } from '../../@services/auth.service';
 import { environment } from '../../@models/user.model';
 import Swal from 'sweetalert2';
-import { MatIconModule } from "@angular/material/icon";
+import { MatIconModule } from '@angular/material/icon';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -31,8 +31,7 @@ import { Subscription } from 'rxjs';
   templateUrl: './chat-room.component.html',
   styleUrl: './chat-room.component.scss',
 })
-export class ChatRoomComponent implements OnInit, OnDestroy{
-
+export class ChatRoomComponent implements OnInit, OnDestroy {
   @ViewChild('scrollBox') scrollBox!: ElementRef;
 
   groupId!: number;
@@ -106,9 +105,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
 
     this.ws.subscribe(this.groupId, (msg: any) => {
       this.zone.run(() => {
-
         switch (msg.type) {
-
           case 'ONLINE':
             this.onlineUsers = [...(msg.users || [])];
             this.onlineCount = this.onlineUsers.length;
@@ -134,7 +131,6 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
             this.applyRecall(msg);
             break;
         }
-
       });
 
       setTimeout(() => this.scrollToBottom(), 50);
@@ -234,14 +230,14 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
     if (avatar.startsWith('http://localhost:8081')) {
       return avatar.replace(
         'http://localhost:8081',
-        window.location.origin + '/api'
+        window.location.origin + '/api',
       );
     }
 
     if (avatar.startsWith('http://localhost:8080')) {
       return avatar.replace(
         'http://localhost:8080',
-        window.location.origin + '/api'
+        window.location.origin + '/api',
       );
     }
 
@@ -257,24 +253,24 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
   }
 
   getMember() {
-    this.http.get<any>(
-      `${environment.apiUrl}/family_life/get_members?group_id=${this.groupId}`
-    ).subscribe(res => {
-      this.allMembers = res.groupMembersList ?? [];
-      this.buildMemberStatus();
-    });
+    this.http
+      .get<any>(
+        `${environment.apiUrl}/family_life/get_members?group_id=${this.groupId}`,
+      )
+      .subscribe((res) => {
+        this.allMembers = res.groupMembersList ?? [];
+        this.buildMemberStatus();
+      });
   }
 
   buildMemberStatus() {
     if (!Array.isArray(this.allMembers)) return;
 
-    const onlineIds = new Set(
-      this.onlineUsers.map(u => this.getUserId(u))
-    );
+    const onlineIds = new Set(this.onlineUsers.map((u) => this.getUserId(u)));
 
-    this.membersWithStatus = this.allMembers.map(m => ({
+    this.membersWithStatus = this.allMembers.map((m) => ({
       ...m,
-      isOnline: onlineIds.has(this.getUserId(m))
+      isOnline: onlineIds.has(this.getUserId(m)),
     }));
   }
 
@@ -283,11 +279,11 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
   }
 
   get onlineMembers() {
-    return this.membersWithStatus.filter(m => m.isOnline);
+    return this.membersWithStatus.filter((m) => m.isOnline);
   }
 
   get offlineMembers() {
-    return this.membersWithStatus.filter(m => !m.isOnline);
+    return this.membersWithStatus.filter((m) => !m.isOnline);
   }
 
   // =========================
@@ -296,25 +292,27 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
   loadMessages() {
     this.isLoadingMessages = true;
 
-    this.http.get<any>(
-      `${environment.apiUrl}/chat/${this.groupId}?userId=${this.userId}`
-    ).subscribe({
-      next: (res) => {
-        this.messages = res.messages ?? [];
+    this.http
+      .get<any>(
+        `${environment.apiUrl}/chat/${this.groupId}?userId=${this.userId}`,
+      )
+      .subscribe({
+        next: (res) => {
+          this.messages = res.messages ?? [];
 
-        this.firstUnreadIndex = this.messages.findIndex(
-          m => m.senderId !== this.userId && !m.readByMe
-        );
+          this.firstUnreadIndex = this.messages.findIndex(
+            (m) => m.senderId !== this.userId && !m.readByMe,
+          );
 
           this.markRead();
 
-        this.hasLoaded = true;
-        this.isLoadingMessages = false;
-      },
-      error: () => {
-        this.isLoadingMessages = false;
-      }
-    });
+          this.hasLoaded = true;
+          this.isLoadingMessages = false;
+        },
+        error: () => {
+          this.isLoadingMessages = false;
+        },
+      });
   }
 
   sendMessage() {
@@ -324,7 +322,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
       groupId: this.groupId,
       senderId: this.userId,
       message: this.message,
-      replyId: this.replyMessage?.id || null
+      replyId: this.replyMessage?.id || null,
     });
 
     this.message = '';
@@ -359,33 +357,34 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
     });
   }
 
-
   // =========================
   // READ
   // =========================
   markRead() {
-    this.http.post(
-      `${environment.apiUrl}/chat/read/${this.groupId}?userId=${this.userId}`,
-      {}
-    ).subscribe(() => {
-      this.messages.forEach(m => {
-        if (m.senderId !== this.userId) {
-          m.readByMe = true;
-        }
-      });
+    this.http
+      .post(
+        `${environment.apiUrl}/chat/read/${this.groupId}?userId=${this.userId}`,
+        {},
+      )
+      .subscribe(() => {
+        this.messages.forEach((m) => {
+          if (m.senderId !== this.userId) {
+            m.readByMe = true;
+          }
+        });
 
-      this.calculateUnreadIndex();
-    });
+        this.calculateUnreadIndex();
+      });
   }
 
   updateReadCount(msg: any) {
-    const target = this.messages.find(m => m.id === msg.messageId);
+    const target = this.messages.find((m) => m.id === msg.messageId);
     if (target) target.readCount = msg.readCount;
   }
 
   calculateUnreadIndex() {
     const idx = this.messages.findIndex(
-      m => m.senderId !== this.userId && !m.readByMe
+      (m) => m.senderId !== this.userId && !m.readByMe,
     );
 
     this.firstUnreadIndex = idx >= 0 ? idx : -1;
@@ -395,7 +394,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
   // RECALL
   // =========================
   private applyEdit(msg: any) {
-    const target = this.messages.find(m => m.id === msg.messageId);
+    const target = this.messages.find((m) => m.id === msg.messageId);
     if (target) {
       target.message = msg.message;
       target.edited = true;
@@ -403,7 +402,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
   }
 
   private applyRecall(msg: any) {
-    const target = this.messages.find(m => m.id === msg.messageId);
+    const target = this.messages.find((m) => m.id === msg.messageId);
     if (target) target.recalled = true;
   }
 
@@ -432,11 +431,10 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
   formatDate(date: string): string {
     const d = new Date(date);
 
-    return `${d.getFullYear()}/${
-      String(d.getMonth() + 1).padStart(2, '0')
-    }/${
-      String(d.getDate()).padStart(2, '0')
-    }`;
+    return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(
+      2,
+      '0',
+    )}/${String(d.getDate()).padStart(2, '0')}`;
   }
 
   //右鍵選單
@@ -479,7 +477,6 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
     this.showMenu = false;
   }
 
-
   copyMessage() {
     if (!this.selectedMessage) return;
 
@@ -517,43 +514,44 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
       confirmButtonText: '收回',
       cancelButtonText: '取消',
     }).then((result) => {
-
       if (!result.isConfirmed) return;
 
       Swal.fire({
         title: '收回中...',
         allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
+        didOpen: () => Swal.showLoading(),
       });
 
-      this.http.post(
-        `${environment.apiUrl}/chat/message/${this.selectedMessage.id}/recall`,
-        {}
-      ).subscribe({
-        next: () => {
-          Swal.close();
+      this.http
+        .post(
+          `${environment.apiUrl}/chat/message/${this.selectedMessage.id}/recall`,
+          {},
+        )
+        .subscribe({
+          next: () => {
+            Swal.close();
 
-          const target = this.messages.find(
-            m => m.id === this.selectedMessage.id
-          );
+            const target = this.messages.find(
+              (m) => m.id === this.selectedMessage.id,
+            );
 
-          if (target) {
-            target.recalled = true;
-          }
+            if (target) {
+              target.recalled = true;
+            }
 
-          this.selectedMessage.recalled = true;
-        },
+            this.selectedMessage.recalled = true;
+          },
 
-        error: (err) => {
-          Swal.close();
+          error: (err) => {
+            Swal.close();
 
-          Swal.fire({
-            title: '收回失敗',
-            text: err.message || '請稍後再試',
-            icon: 'error'
-          });
-        }
-      });
+            Swal.fire({
+              title: '收回失敗',
+              text: err.message || '請稍後再試',
+              icon: 'error',
+            });
+          },
+        });
     });
   }
 
@@ -566,15 +564,16 @@ export class ChatRoomComponent implements OnInit, OnDestroy{
     this.previewScale = 1;
     this.previewRotate = 0;
     this.imagePreviewVisible = true;
-      // ⭐關鍵：強制移到 body（避免被 cdkDrag 的 transform 影響 fixed 定位）
-  setTimeout(() => {
-    const preview =
-      document.querySelector('.image-preview-overlay') as HTMLElement;
+    // ⭐關鍵：強制移到 body（避免被 cdkDrag 的 transform 影響 fixed 定位）
+    setTimeout(() => {
+      const preview = document.querySelector(
+        '.image-preview-overlay',
+      ) as HTMLElement;
 
-    if (preview) {
-      document.body.appendChild(preview);
-    }
-  });
+      if (preview) {
+        document.body.appendChild(preview);
+      }
+    });
   }
 
   // 關閉圖片預覽

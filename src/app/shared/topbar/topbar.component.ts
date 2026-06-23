@@ -64,6 +64,9 @@ export class TopbarComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<void>(); //避免重複傳送
   lastUnreadCount = 0;
 
+  // 頭像載入中
+  isAvatarLoading = true;
+
   constructor(
     private dialog: MatDialog,
     private http: HttpClient,
@@ -240,26 +243,31 @@ export class TopbarComponent implements OnInit, OnDestroy {
   // 讀取使用者頭像
   // 用箭頭函式，避免 window.addEventListener 呼叫時 this 指向錯誤
   loadAvatar = (): void => {
-    if (!this.user_id) {
-      this.avatarUrl = '';
-      return;
-    }
+  if (!this.user_id) {
+    this.avatarUrl = '';
+    this.isAvatarLoading = false;
+    return;
+  }
 
-    this.http
-      .get<any>(
-        `${environment.apiUrl}/users/get_user_info?userId=${this.user_id}`,
-      )
-      .subscribe({
-        next: (res) => {
-          this.avatarUrl = res.avatar || '';
-        },
+  this.isAvatarLoading = true;
 
-        error: (err) => {
-          console.log(err);
-          this.avatarUrl = '';
-        },
-      });
-  };
+  this.http
+    .get<any>(
+      `${environment.apiUrl}/users/get_user_info?userId=${this.user_id}`,
+    )
+    .subscribe({
+      next: (res) => {
+        this.avatarUrl = res.avatar || '';
+        this.isAvatarLoading = false;
+      },
+
+      error: (err) => {
+        console.log(err);
+        this.avatarUrl = '';
+        this.isAvatarLoading = false;
+      },
+    });
+};
   //獲取圖片 用
   getAvatar(avatar?: string | null): string {
   if (!avatar || avatar.trim() === '') {

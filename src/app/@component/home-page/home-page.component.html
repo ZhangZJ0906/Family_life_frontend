@@ -2,6 +2,13 @@
 
   <app-topbar></app-topbar>
 
+  @if (isHomeLoading) {
+  <section class="home-loading-card">
+    <div class="home-loading-spinner"></div>
+    <h3>首頁資料載入中...</h3>
+    <p>正在整理本月支出、到期提醒與今日優先事項</p>
+  </section>
+} @else {
 <!-- 第一區：歡迎卡片，內含橫向金額摘要 -->
 <section class="welcome-card">
 
@@ -190,6 +197,7 @@
       </div>
 
     </section>
+
   </div>
 
   <!-- 右邊：今日優先處理 -->
@@ -228,6 +236,9 @@
         }
       </div>
     </section>
+
   </div>
 
 </section>
+}
+</div>

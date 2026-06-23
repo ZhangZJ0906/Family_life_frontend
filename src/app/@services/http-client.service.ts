@@ -27,7 +27,7 @@ export class HttpClientService {
   // }
 
   getApi(path: string) {
-    console.log("url: ", this.basicUrl+path)
+    // console.log("url: ", this.basicUrl+path)
     return this.httpClient.get(`${this.basicUrl}/${path}`);
   }
 
