@@ -62,6 +62,14 @@ export class ProfileComponent implements CanComponentDeactivate {
   // 個人頭像載入中
 isAvatarLoading = true;
 
+  private isRealAvatar(avatar?: string | null): boolean {
+  if (!avatar || avatar.trim() === '') {
+    return false;
+  }
+
+  return !avatar.includes('default-avatar.png');
+}
+
   constructor(
     // private http: HttpClient,
     private authService: AuthService,
@@ -72,28 +80,41 @@ isAvatarLoading = true;
 
   user_id = 0;
   getAvatar(avatar?: string | null): string {
-    if (!avatar || avatar.trim() === '') {
-      return 'assets/default-avatar.png';
-    }
-
-    if (avatar.startsWith('http://localhost:8081')) {
-      return avatar.replace('http://localhost:8081', window.location.origin + '/api');
-    }
-
-    if (avatar.startsWith('http://localhost:8080')) {
-      return avatar.replace('http://localhost:8080', window.location.origin + '/api');
-    }
-
-    if (avatar.startsWith('http')) {
-      return avatar;
-    }
-
-    if (avatar.startsWith('/')) {
-      return window.location.origin + '/api' + avatar;
-    }
-
-    return window.location.origin + '/api/' + avatar;
+  if (!avatar || avatar.trim() === '') {
+    return '';
   }
+
+  if (avatar.includes('default-avatar.png')) {
+    return '';
+  }
+
+  if (avatar.startsWith('assets/')) {
+    return avatar;
+  }
+
+  if (avatar.startsWith('blob:')) {
+  return avatar;
+}
+
+  if (avatar.startsWith('http://localhost:8081')) {
+    return avatar.replace('http://localhost:8081', window.location.origin + '/api');
+  }
+
+  if (avatar.startsWith('http://localhost:8080')) {
+    return avatar.replace('http://localhost:8080', window.location.origin + '/api');
+  }
+
+  if (avatar.startsWith('http')) {
+    return avatar;
+  }
+
+  if (avatar.startsWith('/')) {
+    return window.location.origin + '/api' + avatar;
+  }
+
+  return window.location.origin + '/api/' + avatar;
+}
+
 
   ngOnInit(): void {
     //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
@@ -113,7 +134,7 @@ isAvatarLoading = true;
       this.email = res.email;
       this.endDateNotify = res.notifyByEndDate;
       this.emailNotify = res.notifyByEmail;
-      this.avatarUrl = res.avatar;
+      this.avatarUrl = this.isRealAvatar(res.avatar) ? res.avatar : '';
       this.emailVerify = res.emailVerify;
 
       // 共享 userInfo
@@ -361,8 +382,7 @@ isAvatarLoading = true;
 
     if (result.value.file) {
       this.file = result.value.file;
-      this.avatarUrl = URL.createObjectURL(this.file);
-      this.notifySettingService.setAvatar(this.avatarUrl);
+
     }
 
     this.notifySettingService.setName(this.userName);
