@@ -152,14 +152,14 @@ export class ItemListAddDialogComponent implements OnInit {
 
     const file = input.files[0];
 
-    // 限制 5MB
-    const maxSize = 5 * 1024 * 1024;
+    // 限制 1MB
+    const maxSize = 1 * 1024 * 1024;
 
     if (file.size > maxSize) {
       Swal.fire({
         icon: 'warning',
         title: '圖片太大',
-        text: '請上傳 5MB 以下的圖片',
+        text: '請上傳 1MB 以下的圖片',
         confirmButtonText: '確認',
       });
 

@@ -577,7 +577,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
     // ⭐關鍵：強制移到 body（避免被 cdkDrag 的 transform 影響 fixed 定位）
     setTimeout(() => {
       const preview = document.querySelector(
-        '.image-preview-overlay',
+        '.image-preview-backdrop',
       ) as HTMLElement;
 
       if (preview) {
