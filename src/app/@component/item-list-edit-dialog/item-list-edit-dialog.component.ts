@@ -178,7 +178,16 @@ export class ItemListEditDialogComponent implements OnInit {
     const file = event.target.files[0];
     if (file) {
       this.selectedFile = file;
-
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        Swal.fire({
+          title: '圖片檔案過大',
+          text: '不能上傳超過 5MB 的圖片，請重新選擇！',
+          icon: 'error',
+        });
+        file.value = ''; // 清空 input 選擇
+        return;
+      }
       // 使用 FileReader 產生 Base64 供前端預覽
       const reader = new FileReader();
       reader.onload = (e: any) => {

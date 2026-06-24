@@ -322,7 +322,17 @@ export class ItemListComponent {
       // edit-dialog 回傳的 _type 為 'item' | 'subscription' | 'warranty' | 'medicine'
       const { _type, selectedFile, ...payload } = result;
       payload.userId = this.currentUserId;
-
+if (selectedFile) {
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (selectedFile.size > maxSize) {
+          Swal.fire({
+            title: '上傳失敗',
+            text: '圖片大小不能超過 5MB，請重新選擇較小的檔案！',
+            icon: 'error',
+          });
+          return; // 阻擋不送出 API
+        }
+      }
       // const url = this.basicUrl + (this.updateApiMap[_type] ?? 'item/update');
       const url = this.updateApiMap[_type] ?? 'item/update';
 
