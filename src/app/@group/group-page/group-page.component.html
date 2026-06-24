@@ -46,14 +46,19 @@
         <div class="card-list">
 
           <!-- loading -->
-          <div class="loading-state" *ngIf="isLoading">
-            ⏳ 載入中...
-          </div>
+          <ng-container *ngIf="isLoading; else loaded">
+            <div class="state-container">⏳ 載入中...</div>
+          </ng-container>
 
-          <!-- empty -->
-          <div class="loading-state" *ngIf="!isLoading && pagedGroups.length === 0">
-            📭 沒有群組資料
-          </div>
+          <ng-template #loaded>
+            <ng-container *ngIf="pagedGroups.length > 0; else empty">
+              <!-- list -->
+            </ng-container>
+
+            <ng-template #empty>
+              <div class="state-container">📭 沒有群組資料</div>
+            </ng-template>
+          </ng-template>
 
           <ng-container *ngIf="!isLoading">
 

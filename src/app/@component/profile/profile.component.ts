@@ -15,20 +15,21 @@ import { CanComponentDeactivate } from '../../@guard/pending-changes.guard';
 import { EmailVerifyService } from './../../@services/EmailVerifyService';
 import { HttpClientService } from '../../@services/http-client.service';
 import { environment } from '../../@models/user.model';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [TopbarComponent, RouterLink, CommonModule, FormsModule],
+  imports: [TopbarComponent, RouterLink, CommonModule, FormsModule,   MatIconModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
 })
 export class ProfileComponent implements CanComponentDeactivate {
   // 使用者名稱
-  userName = 'Jack';
+  userName = '載入名字中...';
 
   // Email
-  email = 'jack@example.com';
+  email = '載入 Email 中...';
 
   // 頭像預設文字
   avatarText = 'U';
@@ -58,6 +59,17 @@ export class ProfileComponent implements CanComponentDeactivate {
 
   isLoading = false;
 
+  // 個人頭像載入中
+isAvatarLoading = true;
+
+  private isRealAvatar(avatar?: string | null): boolean {
+  if (!avatar || avatar.trim() === '') {
+    return false;
+  }
+
+  return !avatar.includes('default-avatar.png');
+}
+
   constructor(
     // private http: HttpClient,
     private authService: AuthService,
@@ -68,28 +80,41 @@ export class ProfileComponent implements CanComponentDeactivate {
 
   user_id = 0;
   getAvatar(avatar?: string | null): string {
-    if (!avatar || avatar.trim() === '') {
-      return 'assets/default-avatar.png';
-    }
-
-    if (avatar.startsWith('http://localhost:8081')) {
-      return avatar.replace('http://localhost:8081', window.location.origin + '/api');
-    }
-
-    if (avatar.startsWith('http://localhost:8080')) {
-      return avatar.replace('http://localhost:8080', window.location.origin + '/api');
-    }
-
-    if (avatar.startsWith('http')) {
-      return avatar;
-    }
-
-    if (avatar.startsWith('/')) {
-      return window.location.origin + '/api' + avatar;
-    }
-
-    return window.location.origin + '/api/' + avatar;
+  if (!avatar || avatar.trim() === '') {
+    return '';
   }
+
+  if (avatar.includes('default-avatar.png')) {
+    return '';
+  }
+
+  if (avatar.startsWith('assets/')) {
+    return avatar;
+  }
+
+  if (avatar.startsWith('blob:')) {
+  return avatar;
+}
+
+  if (avatar.startsWith('http://localhost:8081')) {
+    return avatar.replace('http://localhost:8081', window.location.origin + '/api');
+  }
+
+  if (avatar.startsWith('http://localhost:8080')) {
+    return avatar.replace('http://localhost:8080', window.location.origin + '/api');
+  }
+
+  if (avatar.startsWith('http')) {
+    return avatar;
+  }
+
+  if (avatar.startsWith('/')) {
+    return window.location.origin + '/api' + avatar;
+  }
+
+  return window.location.origin + '/api/' + avatar;
+}
+
 
   ngOnInit(): void {
     //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
@@ -101,30 +126,33 @@ export class ProfileComponent implements CanComponentDeactivate {
   }
 
   getSelfInfo() {
-    this.http.getApi(`users/get_user_info?userId=${this.user_id}`).subscribe({
-      next: (res: any) => {
-        this.userName = res.name;
-        this.email = res.email;
-        this.endDateNotify = res.notifyByEndDate;
-        this.emailNotify = res.notifyByEmail;
-        this.avatarUrl = res.avatar;
-        this.emailVerify = res.emailVerify;
-        console.log(res.avatar);
+  this.isAvatarLoading = true;
 
-        // 共享 userInfo
-        this.notifySettingService.setName(res.name);
-        this.notifySettingService.setEmail(res.email);
-        this.notifySettingService.setAvatar(this.avatarUrl);
-        this.notifySettingService.setNotifyByEndDate(res.notifyByEndDate);
-        this.notifySettingService.setNotifyByEmail(res.notifyByEmail);
-      },
+  this.http.getApi(`users/get_user_info?userId=${this.user_id}`).subscribe({
+    next: (res: any) => {
+      this.userName = res.name;
+      this.email = res.email;
+      this.endDateNotify = res.notifyByEndDate;
+      this.emailNotify = res.notifyByEmail;
+      this.avatarUrl = this.isRealAvatar(res.avatar) ? res.avatar : '';
+      this.emailVerify = res.emailVerify;
 
-      error: (err) => {
-        console.log(err);
-      },
-    });
-  }
+      // 共享 userInfo
+      this.notifySettingService.setName(res.name);
+      this.notifySettingService.setEmail(res.email);
+      this.notifySettingService.setAvatar(this.avatarUrl);
+      this.notifySettingService.setNotifyByEndDate(res.notifyByEndDate);
+      this.notifySettingService.setNotifyByEmail(res.notifyByEmail);
 
+      this.isAvatarLoading = false;
+    },
+
+    error: (err) => {
+      console.log(err);
+      this.isAvatarLoading = false;
+    },
+  });
+}
   getGroup() {
     this.isLoading = true;
 
@@ -177,150 +205,196 @@ export class ProfileComponent implements CanComponentDeactivate {
 
   // 開啟修改資料彈窗
   openEditDialog(): void {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const avatarPreviewHtml =
+    this.avatarUrl && this.avatarUrl.trim() !== ''
+      ? `
+        <img
+          id="avatarPreviewImg"
+          src="${this.getAvatar(this.avatarUrl)}"
+          style="
+            width:90px;
+            height:90px;
+            border-radius:50%;
+            object-fit:cover;
+            border:2px solid #eee;
+            display:block;
+            margin:0 auto;
+          "
+        />
+      `
+      : `
+        <div
+          id="avatarPreviewDefault"
+          style="
+            width:90px;
+            height:90px;
+            border-radius:50%;
+            background:#2f5fb8;
+            color:white;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            border:2px solid #eee;
+            margin:0 auto;
+          "
+        >
+          <span
+            class="material-icons"
+            style="
+              font-size:52px;
+              width:52px;
+              height:52px;
+              line-height:52px;
+            "
+          >
+            person
+          </span>
+        </div>
+      `;
 
-    Swal.fire({
-      title: '修改基本資料',
+  Swal.fire({
+    title: '修改基本資料',
 
-      html: `
-        <div class="swal-form">
+    html: `
+      <div class="swal-form">
 
-          <!-- 頭像預覽 + 上傳 -->
-          <div style="text-align:center; margin-bottom:16px;">
-            <img id="avatarPreview"
-                src="${this.avatarUrl || ''}"
-                style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:2px solid #eee;" />
+        <div style="text-align:center; margin-bottom:16px;">
+         <div
+            id="avatarPreviewBox"
+            style="
+              width:100%;
+              display:flex;
+              align-items:center;
+              justify-content:center;
+            "
+          >
+            ${avatarPreviewHtml}
+          </div>
+          <div style="margin-top:12px;">
+            <label
+              for="avatarInput"
+              style="
+                display:inline-block;
+                padding:8px 16px;
+                background:#2f80ed;
+                color:white;
+                border-radius:10px;
+                cursor:pointer;
+                font-weight:600;
+              ">
+              選擇圖片
+            </label>
 
-            <div style="margin-top:12px;">
-              <label
-                for="avatarInput"
-                style="
-                  display:inline-block;
-                  padding:8px 16px;
-                  background:#2f80ed;
-                  color:white;
-                  border-radius:10px;
-                  cursor:pointer;
-                  font-weight:600;
-                ">
-                選擇圖片
-              </label>
+            <input
+              id="avatarInput"
+              type="file"
+              accept="image/*"
+              style="display:none;"
+            />
 
-              <input
-                id="avatarInput"
-                type="file"
-                accept="image/*"
-                style="display:none;"
-              />
-
-              <div
-                id="fileName"
-                style="
-                  margin-top:8px;
-                  font-size:13px;
-                  color:#666;
-                ">
-                尚未選擇圖片
-              </div>
+            <div
+              id="fileName"
+              style="
+                margin-top:8px;
+                font-size:13px;
+                color:#666;
+              ">
+              尚未選擇圖片
             </div>
           </div>
-
-
-          <div class="swal-row">
-            <label>使用者名稱</label>
-            <input id="editUserName"
-                  class="swal2-input"
-                  value="${this.userName}">
-          </div>
-
         </div>
-      `,
 
-      showCancelButton: true,
-      confirmButtonText: '修改',
-      cancelButtonText: '取消',
+        <div class="swal-row">
+          <label>使用者名稱</label>
+          <input
+            id="editUserName"
+            class="swal2-input"
+            value="${this.userName}"
+          >
+        </div>
 
-      didOpen: () => {
-        // ⭐ 即時預覽頭像
-        const input = document.getElementById(
-          'avatarInput',
-        ) as HTMLInputElement;
-        const preview = document.getElementById(
-          'avatarPreview',
-        ) as HTMLImageElement;
-        const fileName = document.getElementById('fileName');
+      </div>
+    `,
 
-        input?.addEventListener('change', () => {
-          const file = input.files?.[0];
-          if (file) {
-            preview.src = URL.createObjectURL(file);
+    showCancelButton: true,
+    confirmButtonText: '修改',
+    cancelButtonText: '取消',
 
-            if (fileName) {
-              fileName.textContent = file.name;
-            }
+    didOpen: () => {
+      const input = document.getElementById('avatarInput') as HTMLInputElement;
+      const previewBox = document.getElementById('avatarPreviewBox');
+      const fileName = document.getElementById('fileName');
+
+      input?.addEventListener('change', () => {
+        const file = input.files?.[0];
+
+        if (file) {
+          const previewUrl = URL.createObjectURL(file);
+
+          if (previewBox) {
+            previewBox.innerHTML = `
+              <img
+                id="avatarPreviewImg"
+                src="${previewUrl}"
+                style="
+                  width:90px;
+                  height:90px;
+                  border-radius:50%;
+                  object-fit:cover;
+                  border:2px solid #eee;
+                  display:block;
+                  margin:0 auto;
+                "
+              />
+            `;
           }
-        });
-      },
 
-      preConfirm: () => {
-        const userName = (
-          document.getElementById('editUserName') as HTMLInputElement
-        ).value.trim();
-        // const email = (document.getElementById('editEmail') as HTMLInputElement).value.trim();
-        const file = (
-          document.getElementById('avatarInput') as HTMLInputElement
-        ).files?.[0];
-
-        if (!userName) {
-          Swal.showValidationMessage('使用者名稱不可為空');
-          return false;
+          if (fileName) {
+            fileName.textContent = file.name;
+          }
         }
+      });
+    },
 
-        // if (!email) {
-        //   Swal.showValidationMessage('Email 不可為空');
-        //   return false;
-        // }
+    preConfirm: () => {
+      const userName = (
+        document.getElementById('editUserName') as HTMLInputElement
+      ).value.trim();
 
-        // if (!emailPattern.test(email)) {
-        //   Swal.showValidationMessage('Email 格式錯誤');
-        //   return false;
-        // }
+      const file = (
+        document.getElementById('avatarInput') as HTMLInputElement
+      ).files?.[0];
 
-        // if (email === "familyLifeTest123456@gmail.com") {
-        //   Swal.showValidationMessage('這是官方 email!!');
-        //   return false;
-        // }
-
-        return {
-          userName,
-          // email,
-          file,
-        };
-      },
-    }).then((result) => {
-      if (!result.isConfirmed || !result.value) return;
-
-      // 更新資料
-      this.userName = result.value.userName;
-      // this.email = result.value.email;
-
-      // ⭐ 如果有新頭像
-      if (result.value.file) {
-        this.file = result.value.file;
-        this.avatarUrl = URL.createObjectURL(this.file);
-        this.notifySettingService.setAvatar(this.avatarUrl);
+      if (!userName) {
+        Swal.showValidationMessage('使用者名稱不可為空');
+        return false;
       }
 
-      this.notifySettingService.setName(this.userName);
-      this.isDirty = true;
+      return {
+        userName,
+        file,
+      };
+    },
+  }).then((result) => {
+    if (!result.isConfirmed || !result.value) return;
 
-      Swal.fire({
-        icon: 'success',
-        title: '修改成功',
-        timer: 1200,
-        showConfirmButton: false,
-      });
+    this.userName = result.value.userName;
+
+    if (result.value.file) {
+      this.file = result.value.file;
+
+    }
+
+    this.notifySettingService.setName(this.userName);
+    this.isDirty = true;
+
+    Swal.fire({
+      icon: 'success',
+      title: '修改成功',
+      timer: 1200,
+      showConfirmButton: false,
     });
+  });
   }
 
   saveAll() {

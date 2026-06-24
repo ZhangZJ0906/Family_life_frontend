@@ -1,8 +1,13 @@
 <header class="topbar">
   <!-- 左側 Logo -->
   <div class="logo-area" routerLink="/home-page">
-    <img src="images/logo.png" class="logo-img" alt="家庭生活到期管家 Logo" />
+
+
+  <div class="logo-text">
+    <div class="logo-title">拾期日常</div>
+    <div class="logo-subtitle">Family Life Manager</div>
   </div>
+</div>
 
   <!-- 手機版選單按鈕 -->
   <button class="menu-toggle" type="button" (click)="toggleMenu()">
@@ -83,12 +88,22 @@
     </button>
 
     <div class="user-avatar">
-      <img *ngIf="avatarUrl; else defaultAvatar" [src]="getAvatar(avatarUrl)" alt="使用者頭像" />
+  <div *ngIf="isAvatarLoading" class="avatar-loading">
+    <span class="avatar-spinner"></span>
+  </div>
 
-      <ng-template #defaultAvatar>
-        J
-      </ng-template>
-    </div>
+  <ng-container *ngIf="!isAvatarLoading">
+    <img
+      *ngIf="avatarUrl; else defaultAvatar"
+      [src]="getAvatar(avatarUrl)"
+      alt="使用者頭像"
+    />
+
+    <ng-template #defaultAvatar>
+      <mat-icon class="default-avatar-icon">person</mat-icon>
+    </ng-template>
+  </ng-container>
+</div>
 
     <button class="logout-btn" type="button" (click)="logout()">
       <mat-icon>logout</mat-icon>

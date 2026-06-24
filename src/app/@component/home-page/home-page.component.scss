@@ -531,6 +531,77 @@
   background: inherit; /* 保持原本的背景色 */
 }
 
+.home-loading-card {
+  min-height: calc(100vh - 180px);
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 22px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 48px 24px;
+  box-sizing: border-box;
+
+  text-align: center;
+}
+
+.home-loading-spinner {
+  width: 54px;
+  height: 54px;
+
+  border: 5px solid rgba(47, 128, 237, 0.16);
+  border-top-color: #2f80ed;
+  border-radius: 50%;
+
+  animation: home-loading-spin 0.8s linear infinite;
+  margin-bottom: 18px;
+}
+
+.home-loading-card h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.home-loading-card p {
+  margin: 10px 0 0;
+  color: #64748b;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+@keyframes home-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 576px) {
+  .home-loading-card {
+    min-height: calc(100vh - 150px);
+    border-radius: 20px;
+    padding: 40px 20px;
+  }
+
+  .home-loading-spinner {
+    width: 48px;
+    height: 48px;
+  }
+
+  .home-loading-card h3 {
+    font-size: 20px;
+  }
+
+  .home-loading-card p {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+}
 /* =========================================================
    平板版：記帳環境在左，目前月份在右
    桌機版、手機版不影響

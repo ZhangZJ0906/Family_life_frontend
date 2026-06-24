@@ -160,6 +160,20 @@
   gap: 12px;
 }
 
+.list-actions {
+  width: 100%;
+  min-width: 0;
+
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, auto));
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+
+  white-space: nowrap;
+  overflow: hidden;
+}
+
 .header-actions {
   justify-content: flex-end;
   flex-wrap: wrap;
@@ -250,11 +264,11 @@
 
 .list-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
   align-items: start;
   gap: 16px;
-
 }
+
 
 .list-card {
   min-height: 148px;
@@ -359,9 +373,15 @@
 }
 
 .list-actions button {
-  flex: 0 0 auto;
   min-width: 0;
-  padding-inline: 8px;
+  padding: 0 6px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 14px;
+  font-weight: 800;
 }
 
 .summary-grid {
@@ -497,6 +517,12 @@ mat-progress-bar {
   overflow: hidden;
 }
 
+.list-actions button mat-icon,
+.list-actions button .mat-icon {
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
 @media (max-width: 900px) {
   .shopping-header-card,
   .lists-panel,
@@ -520,6 +546,8 @@ mat-progress-bar {
     justify-content: flex-start;
   }
 }
+
+
 
 @media (max-width: 768px) {
   .item-page {

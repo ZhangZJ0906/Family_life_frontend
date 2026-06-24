@@ -54,6 +54,28 @@ export class HomePageComponent implements OnInit {
   locationMap: { [key: number]: string } = {};
   selectedPriorityType: 'all' | 'item' | 'medicine' | 'warranty' | 'subscription' = 'all';
 
+  isHomeLoading = true;
+
+private loadingState = {
+  groups: false,
+  expense: false,
+  items: false,
+  medicine: false,
+  subscription: false,
+  warranty: false,
+};
+
+    private updateHomeLoading(): void {
+      this.isHomeLoading = Object.values(this.loadingState).some(Boolean);
+    }
+
+    private finishHomeLoading(
+      key: 'items' | 'medicine' | 'subscription' | 'warranty'
+    ): void {
+      this.loadingState[key] = false;
+      this.updateHomeLoading();
+    }
+
   constructor(private http: HttpClientService) {
     this.basicUrl = this.http.basicUrl;
 
@@ -72,72 +94,70 @@ export class HomePageComponent implements OnInit {
     }
   }
 
-  ngOnInit(): void {
-    // 載入群組
-    this.getExpenseGroups();
-    // 一開始先查私人記帳
-    this.getHomeMonthlyExpense();
-    this.loadAllCategoriesData();
-  }
+ ngOnInit(): void {
+  this.getExpenseGroups();
+
+  this.loadAllCategoriesData();
+}
 
   // 取得使用者群組，資料來源改成跟 Profile 一樣
   // 這樣才拿得到 group.avatar
   getExpenseGroups(): void {
-    this.http
-      .getApi(
-          `family_life/get_group_list?user_id=${this.currentUserId}`,
-      )
-      .subscribe({
-        next: (res: any) => {
-          // Profile 頁是直接使用 res.groupList
-          // 所以首頁也改用 res.groupList
-          if (!res.groupList) {
-            Swal.fire({
-              icon: 'error',
-              title: '群組載入失敗',
-              text: res.message || '無法取得群組資料',
-            });
-            return;
-          }
+  this.loadingState.groups = true;
+  this.updateHomeLoading();
 
-          const groups = res.groupList.map((group: any) => ({
-            groupId: Number(group.groupId),
-            groupName: group.groupName,
-
-            // 真正的群組頭像
-            // 如果資料庫沒有頭像，才使用預設圖
-            avatar: group.avatar || 'assets/default-avatar.png',
-          }));
-
-          // 私人記帳固定放第一個
-          // 頭像使用登入者自己的頭像
-          this.expenseGroups = [
-            {
-              groupId: 0,
-              groupName: '私人記帳',
-              avatar: this.currentUserAvatar || 'assets/default-avatar.png',
-            },
-            ...groups,
-          ];
-
-          // 預設私人記帳
-          this.currentGroupId = 0;
-
-          // 群組載入後再查一次私人記帳
-          this.getHomeMonthlyExpense();
-        },
-
-        error: (err) => {
-          console.log(err);
-
+  this.http
+    .getApi(`family_life/get_group_list?user_id=${this.currentUserId}`)
+    .subscribe({
+      next: (res: any) => {
+        if (!res.groupList) {
           Swal.fire({
             icon: 'error',
             title: '群組載入失敗',
-            text: '請確認後端是否啟動',
+            text: res.message || '無法取得群組資料',
           });
-        },
-      });
-  }
+
+          this.loadingState.groups = false;
+          this.updateHomeLoading();
+          return;
+        }
+
+        const groups = res.groupList.map((group: any) => ({
+          groupId: Number(group.groupId),
+          groupName: group.groupName,
+          avatar: group.avatar || 'assets/default-avatar.png',
+        }));
+
+        this.expenseGroups = [
+          {
+            groupId: 0,
+            groupName: '私人記帳',
+            avatar: this.currentUserAvatar || 'assets/default-avatar.png',
+          },
+          ...groups,
+        ];
+
+        this.currentGroupId = 0;
+
+        this.loadingState.groups = false;
+        this.updateHomeLoading();
+        this.getHomeMonthlyExpense();
+      },
+
+      error: (err) => {
+        console.log(err);
+
+        this.loadingState.groups = false;
+        this.updateHomeLoading();
+
+        Swal.fire({
+          icon: 'error',
+          title: '群組載入失敗',
+          text: '請確認後端是否啟動',
+        });
+      },
+    });
+}
   // 取得目前選到的群組資料
   getCurrentExpenseGroup() {
     return this.expenseGroups.find(
@@ -191,168 +211,221 @@ export class HomePageComponent implements OnInit {
 
   // 查詢首頁本月支出
   getHomeMonthlyExpense(): void {
-    // 畫面上的 0 是私人記帳，後端要吃 0，所以不帶 groupId
-    const apiGroupId = this.currentGroupId === 0 ? 0 : this.currentGroupId;
-    console.log('查詢首頁支出，groupId:', this.currentUserId);
-    let url = `expense/getInfo?userId=${this.currentUserId}`;
+  this.loadingState.expense = true;
+  this.updateHomeLoading();
 
-    if (apiGroupId !== null) {
-      url += `&groupId=${apiGroupId}`;
-    }
+  const apiGroupId = this.currentGroupId === 0 ? 0 : this.currentGroupId;
+  let url = `expense/getInfo?userId=${this.currentUserId}`;
 
-    this.http.getApi(url).subscribe({
+  if (apiGroupId !== null) {
+    url += `&groupId=${apiGroupId}`;
+  }
+
+  this.http.getApi(url).subscribe({
+    next: (res: any) => {
+      if (res.code !== 200) {
+        this.monthlyExpense = 0;
+        this.loadingState.expense = false;
+        this.updateHomeLoading();
+        return;
+      }
+
+      const list = res.list ? [...res.list] : [];
+
+      const monthList = list.filter((item: any) => {
+        if (!item.expenseDate) {
+          return false;
+        }
+
+        const [year, month] = item.expenseDate.split('-').map(Number);
+
+        return year === this.selectedYear && month === this.selectedMonth;
+      });
+
+      this.monthlyExpense = monthList.reduce((sum: number, item: any) => {
+        return sum + (Number(item.price) || 0);
+      }, 0);
+
+      this.loadingState.expense = false;
+      this.updateHomeLoading();
+    },
+
+    error: (err) => {
+      console.log(err);
+      this.monthlyExpense = 0;
+
+      this.loadingState.expense = false;
+      this.updateHomeLoading();
+    },
+  });
+}
+  loadAllCategoriesData(): void {
+  const userId = this.currentUserId;
+  const groupId = this.currentGroupId;
+
+  this.loadingState.items = true;
+  this.loadingState.medicine = true;
+  this.loadingState.subscription = true;
+  this.loadingState.warranty = true;
+  this.updateHomeLoading();
+
+  // 1. 取得物品清單
+  this.http
+    .getApi(`item/getItems?userId=${userId}&groupId=${groupId}`)
+    .subscribe({
       next: (res: any) => {
-        if (res.code !== 200) {
-          this.monthlyExpense = 0;
+        if (res.code != 200) {
+          this.itemsList = [];
+          this.locationMap = {};
+
+          Swal.fire({
+            title: '錯誤',
+            text: '取得物品清單失敗:' + res.message,
+            icon: 'error',
+          });
+
+          this.finishHomeLoading('items');
           return;
         }
-        console.log('支出列表', res.list);
-        const list = res.list ? [...res.list] : [];
 
-        // 只加總目前 selectedYear / selectedMonth 的支出
-        const monthList = list.filter((item: any) => {
-          if (!item.expenseDate) {
-            return false;
-          }
+        this.itemsList = res.items || [];
+        this.locationMap = res.locationMap || {};
 
-          const [year, month] = item.expenseDate.split('-').map(Number);
+        console.log('物品清單資料:', res);
+        console.log('物品清單第一筆:', this.itemsList[0]);
+        console.log('位置對照表:', this.locationMap);
 
-          return year === this.selectedYear && month === this.selectedMonth;
+        this.finishHomeLoading('items');
+      },
+
+      error: (err) => {
+        this.itemsList = [];
+        this.locationMap = {};
+
+        Swal.fire({
+          title: '錯誤',
+          text: '取得物品清單失敗:' + (err.error?.message || err.message || err),
+          icon: 'error',
         });
 
-        this.monthlyExpense = monthList.reduce((sum: number, item: any) => {
-          return sum + (Number(item.price) || 0);
-        }, 0);
-      },
-      error: (err) => {
-        console.log(err);
-        this.monthlyExpense = 0;
+        this.finishHomeLoading('items');
       },
     });
-  }
 
-  loadAllCategoriesData(): void {
-    const userId = this.currentUserId;
-    const groupId = this.currentGroupId;
+  // 2. 取得備用藥品
+  this.http
+    .getApi(`medicine/getByGroup?userId=${userId}&groupId=${groupId}`)
+    .subscribe({
+      next: (res: any) => {
+        if (res.code != 200) {
+          this.medicineList = [];
 
-    // 1. 取得物品清單 (Items) -> 對應 /item/getItems
-    this.http
-      .getApi(
-        `item/getItems?userId=${userId}&groupId=${groupId}`,
-      )
-      .subscribe({
-        next: (res: any) => {
-          if (res.code != 200) {
-            Swal.fire({
-              title: '錯誤',
-              text: '取得物品清單失敗:' + res.message,
-              icon: 'error',
-            });
-            return;
-          }
-
-          // 物品清單
-          this.itemsList = res.items || [];
-
-          // 關鍵：把後端回傳的位置對照表存起來
-          // 例如 { 1: '冰箱', 2: '廚房', 3: '浴室', 4: '儲藏室' }
-          this.locationMap = res.locationMap || {};
-
-          console.log('物品清單資料:', res);
-          console.log('物品清單第一筆:', this.itemsList[0]);
-          console.log('位置對照表:', this.locationMap);
-        },
-        error: (err) => {
           Swal.fire({
             title: '錯誤',
-            text: '取得物品清單失敗:' + err,
+            text: '取得備用藥品失敗:' + res.message,
             icon: 'error',
           });
-        },
-      });
 
-    // 2. 取得備用藥品 (Medicine) -> 對應 /medicine/getByGroup
-    this.http
-      .getApi(
-        `medicine/getByGroup?userId=${userId}&groupId=${groupId}`,
-      )
-      .subscribe({
-        next: (res: any) => {
-          if (res.code != 200) {
-            Swal.fire({
-              title: '錯誤',
-              text: '取得備用藥品失敗:' + res.message,
-              icon: 'error',
-            });
-            return;
-          }
-          this.medicineList = res.data || [];
-          console.log('備用藥品資料:', this.medicineList);
-        },
-        error: (err) => {
+          this.finishHomeLoading('medicine');
+          return;
+        }
+
+        this.medicineList = res.data || [];
+
+        console.log('備用藥品資料:', this.medicineList);
+
+        this.finishHomeLoading('medicine');
+      },
+
+      error: (err) => {
+        this.medicineList = [];
+
+        Swal.fire({
+          title: '錯誤',
+          text: '取得備用藥品失敗:' + (err.error?.message || err.message || err),
+          icon: 'error',
+        });
+
+        this.finishHomeLoading('medicine');
+      },
+    });
+
+  // 3. 取得定期訂閱
+  this.http
+    .getApi(`subscription/getByGroup?userId=${userId}&groupId=${groupId}`)
+    .subscribe({
+      next: (res: any) => {
+        if (res.code != 200) {
+          this.subscriptionList = [];
+
           Swal.fire({
             title: '錯誤',
-            text: '取得備用藥品失敗:',
+            text: '取得定期訂閱失敗:' + res.message,
             icon: 'error',
           });
-        },
-      });
 
-    // 3. 取得定期訂閱 (Subscription) -> 對應 /subscription/getByGroup
-    this.http
-      .getApi(
-        `subscription/getByGroup?userId=${userId}&groupId=${groupId}`,
-      )
-      .subscribe({
-        next: (res: any) => {
-          if (res.code != 200) {
-            Swal.fire({
-              title: '錯誤',
-              text: '取得定期訂閱失敗:' + res.message,
-              icon: 'error',
-            });
-            return;
-          }
-          this.subscriptionList = res.data || [];
-          console.log('定期訂閱資料:', this.subscriptionList);
-        },
-        error: (err) => {
+          this.finishHomeLoading('subscription');
+          return;
+        }
+
+        this.subscriptionList = res.data || [];
+
+        console.log('定期訂閱資料:', this.subscriptionList);
+
+        this.finishHomeLoading('subscription');
+      },
+
+      error: (err) => {
+        this.subscriptionList = [];
+
+        Swal.fire({
+          title: '錯誤',
+          text: '取得定期訂閱失敗:' + (err.error?.message || err.message || err),
+          icon: 'error',
+        });
+
+        this.finishHomeLoading('subscription');
+      },
+    });
+
+  // 4. 取得保固到期
+  this.http
+    .getApi(`warranty/getByGroup?userId=${userId}&groupId=${groupId}`)
+    .subscribe({
+      next: (res: any) => {
+        if (res.code != 200) {
+          this.warrantyList = [];
+
           Swal.fire({
             title: '錯誤',
-            text: '取得定期訂閱失敗:' + err,
+            text: '取得保固到期失敗:' + res.message,
             icon: 'error',
           });
-        },
-      });
 
-    // 4. 取得保固到期 (Warranty) -> 對應 /warranty/getByGroup
-    this.http
-      .getApi(
-        `warranty/getByGroup?userId=${userId}&groupId=${groupId}`,
-      )
-      .subscribe({
-        next: (res: any) => {
-          if (res.code != 200) {
-            Swal.fire({
-              title: '錯誤',
-              text: '取得保固到期失敗:' + res.message,
-              icon: 'error',
-            });
-            return;
-          }
-          this.warrantyList = res.list || res.warranties || [];
-          console.log('保固到期資料:', this.warrantyList);
-        },
-        error: (err) => {
-          Swal.fire({
-            title: '錯誤',
-            text: '取得保固到期失敗:' + err,
-            icon: 'error',
-          });
-        },
-      });
-  }
+          this.finishHomeLoading('warranty');
+          return;
+        }
 
+        this.warrantyList = res.list || res.warranties || [];
+
+        console.log('保固到期資料:', this.warrantyList);
+
+        this.finishHomeLoading('warranty');
+      },
+
+      error: (err) => {
+        this.warrantyList = [];
+
+        Swal.fire({
+          title: '錯誤',
+          text: '取得保固到期失敗:' + (err.error?.message || err.message || err),
+          icon: 'error',
+        });
+
+        this.finishHomeLoading('warranty');
+      },
+    });
+}
   get expiringFoodCount(): number {
     return this.itemsList.filter((item: any) => item.status === '即將到期')
       .length;

@@ -75,7 +75,7 @@ export class RegisterComponent {
       return '官方email請勿使用';
     }
 
-    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+    const gmailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9.-]+(\.[a-zA-Z]{2,})$/;
 
     if (!gmailRegex.test(this.email)) {
       return '請輸入正確的 Email 信箱';

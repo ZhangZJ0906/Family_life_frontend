@@ -31,7 +31,7 @@ export class AppComponent {
         map(() => {
           let route = this.activatedRoute;
           while (route.firstChild) route = route.firstChild;
-          return route.snapshot.data['title'] || '家庭生活管家';
+          return route.snapshot.data['title'] || '拾期日常';
         }),
       )
       .subscribe((title) => {
