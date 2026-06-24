@@ -613,6 +613,12 @@
   background: #1f6fd6;
 }
 
+.chat-footer button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #90caf9;
+}
+
 /* Context Menu */
 .context-menu {
   position: fixed;
@@ -789,6 +795,12 @@
     padding: 10px 14px;
     flex-shrink: 0;
   }
+
+  // .chat-footer button:disabled {
+  //   opacity: 0.6;
+  //   cursor: not-allowed;
+  //   background: #90caf9;
+  // }
 }
 
 

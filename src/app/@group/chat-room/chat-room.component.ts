@@ -41,6 +41,8 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
   message = '';
   messages: any[] = [];
 
+  isSending = false;
+
   // ===== online state =====
   isActiveRoom = true;
   onlineCount = 0;
@@ -103,11 +105,6 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
 
     await this.ws.connect();
 
-    // ⭐ ONLY HERE join room
-    this.ws.enterRoom(this.groupId, this.userId);
-
-    this.startHeartbeat();
-
     this.ws.subscribe(this.groupId, (msg: any) => {
       this.zone.run(() => {
         switch (msg.type) {
@@ -120,6 +117,12 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
           case 'MESSAGE':
           case 'IMAGE':
             this.messages = [...this.messages, msg];
+
+            // 自己的訊息回來，代表後端已成功儲存並廣播
+            if (msg.senderId === this.userId) {
+              this.isSending = false;
+            }
+
             this.calculateUnreadIndex();
             break;
 
@@ -165,8 +168,11 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
 
   //判斷是否死了
   private startHeartbeat() {
+
     this.heartbeatTimer = setInterval(() => {
+
       this.ws.sendHeartbeat(this.groupId, this.userId);
+
     }, 10000); // 每 10 秒一次
   }
 
@@ -318,7 +324,9 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
   }
 
   sendMessage() {
-    if (!this.message.trim()) return;
+    if (!this.message.trim() || this.isSending) return;
+
+    this.isSending = true;
 
     this.ws.sendMessage({
       groupId: this.groupId,

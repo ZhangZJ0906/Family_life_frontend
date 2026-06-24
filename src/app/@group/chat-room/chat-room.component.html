@@ -232,8 +232,10 @@
     <button
       type="button"
       (click)="sendMessage()"
+      [disabled]="isSending || !message.trim()"
     >
-      發送
+      <span *ngIf="!isSending">發送</span>
+      <span *ngIf="isSending">傳送中...</span>
     </button>
 
   </div>
