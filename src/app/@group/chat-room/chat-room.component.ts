@@ -41,6 +41,8 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
   message = '';
   messages: any[] = [];
 
+  isSending = false;
+
   // ===== online state =====
   isActiveRoom = true;
   onlineCount = 0;
@@ -115,6 +117,12 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
           case 'MESSAGE':
           case 'IMAGE':
             this.messages = [...this.messages, msg];
+
+            // 自己的訊息回來，代表後端已成功儲存並廣播
+            if (msg.senderId === this.userId) {
+              this.isSending = false;
+            }
+
             this.calculateUnreadIndex();
             break;
 
@@ -316,7 +324,9 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
   }
 
   sendMessage() {
-    if (!this.message.trim()) return;
+    if (!this.message.trim() || this.isSending) return;
+
+    this.isSending = true;
 
     this.ws.sendMessage({
       groupId: this.groupId,
