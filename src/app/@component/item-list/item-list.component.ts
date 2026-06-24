@@ -482,6 +482,7 @@ export class ItemListComponent {
   getItemByGroupId(groupId: number): void {
     this.isLoading = true; // 🔥 開啟 table loading
     this.currentGroupId = groupId;
+    this.showLoading('載入中物品清單中...');
     // 切換群組時先清空快取，避免讀到舊群組資料
     this.cachedData = {
       item: [],

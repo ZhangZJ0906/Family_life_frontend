@@ -62,7 +62,7 @@ export class ShoppingListComponent implements OnInit {
   userGroups: DropDownGroupList[] = [];
 
 
-  userId = 1;
+  userId = 0;
   lists: ShoppingList[] = [];
   groupOptions: GroupOption[] = [];
   loadingItemsByListId: Record<number, boolean> = {};
@@ -93,7 +93,7 @@ export class ShoppingListComponent implements OnInit {
   ) {}
 
 ngOnInit(): void {
-  this.userId = this.authService.currentUser()?.user_id ?? 1;
+  this.userId = this.authService.currentUser()?.user_id ?? 0;
 
   this.loadUserInfo();
   this.loadLists();

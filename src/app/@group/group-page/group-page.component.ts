@@ -24,7 +24,7 @@ import { environment } from '../../@models/user.model';
   imports: [
     CommonModule,
     FormsModule,
-    GroupMemberDialogComponent,
+
     MatIconModule,
     MatBadgeModule,
     TopbarComponent
