@@ -637,9 +637,10 @@ getGroupLabel(groupId: number | null): string {
     item.check = nextValue;
     item.checkDate = checkDate;
     item.checkMan = checkMan;
-
+this.showLoading(nextValue ? '標記為已購買中...' : '取消已購買狀態中...');
     this.shoppingService.updateCheck(list.id, item.id, nextValue, this.userId).subscribe({
       next: () => {
+        Swal.close(); // 關閉 loading
         Swal.fire({
           icon: nextValue ? 'success' : 'info',
           title: nextValue ? '已標記為購買' : '已取消購買狀態',
@@ -966,4 +967,14 @@ getGroupLabel(groupId: number | null): string {
 
     URL.revokeObjectURL(url);
   }
+
+    private showLoading(message = '處理中...'): void {
+      Swal.fire({
+        title: message,
+        text: '請稍候',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => Swal.showLoading(),
+      });
+    }
 }
