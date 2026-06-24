@@ -103,14 +103,6 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
 
     await this.ws.connect();
 
-<<<<<<< HEAD
-=======
-    // ⭐ ONLY HERE join room
-    this.ws.enterRoom(this.groupId, this.userId);
-
-    this.startHeartbeat();
-
->>>>>>> origin/feature-calendar
     this.ws.subscribe(this.groupId, (msg: any) => {
       this.zone.run(() => {
         switch (msg.type) {
@@ -168,16 +160,11 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
 
   //判斷是否死了
   private startHeartbeat() {
-<<<<<<< HEAD
 
     this.heartbeatTimer = setInterval(() => {
 
       this.ws.sendHeartbeat(this.groupId, this.userId);
 
-=======
-    this.heartbeatTimer = setInterval(() => {
-      this.ws.sendHeartbeat(this.groupId, this.userId);
->>>>>>> origin/feature-calendar
     }, 10000); // 每 10 秒一次
   }
 
