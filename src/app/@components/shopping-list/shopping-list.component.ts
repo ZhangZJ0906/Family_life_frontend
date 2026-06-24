@@ -62,7 +62,7 @@ export class ShoppingListComponent implements OnInit {
   userGroups: DropDownGroupList[] = [];
 
 
-  userId = 1;
+  userId = 0;
   lists: ShoppingList[] = [];
   groupOptions: GroupOption[] = [];
   loadingItemsByListId: Record<number, boolean> = {};
@@ -93,7 +93,12 @@ export class ShoppingListComponent implements OnInit {
   ) {}
 
 ngOnInit(): void {
-  this.userId = this.authService.currentUser()?.user_id ?? 1;
+  this.userId = this.authService.currentUser()?.user_id ?? 0;
+
+  if (!this.userId) {
+    this.router.navigate(['/login']);
+    return;
+  }
 
   this.loadUserInfo();
   this.loadLists();
@@ -683,7 +688,7 @@ getGroupLabel(groupId: number | null): string {
           return;
         }
 
-        this.http.postApi(`item/delete`, [matchedItem.id]).subscribe({
+        this.http.postApi(`item/delete?userId=${this.userId}`, [matchedItem.id]).subscribe({
           next: (deleteRes: any) => {
             if (deleteRes.code !== 200) {
               this.errorMessage = deleteRes.message ?? '刪除物品清單項目失敗';
