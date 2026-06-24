@@ -52,7 +52,7 @@ export class PurchaseItemComponent implements OnInit {
   isEditPage = false; //目前路由是否為修改
 
   listId = 0;
-  userId = 1;
+  userId = 0;
   groupId!: number;
   items: PurchaseItemVo[] = [];
   categories: LocationAndCategory[] = [];
@@ -87,7 +87,13 @@ export class PurchaseItemComponent implements OnInit {
 
   ngOnInit(): void {
     this.listId = Number(this.route.snapshot.paramMap.get('listId'));
-    this.userId = this.authService.currentUser()?.user_id ?? 1;
+    this.userId = this.authService.currentUser()?.user_id ?? 0;
+
+    if (!this.userId) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
     this.newItem.assignedUserId = this.userId;
     this.loadCategories();
     this.loadCurrentList();
