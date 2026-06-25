@@ -207,13 +207,17 @@ export class EmailVerifyService {
 
     this.http
       .post(
-        `${this.baseUrl}/verify?email=${encodeURIComponent(email)}&code=${encodeURIComponent(result.value)}`,
+        `${this.baseUrl}users/verify?email=${encodeURIComponent(email)}&code=${encodeURIComponent(result.value)}`,
         {},
         { responseType: 'text' }
       )
       .subscribe({
         next: (res: string) => {
           Swal.close();
+
+          const message = res.trim();
+
+          console.log('verify response:', message);
 
           if (res.trim() === '驗證成功') {
             onSuccess();

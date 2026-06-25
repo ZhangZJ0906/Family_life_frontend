@@ -71,18 +71,20 @@ export class RegisterComponent {
       return '';
     }
 
-    if(this.email == "familyLifeTest123456@gmail.com"){
+    const email = this.email.trim();
+
+    if (email.toLowerCase() === 'familylifetest123456@gmail.com') {
       return '官方email請勿使用';
     }
 
-    const gmailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9.-]+(\.[a-zA-Z]{2,})$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-    if (!gmailRegex.test(this.email)) {
+    if (!emailRegex.test(email)) {
       return '請輸入正確的 Email 信箱';
     }
 
     return '';
-  }
+}
 
   register(): void {
 
