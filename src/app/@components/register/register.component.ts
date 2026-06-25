@@ -75,7 +75,7 @@ export class RegisterComponent {
       return '官方email請勿使用';
     }
 
-    const gmailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9.-]+(\.[a-zA-Z]{2,})$/;
+    const gmailRegex =  /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
     if (!gmailRegex.test(this.email)) {
       return '請輸入正確的 Email 信箱';
@@ -100,6 +100,7 @@ export class RegisterComponent {
       avatar: this.avatar ?? '',
     }).subscribe({
       next: (res) => {
+        console.log(res.trim());
         if(res.message == "Email already exists"){
           Swal.fire({
             icon: 'error',

@@ -8,8 +8,8 @@ import Swal from 'sweetalert2';
 })
 export class EmailVerifyService {
 
-  // private baseUrl = 'http://localhost:8080/users';
-  private baseUrl = '/api';
+  private baseUrl = 'http://localhost:8081';
+  // private baseUrl = '/api';
 
 
   constructor(private http: HttpClient) {}
@@ -207,7 +207,7 @@ export class EmailVerifyService {
 
     this.http
       .post(
-        `${this.baseUrl}/verify?email=${encodeURIComponent(email)}&code=${encodeURIComponent(result.value)}`,
+        `${this.baseUrl}/users/verify?email=${encodeURIComponent(email)}&code=${encodeURIComponent(result.value)}`,
         {},
         { responseType: 'text' }
       )
@@ -217,6 +217,11 @@ export class EmailVerifyService {
 
           if (res.trim() === '驗證成功') {
             onSuccess();
+            Swal.fire({
+              icon: 'success',
+              title: '驗證成功',
+              text: '可以開始登入',
+            });
             return;
           }
 
