@@ -85,6 +85,8 @@ export class NotifyDialogComponent implements OnInit {
 
     const list = this.notifies || [];
 
+    console.log(list);
+
     if (type === 'all') {
       return list.filter(n => Number(n.isRead) !== 1).length;
     }
