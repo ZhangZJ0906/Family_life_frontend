@@ -207,7 +207,7 @@ export class EmailVerifyService {
 
     this.http
       .post(
-        `${this.baseUrl}users/verify?email=${encodeURIComponent(email)}&code=${encodeURIComponent(result.value)}`,
+        `${this.baseUrl}/users/verify?email=${encodeURIComponent(email)}&code=${encodeURIComponent(result.value)}`,
         {},
         { responseType: 'text' }
       )
@@ -227,7 +227,7 @@ export class EmailVerifyService {
           Swal.fire({
             icon: 'error',
             title: '驗證失敗',
-            text: '驗證碼不正確',
+            text: message,
           });
         },
 
