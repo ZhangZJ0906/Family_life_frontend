@@ -872,3 +872,297 @@
     padding: 3px 4px;
   }
 }
+
+/* Final calendar-only UI overrides: compact desktop, more readable mobile. */
+.calendar-page {
+  padding: 22px;
+  background:
+    radial-gradient(circle at top left, rgba(47, 91, 234, 0.05), transparent 30%),
+    #f5f7fb;
+}
+
+.calendar-header-card,
+.calendar-main-card {
+  border: 1px solid #e6eaf2;
+  border-radius: 18px;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
+}
+
+.calendar-header-card {
+  padding: 20px 24px;
+  margin-bottom: 18px;
+  gap: 18px;
+}
+
+.title-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  font-size: 25px;
+}
+
+.calendar-title h2 {
+  font-size: 30px;
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+.calendar-title p {
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.calendar-actions {
+  gap: 14px;
+}
+
+.calendar-group-select {
+  width: 220px;
+  height: 56px;
+}
+
+.calendar-group-select ::ng-deep .mat-mdc-text-field-wrapper,
+.calendar-group-select ::ng-deep .mat-mdc-form-field-flex {
+  height: 58px !important;
+}
+
+.calendar-group-select ::ng-deep .mat-mdc-form-field-infix {
+  min-height: 58px !important;
+}
+
+.calendar-group-select ::ng-deep .mat-mdc-select-trigger {
+  height: 46px !important;
+}
+
+.calendar-group-avatar {
+  width: 38px;
+  height: 38px;
+}
+
+.calendar-selected-group,
+.calendar-group-option {
+  gap: 10px;
+}
+
+.calendar-selected-group span,
+.calendar-group-option span {
+  font-size: 17px;
+}
+
+.add-btn {
+  height: 56px;
+  min-width: 128px;
+  padding: 0 24px;
+  border-radius: 16px;
+  font-size: 16px;
+  gap: 10px;
+}
+
+.add-btn mat-icon {
+  width: 26px;
+  height: 26px;
+  font-size: 26px;
+}
+
+.calendar-main-card {
+  padding: 18px;
+}
+
+:host ::ng-deep .fc .fc-toolbar {
+  margin-bottom: 16px;
+}
+
+:host ::ng-deep .fc .fc-toolbar-title {
+  font-size: 28px;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+:host ::ng-deep .fc .fc-button {
+  min-height: 42px;
+  padding: 8px 14px !important;
+  border-radius: 12px !important;
+  font-size: 14px !important;
+}
+
+:host ::ng-deep .fc .fc-col-header-cell {
+  padding: 10px 0;
+}
+
+:host ::ng-deep .fc .fc-col-header-cell-cushion {
+  font-size: 15px;
+}
+
+:host ::ng-deep .fc .fc-daygrid-day-frame {
+  min-height: 86px;
+}
+
+:host ::ng-deep .fc .fc-daygrid-day-number {
+  padding: 8px;
+  font-size: 14px;
+}
+
+:host ::ng-deep .fc .fc-event {
+  padding: 3px 7px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+:host ::ng-deep .fc .fc-timegrid-slot {
+  height: 44px;
+}
+
+@media (min-width: 1400px) {
+  .calendar-page {
+    padding: 20px 28px;
+  }
+
+  :host ::ng-deep .fc .fc-daygrid-day-frame {
+    min-height: 78px;
+  }
+}
+
+@media (max-width: 768px) {
+  .calendar-page {
+    padding: 10px;
+  }
+
+  .calendar-header-card {
+    padding: 18px;
+    margin-bottom: 14px;
+    border-radius: 18px;
+    gap: 14px;
+  }
+
+  .calendar-title {
+    align-items: center;
+  }
+
+  .title-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    font-size: 22px;
+  }
+
+  .calendar-title h2 {
+    font-size: 25px;
+  }
+
+  .calendar-actions {
+    grid-template-columns: minmax(0, 0.9fr) minmax(118px, 0.72fr);
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .calendar-group-select,
+  .add-btn {
+    height: 56px;
+    min-width: 0;
+  }
+
+  .calendar-group-select {
+    width: 100%;
+    overflow: visible;
+  }
+
+  .calendar-group-select ::ng-deep .mat-mdc-text-field-wrapper,
+  .calendar-group-select ::ng-deep .mat-mdc-form-field-flex {
+    width: 100%;
+    min-width: 0;
+    height: 56px !important;
+  }
+
+  .calendar-group-select ::ng-deep .mat-mdc-form-field-infix {
+    width: 100%;
+    min-width: 0;
+    min-height: 56px !important;
+  }
+
+  .calendar-group-select ::ng-deep .mat-mdc-select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .calendar-group-select ::ng-deep .mat-mdc-select-value {
+    max-width: 100%;
+  }
+
+  .calendar-group-avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .calendar-selected-group {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .calendar-selected-group span {
+    max-width: calc(100% - 42px);
+    font-size: 15px;
+  }
+
+  .add-btn {
+    width: 100%;
+    border-radius: 15px;
+    font-size: 15px;
+    padding: 0 10px;
+  }
+
+  .calendar-main-card {
+    padding: 10px;
+    border-radius: 18px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  :host ::ng-deep .fc {
+    min-width: 500px;
+  }
+
+  :host ::ng-deep .fc .fc-toolbar {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  :host ::ng-deep .fc .fc-toolbar-title {
+    font-size: 25px;
+  }
+
+  :host ::ng-deep .fc .fc-button {
+    min-height: 42px;
+    padding: 8px 13px !important;
+    font-size: 14px !important;
+  }
+
+  :host ::ng-deep .fc .fc-dayGridMonth-view {
+    min-width: 500px;
+  }
+
+  :host ::ng-deep .fc .fc-daygrid-day-frame {
+    min-height: 84px;
+  }
+
+  :host ::ng-deep .fc .fc-col-header-cell-cushion {
+    font-size: 14px;
+  }
+
+  :host ::ng-deep .fc .fc-daygrid-day-number {
+    font-size: 14px;
+    padding: 7px;
+  }
+}
+
+@media (max-width: 420px) {
+  :host ::ng-deep .fc,
+  :host ::ng-deep .fc .fc-dayGridMonth-view {
+    min-width: 540px;
+  }
+
+  :host ::ng-deep .fc .fc-daygrid-day-frame {
+    min-height: 88px;
+  }
+}
