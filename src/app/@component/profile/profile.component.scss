@@ -561,3 +561,130 @@
     height: 46px;
   }
 }
+
+.avatar-large img[role="button"] {
+  cursor: zoom-in;
+}
+
+.avatar-large img[role="button"]:hover {
+  filter: brightness(0.92);
+}
+
+.image-preview-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: rgba(0, 0, 0, 0.76);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  box-sizing: border-box;
+}
+
+.image-preview-panel {
+  position: relative;
+  width: min(900px, 90vw);
+  height: min(760px, 84vh);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-close-btn {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.preview-close-btn:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.image-preview-stage {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-main-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.2s ease;
+  transform-origin: center center;
+  user-select: none;
+}
+
+.preview-toolbar {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(8px);
+}
+
+.preview-toolbar button {
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.preview-toolbar button:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.preview-toolbar mat-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+}
+
+@media (max-width: 576px) {
+  .image-preview-backdrop {
+    padding: 18px;
+  }
+
+  .image-preview-panel {
+    width: 94vw;
+    height: 78vh;
+  }
+
+  .preview-toolbar {
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .preview-toolbar button {
+    width: 38px;
+    height: 38px;
+  }
+}

@@ -53,6 +53,12 @@ export class ProfileComponent implements CanComponentDeactivate {
 
   private avatarPreviewObjectUrl = '';
 
+  imagePreviewVisible = false;
+  previewImageUrl = '';
+  previewImageTitle = '';
+  previewScale = 1;
+  previewRotate = 0;
+
   //切到其它分頁時護衛模式
   isDirty = false;
 
@@ -93,6 +99,73 @@ isAvatarLoading = true;
     this.clearAvatarPreviewObjectUrl();
     this.avatarPreviewObjectUrl = URL.createObjectURL(file);
     this.avatarUrl = this.avatarPreviewObjectUrl;
+  }
+
+  openImagePreview(event: MouseEvent): void {
+    event.stopPropagation();
+
+    if (!this.avatarUrl || this.avatarUrl.trim() === '') {
+      return;
+    }
+
+    const previewUrl = this.getAvatar(this.avatarUrl);
+
+    if (!previewUrl) {
+      return;
+    }
+
+    this.previewImageUrl = previewUrl;
+    this.previewImageTitle = this.userName || '個人頭像';
+    this.previewScale = 1;
+    this.previewRotate = 0;
+    this.imagePreviewVisible = true;
+  }
+
+  closeImagePreview(): void {
+    this.imagePreviewVisible = false;
+    this.previewImageUrl = '';
+    this.previewImageTitle = '';
+    this.previewScale = 1;
+    this.previewRotate = 0;
+  }
+
+  zoomIn(): void {
+    if (this.previewScale >= 3) {
+      return;
+    }
+
+    this.previewScale = Number((this.previewScale + 0.2).toFixed(1));
+  }
+
+  zoomOut(): void {
+    if (this.previewScale <= 0.4) {
+      return;
+    }
+
+    this.previewScale = Number((this.previewScale - 0.2).toFixed(1));
+  }
+
+  rotateLeft(): void {
+    this.previewRotate -= 90;
+  }
+
+  rotateRight(): void {
+    this.previewRotate += 90;
+  }
+
+  resetPreview(): void {
+    this.previewScale = 1;
+    this.previewRotate = 0;
+  }
+
+  onPreviewWheel(event: WheelEvent): void {
+    event.preventDefault();
+
+    if (event.deltaY < 0) {
+      this.zoomIn();
+    } else {
+      this.zoomOut();
+    }
   }
 
   getAvatar(avatar?: string | null): string {
