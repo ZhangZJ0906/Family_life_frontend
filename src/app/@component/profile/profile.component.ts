@@ -51,6 +51,8 @@ export class ProfileComponent implements CanComponentDeactivate {
   //大頭貼
   file: any;
 
+  private avatarPreviewObjectUrl = '';
+
   //切到其它分頁時護衛模式
   isDirty = false;
 
@@ -79,6 +81,20 @@ isAvatarLoading = true;
   ) {}
 
   user_id = 0;
+
+  private clearAvatarPreviewObjectUrl(): void {
+    if (this.avatarPreviewObjectUrl) {
+      URL.revokeObjectURL(this.avatarPreviewObjectUrl);
+      this.avatarPreviewObjectUrl = '';
+    }
+  }
+
+  private previewPendingAvatar(file: File): void {
+    this.clearAvatarPreviewObjectUrl();
+    this.avatarPreviewObjectUrl = URL.createObjectURL(file);
+    this.avatarUrl = this.avatarPreviewObjectUrl;
+  }
+
   getAvatar(avatar?: string | null): string {
   if (!avatar || avatar.trim() === '') {
     return '';
@@ -134,6 +150,7 @@ isAvatarLoading = true;
       this.email = res.email;
       this.endDateNotify = res.notifyByEndDate;
       this.emailNotify = res.notifyByEmail;
+      this.clearAvatarPreviewObjectUrl();
       this.avatarUrl = this.isRealAvatar(res.avatar) ? res.avatar : '';
       this.emailVerify = res.emailVerify;
 
@@ -382,7 +399,7 @@ isAvatarLoading = true;
 
     if (result.value.file) {
       this.file = result.value.file;
-
+      this.previewPendingAvatar(result.value.file);
     }
 
     this.notifySettingService.setName(this.userName);
