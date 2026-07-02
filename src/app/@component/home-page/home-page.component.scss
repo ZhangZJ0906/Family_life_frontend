@@ -7,6 +7,356 @@
   box-sizing: border-box;
 }
 
+/* =========================================================
+   Home dashboard UI refresh
+   Only overrides the home page layout and visual treatment.
+   ========================================================= */
+
+.home-page {
+  padding: 24px;
+  background:
+    radial-gradient(circle at top left, rgba(47, 91, 234, 0.06), transparent 32%),
+    #f5f7fb;
+  color: #111827;
+}
+
+.welcome-card,
+.summary-card,
+.priority-card,
+.home-loading-card {
+  border: 1px solid #e6eaf2;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.05);
+}
+
+.welcome-card {
+  border-radius: 18px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.welcome-top {
+  margin-bottom: 20px;
+}
+
+.welcome-text h1 {
+  font-size: clamp(28px, 3vw, 38px);
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+.welcome-text p {
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.home-month-switch {
+  gap: 10px;
+}
+
+.month-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.month-btn:hover:not(:disabled) {
+  border-color: #b8c7ff;
+  background: #f3f6ff;
+  color: #2f5bea;
+}
+
+.month-info {
+  min-width: 188px;
+  height: 62px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #f3f6ff 0%, #edf3ff 100%);
+  box-shadow: none;
+}
+
+.month-info span {
+  color: #2f5bea;
+  letter-spacing: 0;
+}
+
+.month-info strong {
+  font-size: 23px;
+  letter-spacing: 0;
+}
+
+.home-group-select {
+  width: min(100%, 260px);
+}
+
+.home-group-select ::ng-deep .mat-mdc-text-field-wrapper,
+.home-group-select ::ng-deep .mat-mdc-form-field-flex {
+  height: 58px;
+}
+
+.home-group-select ::ng-deep .mat-mdc-select-value {
+  font-size: 16px;
+}
+
+.welcome-bottom {
+  align-items: stretch;
+}
+
+.welcome-bottom .col-12 {
+  display: flex;
+}
+
+.money-item {
+  min-height: 108px;
+  border-radius: 16px;
+  padding: 20px;
+  background: #f8fafc;
+  border: 1px solid #edf0f6;
+}
+
+.money-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+}
+
+.money-item p {
+  margin-bottom: 6px;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+.money-item h2 {
+  font-size: clamp(26px, 3vw, 34px);
+  letter-spacing: 0;
+}
+
+.expired-card {
+  background: #fff7f7;
+  border-color: #ffd9d9;
+}
+
+.bottom-grid {
+  --bs-gutter-x: 20px;
+  --bs-gutter-y: 20px;
+}
+
+.summary-grid {
+  height: auto;
+  min-height: 0;
+}
+
+.summary-card {
+  min-height: 148px;
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.summary-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: transparent;
+  transition: background 0.15s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  border-color: #cfd8ea;
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.08);
+}
+
+.active-summary {
+  border-color: #9fb4ff !important;
+  background: #f4f7ff !important;
+  box-shadow: 0 16px 34px rgba(47, 91, 234, 0.12);
+}
+
+.active-summary::before {
+  background: #2f5bea;
+}
+
+.summary-text {
+  gap: 4px;
+}
+
+.card-label {
+  color: #111827;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.summary-card h2 {
+  margin: 8px 0 0;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.summary-card p.card-label {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.summary-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+}
+
+.food-icon {
+  background: #eefaf2;
+}
+
+.medicine-icon {
+  background: #eef4ff;
+}
+
+.warranty-icon {
+  background: #fff8e8;
+}
+
+.sub-icon {
+  background: #fff1f3;
+}
+
+.priority-card {
+  height: 100%;
+  min-height: 316px;
+  max-height: 520px;
+  border-radius: 18px;
+  padding: 22px;
+}
+
+.priority-card h3 {
+  margin-bottom: 16px;
+  font-size: 22px;
+  letter-spacing: 0;
+}
+
+.priority-list {
+  padding-right: 6px;
+}
+
+.task {
+  gap: 16px;
+  border: 1px solid transparent;
+  padding: 14px 16px;
+}
+
+.task h4 {
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.task p {
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.task span {
+  min-width: 38px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.danger {
+  background: #fff3f3;
+  color: #dc2626;
+}
+
+.warning {
+  background: #fff8e8;
+  color: #b7791f;
+}
+
+.normal {
+  background: #f1f5ff;
+  color: #2f5bea;
+}
+
+.task:hover {
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+@media (min-width: 992px) {
+  .bottom-grid > .col-lg-6:first-child {
+    flex: 0 0 48%;
+    max-width: 48%;
+  }
+
+  .bottom-grid > .col-lg-6:last-child {
+    flex: 0 0 52%;
+    max-width: 52%;
+  }
+}
+
+@media (max-width: 991px) {
+  .welcome-text {
+    text-align: left;
+  }
+
+  .welcome-month-col,
+  .welcome-group-col {
+    justify-content: flex-start !important;
+  }
+
+  .priority-card {
+    height: auto;
+    max-height: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .home-page {
+    padding: 14px;
+  }
+
+  .welcome-card {
+    padding: 18px;
+  }
+
+  .welcome-text {
+    text-align: left;
+  }
+
+  .welcome-text h1 {
+    font-size: 28px;
+  }
+
+  .home-month-switch {
+    justify-content: flex-start;
+  }
+
+  .month-info {
+    min-width: 164px;
+  }
+
+  .money-item {
+    min-height: 96px;
+  }
+
+  .summary-card {
+    min-height: 120px;
+  }
+
+  .priority-card {
+    min-height: 300px;
+    padding: 20px 18px;
+  }
+
+  .task {
+    align-items: flex-start;
+  }
+}
+
 /* 歡迎卡片：包含早安 Jack、月份群組控制、金額摘要 */
 .welcome-card {
   background: #ffffff;
@@ -800,5 +1150,318 @@
   .task {
     min-height: 86px;
     padding: 16px;
+  }
+}
+
+/* Final home-only UI overrides: keep behavior intact, refine dashboard density. */
+.home-page {
+  padding: 24px;
+  background:
+    radial-gradient(circle at top left, rgba(47, 91, 234, 0.06), transparent 32%),
+    #f5f7fb;
+  color: #111827;
+}
+
+.welcome-card,
+.summary-card,
+.priority-card,
+.home-loading-card {
+  border: 1px solid #e6eaf2;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.05);
+}
+
+.welcome-card {
+  border-radius: 18px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.welcome-top {
+  margin-bottom: 20px;
+}
+
+.welcome-text h1 {
+  font-size: clamp(28px, 3vw, 38px);
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+.welcome-text p {
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.month-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.month-btn:hover:not(:disabled) {
+  border-color: #b8c7ff;
+  background: #f3f6ff;
+  color: #2f5bea;
+}
+
+.month-info {
+  min-width: 188px;
+  height: 62px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #f3f6ff 0%, #edf3ff 100%);
+  box-shadow: none;
+}
+
+.month-info span {
+  color: #2f5bea;
+  letter-spacing: 0;
+}
+
+.month-info strong {
+  font-size: 23px;
+  letter-spacing: 0;
+}
+
+.home-group-select {
+  width: min(100%, 260px);
+}
+
+.home-group-select ::ng-deep .mat-mdc-text-field-wrapper,
+.home-group-select ::ng-deep .mat-mdc-form-field-flex {
+  height: 58px;
+}
+
+.home-group-select ::ng-deep .mat-mdc-select-value {
+  font-size: 16px;
+}
+
+.welcome-bottom .col-12 {
+  display: flex;
+}
+
+.money-item {
+  min-height: 108px;
+  border: 1px solid #edf0f6;
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.money-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+}
+
+.money-item p {
+  margin-bottom: 6px;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+.money-item h2 {
+  font-size: clamp(26px, 3vw, 34px);
+  letter-spacing: 0;
+}
+
+.expired-card {
+  background: #fff7f7;
+  border-color: #ffd9d9;
+}
+
+.bottom-grid {
+  --bs-gutter-x: 20px;
+  --bs-gutter-y: 20px;
+}
+
+.summary-grid {
+  height: auto;
+  min-height: 0;
+}
+
+.summary-card {
+  min-height: 148px;
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.summary-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: transparent;
+  transition: background 0.15s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  border-color: #cfd8ea;
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.08);
+}
+
+.active-summary {
+  border-color: #9fb4ff !important;
+  background: #f4f7ff !important;
+  box-shadow: 0 16px 34px rgba(47, 91, 234, 0.12);
+}
+
+.active-summary::before {
+  background: #2f5bea;
+}
+
+.card-label {
+  color: #111827;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.summary-card h2 {
+  margin: 8px 0 0;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.summary-card p.card-label {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.summary-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+}
+
+.priority-card {
+  height: 100%;
+  min-height: 316px;
+  max-height: 520px;
+  border-radius: 18px;
+  padding: 22px;
+}
+
+.priority-card h3 {
+  margin-bottom: 16px;
+  font-size: 22px;
+  letter-spacing: 0;
+}
+
+.task {
+  gap: 16px;
+  border: 1px solid transparent;
+  padding: 14px 16px;
+}
+
+.task h4 {
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.task p {
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.task span {
+  min-width: 38px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.danger {
+  background: #fff3f3;
+  color: #dc2626;
+}
+
+.warning {
+  background: #fff8e8;
+  color: #b7791f;
+}
+
+.normal {
+  background: #f1f5ff;
+  color: #2f5bea;
+}
+
+.task:hover {
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+@media (min-width: 992px) {
+  .bottom-grid > .col-lg-6:first-child {
+    flex: 0 0 48%;
+    max-width: 48%;
+  }
+
+  .bottom-grid > .col-lg-6:last-child {
+    flex: 0 0 52%;
+    max-width: 52%;
+  }
+}
+
+@media (max-width: 991px) {
+  .welcome-text {
+    text-align: left;
+  }
+
+  .welcome-month-col,
+  .welcome-group-col {
+    justify-content: flex-start !important;
+  }
+
+  .priority-card {
+    height: auto;
+    max-height: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .home-page {
+    padding: 14px;
+  }
+
+  .welcome-card {
+    padding: 18px;
+  }
+
+  .welcome-text {
+    text-align: left;
+  }
+
+  .welcome-text h1 {
+    font-size: 28px;
+  }
+
+  .home-month-switch {
+    justify-content: flex-start;
+  }
+
+  .month-info {
+    min-width: 164px;
+  }
+
+  .money-item {
+    min-height: 96px;
+  }
+
+  .summary-card {
+    min-height: 120px;
+  }
+
+  .priority-card {
+    min-height: 300px;
+    padding: 20px 18px;
+  }
+
+  .task {
+    align-items: flex-start;
   }
 }
