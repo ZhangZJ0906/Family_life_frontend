@@ -227,12 +227,26 @@ isAvatarLoading = true;
       this.avatarUrl = this.isRealAvatar(res.avatar) ? res.avatar : '';
       this.emailVerify = res.emailVerify;
 
+      const currentUser = this.authService.currentUser();
+      if (currentUser) {
+        this.authService.setCurrentUser({
+          ...currentUser,
+          name: res.name,
+          email: res.email,
+          avatar: this.avatarUrl,
+          notifyByEndDate: res.notifyByEndDate,
+          notifyByEmail: res.notifyByEmail,
+        });
+      }
+
       // 共享 userInfo
       this.notifySettingService.setName(res.name);
       this.notifySettingService.setEmail(res.email);
       this.notifySettingService.setAvatar(this.avatarUrl);
       this.notifySettingService.setNotifyByEndDate(res.notifyByEndDate);
       this.notifySettingService.setNotifyByEmail(res.notifyByEmail);
+
+      window.dispatchEvent(new Event('avatarChanged'));
 
       this.isAvatarLoading = false;
     },

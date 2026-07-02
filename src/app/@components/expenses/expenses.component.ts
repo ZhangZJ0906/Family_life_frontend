@@ -19,6 +19,7 @@ import {
   LocationAndCategory,
 } from '../../common/interfaceList';
 import { HttpClientService } from '../../@services/http-client.service';
+import { NotifySettingService } from '../../@services/NotifySettingService';
 import { ExpensesAddComponent } from '../expenses-add/expenses-add.component';
 import { ExpensesEditComponent } from '../expenses-edit/expenses-edit.component';
 import Swal from 'sweetalert2';
@@ -142,6 +143,7 @@ resetMobilePage(): void {
     private http: HttpClientService,
     private dialog: MatDialog,
     private route: ActivatedRoute,
+    private notifySettingService: NotifySettingService,
   ) {
     this.basicUrl = this.http.basicUrl;
 
@@ -155,6 +157,11 @@ resetMobilePage(): void {
       this.currentUserAvatar = this.user.avatar || 'assets/default-avatar.png';
       this.getLoginExpensePageTime();
     }
+
+    this.notifySettingService.avatarSubject$.subscribe((avatar) => {
+      this.updatePrivateGroupAvatar(avatar);
+    });
+
     // 設定表格篩選邏輯
     this.dataSource.filterPredicate = (data: ExpenseRecord, filter: string) => {
       const f = JSON.parse(filter);
@@ -190,6 +197,17 @@ resetMobilePage(): void {
     // 載入記帳
     this.getExpense(this.currentUserId);
   }
+
+  private updatePrivateGroupAvatar(avatar?: string | null): void {
+    this.currentUserAvatar = avatar || 'assets/default-avatar.png';
+
+    this.userGroups = this.userGroups.map((group) =>
+      Number(group.groupId) === 0
+        ? { ...group, avatar: this.currentUserAvatar }
+        : group,
+    );
+  }
+
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;

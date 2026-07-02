@@ -246,7 +246,7 @@ export class PurchaseItemComponent implements OnInit {
     }
 
     const updatedItem: PurchaseItemVo = {
-      id: this.editingItemId ?? 0,
+      id: this.editingItemId ?? (this.isEditPage ? this.getNextTempItemId() : 0),
       listId: this.listId,
       userId: this.hasGroup ? this.newItem.assignedUserId : this.userId,
       categoryId: this.newItem.categoryId,
@@ -306,15 +306,15 @@ export class PurchaseItemComponent implements OnInit {
     const req: AddPurchaseItemReq = {
       listId: this.listId,
       createrId: this.userId,
-      purchaseItemVoList: this.items.map((item) => ({
-        id: item.id ?? 0,
-        listId: this.listId,
-        userId: this.hasGroup ? item.userId : this.userId,
-        categoryId: item.categoryId,
-        item: item.item,
-        quantity: item.quantity,
-        check: item.check ?? false,
-      })),
+     purchaseItemVoList: this.items.map((item) => ({
+      id: item.id,
+      listId: this.listId,
+      userId: this.hasGroup ? item.userId : this.userId,
+      categoryId: item.categoryId,
+      item: item.item,
+      quantity: item.quantity,
+      check: item.check ?? false,
+    })),
     };
 
     console.log("req", req)

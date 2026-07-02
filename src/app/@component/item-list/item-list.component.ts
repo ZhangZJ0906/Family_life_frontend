@@ -27,6 +27,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../@services/auth.service';
+import { NotifySettingService } from '../../@services/NotifySettingService';
 import { forkJoin, Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import {
@@ -114,6 +115,7 @@ export class ItemListComponent {
     private router: Router,
     private route: ActivatedRoute,
     private dialog: MatDialog,
+    private notifySettingService: NotifySettingService,
   ) {
     this.basicUrl = this.http.basicUrl;
     this.currentUserId = this.authService.currentUser()?.user_id ?? 0;
@@ -123,10 +125,36 @@ export class ItemListComponent {
   }
 
   ngOnInit() {
+    this.notifySettingService.avatarSubject$.subscribe((avatar) => {
+      this.updatePrivateGroupAvatar(avatar);
+    });
+
     this.route.params.subscribe((params) => {
       const groupId = Number(params['groupId']) || 0;
       this.initData(groupId);
     });
+  }
+
+  private normalizePrivateAvatar(avatar?: string | null): string {
+    const rawAvatar = avatar || '';
+
+    if (rawAvatar.startsWith('http://') || rawAvatar.startsWith('https://')) {
+      const uploadsIndex = rawAvatar.indexOf('/uploads/');
+      return uploadsIndex !== -1 ? rawAvatar.substring(uploadsIndex) : '';
+    }
+
+    return rawAvatar;
+  }
+
+  private updatePrivateGroupAvatar(avatar?: string | null): void {
+    this.currentUserAvatar =
+      this.normalizePrivateAvatar(avatar) || 'assets/default-avatar.png';
+
+    this.userGroups = this.userGroups.map((group) =>
+      Number(group.groupId) === 0
+        ? { ...group, avatar: this.currentUserAvatar }
+        : group,
+    );
   }
 
   ngAfterViewInit() {

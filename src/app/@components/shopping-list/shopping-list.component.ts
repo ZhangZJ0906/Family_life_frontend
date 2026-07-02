@@ -10,6 +10,7 @@ import { ShoppingListService } from '../../@services/shopping-list.service';
 import { DropDownGroupList, Item, LocationAndCategory } from '../../common/interfaceList';
 import { ItemListAddDialogComponent } from '../../@component/item-list-add-dialog/item-list-add-dialog.component';
 import { HttpClientService } from '../../@services/http-client.service';
+import { NotifySettingService } from '../../@services/NotifySettingService';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -89,7 +90,8 @@ export class ShoppingListComponent implements OnInit {
     private readonly router: Router,
     private readonly shoppingService: ShoppingListService,
     private readonly dialog: MatDialog,
-    private readonly http: HttpClientService
+    private readonly http: HttpClientService,
+    private readonly notifySettingService: NotifySettingService
   ) {}
 
 ngOnInit(): void {
@@ -100,9 +102,23 @@ ngOnInit(): void {
     return;
   }
 
+  this.notifySettingService.avatarSubject$.subscribe((avatar) => {
+    this.updatePrivateGroupAvatar(avatar);
+  });
+
   this.loadUserInfo();
   this.loadLists();
   this.loadItemMetadata();
+}
+
+private updatePrivateGroupAvatar(avatar?: string | null): void {
+  this.userAvatar = avatar || this.defaultUserAvatar;
+
+  this.groupOptions = this.groupOptions.map((group) =>
+    group.id === 0 ? { ...group, avatar: this.userAvatar } : group,
+  );
+
+  this.syncUserGroups();
 }
 
 // 判斷是否為手機裝置（寬度小於等於768px）

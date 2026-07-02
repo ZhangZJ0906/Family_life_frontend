@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 import { TopbarComponent } from '../../shared/topbar/topbar.component';
 // import { RouterLink } from '@angular/router';
 import { HttpClientService } from '../../@services/http-client.service';
+import { NotifySettingService } from '../../@services/NotifySettingService';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import {
   MatSelect,
@@ -190,6 +191,7 @@ onWindowScroll(): void {
     private http: HttpClientService,
     private router: Router,
     private route: ActivatedRoute,
+    private notifySettingService: NotifySettingService,
   ) {
     this.userInfo = JSON.parse(
       sessionStorage.getItem('family-life-current-user')!,
@@ -199,11 +201,28 @@ onWindowScroll(): void {
   }
 
   ngOnInit() {
+    this.notifySettingService.avatarSubject$.subscribe((avatar) => {
+      this.updatePrivateGroupAvatar(avatar);
+    });
+
     const now = new Date();
     this.getLoginCalendarPageTime();
     this.http
     .postApi(`calendar/recordLoginCalendarPageTime?userId=${this.createdBy}`, {})
     .subscribe();
+  }
+
+  private updatePrivateGroupAvatar(avatar?: string | null): void {
+    const nextAvatar = avatar || 'assets/default-avatar.png';
+
+    this.userInfo = {
+      ...this.userInfo,
+      avatar: nextAvatar,
+    };
+
+    this.userGroupList = this.userGroupList.map((group) =>
+      Number(group.groupId) === 0 ? { ...group, avatar: nextAvatar } : group,
+    );
   }
 
   getGroupMembers(groupId: number): void {
