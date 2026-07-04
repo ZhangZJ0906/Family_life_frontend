@@ -340,23 +340,85 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
     setTimeout(() => this.scrollToBottom(), 200);
   }
 
-  onImageSelected(event: any) {
-    const file = event.target.files[0];
+  selectedImage?: File;
+  previewUrl?: string;
 
-    if (!file) {
-      return;
-    }
+  onImageSelected(event: any) {
+
+    console.log("選到圖片");
+
+    const file = event.target.files[0];
+    console.log(file);
+
+    if (!file) return;
+
+    this.selectedImage = file;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      this.previewUrl = reader.result as string;
+    };
+
+    reader.readAsDataURL(file);
+
+    // ⭐讓 input 可重選同一張
+    event.target.value = '';
+  }
+
+  // onImageSelected(event: any) {
+  //   const file = event.target.files[0];
+
+  //   if (!file) {
+  //     return;
+  //   }
+
+  //   const formData = new FormData();
+
+  //   formData.append('file', file);
+
+  //   formData.append('groupId', this.groupId.toString());
+
+  //   formData.append('senderId', this.userId.toString());
+
+  //   this.http.post(`${environment.apiUrl}/chat/upload`, formData).subscribe({
+  //     next(res) {},
+  //     error: (err) => {
+  //       Swal.fire({
+  //         title: '圖片上傳失敗',
+  //         text: err.message,
+  //         icon: 'error',
+  //       });
+  //     },
+  //   });
+  // }
+
+  isImageSending = false;
+
+  sendImage() {
+
+    if (!this.selectedImage) return;
+
+    this.isImageSending = true;
 
     const formData = new FormData();
 
-    formData.append('file', file);
+    formData.append("file", this.selectedImage);
 
     formData.append('groupId', this.groupId.toString());
 
     formData.append('senderId', this.userId.toString());
 
     this.http.post(`${environment.apiUrl}/chat/upload`, formData).subscribe({
-      next(res) {},
+      next: (res) => {
+        console.log("upload success:", res);
+
+        // ⭐清理狀態
+        this.selectedImage = undefined;
+        this.previewUrl = undefined;
+
+        this.isImageSending = false;
+      },
       error: (err) => {
         Swal.fire({
           title: '圖片上傳失敗',
@@ -365,6 +427,25 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
         });
       },
     });
+  }
+
+  cancelImage() {
+    this.selectedImage = undefined;
+    this.previewUrl = undefined;
+  }
+
+  //可以換行
+  onKeyDown(event: KeyboardEvent) {
+
+    // 手機不要攔截 Enter
+    if (this.isMobile) {
+      return;
+    }
+
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      this.sendMessage();
+    }
   }
 
   // =========================
