@@ -322,32 +322,41 @@ private isMarkingRead = false;
   // =========================
   // MESSAGES
   // =========================
-  loadMessages() {
-    this.isLoadingMessages = true;
+  loadMessages(): void {
+  this.isLoadingMessages = true;
 
-    this.http
-      .get<any>(
-        `${environment.apiUrl}/chat/${this.groupId}?userId=${this.userId}`,
-      )
-      .subscribe({
-        next: (res) => {
-          this.messages = res.messages ?? [];
+  this.http
+    .get<any>(
+      `${environment.apiUrl}/chat/${this.groupId}?userId=${this.userId}`,
+    )
+    .subscribe({
+      next: (res) => {
+        this.messages = (res.messages ?? []).map((msg: any) => ({
+          ...msg,
+          id: Number(msg.id),
+          senderId: Number(msg.senderId),
+          readCount: Number(msg.readCount ?? 0),
+          readByMe: Boolean(msg.readByMe),
+        }));
 
-          this.firstUnreadIndex = this.messages.findIndex(
-            (m) => m.senderId !== this.userId && !m.readByMe,
-          );
+        this.firstUnreadIndex = this.messages.findIndex(
+          (m) =>
+            Number(m.senderId) !== Number(this.userId) &&
+            !m.readByMe,
+        );
 
-          this.markRead();
+        this.markRead();
 
-          this.hasLoaded = true;
-          this.isLoadingMessages = false;
-        },
-        error: () => {
-          this.isLoadingMessages = false;
-        },
-      });
-  }
+        this.hasLoaded = true;
+        this.isLoadingMessages = false;
+      },
 
+      error: (err) => {
+        console.error('載入聊天室失敗:', err);
+        this.isLoadingMessages = false;
+      },
+    });
+}
   sendMessage() {
     if (!this.message.trim() || this.isSending) return;
 
