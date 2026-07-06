@@ -400,9 +400,8 @@ export class GroupPageComponent{
           // ⚠️ title 也要避免 HTML injection
           Swal.fire({
             icon: 'success',
-            title: this.escapeHtml(groupName) + ' 建立成功'
+            title: `${groupName} 建立成功`
           });
-
           this.getGroup();
         },
 

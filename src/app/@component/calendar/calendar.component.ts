@@ -169,21 +169,34 @@ onWindowScroll(): void {
 
     //判斷新事件
     eventContent: (arg) => {
-      const isNew = this.isNewItem(
-          arg.event.extendedProps['createdTime'],
-          arg.event.extendedProps['createdBy']
-        );
+    const container = document.createElement('div');
+    container.classList.add('calendar-event-content');
 
-      return {
-        html: `
-          ${isNew ? '<span class="new-tag">NEW</span>' : ''}
-          ${arg.event.title}
-        `
-      };
-    },
+    const isNew = this.isNewItem(
+      arg.event.extendedProps['createdTime'],
+      arg.event.extendedProps['createdBy']
+    );
 
-    events: []
-  };
+    if (isNew) {
+      const newTag = document.createElement('span');
+      newTag.classList.add('new-tag');
+      newTag.textContent = 'NEW';
+
+      container.appendChild(newTag);
+    }
+
+    const title = document.createElement('span');
+    title.classList.add('calendar-event-title');
+
+    // textContent 只會當成文字，不會執行 HTML
+    title.textContent = arg.event.title || '未命名活動';
+
+    container.appendChild(title);
+
+    return {
+      domNodes: [container],
+    };
+  },}
 
   constructor(
     private dialog: MatDialog,

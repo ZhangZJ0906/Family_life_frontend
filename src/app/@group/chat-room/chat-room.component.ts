@@ -81,6 +81,9 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
   //登出關聊天室
   private logoutSub?: Subscription;
 
+  private markReadTimer: ReturnType<typeof setTimeout> | null = null;
+private isMarkingRead = false;
+
   constructor(
     private http: HttpClient,
     private ws: ChatWsService,
@@ -93,6 +96,21 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
   // =========================
   // INIT
   // =========================
+
+  private scheduleMarkRead(): void {
+  if (!this.isActiveRoom) {
+    return;
+  }
+
+  if (this.markReadTimer) {
+    clearTimeout(this.markReadTimer);
+  }
+
+  this.markReadTimer = setTimeout(() => {
+    this.markRead();
+  }, 150);
+}
+
   async ngOnInit() {
     this.groupName = this.data.groupName;
     this.groupId = this.data.groupId;
@@ -118,9 +136,10 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
           case 'IMAGE':
             this.messages = [...this.messages, msg];
 
-            // 自己的訊息回來，代表後端已成功儲存並廣播
-            if (msg.senderId === this.userId) {
+            if (Number(msg.senderId) === Number(this.userId)) {
               this.isSending = false;
+            } else {
+              this.scheduleMarkRead();
             }
 
             this.calculateUnreadIndex();
@@ -143,7 +162,6 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
 
       setTimeout(() => this.scrollToBottom(), 50);
     });
-
     // console.log("收到WS:", msg);
 
     // this.ws.subscribe(this.groupId, callback);
@@ -180,12 +198,19 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
   // DESTROY
   // =========================
   ngOnDestroy() {
-    this.logoutSub?.unsubscribe();
-    if (this.heartbeatTimer) {
-      clearInterval(this.heartbeatTimer);
-    }
-    this.leaveRoom();
+  this.logoutSub?.unsubscribe();
+
+  if (this.heartbeatTimer) {
+    clearInterval(this.heartbeatTimer);
   }
+
+  if (this.markReadTimer) {
+    clearTimeout(this.markReadTimer);
+    this.markReadTimer = null;
+  }
+
+  this.leaveRoom();
+}
 
   closeChat() {
     if (this.heartbeatTimer) {
@@ -451,27 +476,57 @@ export class ChatRoomComponent implements OnInit, OnDestroy {
   // =========================
   // READ
   // =========================
-  markRead() {
-    this.http
-      .post(
-        `${environment.apiUrl}/chat/read/${this.groupId}?userId=${this.userId}`,
-        {},
-      )
-      .subscribe(() => {
-        this.messages.forEach((m) => {
-          if (m.senderId !== this.userId) {
-            m.readByMe = true;
-          }
-        });
+  markRead(): void {
+  if (!this.isActiveRoom || this.isMarkingRead) {
+    return;
+  }
+
+  const unreadMessages = this.messages.filter(
+    (m) =>
+      Number(m.senderId) !== Number(this.userId) &&
+      !m.readByMe
+  );
+
+  if (unreadMessages.length === 0) {
+    return;
+  }
+
+  this.isMarkingRead = true;
+
+  this.http
+    .post(
+      `${environment.apiUrl}/chat/read/${this.groupId}?userId=${this.userId}`,
+      {},
+    )
+    .subscribe({
+      next: () => {
+        this.messages = this.messages.map((m) =>
+          Number(m.senderId) !== Number(this.userId)
+            ? { ...m, readByMe: true }
+            : m
+        );
 
         this.calculateUnreadIndex();
-      });
-  }
+        this.isMarkingRead = false;
+      },
 
-  updateReadCount(msg: any) {
-    const target = this.messages.find((m) => m.id === msg.messageId);
-    if (target) target.readCount = msg.readCount;
-  }
+      error: (err) => {
+        console.error('標記已讀失敗:', err);
+        this.isMarkingRead = false;
+      },
+    });
+}
+
+  updateReadCount(msg: any): void {
+  const messageId = Number(msg.messageId);
+  const readCount = Number(msg.readCount ?? 0);
+
+  this.messages = this.messages.map((m) =>
+    Number(m.id) === messageId
+      ? { ...m, readCount }
+      : m
+  );
+}
 
   calculateUnreadIndex() {
     const idx = this.messages.findIndex(

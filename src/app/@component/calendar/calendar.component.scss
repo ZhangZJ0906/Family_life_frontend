@@ -647,6 +647,19 @@
 }
 
 
+.calendar-event-content {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.calendar-event-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 
 /* RWD：平板 */
 @media (max-width: 1100px) {
