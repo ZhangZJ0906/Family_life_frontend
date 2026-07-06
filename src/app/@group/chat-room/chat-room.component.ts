@@ -632,10 +632,53 @@ private isMarkingRead = false;
     this.showMenu = false;
   }
 
-  copyMessage() {
+  async copyMessage() {
+
     if (!this.selectedMessage) return;
 
-    navigator.clipboard.writeText(this.selectedMessage.message);
+    try {
+
+      if (this.selectedMessage.type === 'IMAGE') {
+
+        const response = await fetch(this.selectedMessage.imageUrl);
+
+        const blob = await response.blob();
+
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            [blob.type]: blob
+          })
+        ]);
+
+      } else {
+
+        await navigator.clipboard.writeText(
+          this.selectedMessage.message
+        );
+
+      }
+
+      // Swal.fire({
+      //   toast: true,
+      //   position: 'top',
+      //   icon: 'success',
+      //   title:
+      //     this.selectedMessage.type === 'IMAGE'
+      //       ? '圖片已複製'
+      //       : '文字已複製',
+      //   timer: 1200,
+      //   showConfirmButton: false,
+      // });
+
+    } catch {
+
+      Swal.fire({
+        icon: 'error',
+        title: '複製失敗',
+        text: '瀏覽器不支援圖片複製或圖片來源限制(CORS)。',
+      });
+
+    }
 
     this.showMenu = false;
   }
