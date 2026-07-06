@@ -213,50 +213,53 @@
 
   <!-- Footer -->
   <div class="chat-footer">
-    <div *ngIf="previewUrl" class="image-preview-inline">
+
+    <!-- 第一列：圖片預覽 -->
+    <div
+      *ngIf="previewUrl"
+      class="image-preview-inline"
+    >
       <img [src]="previewUrl" />
 
       <button
         (click)="sendImage()"
-        [disabled]="isImageSending"
-      >
-        <span *ngIf="!isImageSending">送出</span>
-        <span *ngIf="isImageSending">傳送中...</span>
+        [disabled]="isImageSending">
+        {{ isImageSending ? '傳送中...' : '送出' }}
       </button>
 
       <button
         (click)="cancelImage()"
-        [disabled]="isImageSending"
-      >
+        [disabled]="isImageSending">
         取消
       </button>
     </div>
 
-    <label class="img-btn">
-      📷
-      <input
-        type="file"
-        hidden
-        accept="image/*"
-        (change)="onImageSelected($event)"
-      >
-    </label>
+    <!-- 第二列 -->
+    <div class="footer-input-row">
 
-    <textarea
-      [(ngModel)]="message"
-      rows="2"
-      placeholder="輸入訊息..."
-      (keydown)="onKeyDown($event)">
-    </textarea>
+      <label class="img-btn">
+        📷
+        <input
+          hidden
+          type="file"
+          accept="image/*"
+          (change)="onImageSelected($event)">
+      </label>
 
-    <button
-      type="button"
-      (click)="sendMessage()"
-      [disabled]="isSending || !message.trim()"
-    >
-      <span *ngIf="!isSending">發送</span>
-      <span *ngIf="isSending">傳送中...</span>
-    </button>
+      <textarea
+        [(ngModel)]="message"
+        rows="2"
+        placeholder="輸入訊息..."
+        (keydown)="onKeyDown($event)">
+      </textarea>
+
+      <button
+        (click)="sendMessage()"
+        [disabled]="isSending || !message.trim()">
+        {{ isSending ? '傳送中...' : '發送' }}
+      </button>
+
+    </div>
 
   </div>
 
@@ -273,7 +276,7 @@
       class="menu-item"
       (click)="copyMessage()"
     >
-      📋 複製
+      📋 {{ selectedMessage?.type === 'IMAGE' ? '複製圖片' : '複製文字' }}
     </div>
 
     <div
