@@ -500,12 +500,22 @@ private isMarkingRead = false;
     return;
   }
 
+  const latestMessageId = Math.max(
+    ...unreadMessages.map((m) => Number(m.id))
+  );
+
   this.isMarkingRead = true;
 
   this.http
     .post(
-      `${environment.apiUrl}/chat/read/${this.groupId}?userId=${this.userId}`,
+      `${environment.apiUrl}/chat/read/${this.groupId}`,
       {},
+      {
+        params: {
+          userId: String(this.userId),
+          upToMessageId: String(latestMessageId),
+        },
+      }
     )
     .subscribe({
       next: () => {
